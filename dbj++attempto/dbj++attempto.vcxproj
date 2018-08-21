@@ -155,18 +155,48 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dbjtree.h" />
+    <ClInclude Include="dbjtreeprint.h" />
+    <ClInclude Include="dbj_actual_type.h" />
+    <ClInclude Include="dbj_any.h" />
+    <ClInclude Include="dbj_any_node.h" />
+    <ClInclude Include="dbj_atoms.h" />
+    <ClInclude Include="dbj_ctstring.h" />
+    <ClInclude Include="dbj_fontlist.h" />
+    <ClInclude Include="dbj_lambda_lists.h" />
+    <ClInclude Include="dbj_micro_printf.h" />
+    <ClInclude Include="dbj_polymorph.h" />
+    <ClInclude Include="dbj_swapable_engines.h" />
+    <ClInclude Include="dbj_tokenizer.h" />
+    <ClInclude Include="dbj_tree_tests.h" />
+    <ClInclude Include="lambda_runtime_retval_test.h" />
+    <ClInclude Include="no_copy_no_move.h" />
+    <ClInclude Include="no_inheritance.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="policy_classes.h" />
+    <ClInclude Include="string_literals_with_universal_character_names.h" />
+    <ClInclude Include="supports_api.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="console_tests.cpp" />
     <ClCompile Include="dbj++attempto.cpp" />
+    <ClCompile Include="dbj_traits_testing.cpp" />
+    <ClCompile Include="dbj_web_syndication.cpp" />
+    <ClCompile Include="few_more_nuggets.cpp" />
+    <ClCompile Include="lambda_mixer_samples.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="pretty_printer.cpp" />
+    <ClCompile Include="quick_local_test.cpp" />
+    <ClCompile Include="string_transformations.cpp" />
+    <ClCompile Include="tests.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="README.MD" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
