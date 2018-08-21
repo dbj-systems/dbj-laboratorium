@@ -1,6 +1,5 @@
-#ifdef DBJ_CPP_WINRT_TESTING
-
 #include "pch.h"
+#ifdef DBJ_CPP_WINRT_TESTING
 /*
 https://moderncpp.com/2017/11/01/cppwinrt-in-the-windows-sdk/
 https://kennykerr.ca/2018/03/09/cppwinrt-producing-async-objects/
