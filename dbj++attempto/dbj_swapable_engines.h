@@ -88,11 +88,8 @@ namespace car_factory {
 		friend  Automobile assembly_line(engine_tag);
 		//
 		void insert_new_engine(engine_tag tag_) {
-			engine_type * new_engine
-				= engine_workshop::make_new_engine(tag_);
-
 			if (this->engine_ != nullptr) delete this->engine_;
-			this->engine_ = new_engine;
+			this->engine_ = engine_workshop::make_new_engine(tag_);
 		}
 	public:
 		// delegating to the engine
@@ -126,6 +123,12 @@ namespace car_factory {
 		Automobile& operator=(Automobile&& other_) = delete;  
 		// noexcept { std::swap(this->engine_, other_.engine_); return *this; }
 
+		std::string description() const noexcept
+		{
+			return std::string{ "Automobile, with the engine tagged: '" } 
+			+ char(this->engine_->tag()) + "'";
+		}
+
 	};
 
 // factory inserts the engine on production line
@@ -141,6 +144,18 @@ inline Automobile assembly_line (engine_tag which_)
 		);
 }
 
+} // car_factory
+
+namespace dbj::console {
+	// void __cdecl dbj::console::out<class car_factory::Automobile>(class car_factory::Automobile)
+	template<> inline void
+		dbj::console::out<class car_factory::Automobile>
+		(
+			class car_factory::Automobile  automobile_
+		)
+	{
+		console::PRN.printf(automobile_.description().c_str());
+	}
 }
 /*
 Copyright 2018 by dbj@dbj.org

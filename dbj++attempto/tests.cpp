@@ -67,7 +67,7 @@ DBJ_TEST_UNIT(compiletime_static_string_constant)
 template< typename T>
 void array_analyzer (const T & specimen) {
 
-	static char const * name{ dbj::tt::name_<T>() }; //safe?
+	static char const * name{ DBJ_TYPENAME(T) }; //safe?
 	constexpr bool is_array = std::is_array_v<T>;
 	if constexpr (is_array == true)
 	{

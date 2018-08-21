@@ -60,8 +60,8 @@ DBJ_TEST_UNIT(_dbj_pointer_traits_tests) {
 	const std::array<int, 3> iarr{ 1,2,3 };
 	static_assert(pointer(iarr.data()));
 
-	auto n1 = DBJ_TEST_ATOM( dbj::tt::name_<decltype(holla_)>()  );
-	auto n2 = DBJ_TEST_ATOM( dbj::tt::name_<decltype(&holla_)>() );
+	auto n1 = DBJ_TEST_ATOM( DBJ_VALTYPENAME(holla_ ));
+	auto n2 = DBJ_TEST_ATOM( DBJ_VALTYPENAME(&holla_));
 }
 
 DBJ_TEST_SPACE_CLOSE

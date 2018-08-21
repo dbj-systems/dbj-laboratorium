@@ -10,7 +10,7 @@ namespace dbj::samples {
 	{
 		using namespace std;
 		using FT = dbj::tt::to_base_t< decltype(s_) >;
-		auto type_name_ = dbj::tt::name_<FT>();
+		auto type_name_ =  DBJ_TYPENAME(FT);
 
 		if constexpr (dbj::tt::same_types<FT, char>) {
 			cout << "\n" << s_ << "\n";
