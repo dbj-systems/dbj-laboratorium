@@ -4,7 +4,7 @@
 
 #include "pch.h"
 
-namespace {
+namespace dbj::samples{
 	using namespace std;
 	/*
 	http://www.open-std.org/pipmail/ub/2016-February/000565.html

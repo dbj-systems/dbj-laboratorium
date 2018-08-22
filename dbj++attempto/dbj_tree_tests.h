@@ -4,7 +4,7 @@
 #ifdef DBJ_TESTING_EXISTS
 
 
-namespace {
+namespace dbj::samples {
 
 	/*
 	An example of what some are calling 'comfortable API'

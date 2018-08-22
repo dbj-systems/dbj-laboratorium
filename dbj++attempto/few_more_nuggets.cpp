@@ -3,7 +3,7 @@
 
 #include "pch.h"
 
-namespace { // beware of anonymous namespace
+namespace dbj::samples{ // beware of anonymous namespace
 
 	using namespace std; // beware of this
 

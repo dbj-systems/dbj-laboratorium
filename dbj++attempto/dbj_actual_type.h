@@ -81,7 +81,7 @@ namespace dbj_samples {
 /*
  Reasoning, motivation and testing
 */
-namespace {
+namespace dbj::samples {
 
 	auto lambada = []( auto arg ) {
 		using naive_type = decltype(arg);

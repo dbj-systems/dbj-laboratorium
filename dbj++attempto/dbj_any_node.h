@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 
-#if 0
+
 /*
 I looked into this: https://github.com/LoopPerfect/valuable
 and I decided it is not necessary. 
@@ -11,7 +11,7 @@ Hence dbj::AnyNode Proof Of Concept (POC)
 
 */
 
-namespace dbj_samples {
+namespace dbj::samples {
 	
 	template<typename T>
 	inline std::string address_as_string(T * p) {
@@ -39,7 +39,9 @@ namespace dbj_samples {
 		left or right or nowhere
 		this can be used in any kind of operation supported by visitor
 		*/
-		using DecisionLogic = AnyNode::where_next(const AnyNode &, const AnyNode &);
+		using DecisionLogic 
+			= AnyNode::where_next
+			(const AnyNode &, const AnyNode &);
 		/*
 		AnyNode visitor signature
 		*/
@@ -64,7 +66,7 @@ namespace dbj_samples {
 				return std::any_cast<AnyNode>(tp_);
 			}
 			catch (std::bad_any_cast & x) {
-				dbj::trace("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
+				DBJ::TRACE("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
 				throw dbj::Exception(x.what());
 			}
 		}
@@ -124,7 +126,7 @@ namespace dbj_samples {
 		bool add(where_next leader, const AnyNode & node_to_be_inserted_)
 		{
 			if (leader == where_next::nowhere) {
-				dbj::trace("%s(%d) : insert nowhere?", __FILE__, __LINE__ );
+				DBJ::TRACE("%s(%d) : insert nowhere?", __FILE__, __LINE__ );
 				return true;
 			}
 			if (leader == where_next::left) {
@@ -139,19 +141,19 @@ namespace dbj_samples {
 
 	 /*	3 kinds of binary tree traversal	*/
 
-	auto preorder = [] ( AnyNode & root_, /* AnyNode::AnyVisitor*/ auto f) -> void {
-		if (!f(root_)) return; // process, stop if false return
+	auto preorder = [] ( const AnyNode & root_, /* AnyNode::AnyVisitor*/ auto f) -> void {
+		if (!f((AnyNode &)root_)) return; // process, stop if false return
 		if (!AnyNode::empty(root_.left ))  preorder(AnyNode::node(root_.left), f); // left subtree
 		if (!AnyNode::empty(root_.right))  preorder(AnyNode::node(root_.right), f); // right subtree
 	};
 
-	auto inorder = [] ( AnyNode & root_, auto f) -> void {
+	auto inorder = [] (const AnyNode & root_, auto f) -> void {
 		if (!AnyNode::empty(root_.left))  inorder(AnyNode::node(root_.left), f); // left subtree
 		if (!f(root_)) return; // process, stop if false return
 		if (!AnyNode::empty(root_.right))  inorder(AnyNode::node(root_.right), f); // right subtree
 	};
 
-	auto postorder = [] ( AnyNode & root_, auto f) ->void {
+	auto postorder = [] (const AnyNode & root_, auto f) ->void {
 		if (!AnyNode::empty(root_.left))  postorder(AnyNode::node(root_.left), f); // left subtree
 		if (!AnyNode::empty(root_.right))  postorder(AnyNode::node(root_.right), f); // right subtree
 		if (!f(root_)) return; // process, stop if false return
@@ -161,13 +163,15 @@ namespace dbj_samples {
 	 With AnyVisitor and AnyNode traversals we can do anything wee need on the tree made of AnyNodes.
 
 	 AnyVisitor can be lambda, functor, function or anything else 
-	 that is callable and confirms to AnyVisitor signature
+	 that is callable and confirms to AnyNode::DecisionLogic signature
 
 	 BIG NOTE: data on this tree is anonymous, i.e. typeless so we can not use operators on it, yet.
 
 	*/
 
 	namespace anyvisitors {
+
+		// AnyNode::DecisionLogic  is   insertion_type
 
 		inline AnyNode::where_next no_logic(const AnyNode &, const AnyNode &) {
 			return AnyNode::where_next::nowhere;
@@ -184,7 +188,10 @@ namespace dbj_samples {
 			return AnyNode::where_next::right;
 		}
 
-		template< typename insertion_logic >
+		template< 
+			AnyNode::DecisionLogic //   insertion_type
+			insertion_logic
+		>
 		class Inserter final {
 
 			AnyNode node_to_be_inserted_{};
@@ -200,7 +207,9 @@ namespace dbj_samples {
 			tree traversal methods
 			*/
 			bool operator ()( AnyNode & n) {
-				typename AnyNode::where_next leader = insertion_logic(n, node_to_be_inserted_);
+				/*typename AnyNode::where_next*/ 
+				auto leader = 
+				insertion_logic(n, node_to_be_inserted_) ;
 					return n.add(leader, node_to_be_inserted_);
 			}
 		};
@@ -209,7 +218,7 @@ namespace dbj_samples {
 
 } // dbj
 
-#ifdef DBJ_TESTING_ONAIR
+
 #pragma region dbj testing
 namespace tree_testing {
 
@@ -226,38 +235,45 @@ namespace tree_testing {
 					return std::any_cast<T>(any_);
 				}
 				catch (std::bad_any_cast & x) {
-					dbj::trace("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
+					DBJ::TRACE("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
 					// throw dbj::Exception(x.what());
 				}
 				return T{};
 			};
 		};
 
-	DBJ_TEST_CASE(dbj::FILELINE(__FILE__, __LINE__, ": dbj::AnyNode ")) {
+DBJ_TEST_UNIT(dbj_AnyNode) {
+
+	using namespace dbj::samples;
+	using dbj::console::print;
 
 		Transformer<const char *> node_data;
 
 		auto printer = [&node_data](auto & n) -> bool {
-			dbj::log::print("\n(name: '", n.name, "', \tuid:", n.uid, ", \tdata: ", node_data(n.data) , ")");
+			dbj::console::print(
+				"\n(name: '", n.name, "', \tuid:", n.uid, ", \tdata: ", node_data(n.data) , ")"
+			);
 			return true;
 		};
 
-	 auto root = dbj::AnyNode("root payload", "ROOT", dbj::AnyNode("left payload", "L"), dbj::AnyNode("right payload", "R")	);
+	 auto root = AnyNode("root payload", "ROOT", 
+		 AnyNode("left payload", "L"), 
+		 AnyNode("right payload", "R")	
+	 );
 
-	 dbj::anyvisitors::Inserter< decltype(dbj::anyvisitors::append_right) >
-		 to_right( dbj::AnyNode("yeat another payload", "LEAF" ));
+	 anyvisitors::Inserter< anyvisitors::append_right >
+		 to_right( AnyNode("yet another payload", "LEAF" ));
 
-			dbj::preorder(root, to_right );
+			preorder(root, to_right );
 
-			 dbj::log::print("\n\nPreorder");
-			 dbj::preorder(root, printer );
-			 dbj::log::print("\n\nInorder");
-			 dbj::inorder(root, printer);
-			 dbj::log::print("\n\nPostorder");
-			 dbj::postorder(root, printer);
+			 print("\n\nPreorder");
+			 preorder(root, printer );
+			 print("\n\nInorder");
+			 inorder(root, printer);
+			 print("\n\nPostorder");
+			 postorder(root, printer);
 	}
 }
 #pragma endregion
-#endif
 
-#endif
+
