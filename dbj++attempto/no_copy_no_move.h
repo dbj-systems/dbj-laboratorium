@@ -26,6 +26,13 @@ namespace dbj::samples {
 
 	DBJ_TEST_SPACE_OPEN(local_tests)
 
+	DBJ_TEST_UNIT(remove_all_pointers) 
+	{
+		using namespace dbj::tt;
+
+		static_assert(std::is_same_v<int, to_base_t<int **************> >);
+	}
+
 	struct D;
 	extern const D not_d;
 	struct D
@@ -79,6 +86,8 @@ namespace dbj::samples {
 		};
 
 		auto r1 = test();
+
+		using namespace std::string_view_literals;
 	}
 
 	DBJ_TEST_SPACE_CLOSE
