@@ -26,8 +26,12 @@ DBJ_TEST_SPACE_OPEN(local_tests)
 using namespace std::literals;
 
 struct STANDARD {
-	constexpr static const auto compiletime_static_string_view_constant() {
-		return "compile time"sv;
+	constexpr static const auto compiletime_static_string_view_constant() 
+	{
+		auto make_once_and_only_if_called = "constexpr string view literal"sv;
+		// on second and all the other calls 
+		// just return
+		return make_once_and_only_if_called;
 	}
 };
 
@@ -49,9 +53,12 @@ DBJ_TEST_UNIT(compiletime_static_string_constant)
 	// std artefacts conformance
 	auto the_constant = return_by_val();
 
-	_ASSERTE(the_constant == "compile time");
+	_ASSERTE(the_constant == "constexpr string view literal");
 
-	static_assert(STANDARD::compiletime_static_string_view_constant() == "compile time" );
+	static_assert(
+		STANDARD::compiletime_static_string_view_constant() 
+		== "constexpr string view literal" 
+		);
 
 	// make init list
 	auto ref_w = { the_constant  } ;

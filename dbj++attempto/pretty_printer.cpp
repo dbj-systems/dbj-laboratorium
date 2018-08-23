@@ -1,7 +1,7 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "pch.h"
-
+#if 0
 // cl /EHsc /nologo /W4 pretty_printer.cpp
 // g++ -Wall -Wextra -std=c++0x pretty_printer.cpp -o pretty_printer.exe
 
@@ -404,3 +404,5 @@ namespace st_lavavej {
 		DBJ_TEST_SPACE_CLOSE
 #endif
 } // st_lavavej
+
+#endif

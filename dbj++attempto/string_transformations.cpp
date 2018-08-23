@@ -9,7 +9,7 @@ namespace string_transformations {
 	from
 	C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\cppwinrt\winrt\base.h
 	*/
-	namespace winrt {
+	namespace from_winrt {
 		inline std::string to_string(std::wstring_view value)
 		{
 			if (value.empty()) return {}; // DBJ added
