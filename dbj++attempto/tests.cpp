@@ -28,7 +28,7 @@ using namespace std::literals;
 struct STANDARD {
 	constexpr static const auto compiletime_static_string_view_constant() 
 	{
-		auto make_once_and_only_if_called = "constexpr string view literal"sv;
+		static auto make_once_and_only_if_called = "constexpr string view literal"sv;
 		// on second and all the other calls 
 		// just return
 		return make_once_and_only_if_called;
