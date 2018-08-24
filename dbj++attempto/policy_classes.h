@@ -6,10 +6,6 @@ __interface msvc keyword
 explained here: https://docs.microsoft.com/en-us/cpp/cpp/interface
 */
 
-#ifndef implements
-#define implements public
-#endif
-
 namespace dbj::samples {
 	namespace philology {
 		using std::string;
@@ -26,19 +22,19 @@ namespace dbj::samples {
 		// classes to be used
 		// as default policies		
 		struct WideWriterPolicy 
-			: implements IWriterPolicy {
+			: public IWriterPolicy {
 			void write(const string & msg) const noexcept 
 			{ print(" ", msg); }
 		};
 		struct LanguagePolicyEnglish 
-			: implements ILanguagePolicy {
+			: public ILanguagePolicy {
 			string translate(const string & msg) const noexcept 
 			{ return msg; }
 		};
 		// german is also here as some folks will 
 		// want to make it a default language
 		struct LanguagePolicyGerman 
-			: implements ILanguagePolicy {
+			: public ILanguagePolicy {
 			string translate(const string & msg) const noexcept 
 			{ return msg; }
 		};

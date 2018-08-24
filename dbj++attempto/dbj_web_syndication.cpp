@@ -1,4 +1,6 @@
 #include "pch.h"
+
+// #define DBJ_CPP_WINRT_TESTING
 #ifdef DBJ_CPP_WINRT_TESTING
 /*
 https://moderncpp.com/2017/11/01/cppwinrt-in-the-windows-sdk/
@@ -16,7 +18,7 @@ https://kennykerr.ca/2018/03/09/cppwinrt-producing-async-objects/
 /// to equal any cppWINRT name
 /// </remarks>
 /// </summary>
-namespace dbj_samples::wrt {
+namespace /*dbj_samples::wrt */ {
 
 	constexpr const wchar_t * feed_uri[]{
 		L"https://kennykerr.ca/feed",

@@ -1,10 +1,6 @@
 #pragma once
 #include "pch.h"
 
-#ifndef implements
-#define implements public
-#endif
-
 namespace dbj::samples {
 	namespace docops {
 		using string = std::string;
@@ -42,10 +38,10 @@ namespace dbj::samples {
 
 		// IOperation implementations are completely hidden from users
 		namespace {
-			class LocalDocOp final : implements IOperation {
+			class LocalDocOp final : public IOperation {
 				bool open(string name) { return true; }
 			};
-			class OnlineDocOp final : implements IOperation {
+			class OnlineDocOp final : public IOperation {
 				bool open(string name) { return true; }
 			};
 			/*
@@ -95,7 +91,7 @@ namespace documents {
 		Future expansion: introduce DataBase document
 		That will not change the existing code bellow whatsoever.
 		*/
-		class Document : implements IDocument {
+		class Document : public IDocument {
 			/*	Types of documents do not equal type of operations on them
 				thus we do not inherit from doc operations
 				Document hierarchy uses Documents Operations
