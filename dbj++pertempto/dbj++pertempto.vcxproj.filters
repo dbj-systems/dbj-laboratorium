@@ -26,6 +26,15 @@
     <ClCompile Include="dbj++pertempto.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="console_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbj_traits_testing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />

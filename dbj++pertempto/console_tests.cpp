@@ -123,22 +123,24 @@ void string_tester ( T * init_str_literal)
 #endif
 	};
 
-	if constexpr (dbj::tt::same_types <T, char>) {
+	using base_type = dbj::tt::to_base_t<T>;
+
+	if constexpr (std::is_same_v <base_type, char>) {
 		actual_tests(string{ init_str_literal });
 		actual_tests(string_view{ init_str_literal });
 	}
 	else
-		if constexpr (dbj::tt::same_types<T, wchar_t>) {
+		if constexpr (std::is_same_v<base_type, wchar_t>) {
 			actual_tests(wstring{ init_str_literal });
 			actual_tests(wstring_view{ init_str_literal });
 		}
 		else
-			if constexpr (dbj::tt::same_types<T, char16_t> ) {
+			if constexpr (std::is_same_v<base_type, char16_t> ) {
 				actual_tests(u16string{ init_str_literal });
 				actual_tests(u16string_view{ init_str_literal });
 			}
 			else
-				if constexpr (dbj::tt::same_types<T, char32_t>) {
+				if constexpr (std::is_same_v<base_type, char32_t>) {
 					actual_tests(u32string{ init_str_literal });
 					actual_tests(u32string_view{ init_str_literal });
 				}
@@ -181,19 +183,9 @@ void arh_test ( Args ... args)
 		using arh_type = typename dbj::arr::ARH<arg_list_type::value_type, (sizeof... (args))>;
 
 		static_assert(
-			dbj::tt::same_types< arh_type::value_type, arg_list_type::value_type >,
+			std::is_same_v< arh_type::value_type, arg_list_type::value_type >,
 			"dbj::ARH::value_type must be the same to the type of each brace init list element"
 			);
-#if 0 // avoiding print
-		PRN.char_to_console("\n");
-		out(arh_type::ARR{ { args... } });
-		// native arrays out
-		PRN.char_to_console("\n");
-		out(arh_type::to_arp(arh_type::ARR{ { args... } }));
-		PRN.char_to_console("\n");
-		out(arh_type::to_arf(arh_type::ARR{ { args... } }));
-#else
-		// std::array<arg_list_type::value_type, (sizeof... (args))> std_arr{ { args ... } };
 
 		typename arh_type::ARR std_arr{ { args ... } };
 		dbj::console::print( 
@@ -201,7 +193,6 @@ void arh_test ( Args ... args)
 			"\n", arh_type::to_arp(std_arr),
 			"\n", arh_type::to_arf(std_arr)
 		);
-#endif
 	}
 
 };

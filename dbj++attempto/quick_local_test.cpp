@@ -28,6 +28,7 @@ namespace dbj::samples{
 		memcpy(buff, p, sizeof(T));
 		p->~U();
 		T *result = new (p) T;
+		// todo: here use the dbj++ memcpy wrapup
 		memcpy(result, buff, sizeof(T));
 		return result;
 	}

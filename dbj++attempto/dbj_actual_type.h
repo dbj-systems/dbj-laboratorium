@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.h"
 
 namespace dbj_samples {
@@ -16,15 +17,12 @@ namespace dbj_samples {
 	template<typename T>
 	constexpr auto is_pointer_pointer_v = is_pointer_pointer<T>::value;
 
-	auto is_p2p = [](auto arg) constexpr -> bool {
+	inline auto is_p2p = [](auto arg) constexpr -> bool {
 		using arg_type = decltype(arg) ;
-#if 0
-		return std::is_pointer_v<arg_type> &&
-			std::is_pointer_v< typename std::remove_pointer_t<arg_type> >;
-#endif
 		return is_pointer_pointer_v< arg_type >;
 	};
 
+#if 0
 	/// <summary>
 	/// reveal the actual type of T
 	/// </summary>
@@ -75,9 +73,10 @@ namespace dbj_samples {
 
 		return tempo_.data() ;
 	};
+#endif
 } // dbj
 
-#ifdef DBJ_TESTING_ONAIR
+#if 0
 /*
  Reasoning, motivation and testing
 */
@@ -111,6 +110,6 @@ namespace dbj::samples {
 		dbj::log::print("\n");
 
 	}
-}
+} // dbj::samples
 
 #endif

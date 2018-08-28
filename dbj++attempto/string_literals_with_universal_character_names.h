@@ -9,19 +9,19 @@ namespace dbj::samples {
 	auto out = [&]( const auto & s_) 
 	{
 		using namespace std;
-		using FT = dbj::tt::to_base_t< decltype(s_) >;
-		auto type_name_ =  DBJ_TYPENAME(FT);
+		using base_type = dbj::tt::to_base_t< decltype(s_) >;
+		auto type_name_ =  DBJ_TYPENAME(base_type);
 
-		if constexpr (dbj::tt::same_types<FT, char>) {
+		if constexpr (std::is_same_v<base_type, char>) {
 			cout << "\n" << s_ << "\n";
 		} else
-			if constexpr (dbj::tt::same_types<FT, wchar_t>) {
+			if constexpr (std::is_same_v<base_type, wchar_t>) {
 				wcout << "\n" << s_ << "\n";
 			}
-			else if constexpr (dbj::tt::same_types<FT, char16_t>) {
+			else if constexpr (std::is_same_v<base_type, char16_t>) {
 				wcout << "\n" << s_ << "\n";
 			}
-			else if constexpr (dbj::tt::same_types<FT, char32_t>) {
+			else if constexpr (std::is_same_v<base_type, char32_t>) {
 				wcout << "\n" << s_ << "\n";
 			}
 			else {
@@ -35,7 +35,7 @@ namespace dbj::samples {
 
 		auto sync_state_previous = std::ios::sync_with_stdio(true);
 		/*
-		https://docs.microsoft.com/en-us/cpp/cpp/string-and-character-literals-cpp
+		https://docs.microsobase_type.com/en-us/cpp/cpp/string-and-character-literals-cpp
 		*/
 		// ASCII smiling face  
 		const char*     s1 = ":-)";

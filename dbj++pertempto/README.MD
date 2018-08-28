@@ -3,7 +3,7 @@
 
 > pertempto is Latin for "probe, try out, explore, search, weigh"
 
-## Testing arround and about [dbj++](https://github.com/dbj-systems/dbjplusplus)
+## Testing the [dbj++](https://github.com/dbj-systems/dbjplusplus)
 
 > Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
 

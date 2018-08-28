@@ -110,29 +110,6 @@ DBJ_TEST_UNIT(_array_stays_array)
 	auto s3 = probe_array(std::addressof(ia));
 }
 
-DBJ_TEST_UNIT(_GetGeoInfoEx_)
-{
-	using namespace std::literals;
-
-	constexpr auto us_ = L"US"sv;
-	constexpr auto rs_ = L"RS"sv;
-
-	auto DBJ_UNUSED(us_data) = dbj::win32::geo_info(  (PWSTR)us_.data() );
-	auto DBJ_UNUSED(rs_data) = dbj::win32::geo_info(  (PWSTR)rs_.data() );
-
-	dbj::console::print(us_data);
-	dbj::console::print(rs_data);
-}
-/*
-auto reporter = [&](const char * prompt = "", const void * this_ptr = nullptr ) {
-	char address_str[128]{0};
-	int retval = std::snprintf(address_str, 128, "%p", this_ptr);
-	_ASSERTE( retval > 0);
-	dbj::console::print("\n[", address_str, "]\t", prompt );
-};
-*/
-
-
 typedef enum class CODE : UINT {
 	page_1252 = 1252u,   // western european windows
 	page_65001 = 65001u // utf8

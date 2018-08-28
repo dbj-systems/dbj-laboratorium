@@ -163,7 +163,6 @@
   <ItemGroup>
     <ClInclude Include="dbjtree.h" />
     <ClInclude Include="dbjtreeprint.h" />
-    <ClInclude Include="dbj_actual_type.h" />
     <ClInclude Include="dbj_any.h" />
     <ClInclude Include="dbj_any_node.h" />
     <ClInclude Include="dbj_atoms.h" />
@@ -184,9 +183,7 @@
     <ClInclude Include="supports_api.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="console_tests.cpp" />
     <ClCompile Include="dbj++attempto.cpp" />
-    <ClCompile Include="dbj_traits_testing.cpp" />
     <ClCompile Include="dbj_web_syndication.cpp" />
     <ClCompile Include="few_more_nuggets.cpp" />
     <ClCompile Include="lambda_mixer_samples.cpp" />
@@ -196,10 +193,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="pretty_printer.cpp" />
     <ClCompile Include="quick_local_test.cpp" />
-    <ClCompile Include="string_transformations.cpp" />
-    <ClCompile Include="tests.cpp" />
+    <ClCompile Include="r+d.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
