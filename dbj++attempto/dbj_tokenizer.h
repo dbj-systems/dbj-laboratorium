@@ -25,230 +25,197 @@ This is how my original code was old today.
 //  $Date: $
 //  $Revision: $
 //*****************************************************************************/
-#pragma once
 
-#ifdef DBJ_TOKENIZER_USES_BSTR
-#include <comutil.h>
-#endif
-//---------------------------------------------------------------------------------------
-namespace dbj_samples {
-/* fm == Foundation Mechanisms */
-namespace fm {
-		template< typename STYPE, typename CHARTYPE >
-		class tokenizerT
+namespace dbj::samples {
+
+namespace internal {
+
+template< typename STYPE> struct tokenizer_engine;
+
+// most common used tokenizer engines types
+typedef tokenizer_engine< std::string > tokenizer_eng;
+typedef tokenizer_engine< std::wstring > wtokenizer_eng;
+
+template< typename STYPE>
+struct tokenizer_engine final
+{
+	using string_type = STYPE;
+
+	using pos_vector = std::vector< size_t >; 
+
+	mutable pos_vector			vector_of_begins;
+	mutable pos_vector			vector_of_ends;
+	mutable STYPE				src_;
+	mutable STYPE				tag_;
+
+	// return not-a-position value for this string type
+	auto NPOS() const noexcept { static auto lazy_retval = STYPE::npos; return lazy_retval; }
+	// find tag position in the source begining at given position
+	// for this string type
+	size_t find_tag_position(size_t starting_position) const
+	{
+		return src_.find(tag_, starting_position);
+	}
+	// return substring from the source
+	// starting from vector_of_begins[ord_] using
+	// length vector_of_ends[ord_] - vector_of_begins[ord_]
+	// 
+	STYPE src_substr(size_t ord_) const
+	{
+		if (0 == vector_of_ends[ord_] - vector_of_begins[ord_])
+			return STYPE();
+
+		return src_.substr(
+			vector_of_begins[ord_], 
+			vector_of_ends[ord_] - vector_of_begins[ord_]
+		);
+	}
+
+	// size() semantics for the STYPE used
+	// 
+	size_t tag_size() const noexcept { return tag_.size();	}
+	// 
+	size_t src_size() const noexcept { return src_.size();	}
+	//
+	//IMPLEMENTATION
+	//
+	void parseLine()
+	{
+		size_t tagSize_ = tag_size();
+		size_t tagStartPos_ = 0, tagEndPos_ = 0;
+
+		vector_of_begins.clear();
+		vector_of_ends.clear();
+
+		if (tagSize_ < 1)
+			return;
+		if (src_size() < 1)
+			return;
+
+		vector_of_begins.push_back(tagStartPos_);
+
+		while ((tagEndPos_ = find_tag_position(tagStartPos_)) != NPOS())
 		{
-		protected:
-
-			// 
-			std::vector<size_t> vector_of_begins;
-			// 
-			std::vector<size_t> vector_of_ends;
-			// internally we use std::wstring for implementation
-			// UNICODE is supposed to be quicker under W2K and NT
-			// 
-			mutable STYPE src_;
-			// 
-			mutable STYPE tag_;
-			// return not-a-position value for this string type
-			// 
-			size_t NPOS() const
-			{
-				return STYPE::npos;
-			}
-			// find tag position in the source begining at given position
-			// for this string type
-			// 
-			size_t find_tag_position(size_t starting_position) const
-			{
-				return src_.find(tag_, starting_position);
-			}
-			// return substring from the source
-			// starting from vector_of_begins[pos_] using
-			// length vector_of_ends[pos_] - vector_of_begins[pos_]
-			// 
-			STYPE src_substr(size_t pos_) const
-			{
-				if (0 == vector_of_ends[pos_] - vector_of_begins[pos_])
-					return STYPE();
-
-				return src_.substr(vector_of_begins[pos_], vector_of_ends[pos_] - vector_of_begins[pos_]);
-			}
-			// size() semantics for the STYPE used
-			// 
-			size_t tag_size() const
-			{
-				return tag_.size();
-			}
-			// 
-			size_t src_size() const
-			{
-				return src_.size();
-			}
-			//
-			//IMPLEMENTATION
-			//
-			// 
-			void parseLine()
-			{
-				size_t tagSize_ = tag_size();
-				size_t tagStartPos_ = 0, tagEndPos_ = 0;
-
-				vector_of_begins.clear();
-				vector_of_ends.clear();
-
-				if (tagSize_ < 1)
-					return;
-				if (src_size() < 1)
-					return;
-
-				vector_of_begins.push_back(tagStartPos_);
-
-				while ((tagEndPos_ = find_tag_position(tagStartPos_)) != NPOS())
-				{
-					vector_of_ends.push_back(tagEndPos_);
-					tagStartPos_ = tagEndPos_ + tagSize_;
-					vector_of_begins.push_back(tagStartPos_);
-				}
-				vector_of_ends.push_back(src_size());
-			}
-
-			// namespace {
-			using IDX_VECTOR = std::vector<size_t >;
-			inline IDX_VECTOR & indices(bool reset = false) {
-
-				auto ordered_int_sequence = [](size_t sz_) {
-					IDX_VECTOR rezult;
-					for (size_t j = 0; j != sz_; ++j)
-						rezult.push_back(j);
-					return rezult;
-				};
-
-				static IDX_VECTOR indices_{ ordered_int_sequence(vector_of_begins.size()) };
-				if (reset) indices_ = ordered_int_sequence(vector_of_begins.size());
-				return indices_;
-			}
-			// }
-			//--------------------------------------------------
-			// use this method when you want to reuse the only
-			// instance of this class
-			void reset(STYPE & mSrc_, STYPE & mTag_)
-			{
-				src_.swap(mSrc_);
-				tag_.swap(mTag_);
-				parseLine();
-				indices(true); // reset the indices too
-			}
-
-			// 
-			STYPE getWord(const size_t pos_) const
-			{
-				// dbjVERIFY( pos_ > -1 );
-				// std::end() points after the end so we can't assert pos < vector_of_begins.size()
-				return pos_ > src_.size() ? STYPE() : /* cast_to_stype */(src_substr(pos_));
-			}
-
-			// forbidden
-			tokenizerT() {}
-		public:
-
-			typedef STYPE string_type; // DBJ 19NOV2000
-			typedef std::size_t size_t;
-			//
-			// 
-			explicit tokenizerT(const STYPE & mSrc_, const STYPE & mTag_)
-			{
-				reset(const_cast<STYPE & >(mSrc_), const_cast<STYPE & >(mTag_));
-			}
-
-			~tokenizerT()
-			{   // 210598 JovanovD added
-				// vector_of_begins.erase( vector_of_begins.begin(), vector_of_begins.end() ) ;
-				// vector_of_ends.erase( vector_of_ends.begin(), vector_of_ends.end() ) ;
-				// 020517 DBJ
-				vector_of_begins.clear();
-				vector_of_ends.clear();
-			}
-
-
-			auto begin() {
-				return indices().begin();
-			}
-
-			auto end() {
-				return indices().end();
-			}
-			// added by JovanovD 21.05.98
-			//
-			STYPE operator [] (size_t pos_) const
-			{
-				return getWord(pos_);
-			}
-			//
-			size_t size() const throw()
-			{
-				return vector_of_begins.size();
-			}
-
-			// 
-			tokenizerT & operator=(const tokenizerT &right)
-			{
-				std::swap(*this, right);
-				return *this;
-			}
-			tokenizerT & operator=(tokenizerT && right)
-			{
-				std::swap(*this, right);
-				return *this;
-			}
-
-			// copy
-			tokenizerT(const tokenizerT & right)
-			{   // 210598 JovanovD added
-				std::swap(*this, right);
-			}
-			// move -- called on rvalues only. rvalue is temporary object
-			// 250917 JovanovD added
-			tokenizerT(tokenizerT && right) noexcept {
-				std::swap(*this, right);
-			}
-
-			friend auto swap(tokenizerT & left, tokenizerT & right) {
-				using std::swap;
-				swap(left.vector_of_begins, right.vector_of_begins);
-				swap(left.vector_of_ends, right.vector_of_ends);
-				swap(left.src_, right.src_);
-				swap(left.tag_, right.tag_);
-				indices(true);
-			}
-
-		}; // tokenizerT
-
-		   //--------------------------------------------------------------
-		   // specializations necessary for tokenizerT<std::string,char> to work
-		   // transform std::wstring to std::string
-#if 0
-		__forceinline
-			std::string tokenizerT< std::string, char >::cast_to_stype(const std::wstring & wstr) const
-		{
-			return std::string(wstr.begin(), wstr.end());
+			vector_of_ends.push_back(tagEndPos_);
+			tagStartPos_ = tagEndPos_ + tagSize_;
+			vector_of_begins.push_back(tagStartPos_);
 		}
-		__forceinline
-			void tokenizerT< std::string, char >::reset(
-				const std::string & mSrc_, const std::string & mTag_)
-		{
-			src_ = (wchar_t*)std::wstring(mSrc_.begin(), mSrc_.end()).data();
-			tag_ = (wchar_t*)std::wstring(mTag_.begin(), mTag_.end()).data();
-			parseLine();
-		}
-#endif
-		//--------------------------------------------------------------
-		// most common used tokenizing types
-		typedef tokenizerT< std::string, char >               tokenizer;
-		typedef tokenizerT< std::wstring, wchar_t >           wtokenizer;
-		//--------------------------------------------------------------
+		vector_of_ends.push_back(src_size());
+	}
 
-	}; // fm
-}; // dbjsys
+	//--------------------------------------------------
+	// use this method when you want to reuse the only
+	// instance of this class
+	void reset(STYPE & mSrc_, STYPE & mTag_)
+	{
+		src_.swap(mSrc_);
+		tag_.swap(mTag_);
+		parseLine();
+	}
+
+	// 
+	STYPE getWord(const size_t pos_) const
+	{
+		return pos_ > src_.size() ? STYPE() : this->src_substr(pos_);
+	}
+
+	// forbidden
+	tokenizer_engine() = delete;
+
+	explicit tokenizer_engine(const STYPE & mSrc_, const STYPE & mTag_)
+	{
+		reset((STYPE &)mSrc_, (STYPE &)mTag_);
+	}
+
+	~tokenizer_engine() = default;
+
+	// begins and engs must be the same size
+	size_t size() const throw()
+	{
+		return vector_of_begins.size();
+	}
+
+	//  copy
+	tokenizer_engine & operator=(const tokenizer_engine &right) = delete;
+	tokenizer_engine(const tokenizer_engine & right) = delete;
+
+	// move
+	tokenizer_engine & operator=(tokenizer_engine && right) = delete;
+	tokenizer_engine(tokenizer_engine && right) = delete;
+
+		}; // tokenizer_engine
+
+	}; // internal
+
+//--------------------------------------------------------------
+template< typename ENGINE_T > class tokenizer;
+
+typedef tokenizer<internal::tokenizer_eng>		stokenizer;
+typedef tokenizer<internal::wtokenizer_eng>		wtokenizer;
+
+//--------------------------------------------------------------
+template< typename ENGINE_T >
+class tokenizer final 
+{
+	using string_type = typename ENGINE_T::string_type;
+	using pos_pair = std::pair<	size_t, size_t >;
+	using pos_pair_vector = std::vector< pos_pair >;
+
+	mutable  ENGINE_T * engine_{};
+	// mutable	pos_pair_vector		vector_of_pos_pairs_;
+
+	pos_pair_vector	&
+		vector_of_pos_pairs(bool rebuild = false) const noexcept
+	{
+		auto & b_v = engine_->vector_of_begins;
+		auto & e_v = engine_->vector_of_ends;
+
+		auto build = [&]() -> pos_pair_vector 
+		{
+			pos_pair_vector retval{};
+			for (size_t j; j < b_v.size(); j++) {
+				retval.push_back(
+					std::make_pair(
+						b_v[j], e_v[j]
+					)
+				);
+			}
+			return retval;
+		};
+		// anchor
+		static pos_pair_vector pairs_v = build();
+			if (rebuild) pairs_v = build();
+				return pairs_v ;
+	}
+public :
+	
+	tokenizer(
+		const string_type & src_, const string_type & tag_
+	) : engine_(new ENGINE_T{ src_, tag_ } ) {}
+
+	~tokenizer() { if (engine_ != nullptr) { delete engine_; } engine_ = nullptr; }
+
+	auto begin()  noexcept {
+		return vector_of_pos_pairs().begin();
+	}
+
+	auto end()  noexcept {
+		return vector_of_pos_pairs().end();
+	}
+
+	// size_t walker{ 0 };
+	auto  operator ++ () {
+		return vector_of_pos_pairs()++;
+	}
+
+	// return the word by its prdinal number
+	string_type operator [] (size_t ord_) const
+	{
+		return  engine_->getWord(ord_);
+	}
+};
+
+}; // dbj::samples 
    /* standard suffix for every other header here */
 #pragma comment( user, __FILE__ "(c) 2017 by dbj@dbj.org | Version: " __DATE__ __TIME__ ) 
    /*

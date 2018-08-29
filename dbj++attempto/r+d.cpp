@@ -191,4 +191,26 @@ typedef enum class CODE : UINT {
 		dbj::samples::documents::opendoc(text, "world oyster");
 	}
 
+	DBJ_TEST_UNIT(tokenizer_test)
+	{
+		{
+			dbj::samples::internal::tokenizer_eng	stok{ "abra ka dabra", " " };
+			dbj::samples::internal::wtokenizer_eng	wtok{ L"abra ka dabra", L" " };
+
+			auto s_ = stok.size();
+
+			auto w0_ = stok.getWord(0);
+			auto w1_ = stok.getWord(1);
+			auto w2_ = stok.getWord(2);
+		}
+
+		dbj::samples::stokenizer		stok{ "abra ka dabra",   " " };
+		dbj::samples::wtokenizer		wtok{ L"abra ka dabra", L" " };
+
+		for (auto &&[b, e] : stok) {
+
+		}
+
+	}
+
 DBJ_TEST_SPACE_CLOSE
