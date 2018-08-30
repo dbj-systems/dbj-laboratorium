@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+#if 0
 // https://ideone.com/mYh4Y3
 
 namespace sean_parent {
@@ -99,7 +100,9 @@ namespace sean_parent {
 	
 } // sean_parent
 
-namespace dbj_samples {
+#endif
+
+namespace dbj::samples {
 #pragma region "Unknown IDE ONE Author"
 	struct MyConcept
 	{
@@ -156,12 +159,12 @@ namespace dbj_samples {
 
 	struct Thingy1
 	{
-		void display() const { std::cout << "Thingy1\n"; }
+		void display() const { dbj::console::print("Thingy1\n"); }
 	};
 
 	struct Thingy2
 	{
-		void display() const { std::cout << "Thingy2\n"; }
+		void display() const { dbj::console::print("Thingy2\n"); }
 	};
 #pragma region "Unknown IDE ONE Author"
 
@@ -172,7 +175,7 @@ namespace dbj_samples {
 
 DBJ_TEST_SPACE_OPEN(dbj_polymorph)
 
-using namespace dbj_samples;
+using namespace dbj::samples;
 
 DBJ_TEST_UNIT(": dbj any wrapper ") {
 	display_thingy(Thingy1());

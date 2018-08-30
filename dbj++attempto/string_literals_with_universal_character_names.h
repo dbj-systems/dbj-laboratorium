@@ -6,34 +6,11 @@
 
 namespace dbj::samples {
 
-	auto out = [&]( const auto & s_) 
-	{
-		using namespace std;
-		using base_type = dbj::tt::to_base_t< decltype(s_) >;
-		auto type_name_ =  DBJ_TYPENAME(base_type);
-
-		if constexpr (std::is_same_v<base_type, char>) {
-			cout << "\n" << s_ << "\n";
-		} else
-			if constexpr (std::is_same_v<base_type, wchar_t>) {
-				wcout << "\n" << s_ << "\n";
-			}
-			else if constexpr (std::is_same_v<base_type, char16_t>) {
-				wcout << "\n" << s_ << "\n";
-			}
-			else if constexpr (std::is_same_v<base_type, char32_t>) {
-				wcout << "\n" << s_ << "\n";
-			}
-			else {
-				cout << "\nCan not print type:" << type_name_ << "\n";
-			}
-
-		return out ;
-	};
 	/* */
 	DBJ_TEST_UNIT(string_literals_with_universal_character_names) {
 
-		auto sync_state_previous = std::ios::sync_with_stdio(true);
+		using dbj::console::print;
+
 		/*
 		https://docs.microsobase_type.com/en-us/cpp/cpp/string-and-character-literals-cpp
 		*/
@@ -48,12 +25,10 @@ namespace dbj::samples {
 		// UTF-32 encoded SMILING FACE WITH SUNGLASSES (U+1F60E)  
 		const char32_t* s5 = U"😎 = \U0001F60E is B-)";
 
-		out("ASCII smiling face ")(s1);
-		out("UTF-16 (on Windows) encoded WINKING FACE (U+1F609)")(s2);
-		out("UTF-8  encoded SMILING FACE WITH HALO (U+1F607)")(s3);
-		out("UTF-16 encoded SMILING FACE WITH OPEN MOUTH (U+1F603)")(s4);
-		out("UTF-32 encoded SMILING FACE WITH SUNGLASSES (U+1F60E)")(s5);
-
-		std::ios::sync_with_stdio(sync_state_previous);
+		print("ASCII smiling face ")(s1);
+		print("UTF-16 (on Windows) encoded WINKING FACE (U+1F609)")(s2);
+		print("UTF-8  encoded SMILING FACE WITH HALO (U+1F607)")(s3);
+		print("UTF-16 encoded SMILING FACE WITH OPEN MOUTH (U+1F603)")(s4);
+		print("UTF-32 encoded SMILING FACE WITH SUNGLASSES (U+1F60E)")(s5);
 	}
 } // dbj::samples

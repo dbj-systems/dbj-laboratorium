@@ -45,9 +45,6 @@
     <ClInclude Include="dbj_swapable_engines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_tokenizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dbj_tree_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,16 +60,7 @@
     <ClInclude Include="no_copy_no_move.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="no_inheritance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="policy_classes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="string_literals_with_universal_character_names.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="supports_api.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

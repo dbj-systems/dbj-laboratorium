@@ -86,6 +86,50 @@ public:
 	} // namespace philology 
 } //namespace dbj::samples 
 
+
+DBJ_TEST_UNIT(_inheritance_) {
+
+	using dbj::console::print;
+	constexpr static  dbj::c_line<80, '-'> Line80; // compile time
+
+	auto measure = [&](auto object, const char * msg = "") -> void {
+		using dbj::console::print;
+		print("\n", Line80,
+			"\n", msg, "\nType name:\t", typeid(object).name(),
+			"\nSpace requirements in bytes",
+			"\nfor Type:\t\t", sizeof(decltype(object)),
+			"\nfor Instance:\t", sizeof(object),
+			"\nfor Allocation:\t", alignof(decltype(object))
+		);
+	};
+
+	dbj::samples::philology::HelloWorld<> hello{};
+	dbj::samples::philology::HelloWorld2<> hello2{};
+
+	print("\n", Line80);
+	print("\nBEFORE RUN\n");
+	measure(hello);
+	measure(hello2);
+	print("\n", Line80);
+	hello.run("\nHelloWorld -- Default policies");
+	hello2.run("\nHelloWorld2 -- No inheritance");
+	print("\n", Line80);
+	print("\nAFTER RUN\n");
+	measure(hello);
+	measure(hello2);
+	print("\n", Line80);
+};
+
+DBJ_TEST_UNIT(_documents_) {
+
+	using IOperation = dbj::samples::docops::IOperation;
+	/* OPTIONAL: configure the docops to use online operations
+	*/
+	auto ot = dbj::samples::docops::operations_type(IOperation::type::online);
+	dbj::samples::documents::TextDoc text;
+	dbj::samples::documents::opendoc(text, "world oyster");
+}
+
 /*Copyright 2017 by dbj@dbj.org
 
 Licensed under the Apache License, Version 2.0 (the "License");

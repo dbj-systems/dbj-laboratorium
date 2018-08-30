@@ -172,15 +172,11 @@
     <ClInclude Include="dbj_micro_printf.h" />
     <ClInclude Include="dbj_polymorph.h" />
     <ClInclude Include="dbj_swapable_engines.h" />
-    <ClInclude Include="dbj_tokenizer.h" />
     <ClInclude Include="dbj_tree_tests.h" />
     <ClInclude Include="lambda_runtime_retval_test.h" />
     <ClInclude Include="no_copy_no_move.h" />
-    <ClInclude Include="no_inheritance.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="policy_classes.h" />
     <ClInclude Include="string_literals_with_universal_character_names.h" />
-    <ClInclude Include="supports_api.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbj++attempto.cpp" />
