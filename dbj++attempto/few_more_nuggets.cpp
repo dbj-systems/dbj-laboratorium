@@ -1,129 +1,131 @@
-// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "pch.h"
+#include <clocale>
 
-namespace dbj::samples{ // beware of anonymous namespace
+namespace dbj::samples { // beware of anonymous namespace
 
-	using namespace std; // beware of this
+	using namespace std; // beware
+/***********************************************************************************/
+	using leader_name_type = const wchar_t *;
+	leader_name_type leaders[]{ L"Ленин", L"Сталин", L"Маленков",
+L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"Горбачёв", L"안녕하세요", L"안녕히 가십시오" };
 
-	// handling aguments param pack when all the 
-	// arguments are of the same type
-	auto args_initlist = [](auto && ... args)
+	/***********************************************************************************/
+	template<
+		typename T, size_t N,
+		typename tuple_type = ::dbj::tt::array_as_tuple_t<T, N>
+	>
+		tuple_type sequence_to_tuple(const T(&narf)[N])
 	{
-		if constexpr(1 > (sizeof... (args))) {
-			return{};
-		}
-		else
-		{
-			using namespace std;
-			// here we transform arguments parameter pack to init list
-			// aka "list initialization" 
-			// https://en.cppreference.com/w/cpp/language/list_initialization
-			// NOTE: since C++17 more than one element in the init list can be deduced
-			// only by copy declaration
-			// this is thus error -> auto	arg_list{ args ... };
-			// and this is not
-			auto	arg_list = { args ... };
-			// the type of the init list instance
-			using	arg_list_type = decltype(arg_list);
-			// the type of the elements in the init list instance
-			using   arg_list_value_type = typename arg_list_type::value_type;
-			/*
-				init list is a kind of a range
-				so we can handle its elements in an range for loop
+		return ::dbj::arr::native_arr_to_tuple(narf);
+	}
 
-				for (element && : arg_list ) {  ... do something with element ...  }
-				*/
-			return arg_list;
+	template<
+		typename T, size_t N,
+		typename arr_type = ::std::array<T, N>
+	>
+		inline arr_type sequence_to_std_array(const T(&narf)[N])
+	{
+		arr_type std_arr;
+		std::copy(narf, narf + 5, std_arr.data());
+		return std_arr;
+	}
+
+	DBJ_TEST_UNIT(tuple_production)
+	{
+		int iarr[] = { 1,2,3,4,5,6,7,8 };
+		auto t1 = sequence_to_tuple({ 1,2,3,4,5 });
+		auto t2 = sequence_to_tuple(iarr);
+	}
+
+	/***********************************************************************************/
+	/* generic lambda solution */
+	auto summa = [](auto first, auto ... second) {
+
+		if constexpr (sizeof ... (second) > 0) {
+			return first + summa(second ...);
+		}
+		else {
+			return first;
 		}
 	};
 
-
-	namespace inner {
-
-		using namespace std;
-
-		template < class Tuple, size_t... I>
-		inline void tup_print(Tuple&& t, index_sequence<I...>)
+		auto lambda_holder = [](auto invocable_arg)
 		{
-			dbj::console::print(get<I>(forward<Tuple>(t))...);
-		}
-	}  // namespace inner
+			return [=]() {
+				return invocable_arg;
+			};
+		};
 
-	template <class Tuple>
-	inline void tup_print(Tuple&& t)
+		auto zbir = lambda_holder(summa);
+
+		struct apply_helper final
+		{
+			// apply the pair
+			template< typename T1, typename T2>
+			auto operator () (T1 v1, T2 v2) {
+				return  apply(zbir(), make_pair(v1, v2));
+			}
+			// apply the tuple or args
+			template< typename ... ARGS >
+			auto operator ()  (std::tuple<ARGS ...> tuple_) {
+				return  apply(zbir(), tuple_);
+			}
+
+			// apply the native array 
+			template< typename T, size_t N>
+			auto operator () (const T(&array_)[N]) {
+				array<T, N> std_array = dbj::arr::native_to_std_array(array_);
+				return  apply(zbir(), std_array);
+			}
+		};
+
+	/***********************************************************************************/
+	DBJ_TEST_UNIT(a_lot_of_nuggets)
 	{
-		using namespace std;
-		constexpr size_t tup_size = tuple_size_v<remove_reference_t<Tuple>>;
-		inner::tup_print(
-			forward<Tuple>(t), make_index_sequence<tup_size>{}
+		auto prev_fn = dbj::console::get_font_name();
+
+		// begin() can throw the exception
+		// end() is guaranteed, even in the presence of exceptions
+		const auto & begin_end_ = dbj::begin_end(
+			[&]() {
+			std::sort(begin(leaders), end(leaders), [](auto strA, auto strB) {
+				return std::wcscmp(strA, strB) < 0;
+			});
+			char* a = std::setlocale(LC_ALL, "");
+			dbj::console::set_extended_chars_font();
+		},
+			[&]() {
+			dbj::console::set_font(prev_fn);
+		}
 		);
-	}
 
-	// handling aguments param pack when 
-	// arguments are of different types
-	// template< typename ... Args >
-	auto args_tuple = [](auto && ... args)
-	{
-		if constexpr(1 > (sizeof... (args))) {
-			return{};
+		using leader_name_type_string
+			= std::basic_string< dbj::tt::to_base_t<leader_name_type>  >;
+		leader_name_type_string zbir;
+
+		// this happens between begin() and end()
+		for (const wchar_t * leader : leaders) {
+			dbj::console::print(leader, '\n');
+			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
-		else
 		{
-			using namespace std;
-			// here we transform arguments parameter pack to tuple
-			auto	tup_list = make_tuple(args ...);
-			// the type of the tuple instance
-			using	arg_list_type = decltype(tup_list);
-
-			/*
-			tuple is not a range
-			dbj::console::print(tup_list);
-			see here how to get to the tuple elements
-			https://en.cppreference.com/w/cpp/utility/tuple/get
-			*/
-			return tup_list;
+			int ai[]{ 1,2,3,4,5 };
+			apply_helper aplikator;
+			auto r0 = aplikator(1, 2);
+			auto r1 = aplikator(make_tuple(1, 2, 3, 4, 5));
+			auto ili = { 1, 2, 3, 4, 5 };
+			auto r2 = aplikator({ 1,2,3 });
+			auto r3 = aplikator(ai);
+			auto unused[[maybe_unused]] = 42;
 		}
-	};
 
-	DBJ_TEST_UNIT(param_pack_to_initlist)
-	{
-
-		auto init_list =  DBJ_TEST_ATOM( args_initlist(1, 2, 3) );
-
-		// this does not compile, wot now?
-		// args_initlist(1, 2.34, true, L"Abra", " Ka", " Dabra!");
-		//
-		auto tup_ =  DBJ_TEST_ATOM(
-			args_tuple(1, 2.34, true, L"Abra", " Ka", " Dabra!")
-			) ;
-		auto &&[a, b, c, d, e, f] = tup_;
+		DBJ_TEST_ATOM(std::apply(summa, std::make_pair(1, 2)));
+		DBJ_TEST_ATOM(std::apply(summa, std::make_tuple(2.0f, 3.0f, 1, 2)));
+		DBJ_TEST_ATOM(std::apply(summa, std::make_tuple(2.0f, 3.0f,
+			std::apply(summa, std::make_pair(11, 12))
+		)));
 	}
-
-	template < typename T >
-	constexpr std::decay_t<T>
-		to_base_value(const T & value_)
-	{
-		using DT =  std::decay_t<T>;
-		return DT{};
-	}
-/* */
-	template < typename T >	constexpr T to_base_value( T && value_ ) = delete;  
-/* */
-
-	DBJ_TEST_UNIT(static_assert_or_delete)
-	{
-		constexpr int rr = 42;
-		auto r1 = to_base_value(rr);
-		const int arr[]{1,2,3};
-		auto r2 = to_base_value(arr);
-		// int arr2[] {1, 2, 3}; auto r3 = to_base_value(arr2);
-
-		auto r4 = to_base_value("ABC");
-
-		// auto r6 = to_base_value(nullptr);
-		// auto r5 = to_base_value( std::forward<int>(42)) ;
-	}
-
 } // anon ns
