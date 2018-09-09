@@ -59,27 +59,36 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			};
 		};
 
-		auto zbir = lambda_holder(summa);
+		using lambda_holder_type = 
+			invoke_result_t < decltype( lambda_holder ), decltype(summa) > ;
 
+		template<typename INVOCABLE >
 		struct apply_helper final
 		{
+			const INVOCABLE & invocable_; 
+
 			// apply the pair
 			template< typename T1, typename T2>
 			auto operator () (T1 v1, T2 v2) {
-				return  apply(zbir(), make_pair(v1, v2));
+				return  apply(invocable_, make_pair(v1, v2));
 			}
 			// apply the tuple or args
 			template< typename ... ARGS >
 			auto operator ()  (std::tuple<ARGS ...> tuple_) {
-				return  apply(zbir(), tuple_);
+				return  apply(invocable_, tuple_);
 			}
 
 			// apply the native array 
 			template< typename T, size_t N>
 			auto operator () (const T(&array_)[N]) {
 				array<T, N> std_array = dbj::arr::native_to_std_array(array_);
-				return  apply(zbir(), std_array);
+				return  apply(invocable_, std_array);
 			}
+		};
+
+
+		auto make_apply_helper = [](auto lambda_) {
+			return apply_helper<decltype(lambda_)>{lambda_};
 		};
 
 	/***********************************************************************************/
@@ -113,7 +122,10 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		}
 		{
 			int ai[]{ 1,2,3,4,5 };
-			apply_helper aplikator;
+
+
+			auto aplikator = make_apply_helper(summa);
+
 			auto r0 = aplikator(1, 2);
 			auto r1 = aplikator(make_tuple(1, 2, 3, 4, 5));
 			auto ili = { 1, 2, 3, 4, 5 };
@@ -127,5 +139,12 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		DBJ_TEST_ATOM(std::apply(summa, std::make_tuple(2.0f, 3.0f,
 			std::apply(summa, std::make_pair(11, 12))
 		)));
+
+		auto buf = dbj::str::optimal_buffer<char>();
+
+		auto [ptr, erc ]= std::to_chars(buf.data(), buf.data() + buf.size(), 42);
+
+		auto rez = 0 == dbj_ordinal_string_compareA(buf.data(), "42", true);
+
 	}
 } // anon ns
