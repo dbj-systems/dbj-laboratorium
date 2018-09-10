@@ -2,13 +2,16 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "pch.h"
-#include <clocale>
 
 namespace dbj::samples { // beware of anonymous namespace
 
 	using namespace std; // beware
 /***********************************************************************************/
 	using leader_name_type = const wchar_t *;
+	
+	using leader_name_type_string
+		= std::basic_string< dbj::tt::to_base_t<leader_name_type>  >;
+
 	leader_name_type leaders[]{ L"Ленин", L"Сталин", L"Маленков",
 L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"Горбачёв", L"안녕하세요", L"안녕히 가십시오" };
 
@@ -98,7 +101,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		// begin() can throw the exception
 		// end() is guaranteed, even in the presence of exceptions
-		const auto & begin_end_ = dbj::begin_end(
+		const auto & begin_end_ = ::dbj::entry_exit(
 			[&]() {
 			std::sort(begin(leaders), end(leaders), [](auto strA, auto strB) {
 				return std::wcscmp(strA, strB) < 0;
@@ -111,8 +114,6 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		}
 		);
 
-		using leader_name_type_string
-			= std::basic_string< dbj::tt::to_base_t<leader_name_type>  >;
 		leader_name_type_string zbir;
 
 		// this happens between begin() and end()
@@ -142,9 +143,35 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		auto buf = dbj::str::optimal_buffer<char>();
 
-		auto [ptr, erc ]= std::to_chars(buf.data(), buf.data() + buf.size(), 42);
+#define UNUSED [[maybe_unused]] 
+
+		UNUSED auto [ ptr , erc ]  = std::to_chars(buf.data(), buf.data() + buf.size(), 42);
 
 		auto rez = 0 == dbj_ordinal_string_compareA(buf.data(), "42", true);
 
 	}
+#pragma region https://stackoverflow.com/questions/52244640/if-constexpr-and-c4702-and-c4100-and-c4715/52244957#52244957
+	
+#ifdef _DEBUG
+#define DBJ_NOT_USED(x) void{x}
+#else
+#define DBJ_NOT_USED(x) 
+#endif
+
+	/***********************************************************************************/
+	DBJ_TEST_UNIT(a_lot_of_variations)
+	{
+		using specimen_type = dbj::tt::fundamental_twins<int, const int &>;
+		specimen_type ft;
+		specimen_type::decay_1 v1{};
+		specimen_type::decay_2 v2{};
+		specimen_type::type v3{};
+		specimen_type::value_type v4{};
+		auto wot = ft();
+
+		int a = 13;
+		const int & b = 42;
+		auto are_they = dbj::tt::same_fundamental_types(a, b);
+	}
+#pragma endregion
 } // anon ns
