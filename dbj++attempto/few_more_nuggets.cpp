@@ -3,12 +3,14 @@
 
 #include "pch.h"
 
+#include <experimental/filesystem>
+
 namespace dbj::samples { // beware of anonymous namespace
 
 	using namespace std; // beware
 /***********************************************************************************/
 	using leader_name_type = const wchar_t *;
-	
+
 	using leader_name_type_string
 		= std::basic_string< dbj::tt::to_base_t<leader_name_type>  >;
 
@@ -55,44 +57,44 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		}
 	};
 
-		auto lambda_holder = [](auto invocable_arg)
-		{
-			return [=]() {
-				return invocable_arg;
-			};
+	auto lambda_holder = [](auto invocable_arg)
+	{
+		return [=]() {
+			return invocable_arg;
 		};
+	};
 
-		using lambda_holder_type = 
-			invoke_result_t < decltype( lambda_holder ), decltype(summa) > ;
+	using lambda_holder_type =
+		invoke_result_t < decltype(lambda_holder), decltype(summa) >;
 
-		template<typename INVOCABLE >
-		struct apply_helper final
-		{
-			const INVOCABLE & invocable_; 
+	template<typename INVOCABLE >
+	struct apply_helper final
+	{
+		const INVOCABLE & invocable_;
 
-			// apply the pair
-			template< typename T1, typename T2>
-			auto operator () (T1 v1, T2 v2) {
-				return  apply(invocable_, make_pair(v1, v2));
-			}
-			// apply the tuple or args
-			template< typename ... ARGS >
-			auto operator ()  (std::tuple<ARGS ...> tuple_) {
-				return  apply(invocable_, tuple_);
-			}
+		// apply the pair
+		template< typename T1, typename T2>
+		auto operator () (T1 v1, T2 v2) {
+			return  apply(invocable_, make_pair(v1, v2));
+		}
+		// apply the tuple or args
+		template< typename ... ARGS >
+		auto operator ()  (std::tuple<ARGS ...> tuple_) {
+			return  apply(invocable_, tuple_);
+		}
 
-			// apply the native array 
-			template< typename T, size_t N>
-			auto operator () (const T(&array_)[N]) {
-				array<T, N> std_array = dbj::arr::native_to_std_array(array_);
-				return  apply(invocable_, std_array);
-			}
-		};
+		// apply the native array 
+		template< typename T, size_t N>
+		auto operator () (const T(&array_)[N]) {
+			array<T, N> std_array = dbj::arr::native_to_std_array(array_);
+			return  apply(invocable_, std_array);
+		}
+	};
 
 
-		auto make_apply_helper = [](auto lambda_) {
-			return apply_helper<decltype(lambda_)>{lambda_};
-		};
+	auto make_apply_helper = [](auto lambda_) {
+		return apply_helper<decltype(lambda_)>{lambda_};
+	};
 
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_nuggets)
@@ -143,20 +145,12 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		auto buf = dbj::str::optimal_buffer<char>();
 
-#define UNUSED [[maybe_unused]] 
-
-		UNUSED auto [ ptr , erc ]  = std::to_chars(buf.data(), buf.data() + buf.size(), 42);
+		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), 42);
 
 		auto rez = 0 == dbj_ordinal_string_compareA(buf.data(), "42", true);
 
 	}
 #pragma region https://stackoverflow.com/questions/52244640/if-constexpr-and-c4702-and-c4100-and-c4715/52244957#52244957
-	
-#ifdef _DEBUG
-#define DBJ_NOT_USED(x) void{x}
-#else
-#define DBJ_NOT_USED(x) 
-#endif
 
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_variations)
@@ -169,9 +163,12 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		specimen_type::value_type v4{};
 		auto wot = ft();
 
+		DBJ_UNUSED(wot);
+
 		int a = 13;
 		const int & b = 42;
 		auto are_they = dbj::tt::same_fundamental_types(a, b);
+		DBJ_UNUSED(dbj::tt::same_fundamental_types(a, b));
 	}
 #pragma endregion
 } // anon ns
