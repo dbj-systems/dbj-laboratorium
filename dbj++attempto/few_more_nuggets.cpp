@@ -34,15 +34,53 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		inline arr_type sequence_to_std_array(const T(&narf)[N])
 	{
 		arr_type std_arr;
-		std::copy(narf, narf + 5, std_arr.data());
+		std::copy(narf, narf + N, std_arr.data());
 		return std_arr;
 	}
 
+/*
+Transform initializer list into std::vector 
+*/
+	template<typename T, typename outype = std::vector<T> >
+	inline 
+		constexpr outype 
+		inil_to_vector(std::initializer_list<T> inil_)
+	{
+		return { inil_.begin(), inil_.end() };
+	}
+/*******************************************************************************/
+	template<typename T>
+	constexpr size_t get_extent(const T * tar )
+	{
+		if constexpr (std::is_array_v<T>) {
+			constexpr size_t rank_ = std::rank_v<T>;
+			return std::extent_v< std::remove_pointer_t<T>, rank_ - 1> ;
+		}
+		else {
+			return {};
+		};
+	}
+/*******************************************************************************/
+/*******************************************************************************/
 	DBJ_TEST_UNIT(tuple_production)
 	{
 		int iarr[] = { 1,2,3,4,5,6,7,8 };
 		auto t1 = sequence_to_tuple({ 1,2,3,4,5 });
 		auto t2 = sequence_to_tuple(iarr);
+
+		auto inil_ = { 1,2,3,4,5 };
+
+		auto rezult = inil_to_vector(inil_);
+
+		using v_type = decltype(rezult);
+		using v_value_type = typename v_type::value_type ;
+
+		using data_arr_type = v_value_type(&)[];
+
+		const data_arr_type refintarr = (data_arr_type)rezult[0];
+
+		const size_t extent_ = get_extent(refintarr);
+
 	}
 
 	/***********************************************************************************/
@@ -64,18 +102,19 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		};
 	};
 
+	template<typename T>
 	using lambda_holder_type =
-		invoke_result_t < decltype(lambda_holder), decltype(summa) >;
+		invoke_result_t < decltype(lambda_holder), T >;
 
 	template<typename INVOCABLE >
 	struct apply_helper final
 	{
 		const INVOCABLE & invocable_;
 
-		// apply the pair
+		// apply the pair of values
 		template< typename T1, typename T2>
 		auto operator () (T1 v1, T2 v2) {
-			return  apply(invocable_, make_pair(v1, v2));
+			return  apply(invocable_, make_pair(v1,v2) );
 		}
 		// apply the tuple or args
 		template< typename ... ARGS >
@@ -84,6 +123,9 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		}
 
 		// apply the native array 
+		// also takes care of init list call
+		// which will otherwise clash with var args 
+		// overload above
 		template< typename T, size_t N>
 		auto operator () (const T(&array_)[N]) {
 			array<T, N> std_array = dbj::arr::native_to_std_array(array_);
@@ -92,8 +134,8 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	};
 
 
-	auto make_apply_helper = [](auto lambda_) {
-		return apply_helper<decltype(lambda_)>{lambda_};
+	auto make_apply_helper = [](auto invocable_ ) {
+		return apply_helper<decltype(invocable_)>{invocable_};
 	};
 
 	/***********************************************************************************/
@@ -123,18 +165,16 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			dbj::console::print(leader, '\n');
 			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
+		// applicator helper testing
 		{
 			int ai[]{ 1,2,3,4,5 };
-
-
 			auto aplikator = make_apply_helper(summa);
 
-			auto r0 = aplikator(1, 2);
-			auto r1 = aplikator(make_tuple(1, 2, 3, 4, 5));
-			auto ili = { 1, 2, 3, 4, 5 };
-			auto r2 = aplikator({ 1,2,3 });
-			auto r3 = aplikator(ai);
-			auto unused[[maybe_unused]] = 42;
+			DBJ_TEST_ATOM(aplikator(1, 2));
+			DBJ_TEST_ATOM(aplikator(make_tuple(1, 2, 3, 4, 5)));
+			auto ail = { 1, 2, 3, 4, 5 };
+			DBJ_TEST_ATOM(aplikator({ 1,2,3 }));
+			DBJ_TEST_ATOM(aplikator(ai));
 		}
 
 		DBJ_TEST_ATOM(std::apply(summa, std::make_pair(1, 2)));
@@ -155,20 +195,19 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_variations)
 	{
-		using specimen_type = dbj::tt::fundamental_twins<int, const int &>;
-		specimen_type ft;
-		specimen_type::decay_1 v1{};
-		specimen_type::decay_2 v2{};
-		specimen_type::type v3{};
-		specimen_type::value_type v4{};
-		auto wot = ft();
+		using twins_ = dbj::tt::fundamental_twins<int, const int &>;
+		twins_ ft;
+		twins_::decay_1 v1{};
+		twins_::decay_2 v2{};
+		twins_::type v3{};
+		twins_::value_type v4{};
+		auto DBJ_MAYBE(wot) = ft();
 
-		DBJ_UNUSED(wot);
-
-		int a = 13;
+		int DBJ_MAYBE(a) = 13;
 		const int & b = 42;
-		auto are_they = dbj::tt::same_fundamental_types(a, b);
-		DBJ_UNUSED(dbj::tt::same_fundamental_types(a, b));
+		auto DBJ_MAYBE(are_they) = dbj::tt::same_fundamental_types(a, b);
+		DBJ_VANISH(dbj::tt::same_fundamental_types(a, b));
+		DBJ_VANISH(a / b);
 	}
 #pragma endregion
 } // anon ns
