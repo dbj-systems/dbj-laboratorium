@@ -265,27 +265,30 @@ Transform initializer list into std::vector
 
 	DBJ_TEST_UNIT(clang_and_dbj) 
 	{
+		// reaching to C code
+		using dbj::clib::location_;
+		using dbj::clib::location_descriptor;
+
 		location_descriptor *loc_desc_0, *loc_desc_2, *loc_desc_3 ;
 		// begin block
 		{
 			dbj::entry_exit{
 				[&]() {
 				// take one
-				loc_desc_0 =
-					create_location_descriptor(__LINE__, __FILE__);
+				loc_desc_0 =  location_.create(__LINE__, __FILE__);
 				},
 				[&]() {
 					// take two
 					loc_desc_2 =
-						create_location_descriptor(__LINE__, __FILE__);
+						location_.create(__LINE__, __FILE__);
 
 					// release the 2 but leave the 1
-					release_location_descriptor(&loc_desc_2);
+					location_.release(&loc_desc_2);
 
 					// take three, should reuse the second registry slot
 					// thus loc_desc_2 == loc_desc_3
 					loc_desc_3 =
-						create_location_descriptor(__LINE__, __FILE__);
+						location_.create(__LINE__, __FILE__);
 					}
 			};
 		}

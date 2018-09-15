@@ -1,3 +1,19 @@
+/*
+Copyright 2017 by dbj@dbj.org
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http ://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #pragma once
 
 #if defined( __clang__ ) && ! defined( __cplusplus )
@@ -33,26 +49,37 @@
 #endif
 
 #ifdef __cplusplus
-extern "C" {
+namespace dbj::clib {
+	extern "C" {
 #endif
+		typedef struct location_descriptor location_descriptor;
 
-	typedef struct location_descriptor location_descriptor;
+        #define location_descriptor_file_name_size 1024U
 
-	#define location_descriptor_file_name_size 1024U
+		typedef struct location_descriptor {
+			unsigned int cache_index;
+			unsigned int line;
+			char file[location_descriptor_file_name_size];
+		} location_descriptor;
 
-	typedef struct location_descriptor {
-		unsigned int cache_index;
-		unsigned int line;
-		char file[location_descriptor_file_name_size];
-	} location_descriptor;
+		typedef struct LOCATION LOCATION;
 
-	// return null on cache overflow
-	struct location_descriptor *
-		create_location_descriptor(const int line_, const char * file_);
+		typedef struct LOCATION {
 
-	// always return null
-	location_descriptor * release_location_descriptor( location_descriptor ** );
+			location_descriptor * 
+				(*create)
+				(const int line_, const char * file_);
+
+			location_descriptor *
+				(*release)
+				(location_descriptor **);
+
+	} LOCATION;
+
+		extern LOCATION location_;
 
 #ifdef __cplusplus
-}
+	}
+} // eof namespace dbj::clib 
 #endif
+

@@ -1,3 +1,18 @@
+/*
+Copyright 2017 by dbj@dbj.org
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http ://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 # if !defined(__STDC_VERSION__) ||  (__STDC_VERSION__ < 199901L)
 /* Your compiler is not conforming to C99, since
@@ -10,7 +25,7 @@
 #endif
 
 #define _CRT_SECURE_NO_WARNINGS
-// we do the above since we use MSVC UCRT for this clang c code lib
+// we do the above since we use MSVC UCRT *from* this clang c code lib
 
 #include "dbjclib.h"
 #include <stdbool.h>
@@ -31,7 +46,7 @@ location_descriptor_cache[location_descriptor_cache_size];
 // if register slot is false, the slot os free and if true the slot is used
 #define CACHE_REGISTER_FREE_MARK false
 #define CACHE_REGISTER_ACTV_MARK true
-bool cache_register[location_descriptor_cache_size] ;
+static bool cache_register[location_descriptor_cache_size] ;
 
 static unsigned cache_register_in_overflow_state = false ;
 static const unsigned cache_register_invalid_slot = (unsigned)-1;
@@ -69,7 +84,7 @@ static void cache_register_release_slot( unsigned registry_slot_index )
 // the interface implementation -------------------------------------------------
 
 // return NULL if cache overflow
-struct location_descriptor *
+static struct location_descriptor *
 	create_location_descriptor( const int line_, const char * file_ )
 	{
 		unsigned free_slot = cache_register_first_free_slot();
@@ -92,7 +107,7 @@ struct location_descriptor *
 	}
 
 
-location_descriptor *  release_location_descriptor(location_descriptor ** locdesc_ )
+static location_descriptor *  release_location_descriptor(location_descriptor ** locdesc_ )
 {
 	// make the empty descriptor, once
 	static location_descriptor 
@@ -106,3 +121,19 @@ location_descriptor *  release_location_descriptor(location_descriptor ** locdes
 	return (*locdesc_) = NULL;
 }
 
+/*
+		typedef struct LOCATION {
+
+			location_descriptor *
+				(*create)
+				(const int line_, const char * file_);
+
+			location_descriptor *
+				(*release)
+				(location_descriptor **);
+
+	} LOCATION;
+
+		extern LOCATION location_;
+*/
+LOCATION location_ = { create_location_descriptor, release_location_descriptor };
