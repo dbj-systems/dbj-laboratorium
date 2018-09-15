@@ -3,6 +3,8 @@
 
 #include "pch.h"
 
+#include "../dbj++clib/dbjclib.h"
+
 #include <experimental/filesystem>
 
 namespace dbj::samples { // beware of anonymous namespace
@@ -61,6 +63,21 @@ Transform initializer list into std::vector
 		};
 	}
 /*******************************************************************************/
+	template< typename T, size_t N>
+	inline
+	std::array<T, N>
+		v_2_a (const std::vector<T> & vector_) {
+		
+		T(&narf)[N] =
+			*(T(*)[N])vector_.data();
+		
+		std::array<T, N> retval_;
+		
+		std::copy ( narf, narf + N, retval_.data() );
+
+		return retval_;
+	};
+
 /*******************************************************************************/
 	DBJ_TEST_UNIT(tuple_production)
 	{
@@ -75,12 +92,47 @@ Transform initializer list into std::vector
 		using v_type = decltype(rezult);
 		using v_value_type = typename v_type::value_type ;
 
-		using data_arr_type = v_value_type(&)[];
+		using data_arr_type = v_value_type [];
 
-		const data_arr_type refintarr = (data_arr_type)rezult[0];
+		auto & refintarr = * rezult.data() ;
 
-		const size_t extent_ = get_extent(refintarr);
+		// const size_t extent_ = get_extent(refintarr);
+		{
+			std::vector<int> vint{ 1,2,3 };
+			using inarr_type = int[];
+			auto & inarr = *vint.data();
+		}
+		
+		{
+	
+		using C3 = dbj::arr::ARH<char, 3>;
 
+		C3::ARV v_of_c{ 'A','B','C' };
+
+		C3::ARR  std_arr = C3::from_vector(v_of_c);
+		
+		{  // manual way
+			constexpr size_t N = 3;
+			auto std_arr = v_2_a<char, N>(v_of_c);
+		}
+
+		const char(&ref_to_arr_of_chars)[3] = 
+				*(char(*)[3])v_of_c.data();
+
+		const char(&ref_to_arr_of_chars_2)[] =
+				*(char(*)[])v_of_c.data();
+
+		const size_t N = v_of_c.size();
+		char * vla_ = (char*)::std::calloc(N, sizeof(char));
+
+		std::copy(v_of_c.data(), v_of_c.data() + v_of_c.size(), vla_);
+
+		auto isit = std::is_array_v< decltype(vla_)>;
+
+		STD free(vla_);
+
+		auto dummy = true;
+		}
 	}
 
 	/***********************************************************************************/
@@ -210,4 +262,37 @@ Transform initializer list into std::vector
 		DBJ_VANISH(a / b);
 	}
 #pragma endregion
+
+	DBJ_TEST_UNIT(clang_and_dbj) 
+	{
+		location_descriptor *loc_desc_0, *loc_desc_2, *loc_desc_3 ;
+		// begin block
+		{
+			dbj::entry_exit{
+				[&]() {
+				// take one
+				loc_desc_0 =
+					create_location_descriptor(__LINE__, __FILE__);
+				},
+				[&]() {
+					// take two
+					loc_desc_2 =
+						create_location_descriptor(__LINE__, __FILE__);
+
+					// release the 2 but leave the 1
+					release_location_descriptor(&loc_desc_2);
+
+					// take three, should reuse the second registry slot
+					// thus loc_desc_2 == loc_desc_3
+					loc_desc_3 =
+						create_location_descriptor(__LINE__, __FILE__);
+					}
+			};
+		}
+
+		auto ld0 = *loc_desc_0;
+		auto ld3 = *loc_desc_3;
+
+		auto dummy = true;
+	}
 } // anon ns

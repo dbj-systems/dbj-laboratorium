@@ -196,6 +196,11 @@
     <None Include="cpp.hint" />
     <None Include="README.MD" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\dbj++clib\dbj++clib.vcxproj">
+      <Project>{fb3f59bf-e33a-473b-a1f2-7e90510b13a6}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
