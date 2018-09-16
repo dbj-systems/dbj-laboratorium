@@ -43,7 +43,7 @@ static const unsigned location_descriptor_cache_size
 static location_descriptor
 location_descriptor_cache[location_descriptor_cache_size];
 
-// if register slot is false, the slot os free and if true the slot is used
+// if register slot is false, the slot is free and if true the slot is used
 #define CACHE_REGISTER_FREE_MARK false
 #define CACHE_REGISTER_ACTV_MARK true
 static bool cache_register[location_descriptor_cache_size] ;
@@ -79,9 +79,12 @@ static unsigned cache_register_first_free_slot () {
 static void cache_register_release_slot( unsigned registry_slot_index )
 {
 	cache_register[registry_slot_index] = CACHE_REGISTER_FREE_MARK; 
+	// if here we can not have overflow situation
+	cache_register_in_overflow_state = false;
+
 };
 
-// the interface implementation -------------------------------------------------
+// the implementation -------------------------------------------------
 
 // return NULL if cache overflow
 static struct location_descriptor *
@@ -101,9 +104,6 @@ static struct location_descriptor *
 		strncpy(desc_->file, file_, location_descriptor_file_name_size );
 
 		return desc_ ;
-		// above produces 
-		// warning : address of stack memory associated with local variable 'desc_' returned [-Wreturn-stack-address]
-
 	}
 
 
@@ -121,19 +121,7 @@ static location_descriptor *  release_location_descriptor(location_descriptor **
 	return (*locdesc_) = NULL;
 }
 
-/*
-		typedef struct LOCATION {
-
-			location_descriptor *
-				(*create)
-				(const int line_, const char * file_);
-
-			location_descriptor *
-				(*release)
-				(location_descriptor **);
-
-	} LOCATION;
-
-		extern LOCATION location_;
-*/
+// the interface construction -------------------------------------------------
 LOCATION location_ = { create_location_descriptor, release_location_descriptor };
+
+// EOF
