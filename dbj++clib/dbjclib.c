@@ -81,7 +81,6 @@ static void cache_register_release_slot( unsigned registry_slot_index )
 	cache_register[registry_slot_index] = CACHE_REGISTER_FREE_MARK; 
 	// if here we can not have overflow situation
 	cache_register_in_overflow_state = false;
-
 };
 
 // the implementation -------------------------------------------------

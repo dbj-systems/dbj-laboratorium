@@ -125,18 +125,18 @@ DBJ_TEST_UNIT(_polymorph_but_not_inheritor )
 		car_assembly_line(engines::petrol{}, wheels::chrome_vanadium{})
 	);
 
-	auto rv1 = DBJ_TEST_ATOM(diesel_car.start());
-	auto rv2 = DBJ_TEST_ATOM(diesel_car.tag());
-	auto rv3 = DBJ_TEST_ATOM(diesel_car.knobs());
+	DBJ_TEST_ATOM(diesel_car.start());
+	DBJ_TEST_ATOM(diesel_car.tag());
+	DBJ_TEST_ATOM(diesel_car.knobs());
 
-	auto rv4 = DBJ_TEST_ATOM(petrol_car.start());
-	auto rv5 = DBJ_TEST_ATOM(petrol_car.tag());
-	auto rv6 = DBJ_TEST_ATOM(petrol_car.knobs());
+	DBJ_TEST_ATOM(petrol_car.start());
+	DBJ_TEST_ATOM(petrol_car.tag());
+	DBJ_TEST_ATOM(petrol_car.knobs());
 
 	auto ht1 = DBJ_TEST_ATOM(typeid(diesel_car).hash_code());
 	auto ht2 = DBJ_TEST_ATOM(typeid(petrol_car).hash_code());
 
-	auto same = DBJ_TEST_ATOM(ht1 == ht2);
+	auto DBJ_MAYBE( same ) = DBJ_TEST_ATOM(ht1 == ht2);
 
 	dbj::console::print("\ndiesel and petrol car are ");
 

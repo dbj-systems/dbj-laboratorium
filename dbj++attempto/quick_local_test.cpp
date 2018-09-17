@@ -1,7 +1,3 @@
-// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
 #include "pch.h"
 
 namespace dbj::samples{
@@ -38,11 +34,13 @@ namespace dbj::samples{
 	/// </summary>
 	/// <param name="f"> float to be magically transformed to int</param>
 	/// <returns>the result of the "magic"</returns>
+#if 0
 	static int magic_int_float_transformation(float f) {
 		/** float is dead, long live the int! */
 		int *i = change_object_type<int>(&f);
 		return *i;
 	}
+#endif
 
 	/// <summary>
 	/// Illustrating the use of Arrays and Functions in C
@@ -52,8 +50,8 @@ namespace dbj::samples{
 	typedef double numarr[];
 
 	// Finds max in the array
-	extern "C" static double maxArray(const numarr numbs, int arraySize);
-
+	// extern "C" static double maxArray(const numarr numbs, int arraySize);
+#if 0
 	extern "C"  static int Illustrating_the_use_of_Arrays_and_Functions(void) {
 
 		// here we use the typedef in declaration
@@ -86,7 +84,7 @@ namespace dbj::samples{
 
 		return 0;
 	}
-
+#endif
 	/// <summary>
 	/// Function to find the maximum in an array of doubles
 	/// Note the use of the keyword "const" to prevent changing array data
@@ -94,6 +92,7 @@ namespace dbj::samples{
 	/// <param name="numbs">array argument </param>
 	/// <param name="arraySize">user defined size of the array</param>
 	/// <returns></returns>
+#if 0
 	extern "C" static double  maxArray(const numarr numbs, int arraySize) {
 
 		int i;
@@ -111,12 +110,13 @@ namespace dbj::samples{
 		return max;
 
 	}
-
+#endif
 	/// <summary>
 	/// tuple is collection of different types
 	/// vector elementes are all of the same type
 	/// there is no much point transforming vector to tuple
 	/// </summary>
+#if 0
 	static void test_vector_to_touple() {
 		vector<int> vint{ 1, 2, 3 };
 		auto tpl0 = dbj::util::seq_tup<vector<int>, 3>(vint);
@@ -124,7 +124,7 @@ namespace dbj::samples{
 		int vintage[]{ 1, 2, 3 };
 		auto tpl1 = dbj::util::seq_tup(vintage);
 	}
-
+#endif
 	/// <summary>
 	/// c++ 17 generic lambdas have issues
 	/// with required types of auto arguments
@@ -243,7 +243,7 @@ namespace dbj::samples{
 			}
 		};
 	}
-
+#if 0
 	static void limit_on_type() {
 		so::Point<std::uint64_t>		pi1, pi2;
 		so::Point<std::float_t>	pf1;
@@ -256,5 +256,5 @@ namespace dbj::samples{
 
 		auto[x, y] = mid_.data();
 	}
-
+#endif
 }

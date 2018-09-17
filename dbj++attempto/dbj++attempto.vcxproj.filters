@@ -36,22 +36,13 @@
     <ClInclude Include="dbj_lambda_lists.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_micro_printf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dbj_polymorph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dbj_swapable_engines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_tree_tests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dbjtree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbjtreeprint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lambda_runtime_retval_test.h">

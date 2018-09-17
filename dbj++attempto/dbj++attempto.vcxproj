@@ -89,7 +89,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -105,7 +105,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -162,17 +162,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dbjtree.h" />
-    <ClInclude Include="dbjtreeprint.h" />
     <ClInclude Include="dbj_any.h" />
     <ClInclude Include="dbj_any_node.h" />
     <ClInclude Include="dbj_atoms.h" />
     <ClInclude Include="dbj_ctstring.h" />
     <ClInclude Include="dbj_fontlist.h" />
     <ClInclude Include="dbj_lambda_lists.h" />
-    <ClInclude Include="dbj_micro_printf.h" />
     <ClInclude Include="dbj_polymorph.h" />
     <ClInclude Include="dbj_swapable_engines.h" />
-    <ClInclude Include="dbj_tree_tests.h" />
     <ClInclude Include="lambda_runtime_retval_test.h" />
     <ClInclude Include="no_copy_no_move.h" />
     <ClInclude Include="pch.h" />

@@ -58,7 +58,7 @@ namespace dbj_samples {
 
 namespace dbj_samples {
 	namespace treeprint {
-		namespace {
+		namespace inner {
 			constexpr wchar_t doubles[] = { L"║═╚" };
 			constexpr wchar_t singles[] = { L"│─└" };
 			constexpr wchar_t SS = L' '; // single space

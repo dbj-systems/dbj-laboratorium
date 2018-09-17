@@ -158,8 +158,7 @@ DBJ_TEST_SPACE_OPEN( dbj_any_wrapper_testing )
 			std::string not_a_temporary { "YES CAN DO" };
 			auto any_2 = DBJ_TEST_ATOM( any::make("YES CAN DO"));
 
-			auto  v1 = DBJ_TEST_ATOM( any_2 ); // copy wrapper to wrapper
-			auto  v2 = DBJ_TEST_ATOM( v1.get() ); // wrapper to value and so on
+			auto DBJ_MAYBE( any_3 )= DBJ_TEST_ATOM( any_2 ); // copy wrapper to wrapper
 		}	catch (...) {
 			dbj::console::print( dbj::Exception(
 				__FUNCSIG__ "  Unknown exception caught! "
