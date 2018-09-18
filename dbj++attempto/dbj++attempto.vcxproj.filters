@@ -54,6 +54,9 @@
     <ClInclude Include="string_literals_with_universal_character_names.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_command_line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

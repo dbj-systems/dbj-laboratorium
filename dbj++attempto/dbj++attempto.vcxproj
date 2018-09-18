@@ -165,6 +165,7 @@
     <ClInclude Include="dbj_any.h" />
     <ClInclude Include="dbj_any_node.h" />
     <ClInclude Include="dbj_atoms.h" />
+    <ClInclude Include="dbj_command_line.h" />
     <ClInclude Include="dbj_ctstring.h" />
     <ClInclude Include="dbj_fontlist.h" />
     <ClInclude Include="dbj_lambda_lists.h" />

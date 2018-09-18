@@ -42,7 +42,7 @@ namespace dbj_samples {
 				this is given as proc_lambda() to the result lambda od the list()
 				arguments are the original variadic arguments  of the list()
 				*/
-				[=](auto first, auto ...rest) {
+				[=](auto first, auto ... /* rest */) {
 				/*
 				we return list of one element so that users of head() and tail()
 				can use  then both in a symetrical manner
@@ -55,11 +55,13 @@ namespace dbj_samples {
 
 		// returns list() lambda
 		auto tail = [&](auto list_lambda) {
-			return list_lambda([=](auto first, auto ...rest) { return llist(rest...); });
+			return list_lambda([=](
+				auto first, auto ...rest
+				) {  DBJ_VANISH(first); return llist(rest...); });
 		};
 
 		auto length = [&](auto list_lambda) {
-			return list_lambda([=](auto ...z) { return sizeof...(z); });
+			return list_lambda([=](auto ...z) { DBJ_VANISH( std::make_tuple(z...) ); return sizeof...(z); });
 		};
 
 		/* dbj added 
@@ -83,9 +85,9 @@ DBJ_TEST_UNIT(_dbj_lambda_lists_) {
 	// return lambda() internal to list()
 	// explanation
 	{
-		auto return_first = [&](auto first, auto ... rest) { return first; };
-		auto first = my_list(return_first); // returns 1
-		auto first_as_a_list = llist(my_list(return_first)); // returns (1)
+		auto return_first = [&](auto first, auto ... ) { return first; };
+		auto DBJ_MAYBE(first) = my_list(return_first); // returns 1
+		auto DBJ_MAYBE(first_as_a_list) = llist(my_list(return_first)); // returns (1)
 	}
 	// encapsulated implementation usage
 	auto my_head = ll::head(my_list); // returns list of one element -- list(1)
@@ -103,7 +105,7 @@ DBJ_TEST_UNIT(_dbj_lambda_lists_) {
 
 	 dbj::console::print("\n\ndbj::print can print pairs too, here is one: ");
 
-	 auto pofs = DBJ_TEST_ATOM (
+	 DBJ_TEST_ATOM (
 		 std::make_pair("Pair of ", " strings ")
 	 );
 }

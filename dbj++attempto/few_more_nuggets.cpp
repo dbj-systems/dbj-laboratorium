@@ -100,11 +100,13 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		const auto DBJ_MAYBE(d1) = d2d.data();
 		// returns ref to internal matrix
-		// with sizes thus reachable
+		// with array sizes thus reachable
+		// this is not possible with a pointer
 		const auto & dr = d2d.data();
-		auto DBJ_MAYBE(rank_) = std::rank_v< std::remove_reference_t<std::remove_cv_t<decltype(dr)>>    >;
-		auto DBJ_MAYBE(sz_1) = std::extent_v< std::remove_reference_t<std::remove_cv_t<decltype(dr)>>, 0 >;
-		auto DBJ_MAYBE(sz_2) = std::extent_v< std::remove_reference_t<std::remove_cv_t<decltype(dr)>>, 1 >;
+		using dr_type = std::remove_reference_t<std::remove_cv_t<decltype(dr)>>;
+		auto DBJ_MAYBE(rank_) = std::rank_v<  dr_type    >;
+		auto DBJ_MAYBE(sz_1) = std::extent_v< dr_type, 0 >;
+		auto DBJ_MAYBE(sz_2) = std::extent_v< dr_type, 1 >;
 
 		// const instance: can get but not set 
 		auto DBJ_MAYBE(r) = d2d(4, 4); //  = 42; --- error

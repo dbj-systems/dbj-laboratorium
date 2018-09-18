@@ -54,7 +54,7 @@ namespace dbj::samples {
 
 		d1 = d2 = d3;
 
-		auto s1 = d1.state;
+		auto DBJ_MAYBE(s1) = d1.state;
 
 	}
 

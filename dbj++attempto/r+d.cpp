@@ -65,7 +65,7 @@ DBJ_TEST_UNIT(compiletime_static_string_constant)
 		the_constant.data(), the_constant.data() + the_constant.size()
 	};
 
-	auto where = the_constant.find('e');
+	auto DBJ_MAYBE(where) = the_constant.find('e');
 }
 /**************************************************************************************************/
 
@@ -90,22 +90,23 @@ void array_analyzer(const T & specimen) {
 #define DBJ_IS_ARR(x) try_array( std::addressof(x) )
 
 template<typename T>
-constexpr auto try_array(T * specimen)  -> size_t {
+constexpr auto try_array(T * )  -> size_t 
+{
 	return  std::extent_v< T >;
 }
 
 template<typename T>
-constexpr auto probe_array(T specimen)   -> size_t {
+constexpr auto probe_array(T && )   -> size_t {
 	return  std::extent_v< T >;
 }
 
 DBJ_TEST_UNIT(_array_stays_array)
 {
 	static int ia[]{ 1,2,3,4,5,6,7,8,9,0 };
-	auto s0 = try_array(ia);
-	auto s1 = DBJ_IS_ARR(ia);
-	auto s2 = probe_array(ia);
-	auto s3 = probe_array(std::addressof(ia));
+	auto DBJ_MAYBE(s0) = try_array(ia);
+	auto DBJ_MAYBE(s1) = DBJ_IS_ARR(ia);
+	auto DBJ_MAYBE(s2) = probe_array(ia);
+	auto DBJ_MAYBE(s3) = probe_array(std::addressof(ia));
 }
 
 typedef enum class CODE : UINT {
@@ -140,7 +141,7 @@ DBJ_TEST_UNIT(_famous_dbj_console_ucrt_crash)
 
 	// should display: кошка 日本
 	// for any mode the second word is not displayed ?
-	auto fwp_rezult = fwprintf(stdout, L"\nwfprintf() displays: %s\n", specimen);
+	auto DBJ_MAYBE(fwp_rezult) = fwprintf(stdout, L"\nwfprintf() displays: %s\n", specimen);
 	// for any mode the following crashes the UCRT (aka Universal CRT)
 	// fprintf( stdout, "\nprintf() result: %S\n",specimen);
 }
