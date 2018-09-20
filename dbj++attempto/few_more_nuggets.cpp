@@ -223,7 +223,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 			auto DBJ_MAYBE(isit) = std::is_array_v< decltype(vla_)>;
 
-			STD free(vla_);
+			STD :: free(vla_);
 
 			auto DBJ_MAYBE(dummy) = true;
 		}

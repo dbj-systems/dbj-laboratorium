@@ -52,31 +52,34 @@ limitations under the License.
 namespace dbj::clib {
 	extern "C" {
 #endif
-		typedef struct location_descriptor location_descriptor;
+/*******************************************************************/
+void dbj_string_trim(const char * text, char ** p1, char ** p2);
+/*******************************************************************/
+typedef struct location_descriptor location_descriptor;
 
-        #define location_descriptor_file_name_size 1024U
+#define location_descriptor_file_name_size 1024U
 
-		typedef struct location_descriptor {
-			unsigned int cache_index;
-			unsigned int line;
-			char file[location_descriptor_file_name_size];
-		} location_descriptor;
+typedef struct location_descriptor {
+	unsigned int cache_index;
+	unsigned int line;
+	char file[location_descriptor_file_name_size];
+} location_descriptor;
 
-		typedef struct LOCATION LOCATION;
+typedef struct LOCATION LOCATION;
 
-		typedef struct LOCATION {
+typedef struct LOCATION {
 
-			location_descriptor * 
-				(*create)
-				(const int line_, const char * file_);
+	location_descriptor * 
+		(*create)
+		(const int line_, const char * file_);
 
-			location_descriptor *
-				(*release)
-				(location_descriptor **);
+	location_descriptor *
+		(*release)
+		(location_descriptor **);
 
-	} LOCATION;
+} LOCATION;
 
-		extern LOCATION location_;
+extern LOCATION location_;
 
 #ifdef __cplusplus
 	}
