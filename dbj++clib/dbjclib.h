@@ -96,7 +96,7 @@ Warning
 *******
 
 As already pointed out. If user trims non zero limited string, the user is responsible 
-for intepreting the output. That is user defined logic requires care when intererpeting 
+for intepreting the output. That is user defined logic requires care when interpreting 
 the result. For example this input
 
  Front                                                                Back
@@ -199,6 +199,13 @@ policies present in the library
 bool dbj_seek_alnum(uchar_t c);
 bool dbj_is_space(uchar_t c);
 bool dbj_is_white_space(uchar_t c);
+/*
+ask the driver to move the pointer 
+if c is whitespace, space or eos
+not using locale but should be prety resilient to local chars
+since whitespace, space and eos are not locale specific
+*/
+bool dbj_move_if_not_alnum(uchar_t c);
 /* 
 dbj_is_space is default policy, it equates to  char == ' ', test  
 users can provide their own drivers
@@ -257,74 +264,94 @@ extern LOCATION location_;
 
 		using namespace ::std;
 
+		// DBJ proposal :
+		//
+		// void using namespace ::std;
+		//
+		// stop using namespace
+
+		// testing data
+		inline auto target = "LINE O FF\n\rTE\v\tXT"sv;
+		constexpr inline std::string_view text_test_data[]{
+			{ "   LINE O FF\n\rTE\v\tXT    "sv },
+			{ "   LINE O FF\n\rTE\v\tXT"sv },
+			{    "LINE O FF\n\rTE\v\tXT"sv },
+			// all spaces singularity
+			{ "     "sv },
+			// empty string singularity
+			{ ""sv }
+		};
+
+		// trim the string view buffer
+		// return the result in a string
 		inline std::string trimmer(
 			string_view text,
-			// by default test the zero limited string
+			// if false send the whole buffer
 			bool zero_limited_string = true
 		)
 		{
 			char * front_ = 0, * back_  = 0;
 
-			// if requested send the end of buffer position
+			// if requested set back_ pointer
+			// to the end of the buffer position
 			if (!zero_limited_string) {
 				back_ = (char *)(text.data() + text.size());
 			}
 
-			DBJ::clib::dbj_string_trim(
-				text.data(), &front_, &back_
-			);
+			DBJ::clib::dbj_string_trim(	text.data(), &front_, &back_ );
 
+			if ( (! zero_limited_string) && (*front_ == 0))
+				return ""s;
+			// if not back_ + 1 , c++ will cut of the *back_ 
 			return { front_, back_ +1 };
 		}
 
 		inline void dbj_string_trim_test() {
 			using namespace string_view_literals;
-
-			auto target = "LINE O FF\n\rTE\v\tT"sv;
-			constexpr std::string_view text[]{
-				{ "   LINE O FF\n\rTE\v\tT    "sv },
-				{ "   LINE O FF\n\rTE\v\tT"sv },
-				{    "LINE O FF\n\rTE\v\tT"sv },
-				// all spaces singularity
-				{ "     "sv },
-				// empty string singularity
-				{ ""sv }
-			};
+			using namespace string_literals;
 
 			// the classic use case is trimming spaces
-			// from string literals
+			// from zero delimited string literals
 			// using default triming policy ( char == ' ')
 			current_dbj_string_trim_policy = dbj_is_space;
 
-			// using zero limited strings
-			_ASSERTE(target == trimmer(text[0]));
-			_ASSERTE(target == trimmer(text[1]));
-			_ASSERTE(target == trimmer(text[2]));
-			// this results are the result of
-			// the policy function applied
-			// on the zero limited string input
-			_ASSERTE(" "    == trimmer(text[3]));
-			_ASSERTE(""     == trimmer(text[4]));
+			auto trim_assert = []( auto required_outcome, size_t test_data_index, bool zero_delimited_strings = true ) {
+				_ASSERTE(
+					required_outcome == trimmer(text_test_data[test_data_index], zero_delimited_strings)
+				);
+			};
 
-			// using NON zero limited strings ?
+			// using zero delimited strings
+			// results are predictable
+			trim_assert(target, 0);
+			trim_assert(target, 1);
+			trim_assert(target, 2);
+			trim_assert(" "s, 3);
+			trim_assert(""s, 4);
+
+			// using the whole buffer
+			// that is: NON zero limited strings?
 			// That is fine, *if* we change the policy
 			// as the first current char might be EOS
 			// when we start moving the back_ pointer
-			current_dbj_string_trim_policy = dbj_seek_alnum;
+			// this policy will also provoke moving over anything 
+			// that is not alphanum but in a more 
+			// locale resilient manner
+			current_dbj_string_trim_policy = dbj_move_if_not_alnum;
 
-			_ASSERTE(target == trimmer(text[0], false));
-			_ASSERTE(target == trimmer(text[1], false));
-			_ASSERTE(target == trimmer(text[2], false));
+			trim_assert(target, 0, false);
+			trim_assert(target, 1, false);
+			trim_assert(target, 2, false);
 
-			// here is a problem in users logic
-			// trimming zero limited strings 
-			// by not using strlen to determine end of buffer
-			// as the back pointer
-			// all spaces input will thus collapse to 
+			// results are not that predictable
+			// when trimming char array vs strings 
+			// with user defined policies
+			// in here for example
+			// all spaces input will collapse to 
 			// char[1]{0} not char * to ""
-			auto r_0 = trimmer(text[3], false);
+			auto r_0 = trimmer(text_test_data[3], false);
 			// same is for empty string input
-			auto r_1 = trimmer(text[4], false);
+			auto r_1 = trimmer(text_test_data[4], false);
 
 		}
 	} // test

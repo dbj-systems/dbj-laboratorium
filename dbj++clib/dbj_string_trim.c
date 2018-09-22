@@ -48,8 +48,29 @@ limitations under the License.
 	bool dbj_is_white_space(uchar_t c)
 	{
 		return c == '\t' || c == '\r' || c == '\n' || c == '\v' || c == '\f' ;
-		// add whatever else you consider space
+		// add whatever else you consider white space
 	}
+
+/*
+ask the driver to move the pointer
+if c is whitespace, space or eos
+not using locale but should be prety resilient to local chars
+since whitespace, space and eos are not locale specific
+*/
+	bool dbj_move_if_not_alnum(uchar_t c) {
+		// positioned on EOS char
+		// ask to move the pointer
+		if ((int)c == 0) return true;
+		//
+		if (dbj_is_white_space(c)) return true;
+		//
+		if (dbj_is_space(c)) return true;
+		// ask the drive to stop the movement
+		// since c is not any of the above
+		return false;
+	}
+
+	/***********************************************************************/
 
 	dbj_string_trim_policy current_dbj_string_trim_policy = dbj_is_space ;
 
