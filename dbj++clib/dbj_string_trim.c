@@ -18,104 +18,90 @@ limitations under the License.
 #include <assert.h>
 #include <stdbool.h>
 
-	typedef unsigned int size_t;
-	static const int EOS = (int)'\0';
+	// static const int		EOS = (int)'\0';
 	/*
 	static const char * digits[] = { "0123456789" };
 	static const char * uppercase_letters[] = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
 	static const char * lowercase_letters[] = { "abcdefghijklmnopqrstuvwxyz" };
 	*/
 
-	inline bool dbj_isalnum(unsigned char c)
+	// typedef bool(*dbj_string_trim_policy)(unsigned char);
+
+	bool dbj_seek_alnum(uchar_t c)
 	{
-		return 
-			(c >= '0' && c <= '9') &&
-			(c >= 'A' && c <= 'Z') &&
-			(c >= 'a' && c <= 'z');
+		if (c >= '0' && c <= '9') return false;
+		if (c >= 'A' && c <= 'Z') return false;
+		if (c >= 'a' && c <= 'z') return false;
+		// c is not alnum so move the pointer
+		// by returning true
+		return true;
 	}
 
-	inline bool dbj_isspace(unsigned char c)
+	// c is space so move the pointer by returning true
+	bool dbj_is_space(uchar_t c)
 	{
-		return c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\v';
+		return c == ' ';
+	}
+
+	// any kind of white space ? 
+	// yes: move the pointer by returning true
+	bool dbj_is_white_space(uchar_t c)
+	{
+		return c == '\t' || c == '\r' || c == '\n' || c == '\v' || c == '\f' ;
 		// add whatever else you consider space
 	}
 
-	inline void string_trim_front_back_finder(char ** begin_, char ** end_)
-	{
-		assert(*end_);
-		assert(*begin_);
+	dbj_string_trim_policy current_dbj_string_trim_policy = dbj_is_space ;
 
+	inline void string_trim_front_back_driver(char ** begin_, char ** end_)
+	{
+		// empty string case
 		if (*begin_ == *end_) return;
 
-		while (dbj_isspace(**begin_)) {
+		while (current_dbj_string_trim_policy(**begin_)) {
 			(*begin_)++;
+			// all spaces (32) case
+			// or depending on the policy
+			// trim result has collapsed into empty string
+			if (*begin_ == *end_) return;
 		};
 
-		// all spaces case
-		if (*begin_ == *end_) return;
-
-		// if EOS (aka 0)
-		// it is not a space (aka 32)
-		// thus we have to move it "left" 1 first
-		// before the first check
-		if (**end_ == EOS)
-			;
-			(*end_)--;
-		while (dbj_isspace(**end_)) {
+		// the right trim
+		while (current_dbj_string_trim_policy(**end_)) {
 			(*end_)--;
 		};
-		// move it back
-		// beyond the last non space char
-		(*end_)++;
 	}
 
-	// must be zero limited string
-	// that is with EOS ('\0') a the very end
-	void dbj_string_trim(const char * text, char ** p1, char ** p2)
+// if *back_ is NULL then text_
+// must be zero limited string
+// that is with EOS ('\0') a the very end
+// REMEMBER:
+// to conform to the STL meaning of "end"
+// user has to move the back_
+// one to the right
+	void dbj_string_trim( const char * text_,	char ** front_, char ** back_	)
 	{
-		assert(text);
-		size_t text_len = strlen(text);
-		*p1 = (char *)& text[0];
-		*p2 = (char *)& text[text_len];
-		string_trim_front_back_finder(p1, p2);
+		assert(text_);
+		assert(current_dbj_string_trim_policy);
+		
+		// do not assume front points to slot [0]
+		// of the input string
+		if ( *front_ == NULL )
+		*front_ = (char *)& text_[0];
+		
+		if (*back_ == NULL) {
+			size_t text_len = strlen(text_);
+			// notice how back_ is not the C++ end_
+			*back_ = (char *)& text_[text_len-1];
+		} 
+
+		assert(*front_);
+		assert(*back_);
+
+		// return on empty text
+		if (*front_ == *back_ ) return;
+		// move the pointers according to policy
+		string_trim_front_back_driver(front_, back_);
 	}
 
-// C++17 usage
-#if (1==0)
-#include <string>
-#include <string_view>
-
-#if ! _HAS_CXX17
-#error C++17 required
-#endif
-
-	// must be limited string
-	// that is with EOS ('\0') a the end
-	inline std::string trimmer(::std::string_view text)
-	{
-		char * p1 = 0;
-		char * p2 = 0;
-		string_trim(text.data(), &p1, &p2);
-		return { p1, p2 };
-	}
-
-int main()
-{
-	using namespace ::std::string_view_literals;
-
-	auto target = "LINE O FF    TE   XT"sv;
-	std::string_view text[]{
-		{ "   LINE O FF    TE   XT    "sv },
-		{ "   LINE O FF    TE   XT"sv },
-		{ "LINE O FF    TE   XT"sv },
-		{ "     "sv }
-	};
-
-	_ASSERTE(target == trimmer(text[0]));
-	_ASSERTE(target == trimmer(text[1]));
-	_ASSERTE(target == trimmer(text[2]));
-	// on trim, spaces are collapsing 
-	// to empty string
-	_ASSERTE("" == trimmer(text[3]));
-}
-#endif
+// EOF

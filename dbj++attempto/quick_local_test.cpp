@@ -3,42 +3,66 @@
 
 using namespace ::std ;
 
-// must be limited string
-// that is with EOS ('\0') a the end
-inline std::string trimmer(string_view text)
-{
-	char * p1 = 0;
-	char * p2 = 0;
-	DBJ::clib::dbj_string_trim(text.data(), &p1, &p2);
-	return { p1, p2 };
-}
-
 DBJ_TEST_UNIT(dbj_string_trim)
 {
-	using namespace string_view_literals;
+	dbj::clib::test::dbj_string_trim_test();
+}
 
-	auto target = "LINE O FF\n\rTE\v\tT"sv;
-	constexpr std::string_view text[]{
-		{ "   LINE O FF\n\rTE\v\tT    "sv },
-		{ "   LINE O FF\n\rTE\v\tT"sv },
-		{    "LINE O FF\n\rTE\v\tT"sv },
-		{ "     "sv }
+namespace dbj {
+	template<class T, T v>
+	struct integral_constant 
+	{
+		static_assert( is_integral_v<T>);
+
+		static constexpr T value = v;
+		typedef T value_type;
+		typedef integral_constant type;
+		constexpr operator value_type() const noexcept { return value; }
+		constexpr value_type operator()() const noexcept { return value; }
 	};
 
-	_ASSERTE(target == trimmer(text[0]));
-	_ASSERTE(target == trimmer(text[1]));
-	_ASSERTE(target == trimmer(text[2]));
-	// on trim, spaces are collapsing 
-	// to empty string
-	_ASSERTE("" == trimmer(text[3]));
+	template<int i>
+	constexpr inline auto int_c = integral_constant<int, i>{};
 
-	// To "trim" the string actually means to shorten it 
-	// by inserting 0 aka "end of string" where required
-	// which in C/C++ is better not to be done
-	// this is because of 
-	// R/O memory
-	//const char * ro = "READONLY";
-	//char * bang_ = (char *) & ro[0] ;
-	// write access violation
-	// bang_[0] = '!';
+	template <typename V, V v, typename U, U u>
+	constexpr auto
+		operator+(integral_constant<V, v>, integral_constant<U, u>)
+	{
+		return integral_constant<decltype(v + u), v + u>{};
+	}
+}
+
+DBJ_TEST_UNIT(compile_time_entities_as_objects_instead_of_types)
+{
+	{
+		// integral constant as type
+		using one = dbj::integral_constant<int, 1>;
+		// integral constant as object
+		auto  one_rt = dbj::integral_constant<int, 1>{};
+		// integral constant RT value
+		constexpr int one_constexpr = decltype(one_rt)::value;
+	}
+	{
+using zero_int_type = dbj::integral_constant<int, 0>;
+	
+auto succ = [] (auto N) {
+	return dbj::integral_constant<int, decltype(N)::value + 1 >{};
+};
+
+		auto zero = dbj::int_c<0> ;
+
+		auto three = dbj::int_c<1> +dbj::int_c<2>;
+
+/*
+		auto one = succ(zero);
+		auto two = succ(one);
+		auto three = succ(two);
+
+		auto z_ = zero() ;
+		auto o_ = one() ;
+		auto t_ = two() ;
+		auto h_ = three() ;
+*/
+		system("pause");
+	}
 }
