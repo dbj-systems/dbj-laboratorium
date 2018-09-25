@@ -50,6 +50,7 @@ namespace /*dbj_samples::wrt */ {
 
 	DBJ_TEST_UNIT(dbj_winrt_web_syndication)
 	{
+		winrt::hstring hs{ L"HURAH?" };
 		// hum? 
 		winrt::init_apartment();
 		//

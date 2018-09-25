@@ -14,15 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /*
+  Non-trivial plicy driven string trimming
+  ****************************************
   Concepts and the Design
   ***********************
 
-The key abstraction is char array with front and back pointers.
-char array can contain any unsigned char in the range 0 - 127
-for the oridnals and  meaning of particular chars see the table here:
+Key abstraction: usnigned char array with front and back pointers.
+Can contain any unsigned char in the range 0 - 127
+for the ordinals and  meaning of particular chars see the table here:
 https://en.cppreference.com/w/cpp/string/byte/isalnum
 
-Example of an unsigned char array is thus:
+Example:
 
 Front                                                                 Back
   |                                                                     |
@@ -32,51 +34,53 @@ Front                                                                 Back
 +---+---+---+---+---+---+---+---+---+---+---+---+----+---+----+---+---+---+
   0   1   .   .   .                                                     17
 
-By "trimming" we mean moving the front to the right and
-back to the left. front_back_driver function, moves this pointers by using
-the current policy function.
+By "trimming" we actually mean moving the front to the right and
+back to the left. Internal front_back_driver() function, moves these
+pointers by using the current policy function.
 
 What is the trimming policy function?
 
-The policy that is used to trim is actually what delivers
-a logic that drives a front/back pointers, by returning 
-true or false.
+The policy that is used to trim is actually a logic that drives 
+front/back pointers.
 
-Pointer is moved on true returned from a policy function,
+Front/Bavk pointer is moved on true returned from a policy function,
 front to the right or back pointer to the left
-policy function argument is the char value to which the current
+Policy function single argument is the value to which the current
 back/front pointer is pointing.
 
-IMPORTANT: this is powerfull trimming suite. The trimming can be 
-started with arbitrary front and end pointers, or user defined Back pointer that is not the result 
-of simple strlen. 
+This is powerfull trimming suite. The trimming can be 
+started with arbitrary front and end pointers, or user defined 
+Back pointer that is not simply the result of a strlen(). 
 
 When  defining the policy function be aware that Front and Back can 
 point to any position before triming starts. Not just first char for the Front 
 and  strlen(text) - 1 for the Back.
 
-If your policy does not care for that the results will be very likely
+If your policy does not care for that, the results will be very likely
 not what is expected.
 
-Normal Example
+Usage example
 
 First, let's define the policy function logic to drive the pointer for 
-any char that is not alpha or numeric. True return moves the back/front
+any char that is not alpha or numeric. True return, moves the back/front
 
-bool move_if_not_alphanum ( uchar_t current_char ) {  return ! isalnum( (char)current_char ); }
+bool move_if_not_alphanum ( uchar_t current_char ) {  
+   return ! isalnum( (char)current_char ); 
+ }
 
-Now we assign this as the current policy by using the global function pointer:
+Assign the policy as the current one, by using the global function pointer:
 
+// C++ test
 dbj::clib::current_dbj_string_trim_policy = move_if_not_alphanum ;
 
-Then we start the trimming.
+Now start the trimming.
 
 char text[]{" \fA bra\tKa\nDabra\v " } ; 
 char * front = text[0] ;
-char * back  = text[ sizeof(text)] ;
-dbj_string_trim( text, &front, &back ) ;
+char * back  = text[ sizeof(text) ] ;
+dbj::clib::dbj_string_trim( text, &front, &back ) ;
 
-The situation is now: 
+The situation after the trim: 
 
         Front                                             Back
           |                                                 |
@@ -85,7 +89,7 @@ The situation is now:
 |   |\f | A | b | r | a |\t | K | a |\n | D | a | b  | r |  a |\v |   | 0 |
 +---+---+---+---+---+---+---+---+---+---+---+---+----+---+----+---+---+---+
 
-To make std string from this we can do:
+To make an std::string from this, one can do:
 
  return std::string{ front, back+1};
 
@@ -95,9 +99,8 @@ In C++ "end" is one beyond the last. "Back" is the last one in this case.
 Warning
 *******
 
-As already pointed out. If user trims non zero limited string, the user is responsible 
-for intepreting the output. That is user defined logic requires care when interpreting 
-the result. For example this input
+As already pointed out. User defined policy, can trim non zero limited string, 
+the user is responsible for the exepected output. For example this input
 
  Front                                                                Back
   |                                                                     |
@@ -115,7 +118,7 @@ Can result in this situation after the trimming
 |   |   |   |   |   |   |   |   |   |   |   |   |    |   |    |   |   | 0 |
 +---+---+---+---+---+---+---+---+---+---+---+---+----+---+----+---+---+---+
 
-if then user creates std string, as advised by moving 
+if after the trim, user creates std string, as advised by moving 
 the back pointer 1 to the right
 
 return std::string( front, back + 1) ;
@@ -133,7 +136,7 @@ NOTE:
 Naive (and basic) string trimming, concept is  to "trim" the string by
 actually shortening it, by inserting 0 aka "end of string" where required
 Which in C/C++ is better not to be done. This is because of R/O memory issue. 
-Example:
+C++ example:
 
 const char * ro = "READONLY";
 char * bang_ = (char *) & ro[0] ;
@@ -141,36 +144,26 @@ char * bang_ = (char *) & ro[0] ;
 bang_[0] = '!';
 
 */
-
-
-
 #pragma once
 #include <stdbool.h>
 #if defined( __clang__ ) && ! defined( __cplusplus )
 
 # if !defined(__STDC_VERSION__) ||  (__STDC_VERSION__ < 199901L)
-/* Your compiler is not conforming to C99, since
-   this requires the macro __STDC_VERSION__ to be set to the
-   indicated value (or larger).
+#error    Your compiler is not conforming to C99
+#error    this requires the macro __STDC_VERSION__ to be set to the
+#error    indicated value (or larger).
+#error    NOTE: For C11, __STDC_VERSION__ == 201112L
+#endif
 
-   NOTE: For C11, __STDC_VERSION__ == 201112L
-*/
+/* use this to remove unused code */
+/* this verions evaluates the expression */
 #define DBJ_EVAL_REMOVE(expr) typedef char __static_assert_t[(expr) != 0]
+/* this verion does not evaluate the expression */
 #define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
-#else
-#define DBJ_EVAL_REMOVE(expr) typedef char __static_assert_t[(expr) != 0]
-#define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
-# endif
-/*
-#	if ! defined(_WCHAR_T_DEFINED)
-#error	Need _WCHAR_T_DEFINED
-#	endif
-*/
 
 #	if ! defined(_MSC_EXTENSIONS)
 #error Need MSC EXTENSIONS DEFINED
 #	endif
-
 
 #if !defined( _WIN32 ) && !defined(_WIN64)
 #error Need _WIN32 or _WIN64
@@ -178,7 +171,7 @@ bang_[0] = '!';
 
 #endif
 /*
-Note: while inside c++ this is all in the dbj::clib namespace
+Note: while inside c++ all is in the dbj::clib namespace
 */
 #ifdef __cplusplus
 namespace dbj::clib {
@@ -186,16 +179,14 @@ namespace dbj::clib {
 	extern "C" {
 #endif
 #pragma region string triming with policies
+
 typedef unsigned char	uchar_t;
 typedef unsigned int	size_t;
-
-
 typedef bool(*dbj_string_trim_policy)(unsigned char);
 
 /* 
-policies present in the library 
+basic policies present in the library 
 */
-/* return true if c is not alnum */
 bool dbj_seek_alnum(uchar_t c);
 bool dbj_is_space(uchar_t c);
 bool dbj_is_white_space(uchar_t c);

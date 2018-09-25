@@ -59,21 +59,27 @@ since whitespace, space and eos are not locale specific
 */
 	bool dbj_move_if_not_alnum(uchar_t c) {
 		// positioned on EOS char
-		// ask to move the pointer
+		// thus move the pointer
 		if ((int)c == 0) return true;
 		//
 		if (dbj_is_white_space(c)) return true;
 		//
 		if (dbj_is_space(c)) return true;
-		// ask the drive to stop the movement
+		// ask the driver to stop the movement
 		// since c is not any of the above
 		return false;
 	}
 
-	/***********************************************************************/
-
+	/*
+	gloobal 'holder' of the current policy function
+	defualt policy is char == ' ' 
+	*/
 	dbj_string_trim_policy current_dbj_string_trim_policy = dbj_is_space ;
 
+	/*
+	internal front/back driver
+	this is the policy user
+	*/
 	inline void string_trim_front_back_driver(char ** begin_, char ** end_)
 	{
 		// empty string case
@@ -81,8 +87,7 @@ since whitespace, space and eos are not locale specific
 
 		while (current_dbj_string_trim_policy(**begin_)) {
 			(*begin_)++;
-			// all spaces (32) case
-			// or depending on the policy
+			// depending on the policy
 			// trim result has collapsed into empty string
 			if (*begin_ == *end_) return;
 		};
@@ -98,7 +103,7 @@ since whitespace, space and eos are not locale specific
 // that is with EOS ('\0') a the very end
 // REMEMBER:
 // to conform to the STL meaning of "end"
-// user has to move the back_
+// user has to move the back_ result
 // one to the right
 	void dbj_string_trim( const char * text_,	char ** front_, char ** back_	)
 	{
