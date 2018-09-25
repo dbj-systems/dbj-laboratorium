@@ -19,12 +19,12 @@ limitations under the License.
   Concepts and the Design
   ***********************
 
-Key abstraction: usnigned char array with front and back pointers.
-Can contain any unsigned char in the range 0 - 127
-for the ordinals and  meaning of particular chars see the table here:
+The key abstraction is char array with front and back pointers.
+char array can contain any unsigned char in the range 0 - 127
+for the oridnals and  meaning of particular chars see the table here:
 https://en.cppreference.com/w/cpp/string/byte/isalnum
 
-Example:
+Example of an unsigned char array is thus:
 
 Front                                                                 Back
   |                                                                     |

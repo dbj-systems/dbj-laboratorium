@@ -3,7 +3,7 @@
 
 > DBJ C LIB to be used for R&D and/or Testing the C++ code, primarily
 
-This is C11 CLANG LIB made and used by Visual Studio 2017 solution
+This is C CLANG LIB made and used by Visual Studio 2017 solution
 
 > Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
 
