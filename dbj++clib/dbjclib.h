@@ -19,10 +19,10 @@ limitations under the License.
 
 The key abstraction is char array with front and back pointers.
 char array can contain any unsigned char in the range 0 - 127
-for the oridnals and  meaning of particular chars see the table here:
+For the ordinals and  meaning of particular chars see the table here:
 https://en.cppreference.com/w/cpp/string/byte/isalnum
 
-Example of an unsigned char array is thus:
+Example of an unsigned char array:
 
 Front                                                                 Back
   |                                                                     |
