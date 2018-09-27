@@ -62,9 +62,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dbj++attempto.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dbj_web_syndication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,6 +75,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="r+d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbj_error_code.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

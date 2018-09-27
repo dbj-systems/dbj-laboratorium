@@ -179,7 +179,8 @@
     <ClInclude Include="string_literals_with_universal_character_names.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dbj++attempto.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="dbj_error_code.cpp" />
     <ClCompile Include="dbj_web_syndication.cpp" />
     <ClCompile Include="few_more_nuggets.cpp" />
     <ClCompile Include="lambda_mixer_samples.cpp" />
