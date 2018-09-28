@@ -32,14 +32,11 @@ DBJ_TEST_UNIT(dbj_err_system)
 	dbj_error_service.release(&err_desc_0);
 	// what now?
 	{
-		bool valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
+		valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
 		dbj_error_service.release(&err_desc_0);
 		err_desc_0 = nullptr;
 		dbj_error_service.release(&err_desc_0);
 	}
-
-	// structs are copyable
-	auto ld0 = *err_desc_0;
 
 	auto DBJ_MAYBE(dummy) = true;
 }

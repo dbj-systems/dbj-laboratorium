@@ -86,7 +86,7 @@ always null terminating the copied string.
 // both arguments must be zero limited
 		char * dbj_str_shorten(const char * str_, const char * chars_to_remove_);
 
-
+#include "dbj_error_codes.h"
 #include "dbj_error.h"
 #include "dbj_trim.h"
 

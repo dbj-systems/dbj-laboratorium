@@ -20,7 +20,7 @@ limitations under the License.
 #include <string.h>
 #include <assert.h>
 
-// the internals-------------------------------------------------------
+// the cache internals  -----------------------------------------------
 extern error_descriptor error_descriptor_cache[];
 extern const unsigned cache_register_invalid_slot;
 extern unsigned cache_register_first_free_slot();
@@ -30,26 +30,6 @@ extern void *  cache_find_active(const int runtime_index_);
 // the implementation -------------------------------------------------
 
 static const char * unknown_error_location = "Unknown error location";
-static const char * unknown_error_message  = "Unknown error message";
-
-static char * obtain_error_message( int error_number_ ) {
-	char * rezult_ = 0;
-	// first try the ISO C 
-	// streror is C89 compatible
-	rezult_ = strerror(error_number_);
-
-	// from here we will use dbj_error_message( int )
-	// if there is no ISO C result
-	// this seems the only way  to differentiate from
-	// errno.h errnum constants, done as #defines
-	if (rezult_ == 0)
-		rezult_ = (char *)unknown_error_message;
-	if (rezult_[0] == 0)
-		rezult_ = (char *)unknown_error_message;
-
-	return rezult_;
-}
-
 // return NULL if cache overflow
 static struct error_descriptor *
 	create_error_descriptor( 
@@ -58,7 +38,7 @@ static struct error_descriptor *
 	)
 	{
 	if (file_ == NULL) file_ = unknown_error_location;
-	if (msg_ == NULL)  msg_  = obtain_error_message(code_);
+	if (msg_ == NULL)  msg_  = dbj_error_message(code_);
 
 		unsigned free_slot = cache_register_first_free_slot();
 
