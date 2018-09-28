@@ -59,10 +59,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_LIB;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NDEBUG;_LIB;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <CLanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c11</CLanguageStandard>
       <CppLanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c++1y</CppLanguageStandard>
       <CLanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c11</CLanguageStandard>
@@ -74,14 +74,18 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="README.MD" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="dbjclib.c" />
+    <ClCompile Include="dbj_error.c" />
     <ClCompile Include="dbj_string_trim.c" />
+    <ClCompile Include="dbj_string_trim_test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbjclib.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="README.MD" />
+    <ClInclude Include="dbj_error.h" />
+    <ClInclude Include="dbj_trim.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

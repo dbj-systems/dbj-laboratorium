@@ -1,11 +1,4 @@
-﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
-#include "pch.h"
-
-#include "../dbj++clib/dbjclib.h"
-
-// #include <experimental/filesystem>
+﻿#include "pch.h"
 
 namespace dbj::samples { // beware of anonymous namespace
 
@@ -14,7 +7,7 @@ namespace dbj::samples { // beware of anonymous namespace
 	using leader_name_type = const wchar_t *;
 
 	using leader_name_type_string
-		= std::basic_string< dbj::tt::to_base_t<leader_name_type>  >;
+		= std::basic_string< DBJ::tt::to_base_t<leader_name_type>  >;
 
 	leader_name_type leaders[]{ L"Ленин", L"Сталин", L"Маленков",
 L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"Горбачёв", L"안녕하세요", L"안녕히 가십시오" };
@@ -116,11 +109,11 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	template<
 		typename T, size_t N,
-		typename tuple_type = ::dbj::tt::array_as_tuple_t<T, N>
+		typename tuple_type = DBJ::tt::array_as_tuple_t<T, N>
 	>
 		tuple_type sequence_to_tuple(const T(&narf)[N])
 	{
-		return ::dbj::arr::native_arr_to_tuple(narf);
+		return DBJ::arr::native_arr_to_tuple(narf);
 	}
 
 	template<
@@ -199,7 +192,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		{
 
-			using C3 = dbj::arr::ARH<char, 3>;
+			using C3 = DBJ::arr::ARH<char, 3>;
 
 			C3::ARV v_of_c{ 'A','B','C' };
 
@@ -287,7 +280,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_nuggets)
 	{
-		auto prev_fn = dbj::console::get_font_name();
+		auto prev_fn = DBJ::console::get_font_name();
 
 		// begin() can throw the exception
 		// end() is guaranteed, even in the presence of exceptions
@@ -297,10 +290,10 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 				return std::wcscmp(strA, strB) < 0;
 			});
 			char* DBJ_MAYBE(a) = std::setlocale(LC_ALL, "");
-			dbj::console::set_extended_chars_font();
+			DBJ::console::set_extended_chars_font();
 		},
 			[&]() {
-			dbj::console::set_font(prev_fn);
+			DBJ::console::set_font(prev_fn);
 		}
 		);
 
@@ -308,7 +301,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		// this happens between begin() and end()
 		for (const wchar_t * leader : leaders) {
-			dbj::console::print(leader, '\n');
+			DBJ::console::print(leader, '\n');
 			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
 		// applicator helper testing
@@ -329,7 +322,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			std::apply(summa, std::make_pair(11, 12))
 		)));
 
-		auto buf = dbj::str::optimal_buffer<char>();
+		auto buf = DBJ::str::optimal_buffer<char>();
 
 		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), 42);
 
@@ -341,7 +334,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_variations)
 	{
-		using twins_ = dbj::tt::fundamental_twins<int, const int &>;
+		using twins_ = DBJ::tt::fundamental_twins<int, const int &>;
 		twins_ ft;
 		twins_::decay_1 DBJ_MAYBE(v1) {};
 		twins_::decay_2 DBJ_MAYBE(v2) {};
@@ -357,39 +350,4 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	}
 #pragma endregion
 
-	DBJ_TEST_UNIT(clang_and_dbj)
-	{
-		// reaching to C code
-		using dbj::clib::location_;
-		using dbj::clib::location_descriptor;
-
-		location_descriptor *loc_desc_0, *loc_desc_2, *loc_desc_3;
-		// begin block
-		{
-			dbj::entry_exit{
-				[&]() {
-				// take one
-				loc_desc_0 = location_.create(__LINE__, __FILE__);
-				},
-				[&]() {
-					// take two
-					loc_desc_2 =
-						location_.create(__LINE__, __FILE__);
-
-					// release the 2 but leave the 1
-					location_.release(&loc_desc_2);
-
-					// take three, should reuse the second registry slot
-					// thus loc_desc_2 == loc_desc_3
-					loc_desc_3 =
-						location_.create(__LINE__, __FILE__);
-					}
-			};
-		}
-
-		auto ld0 = *loc_desc_0;
-		auto ld3 = *loc_desc_3;
-
-		auto DBJ_MAYBE(dummy) = true;
-	}
-} // anon ns
+} // namespace dbj::samples 

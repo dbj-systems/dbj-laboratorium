@@ -1,15 +1,6 @@
 #include "pch.h"
 
-/* 
-dbj::console::out can not have ref or pointer argument
-thus it can not be sent pointer or ref to some ABC
-this is not a bug, this is by design
-explanations: circle and triangle are both shapes
-but triangle has no radius or center point
-triangle and circle need to output different string
-thus out(shape *) will do what with the pointer to the ABC?
-*/
-
+/*
 namespace dbj::console {
 	template<> inline void out<class std::error_code>
 	(class std::error_code ec_)
@@ -22,7 +13,7 @@ namespace dbj::console {
 		);
 	}
 }
-
+*/
 /*
    user defined error_category implements std::error_category
    and a "factory function" to deliver it as a singleton ref.
@@ -78,15 +69,12 @@ DBJ_TEST_UNIT(standard) {
 #endif
 		int err_enum = int(std::errc::protocol_error);
 
-		std::string throwerr;  
-		auto DBJ_MAYBE( c ) = throwerr.at(1); // throws!
+//		std::string throwerr;  
+//		auto DBJ_MAYBE( c ) = throwerr.at(1); // throws std::system_error
+
 		// we might provide our own exception that will 
 		// inherit from std::system_error
-		throw std::system_error(
-			err_enum,
-			std::system_category(), 
-			" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n"
-		);
+//		throw std::system_error( err_enum, dbj_err_category(),	" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n" );
 #if 0
 }
 	catch (const std::system_error& ex)

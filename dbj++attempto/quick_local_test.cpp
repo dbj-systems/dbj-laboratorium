@@ -1,12 +1,6 @@
 #include "pch.h"
-#include "../dbj++clib/dbjclib.h"
 
 using namespace ::std ;
-
-DBJ_TEST_UNIT(dbj_string_trim)
-{
-	dbj::clib::test::dbj_string_trim_test();
-}
 
 namespace dbj {
 	template<class T, T v>
