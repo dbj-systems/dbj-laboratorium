@@ -79,6 +79,7 @@
   <ItemGroup>
     <ClCompile Include="dbjclib.c" />
     <ClCompile Include="dbj_error.c" />
+    <ClCompile Include="dbj_error_internal.c" />
     <ClCompile Include="dbj_string_trim.c" />
     <ClCompile Include="dbj_string_trim_test.c" />
   </ItemGroup>

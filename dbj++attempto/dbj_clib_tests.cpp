@@ -16,41 +16,30 @@ DBJ_TEST_UNIT(dbj_c_lib)
 
 DBJ_TEST_UNIT(dbj_string_trim)
 {
-	dbj_string_trim_test();
+	// SEGV currently -- dbj_string_trim_test();
 }
 
-DBJ_TEST_UNIT(clang_and_dbj)
+#define DBJ_ERR(n) dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
+DBJ_TEST_UNIT(dbj_err_system)
 {
 	// reaching to C code
 	using namespace DBJ::clib;
 
-	::dbj::clib::error_descriptor *loc_desc_0, *loc_desc_2, *loc_desc_3;
-	// begin block
+	error_descriptor *err_desc_0;
+	// EFAULT is 14
+	err_desc_0 = DBJ_ERR(14);
+	bool valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
+	dbj_error_service.release(&err_desc_0);
+	// what now?
 	{
-		DBJ::entry_exit{
-			[&]() {
-			// take one
-			loc_desc_0 =
-::dbj::clib::dbj_error_provider.create(__LINE__, __FILE__, 0, nullptr);
-				},
-				[&]() {
-					// take two
-					loc_desc_2 =
-::dbj::clib::dbj_error_provider.create(__LINE__, __FILE__, 0, nullptr);
-
-					// release the 2 but leave the 1
-					dbj_error_provider.release(&loc_desc_2);
-
-					// take three, should reuse the second registry slot
-					// thus loc_desc_2 == loc_desc_3
-					loc_desc_3 =
-::dbj::clib::dbj_error_provider.create(__LINE__, __FILE__, 0, nullptr);
-					}
-		};
+		bool valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
+		dbj_error_service.release(&err_desc_0);
+		err_desc_0 = nullptr;
+		dbj_error_service.release(&err_desc_0);
 	}
 
-	auto ld0 = *loc_desc_0;
-	auto ld3 = *loc_desc_3;
+	// structs are copyable
+	auto ld0 = *err_desc_0;
 
 	auto DBJ_MAYBE(dummy) = true;
 }

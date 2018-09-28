@@ -20,56 +20,35 @@ limitations under the License.
 #include <string.h>
 #include <assert.h>
 
-static const unsigned location_descriptor_cache_size	  
-    = error_descriptor_buffer_size;
-
-static error_descriptor
-error_descriptor_cache[location_descriptor_cache_size];
-
-// if register slot is false, the slot is free and if true the slot is used
-#define CACHE_REGISTER_FREE_MARK false
-#define CACHE_REGISTER_ACTV_MARK true
-static bool cache_register[location_descriptor_cache_size] ;
-
-static unsigned cache_register_in_overflow_state = false ;
-static const unsigned cache_register_invalid_slot = (unsigned)-1;
-static const unsigned cache_register_last_slot = error_descriptor_buffer_size - 1;
-static const unsigned cache_register_first_slot = 0 ;
-
-
-static unsigned cache_register_first_free_slot () {
-	
-	if ( cache_register_in_overflow_state) return cache_register_invalid_slot ;
-	
-	// search for the first free slot
-	for (unsigned cache_register_walker = cache_register_first_slot;
-		cache_register_walker != cache_register_last_slot;
-		cache_register_walker ++)
-	{
-		// found it
-		if (cache_register[cache_register_walker] == CACHE_REGISTER_FREE_MARK)
-		{
-			// mark it as active
-			cache_register[cache_register_walker] = CACHE_REGISTER_ACTV_MARK;
-			return cache_register_walker;
-		}
-	}
-		// if here we have new overflow situation
-		cache_register_in_overflow_state = true;
-		return cache_register_invalid_slot;
-}
-
-static void cache_register_release_slot( unsigned registry_slot_index )
-{
-	cache_register[registry_slot_index] = CACHE_REGISTER_FREE_MARK; 
-	// if here we can not have overflow situation
-	cache_register_in_overflow_state = false;
-};
+// the internals-------------------------------------------------------
+extern error_descriptor error_descriptor_cache[];
+extern const unsigned cache_register_invalid_slot;
+extern unsigned cache_register_first_free_slot();
+extern void cache_register_release_slot(unsigned registry_slot_index);
+extern void *  cache_find_active(const int runtime_index_);
 
 // the implementation -------------------------------------------------
 
 static const char * unknown_error_location = "Unknown error location";
 static const char * unknown_error_message  = "Unknown error message";
+
+static char * obtain_error_message( int error_number_ ) {
+	char * rezult_ = 0;
+	// first try the ISO C 
+	// streror is C89 compatible
+	rezult_ = strerror(error_number_);
+
+	// from here we will use dbj_error_message( int )
+	// if there is no ISO C result
+	// this seems the only way  to differentiate from
+	// errno.h errnum constants, done as #defines
+	if (rezult_ == 0)
+		rezult_ = (char *)unknown_error_message;
+	if (rezult_[0] == 0)
+		rezult_ = (char *)unknown_error_message;
+
+	return rezult_;
+}
 
 // return NULL if cache overflow
 static struct error_descriptor *
@@ -79,7 +58,7 @@ static struct error_descriptor *
 	)
 	{
 	if (file_ == NULL) file_ = unknown_error_location;
-	if (msg_ == NULL)  msg_  = unknown_error_message;
+	if (msg_ == NULL)  msg_  = obtain_error_message(code_);
 
 		unsigned free_slot = cache_register_first_free_slot();
 
@@ -88,6 +67,7 @@ static struct error_descriptor *
 		}
 		error_descriptor * desc_ 
 			= & error_descriptor_cache[free_slot];
+
 				desc_->runtime_index = free_slot;
 				desc_->line = line_;
 				desc_->error_code = code_;
@@ -95,44 +75,75 @@ static struct error_descriptor *
 		// so this might clip the result
 		strncpy(desc_->file, file_, error_descriptor_buffer_size );
 		strncpy(desc_->error_message, msg_, error_descriptor_buffer_size );
-
-		return desc_ ;
+		return desc_;
 	}
 
-
-static error_descriptor *  release_error_descriptor(error_descriptor ** locdesc_ )
-{
+/*
+DBJ_NOT_ERR is -1 so if accidentaly used in the cache it will 
+produce compile time or runtime error for sure
+*/
+static error_descriptor * null_error_descriptor() {
 	// make the empty descriptor, once
-	static error_descriptor 
-		empty_error_descriptor = { 0, 0, {0}, 0, {0} };
+	static error_descriptor
+		null_error_descriptor_ = { DBJ_NOT_ERR, DBJ_NOT_ERR, {0}, DBJ_NOT_ERR, {0} };
+	return &null_error_descriptor_;
+}
 
-	assert( NULL != *locdesc_);
+static bool is_null_error_descriptor( error_descriptor * ed_ ) {
+	assert(ed_);
+	return (
+		(ed_ ) &&
+		(ed_->error_code == DBJ_NOT_ERR) &&
+		(ed_->error_message[0] == 0) &&
+		(ed_->file[0] == 0) &&
+		(ed_->line == DBJ_NOT_ERR) &&
+		(ed_->runtime_index == DBJ_NOT_ERR)
+		);
+}
 
-	cache_register_release_slot( (**locdesc_).runtime_index );
-		(**locdesc_) = empty_error_descriptor;
+/*
+valid error_descriptor is the one that is
+-- not a null pointer
+-- not empty
+-- is active
+*/
+static bool is_valid_error_descriptor(error_descriptor * descriptor_) 
+{
+	if (0 == descriptor_) return false;
+	// comparing the pointers ... ?
+	if (is_null_error_descriptor( descriptor_)) return false;
+	if (0 == cache_find_active(descriptor_->runtime_index)) return false;
+	return true;
+}
 
-	return (*locdesc_) = NULL;
+/*
+make sure the error_descriptor argument
+represents the one in use, not already released
+or the one never made
+*/
+static void release_error_descriptor(error_descriptor ** locdesc_ )
+{
+	if (is_valid_error_descriptor(*locdesc_)) {
+		cache_register_release_slot((**locdesc_).runtime_index);
+	}
+	if (*locdesc_)
+		(**locdesc_) = * null_error_descriptor() ;
 }
 
 static error_descriptor *  find_error_descriptor(const int runtime_index_)
 {
-	// make the empty descriptor, once
-	static error_descriptor
-		empty_error_descriptor = { 0, 0, {0}, 0, {0} };
-
-	assert(runtime_index_ > -1);
-	assert(runtime_index_ < cache_register_last_slot );
-
-
-	if (cache_register[runtime_index_] == CACHE_REGISTER_ACTV_MARK)
-	{
-		return & error_descriptor_cache[runtime_index_];
-	}
-	return & empty_error_descriptor;
+	void * cache_result = cache_find_active(runtime_index_);
+	if (cache_result) return (error_descriptor *)cache_result;
+	return null_error_descriptor() ;
 }
 
 // the interface construction -------------------------------------------------
-dbj_error dbj_error_provider 
-   = { create_error_descriptor, release_error_descriptor, find_error_descriptor };
+dbj_error dbj_error_service 
+   = { 
+	create_error_descriptor, 
+	release_error_descriptor, 
+	find_error_descriptor, 
+	is_valid_error_descriptor 
+};
 
 // EOF
