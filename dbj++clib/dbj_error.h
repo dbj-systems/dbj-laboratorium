@@ -5,8 +5,11 @@
 
 typedef struct error_descriptor error_descriptor;
 /*
+
 dbj_error_service is integrated with C standard error handling
 as defined in errno.h
+
+https://www.gnu.org/software/libc/manual/html_node/Error-Reporting.html#Error-Reporting
 
 error_descriptor.error_code might be one of errno values as
 enumerated in <errno.h>

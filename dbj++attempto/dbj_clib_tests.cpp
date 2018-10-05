@@ -3,6 +3,11 @@
 // 'hidden' inside dbj++clib
 extern "C" void dbj_string_trim_test();
 
+DBJ_TEST_UNIT(dbj_string_c_lib)
+{
+	dbj::clib::dbj_string_test();
+}
+
 DBJ_TEST_UNIT(dbj_c_lib)
 {
 	using auto_char_arr = std::unique_ptr<char>;
@@ -19,24 +24,31 @@ DBJ_TEST_UNIT(dbj_string_trim)
 	// SEGV currently -- dbj_string_trim_test();
 }
 
-#define DBJ_ERR(n) dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
+#if 0
+#define DBJ_ERR(n) DBJ::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
+
 DBJ_TEST_UNIT(dbj_err_system)
 {
 	// reaching to C code
 	using namespace DBJ::clib;
 
-	error_descriptor *err_desc_0;
-	// EFAULT is 14
-	err_desc_0 = DBJ_ERR(14);
-	bool valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
-	dbj_error_service.release(&err_desc_0);
-	// what now?
-	{
-		valid_ = dbj_error_service.is_valid_descriptor(err_desc_0);
-		dbj_error_service.release(&err_desc_0);
-		err_desc_0 = nullptr;
-		dbj_error_service.release(&err_desc_0);
-	}
+	auto test = []( unsigned int err_num_ ) {
+		using error_descriptor = DBJ::clib::error_descriptor ;
+		auto * err_desc_0 = DBJ_ERR(err_num_);
+
+		_ASSERTE( DBJ::clib::dbj_error_service.is_valid_descriptor(err_desc_0) );
+		DBJ::clib::dbj_error_service.release(&err_desc_0) ;
+		_ASSERTE( false == DBJ::clib::dbj_error_service.is_valid_descriptor(err_desc_0) );
+	};
+
+	test(::dbj::clib::dbj_error_code::DBJ_EC_BAD_ERR_CODE);
+	test(::dbj::clib::dbj_error_code::DBJ_EC_BAD_STD_ERR_CODE);
+	test(::dbj::clib::dbj_error_code::DBJ_EC_DBJ_LAST_ERROR);
+	test(::dbj::clib::dbj_error_code::DBJ_EC_INDEX_TOO_LARGE);
+	test(::dbj::clib::dbj_error_code::DBJ_EC_INDEX_TOO_SMALL);
+	test(::dbj::clib::dbj_error_code::DBJ_EC_INVALID_ARGUMENT);
 
 	auto DBJ_MAYBE(dummy) = true;
 }
+
+#endif

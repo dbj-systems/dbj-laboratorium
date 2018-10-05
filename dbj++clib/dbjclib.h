@@ -21,6 +21,13 @@ limitations under the License.
 #include <assert.h>
 #include <stdbool.h>
 
+#ifdef __clang__
+/*
+http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-headers
+*/
+#pragma clang system_header
+#endif /* __clang__ */
+
 #if defined (_MSC_VER)
 #define PLATFORM "Windows"
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -40,9 +47,20 @@ limitations under the License.
 #error    NOTE: For C11, __STDC_VERSION__ == 201112L
 #endif
 
+#define FREE(p) do{  if (p) free((void *)p); p = 0;}while(0)
+
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#define DBJ_ASSERT _ASSERTE
+#else
+#include <assert.h>
+#define DBJ_ASSERT assert
+#endif
+
 /* use this to remove unused code */
 /* this verion does not evaluate the expression */
-#define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
+// #define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
+#define DBJ_REMOVE(expr)
 
 #	if ! defined(_MSC_EXTENSIONS)
 #error Need MSC EXTENSIONS DEFINED
@@ -89,6 +107,7 @@ always null terminating the copied string.
 #include "dbj_error_codes.h"
 #include "dbj_error.h"
 #include "dbj_trim.h"
+#include "dbj_string.h"
 
 #ifdef __cplusplus
 	} // extern "C"
