@@ -88,6 +88,7 @@
     <ClInclude Include="dbjclib.h" />
     <ClInclude Include="dbj_error.h" />
     <ClInclude Include="dbj_error_codes.h" />
+    <ClInclude Include="dbj_sll.h" />
     <ClInclude Include="dbj_string.h" />
     <ClInclude Include="dbj_trim.h" />
   </ItemGroup>

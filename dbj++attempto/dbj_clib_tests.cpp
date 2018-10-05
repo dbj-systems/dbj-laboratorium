@@ -3,6 +3,11 @@
 // 'hidden' inside dbj++clib
 extern "C" void dbj_string_trim_test();
 
+DBJ_TEST_UNIT(dbj_sll)
+{
+	dbj::clib::test_dbj_sll();
+}
+
 DBJ_TEST_UNIT(dbj_string_c_lib)
 {
 	dbj::clib::dbj_string_test();

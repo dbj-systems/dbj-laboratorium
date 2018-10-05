@@ -13,7 +13,7 @@ static const size_t		DBJ_MAX_STRING_LENGTH = 65536;
 Concept 1: string is two pointers, front and back
 char * str = "ABC" ;
 char * front = str ;
-char * back  = str + stlen(str) ;
+char * back  = str + strlen(str) ;
 
 Effectively this is the concept of a 'range'
 Sub-range is two pointers to the *same* buffer
@@ -75,7 +75,7 @@ dbj_string_make(const char * string_)
 	pair_->front = (char *)string_;
 	/* NOTE! if string_ is empty, back == front */
 	pair_->back = (char *)string_ + slen;
-	DBJ_ASSERT((pair_->back - pair_->front) == slen);
+	DBJ_ASSERT((size_t)(pair_->back - pair_->front) == slen);
 	return pair_;
 }
 /*

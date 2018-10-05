@@ -16,6 +16,7 @@ limitations under the License.
 
 #pragma once
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -108,6 +109,7 @@ always null terminating the copied string.
 #include "dbj_error.h"
 #include "dbj_trim.h"
 #include "dbj_string.h"
+#include "dbj_sll.h"
 
 #ifdef __cplusplus
 	} // extern "C"
