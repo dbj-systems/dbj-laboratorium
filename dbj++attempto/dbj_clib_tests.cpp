@@ -29,7 +29,7 @@ DBJ_TEST_UNIT(dbj_string_trim)
 	// SEGV currently -- dbj_string_trim_test();
 }
 
-#if 0
+#if 1
 #define DBJ_ERR(n) DBJ::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
 
 DBJ_TEST_UNIT(dbj_err_system)

@@ -10,13 +10,21 @@ static const char * dbj_error_messages_[DBJ_EC_DBJ_LAST_ERROR] =
 	(char*)0
 }; // eof dbj_error_messages
 
+static const char * dbj_error_table_read( size_t code) 
+{
+	static const char * local_reading_error_ = "ERROR READING FROM dbj_error_messages_?";
+	const char * rez_ = dbj_error_messages_[code - 1000];
+
+	return (rez_ ? rez_ : local_reading_error_);
+}
+
 char last_error_msg[256] = {0};
 char * dbj_str_error(char msg_[256], int err_code);
 
 // in C dbj_error_code can be any int ...sigh ....
 const char * dbj_error_message(unsigned int ec_)
 {
-	char * retval_ = 0;
+	const char * retval_ = 0;
 	memset(last_error_msg, 0, 256);
 
 	if (ec_ < DBJ_EC_INVALID_ARGUMENT) {
@@ -25,18 +33,18 @@ const char * dbj_error_message(unsigned int ec_)
 		char * std_iso_message_ = dbj_str_error(last_error_msg, ec_);
 
 		if (!std_iso_message_) {
-			retval_ = (char *)dbj_error_messages_[DBJ_EC_BAD_STD_ERR_CODE];
+			retval_ = dbj_error_table_read(DBJ_EC_BAD_STD_ERR_CODE);
 		}
 		else {
 			retval_ = std_iso_message_;
 		}
 	}
 	else if (ec_ >  DBJ_EC_DBJ_LAST_ERROR  )
-		retval_ = (char *)dbj_error_messages_[DBJ_EC_BAD_ERR_CODE];
+		retval_ = dbj_error_table_read(DBJ_EC_BAD_ERR_CODE);
 	else if (ec_ == DBJ_EC_DBJ_LAST_ERROR  ) 
-		retval_ = (char *)dbj_error_messages_[DBJ_EC_BAD_ERR_CODE];
+		retval_ = dbj_error_table_read(DBJ_EC_BAD_ERR_CODE);
 	else {
-		retval_ = (char *)dbj_error_messages_[ec_];
+		retval_ = dbj_error_table_read(ec_);
 	}
 	return retval_;
 }
