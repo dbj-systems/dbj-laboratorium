@@ -19,6 +19,19 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #pragma clang system_header
 #endif /* __clang__ */
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4505 )
+#endif
+
+#ifndef DBJ_UNUSED
+#ifdef __cplusplus
+#define DBJ_UNUSED [[maybe_unused]]
+#else
+#define DBJ_UNUSED 
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -165,7 +178,7 @@ extern "C" {
 		Find by key is the deafult
 		to find by string one can implement the visitor
 	*/
-	static dbj_sll_node * dbj_sll_find(dbj_sll_node * head_, int k_)
+	static dbj_sll_node * dbj_sll_find(dbj_sll_node * head_, unsigned long k_)
 	{
 		dbj_sll_node * walker_ = head_->next;
 		while (walker_) {
@@ -294,9 +307,9 @@ extern "C" {
 		dbj_sll_node_dump_visitor(head_);
 		assert(true == is_dbj_sll_empty(head_));
 
-		unsigned long k1 = dbj_sll_append(head_, "Abra")->key;
-		unsigned long k2 = dbj_sll_append(head_, "Ka")->key;
-		unsigned long k3 = dbj_sll_append(head_, "Dabra")->key;
+		DBJ_UNUSED unsigned long k1 = dbj_sll_append(head_, "Abra")->key;
+		DBJ_UNUSED unsigned long k2 = dbj_sll_append(head_, "Ka")->key;
+		DBJ_UNUSED unsigned long k3 = dbj_sll_append(head_, "Dabra")->key;
 
 		dbj_sll_node * node_ = dbj_sll_find(head_, k2);
 		assert(0 == strcmp(node_->data, "Ka"));
@@ -309,3 +322,6 @@ extern "C" {
 } /* extern "C"  */
 #endif
 
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
