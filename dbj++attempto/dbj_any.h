@@ -1,6 +1,74 @@
 #pragma once
 #include "pch.h"
+#include <optional>
 
+namespace dbj::samples::optnl {
+
+	using namespace std;
+	/*
+	Idea while reading: https://blogs.msdn.microsoft.com/vcblog/2018/09/04/stdoptional-how-when-and-why/
+
+		using T = std::string ; // some object type 
+
+	struct S {
+		optional<T> maybe_T;
+
+		void construct_the_T(int arg) {
+			// We need not guard against repeat initialization;
+			// optional's emplace member will destroy any 
+			// contained object and make a fresh one.        
+			maybe_T.emplace(arg);
+		}
+
+		T& get_the_T() {
+			assert(maybe_T);
+			return *maybe_T;
+			// Or, if we prefer an exception when maybe_T is not initialized:
+			// return maybe_T.value();
+		}
+
+		// ... No error-prone handwritten special member functions! ...
+	};
+
+	  idea: if S is a template, with ctor/dtor one could do
+
+	  S<int>    int_(42);
+	  S<bool>   bool_(true) ;
+	  S<string> string_("Hola!") ;
+
+	  These are very complete objectified intrinsics?
+	  Also, are the (holy grail) Strong Typedefs, (almost) for free?
+
+	  using int_ = S<int> ; // a distinct type
+
+	*/
+
+	template<typename T>
+	struct strong final 
+	{
+	    /* here we can put demaning static asserts */
+
+		using value_type = T;
+		std::optional<T> maybe_T;
+
+		T & set(T arg) {
+			// We need not guard against repeat initialization;
+			// optional's emplace member will destroy any 
+			// contained object and make a fresh one.        
+			maybe_T.emplace(arg);
+			return this->operator T& ();
+		}
+
+		operator T& () noexcept {
+			_ASSERTE(maybe_T);
+			return *maybe_T;
+			// Or, if we prefer an exception when maybe_T is not initialized:
+			// return maybe_T.value();
+		}
+
+		// ... No error-prone handwritten special member functions! ...
+	};
+}
 
 namespace dbj::samples {
 	

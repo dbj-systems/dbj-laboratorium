@@ -67,7 +67,7 @@ DBJ_TEST_UNIT(standard) {
 	try
 	{
 #endif
-		int err_enum = int(std::errc::protocol_error);
+		int DBJ_MAYBE( err_enum ) = int(std::errc::protocol_error);
 
 //		std::string throwerr;  
 //		auto DBJ_MAYBE( c ) = throwerr.at(1); // throws std::system_error
