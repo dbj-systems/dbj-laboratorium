@@ -12,100 +12,21 @@ namespace dbj::samples { // beware of anonymous namespace
 	leader_name_type leaders[]{ L"Ленин", L"Сталин", L"Маленков",
 L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"Горбачёв", L"안녕하세요", L"안녕히 가십시오" };
 
-	/***********************************************************************************/
-	// C++ dynamic arrays .. also here https://en.cppreference.com/w/cpp/language/new
-	// int n = 42; 
-	// constexpr int m = 13;
-	// double a[n][5]; // error
-	// auto p1 = new double[n][m]; // okay
-	// auto p2 = new double[5][n]; // error
-
-
-	/* static matrix type */
-	template <
-		typename	T,
-		size_t		R,
-		size_t		C,
-		size_t		MAX = INT_MAX /*0x7FFFFFFF -- limits.h*/
-	>
-		class dbj_field final {
-		static_assert(
-			(R * C * sizeof(T)) <= MAX,
-			"Total size of dbj_field must not exceed 0x7FFFFFFF bytes"
-			);
-		/*
-		The 64-bit PECOFF executable format used on Windows
-		doesn't support creating executables that have
-		a load size of greater than 2GB
-		*/
-		public:
-			using type = T[R][C];
-			using reference_type = T(&)[R][C];
-			static constexpr size_t rows() noexcept { return R; };
-			static constexpr size_t cols() noexcept { return C; };
-			static constexpr size_t size() noexcept { return R * C * sizeof(T); };
-			static constexpr size_t max_size() noexcept { return MAX; };
-
-			dbj_field() { }
-			~dbj_field() { }
-
-			/*
-			Not returning pointers but references.
-			dbj_field<int,6,6> fld ;
-			auto ref_ = fld.data() ;
-			 ref type is:
-			dbj_field<int,6,6>::reference_type
-			*/
-			reference_type data() noexcept { return this->data_; }
-			reference_type data() const noexcept { return this->data_; }
-
-			// set and get for non const instances
-			T & operator () (size_t r, size_t c) noexcept { return data_[r][c]; }
-			// no set on const instances
-			T operator () (size_t r, size_t c) const noexcept { return data_[r][c]; }
-
-		private:
-			mutable type data_{};
-			/*
-			how to delete 2d array properly in C++
-			void delete_(T **M) {
-				delete[] M[0];
-				delete[] M;
-			};
-			*/
+/*
+	C++ dynamic arrays .. also here https://en.cppreference.com/w/cpp/language/new
+	int n = 42; 
+	constexpr int m = 13;
+	double a[n][5]; // error
+	auto p1 = new double[n][m]; // okay
+	auto p2 = new double[5][n]; // error
+	
+	how to delete 2d array properly in C++
+	void delete_(T **M) {
+		delete[] M[0];
+		delete[] M;
 	};
+*/
 
-	DBJ_TEST_UNIT(cpp_dynamic_arrays) {
-		/* */
-				auto test_ = []( const int & arg_ )
-				{
-					if ( nullptr == &arg_ ) return ;
-					 int DBJ_MAYBE(x) = arg_ ;
-				};
-				int *ip_ = nullptr;
-				test_(0);			// OK
-				test_(*ip_);		// dbj has caught it
-		/*	*/
-
-
-		using dbj_matrix = dbj_field<int, 0xFF, 0xFF>;
-		const dbj_matrix d2d;
-
-		const auto DBJ_MAYBE(d1) = d2d.data();
-		// returns ref to internal matrix
-		// with array sizes thus reachable
-		// this is not possible with a pointer
-		const auto & dr = d2d.data();
-		using dr_type = std::remove_reference_t<std::remove_cv_t<decltype(dr)>>;
-		auto DBJ_MAYBE(rank_) = std::rank_v<  dr_type    >;
-		auto DBJ_MAYBE(sz_1) = std::extent_v< dr_type, 0 >;
-		auto DBJ_MAYBE(sz_2) = std::extent_v< dr_type, 1 >;
-
-		// const instance: can get but not set 
-		auto DBJ_MAYBE(r) = d2d(4, 4); //  = 42; --- error
-
-		auto DBJ_MAYBE(size_in_byes_) = d2d.size();
-	}
 	/***********************************************************************************/
 	template<
 		typename T, size_t N,

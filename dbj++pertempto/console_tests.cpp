@@ -12,7 +12,7 @@ extern "C"  void console_painting()
 { 
 	using namespace dbj;
 
-	constexpr const dbj::c_line<80, '+'> L80{};
+	static const auto L80 = dbj::c_line('+');
 
 	console::print(
 	    console::nl, console::painter_command::nop, "NOP", L80 , 

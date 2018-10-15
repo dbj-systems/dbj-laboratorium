@@ -1,4 +1,67 @@
 #include "pch.h"
+#include <assert.h>
+
+namespace bulk_free {
+
+	/*
+	NOTE: must place NULL as the last arg!
+	      max args is 255
+	*/
+	void free_free_set_them_free(void * vp, ...)
+	{
+		size_t max_args = 255; size_t arg_count = 0; 
+		va_list marker;
+		va_start(marker, vp); /* Initialize variable arguments. */
+		while (vp != NULL)
+		{
+			free(vp);
+			vp = NULL;
+			vp = va_arg(marker, void *);
+			/* feeble attempt to make it safer  */
+			if ( ++arg_count == max_args ) break ;
+		}
+		va_end(marker);   /* Reset variable argument list. */
+	}
+
+#define FREE(...) free_free_set_them_free((void *)__VA_ARGS__, NULL)
+
+	DBJ_TEST_UNIT(bulk_free)
+	{ 
+		constexpr size_t newlen = 1024;
+		constexpr size_t ARRSZ = 9;
+		typedef char  * arr_type[ARRSZ];
+		arr_type slave = {
+	(char*)calloc( newlen, sizeof(char)), /* 0 */
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)),
+	(char*)calloc( newlen, sizeof(char)) /* 8 */
+		};
+
+		arr_type * copy_ = (arr_type*)malloc( ARRSZ * newlen );
+
+		for (size_t n = 0; n < ARRSZ; ++n) (*copy_)[n] = _strdup (slave[n]);
+
+	FREE(
+		slave[0], slave[1], slave[2], slave[3], slave[4], 
+		slave[5], slave[6], slave[7], slave[8]
+	);
+
+	FREE(
+		(*copy_)[0], (*copy_)[1], (*copy_)[2], (*copy_)[3], (*copy_)[4], 
+		(*copy_)[5], (*copy_)[6], (*copy_)[7], (*copy_)[8]
+	);
+
+	char * p = (char*)malloc(42);
+	free_free_set_them_free(p, NULL);
+
+	}
+
+}
 
 using namespace ::std ;
 
