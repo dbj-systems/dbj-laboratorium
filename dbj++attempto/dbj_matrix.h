@@ -67,7 +67,14 @@ Use like :
      two_dim_array(i, j) = 5
 Really just like a modern macros ... but could be the fastest solution?
 
+whatever, forst the all stack all statick pod variant.
+But in a standard C++ way.
+
 */
+
+// NOTE: __COUNTER__ is also a GCC predefined macro 
+// not just MSVC
+#define DBJ_UID  __COUNTER__ + dbj::util::inner::hash(__FILE__)
 
 /*
 static matrix_type , almost a pod.
@@ -180,21 +187,13 @@ public:
 
 };
 
-#define DBJ_UID  __COUNTER__ + dbj::util::inner::hash(__FILE__)
-
-template<
-	typename MX, typename T
->
+#if 1
+template< typename MX, typename T >
 void test_mx ( T new_val)
 {
-	// const instance
-	DBJ_TEST_ATOM(MX::uuid());
-	DBJ_TEST_ATOM(MX::data());
-	DBJ_TEST_ATOM(MX::size());
-	DBJ_TEST_ATOM(MX::rank());
-	// auto & DBJ_UNUSED(mx) = MX::data() ;
-	// can update this way -- mx[1][1] = 1;
-	// or can update this way -- MX::data(1, 1) = T(1) ;
+	dbj::console::print("\n ID: ", MX::uuid(),", size: ",MX::size(), ", rank: ", MX::rank());
+	// can update this way -- auto & mx = MX::data() ; mx[1][1] = T(1);
+	// or this way -- MX::data(1, 1) = T(1) ;
 	// or this way
 	MX::for_each(
 		[&](typename MX::value_type & val, size_t r, size_t c)
@@ -208,11 +207,17 @@ void test_mx ( T new_val)
 	MX::printarr(dbj::console::print);
 }
 
+template< typename MX>
+MX test_mx_arg_retval(MX the_mx)
+{
+	// leave the trace
+	the_mx.data(the_mx.rows() - 1, the_mx.cols() - 1) = 1234;
+	return the_mx;
+}
+
 DBJ_TEST_UNIT(dbj_static_matrix) {
 
 	constexpr size_t R = 3, C = 3;
-
-	// constexpr auto uid = __COUNTER__ + dbj::util::inner::hash(__FILE__);
 
 	// dbj static matrix solution
 	using mx9a = compile_time_stack_matrix<int, R, C, DBJ_UID >;
@@ -223,6 +228,13 @@ DBJ_TEST_UNIT(dbj_static_matrix) {
 	test_mx<mx9a>(  0   );
 	test_mx<mx9b>( 100  );
 
+	// instances are ok but perfectly
+	// redundant in this context
+	mx9a mxa = test_mx_arg_retval(mx9a());
+	mx9b mxb = test_mx_arg_retval(mx9b());
+
+	mxa.printarr(dbj::console::print);
+	mxb.printarr(dbj::console::print);
 }
 
 // example call
@@ -243,8 +255,8 @@ inline void printarr(const T(&array)[M][N])
 	print("\n");
 }
 
-DBJ_TEST_UNIT(cpp_dynamic_arrays) {
-
+DBJ_TEST_UNIT(cpp_dynamic_arrays) 
+{
 	constexpr size_t R = 3;
 	constexpr size_t C = 3;
 	// shared pointer based solution
@@ -262,14 +274,4 @@ DBJ_TEST_UNIT(cpp_dynamic_arrays) {
 	printarr((int(&)[R][C])(*m32.get()));
 }
 
-/*
-DBJ_TEST_UNIT(cpp_intrinsic_dynamic_arrays)
-{
-	const auto M = 3;
-	const auto N = 3;
-	// the proper way to initialize the array
-	auto intarr = new (int[M][N]){ {3,2,1},{3,2,1},{3,2,1} };
-	printarr((int(&)[M][N])intarr);
-	delete [] intarr;
-}
-*/
+#endif
