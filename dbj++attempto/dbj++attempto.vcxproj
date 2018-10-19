@@ -182,6 +182,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbj_clib_tests.cpp" />
+    <ClCompile Include="dbj_random_kiss.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="dbj_error_code.cpp" />
     <ClCompile Include="dbj_web_syndication.cpp" />

@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbjclib.c" />
+    <ClCompile Include="dbj_ctime_rnd.c" />
     <ClCompile Include="dbj_error.c" />
     <ClCompile Include="dbj_error_codes.c" />
     <ClCompile Include="dbj_error_internal.c" />
@@ -91,6 +92,8 @@
     <ClInclude Include="dbj_sll.h" />
     <ClInclude Include="dbj_string.h" />
     <ClInclude Include="dbj_trim.h" />
+    <ClInclude Include="reverse_no_warning.h" />
+    <ClInclude Include="supress_warning.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

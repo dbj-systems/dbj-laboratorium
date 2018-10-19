@@ -72,9 +72,12 @@ But in a standard C++ way.
 
 */
 
+#pragma warning( push)
+#pragma warning( disable: 4307 )
+
 // NOTE: __COUNTER__ is also a GCC predefined macro 
 // not just MSVC
-#define DBJ_UID  __COUNTER__ + dbj::util::inner::hash(__FILE__)
+#define DBJ_UID  __COUNTER__ + dbj::util::dbj_get_seed()
 
 /*
 static matrix_type , almost a pod.
@@ -275,3 +278,5 @@ DBJ_TEST_UNIT(cpp_dynamic_arrays)
 }
 
 #endif
+
+#pragma warning( pop )

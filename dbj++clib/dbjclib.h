@@ -21,6 +21,7 @@ limitations under the License.
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <time.h>
 
 #ifdef __clang__
 /*
@@ -110,6 +111,8 @@ always null terminating the copied string.
 #include "dbj_trim.h"
 #include "dbj_string.h"
 #include "dbj_sll.h"
+
+		extern const unsigned long dbj_random_kiss();
 
 #ifdef __cplusplus
 	} // extern "C"
