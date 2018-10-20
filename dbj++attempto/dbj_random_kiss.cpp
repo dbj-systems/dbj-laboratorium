@@ -132,9 +132,10 @@ static void simple_test() {
    FIB 49;LFIB4 77;SWB 80;CONG 80;SHR3 84;MWC 93;KISS 157;
    VNI 417;UNI 450;
  */
-constexpr unsigned long dbj_random_kiss() noexcept 
+extern "C" constexpr unsigned long dbj_random_kiss() noexcept 
 {
-	return KISS;
+	return SHR3;
+	// return KISS;
 }
 
 #pragma warning( pop )
