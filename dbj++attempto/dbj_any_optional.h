@@ -285,7 +285,7 @@ DBJ_TEST_SPACE_OPEN(dbj_any_wrapper_testing)
 			// that fails to compile
 			// but this won't
 			auto any_4 = make([&](auto x) { return typeid(x).name();  });
-			auto rez_4 = any_4(true);
+			auto DBJ_MAYBE(rez_4) = any_4(true);
 		}
 		catch (...) {
 			dbj::console::print(dbj::Exception(
