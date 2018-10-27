@@ -30,8 +30,6 @@ namespace dbj_samples::ct {
 		template<char...  str>
 		constexpr  const char string<str...>::chars[];
 
-
-
 		template<typename  lambda_str_type>
 		struct  string_builder
 		{
@@ -43,21 +41,21 @@ namespace dbj_samples::ct {
 		};
 
 		template<char...  str0, char...  str1>
-		inline 
-		constexpr 
-			string<str0..., str1...>  
+		inline
+			constexpr
+			string<str0..., str1...>
 			operator+(string<str0...>, string<str1...>)
 		{
 			return {};
 		}
 	}
 
-/*
-Q:why the macro? A: we can not pass 'string_literal'
-as lambda arg and then use it in seting up the 'string_struct'
-*/
+	/*
+	Q:why the macro? A: we can not pass 'string_literal'
+	as lambda arg and then use it in seting up the 'string_struct'
+	*/
 #define  DBJ_CTSTRING(string_literal) \
-[]{ \
+[] () constexpr { \
 	struct string_struct { \
 		const char * chars = string_literal; \
 	}; \
@@ -67,14 +65,34 @@ as lambda arg and then use it in seting up the 'string_struct'
 		    >::result{}; \
 }() 
 
-DBJ_TEST_UNIT(_compile_time_string_)
-{
-		 auto  str_hello = DBJ_CTSTRING( "hello");
-		 auto  str_world = DBJ_CTSTRING(" world");
+#define	 DBJ_CTS_IMP(V, SL, SS ) \
+struct SS {	const char * chars = SL; }; \
+	constexpr auto V { \
+		variadic_toolbox::apply_range< \
+			sizeof(SL) - 1, \
+			compile_time::string_builder < SS > ::produce \
+		>::result{} };
 
-		 DBJ_TEST_ATOM(typeid(decltype(str_hello)).name());
-		 DBJ_TEST_ATOM(str_hello.chars);
-		 DBJ_TEST_ATOM((str_hello + str_world).chars);
-}
+#define DBJ_CTS(V, SL ) DBJ_CTS_IMP( V, SL, DBJ_CONCAT( the_struct_, __COUNTER__) )
+
+	using namespace std::string_view_literals;
+
+	DBJ_TEST_UNIT(_compile_time_string_)
+	{
+		constexpr auto sview{ "String View"sv };
+
+		DBJ_CTS(cts1, "Hello " );
+		DBJ_CTS(cts2, " World!");
+
+		DBJ_TEST_ATOM(typeid(decltype(cts1)).name());
+
+
+		auto  str_hello = DBJ_CTSTRING("hello");
+		auto  str_world = DBJ_CTSTRING(" world");
+
+		DBJ_TEST_ATOM(typeid(decltype(str_hello)).name());
+		DBJ_TEST_ATOM(str_hello.chars);
+		DBJ_TEST_ATOM((str_hello + str_world).chars);
+	}
 #undef DBJ_CTSTRING
 } // dbj::ct
