@@ -2,6 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 // testing the various stuff in this project
 #include "pch.h"
+
+#include "dbj_ctstring.h"
 #include "dbj_lambda_lists.h"
 #include "dbj_tokenizer.h"
 #include "dbj_atoms.h"
@@ -11,22 +13,22 @@
 
 #include "string_literals_with_universal_character_names.h"
 #include "no_copy_no_move.h"
-
+/*
 #include <test/dbj_kalends_test.h>
 #include <test/dbj_string_util_test.h>
 #include <test/dbj_kv_store_test.h>
-
 #include <string_view>
-
+*/
 DBJ_TEST_SPACE_OPEN(local_tests)
 
 /**************************************************************************************************/
-using namespace std::literals;
+using namespace std::string_view_literals;
 
 struct STANDARD {
 	constexpr static const auto compiletime_static_string_view_constant()
 	{
-		static auto make_once_and_only_if_called = "constexpr string view literal"sv;
+		constexpr static auto 
+			make_once_and_only_if_called = "constexpr string view literal"sv;
 		// on second and all the other calls 
 		// just return
 		return make_once_and_only_if_called;
