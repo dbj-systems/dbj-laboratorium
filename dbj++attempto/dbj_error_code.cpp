@@ -1,6 +1,9 @@
 #include "pch.h"
 
 /*
+http://blog.think-async.com/2010/04/system-error-support-in-c0x-part-5.html
+
+
 namespace dbj::console {
 	template<> inline void out<class std::error_code>
 	(class std::error_code ec_)
@@ -20,11 +23,16 @@ namespace dbj::console {
 */
 const std::error_category & dbj_err_category()
 {
+	/*
+	for an example look into <system_error> 
+	implmentation of a class _System_error_category
+	starting at line # 529
+	*/
 	struct dbj_err_category : public std::error_category 
 	{
 		_NODISCARD virtual const char *name() const noexcept
 		{
-			static char name_[]{ "dbj errors category" };
+			static char name_[]{ "dbj_error_category" };
 			return name_;
 		}
 
@@ -40,11 +48,42 @@ const std::error_category & dbj_err_category()
 				return "dbj unknown error message";
 			}
 		}
+
+		/* this is vopy paste from MSVC STL 
+		   <system_error> line # 562
+		*/
+		_NODISCARD virtual std::error_condition 
+			default_error_condition(int _Errval) 
+			  const noexcept override
+		{	// make error_condition for error code (generic if possible)
+			const int _Posv = std::_Winerror_map(_Errval);
+			if (_Posv == 0)
+			{
+				return (std::error_condition(_Errval, std::system_category()));
+			}
+			else
+			{
+				return (std::error_condition(_Posv, std::generic_category()));
+			}
+		}
 	};
 
 	static dbj_err_category singleton_;
 	return singleton_;
 }
+
+    using namespace dbj::console;
+	inline void out
+		(class std::error_code ec_)
+	{
+		::dbj::console::PRN.printf(
+			"value:%d, category:'%s', message:'%s'",
+			ec_.value(),
+			ec_.category().name(),
+			ec_.message().c_str()
+		);
+	}
+
 /*
 This is how msvc stl uses std::error_code, std::system_category and std::system_error
 
@@ -58,12 +97,33 @@ This is how msvc stl uses std::error_code, std::system_category and std::system_
 */
 	 
 
-DBJ_TEST_SPACE_OPEN( dbj_error_code )
+DBJ_TEST_SPACE_OPEN(how_to_use_system_error_portably)
+
+DBJ_TEST_UNIT(portable) {
+	std::error_code ec;
+	// also does the set to 0
+	auto le = dbj::win32::last_error();
+	char lpBuffer[64]{};
+#ifdef _WIN32
+	DWORD rv = GetEnvironmentVariable(
+		LPCTSTR("whatever"),
+		LPTSTR(lpBuffer),
+		DWORD(64)
+	);
+	ec = std::error_code(GetLastError(), std::system_category());
+#else
+	if (-1 == open(...))
+		ec = std::error_code(errno, std::system_category());
+#endif
+	DBJ_TEST_ATOM(ec.message());
+
+	dbj::console::print(ec);
+}
 
 DBJ_TEST_UNIT(standard) {
 
 	using dbj::console::print;
-#if 0
+#if 1
 	try
 	{
 #endif
@@ -74,14 +134,18 @@ DBJ_TEST_UNIT(standard) {
 
 		// we might provide our own exception that will 
 		// inherit from std::system_error
-//		throw std::system_error( err_enum, dbj_err_category(),	" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n" );
-#if 0
+	throw std::system_error( 
+		err_enum, dbj_err_category(),	" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n" 
+	);
+#if 1
 }
 	catch (const std::system_error& ex)
 	{
 
 		// error_code is platform dependant
 		std::error_code ec_ = ex.code();
+
+		dbj::console::print(ec_);
 		
 		int							
 				DBJ_MAYBE(ec_val_) = ec_.value();

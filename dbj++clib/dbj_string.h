@@ -11,16 +11,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "dbjclib.h"
-#ifdef __clang__
-/*
-http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-headers
-*/
-#pragma clang system_header
-#endif /* __clang__ */
-
-static const size_t		DBJ_NPOS = (size_t)-1;
-static const size_t		DBJ_MAX_STRING_LENGTH = 65536;
 /*
 Concept 1: string is two pointers, front and back
 char * str = "ABC" ;
@@ -33,6 +23,17 @@ Sub-range is two pointers to the *same* buffer
 Concept 2: minimize the use of the string.h
 
 */
+#include "dbjclib.h"
+#ifdef __clang__
+/*
+http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-headers
+*/
+#pragma clang system_header
+#endif /* __clang__ */
+
+static const size_t		DBJ_NPOS = (size_t)-1;
+static const size_t		DBJ_MAX_STRING_LENGTH = 65536;
+
 
 typedef struct dbj_string {
 	bool   full_free;
