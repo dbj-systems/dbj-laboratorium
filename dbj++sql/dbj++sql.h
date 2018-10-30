@@ -93,15 +93,15 @@ namespace dbj::sqlite {
 
 	/*
 	*/
-	inline  auto test_insert ()
+	inline  auto test_insert (const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db")
 	{
-	     static const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db";
 		try
 		{
 			connection c;
 			c.open(db_file);
-			c.execute("create table Hens ( Id int primary key, Name nvarchar(100) not null )");
-			c.execute("insert into Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
+			c.execute("DROP TABLE IF EXISTS Hens");
+			c.execute("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
+			c.execute("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
 		}
 		catch (sql_exception const & e)
 		{
@@ -110,10 +110,11 @@ namespace dbj::sqlite {
 		}
 	}
 
-	inline  auto test_select ( callback_type cb_ )
+	inline  auto test_select ( 
+		callback_type cb_,
+	    const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+	)
 	{
-	     static const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db";
-
 		try
 		{
 			connection c;
