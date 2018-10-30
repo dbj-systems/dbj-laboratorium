@@ -118,6 +118,7 @@ typedef enum class CODE : UINT {
 	// page_1201 = 1201   // utf16 big endian?
 } CODE_PAGE;
 
+#if 0
 DBJ_TEST_UNIT(_famous_dbj_console_ucrt_crash)
 {
 	// кошка 日本
@@ -147,7 +148,7 @@ DBJ_TEST_UNIT(_famous_dbj_console_ucrt_crash)
 	// for any mode the following crashes the UCRT (aka Universal CRT)
 	// fprintf( stdout, "\nprintf() result: %S\n",specimen);
 }
-
+#endif
 
 DBJ_TEST_UNIT(tokenizer_test)
 {

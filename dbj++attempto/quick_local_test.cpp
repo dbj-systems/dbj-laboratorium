@@ -1,5 +1,32 @@
 #include "pch.h"
 #include <assert.h>
+#include "..\dbj++sql\dbj++sql.h"
+
+// using callback_type = int(*)(
+// void * /* a_param */, int /* argc */, char ** /* argv */, 
+// char ** /* column */);
+
+// NOTE! carefull with large data sets, 
+// as this is called once per row
+int dbj_sqlite_callback(
+	void *  a_param[[maybe_unused]], 
+	int argc, char **  argv, 
+	char ** column [[maybe_unused]]
+)
+{
+	// print the row
+	for (int i = 0; i < argc; i++)
+		dbj::console::print("\n\t", argv[i]);
+	dbj::console::print("\n");
+	return 0;
+}
+
+
+DBJ_TEST_UNIT(dbj_sql_lite) {
+
+	// dbj::sqlite::test_insert();
+	dbj::sqlite::test_select(dbj_sqlite_callback);
+}
 
 namespace bulk_free {
 

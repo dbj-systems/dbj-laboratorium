@@ -39,12 +39,14 @@ limitations under the License.
 
 #define FREE(p) do{  if (p) free((void *)p); p = 0; }while(0)
 
+#ifndef DBJ_ASSERT
 #ifdef _MSC_VER
 #include <crtdbg.h>
 #define DBJ_ASSERT _ASSERTE
 #else
 #include <assert.h>
 #define DBJ_ASSERT assert
+#endif
 #endif
 
 /* use this to remove unused code */

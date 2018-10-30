@@ -4,41 +4,6 @@
 // 'hidden' inside dbj++clib
 extern "C" void dbj_string_trim_test();
 
-//namespace dbj::console {
-	template<> void __cdecl dbj::console::out<char**>(char ** varg) {
-		if (!varg) {
-			dbj::console::PRN.printf("null"); 
-			return;
-		}
-		dbj::console::PRN.printf("\n%s", (varg[0] ? varg[0] :"null"));
-	}
-//}
-
-void dbj_dict_callback( char * dbj_args[] ) {
-
-	DBJ_TEST_ATOM( dbj_args);
-}
-
-DBJ_TEST_UNIT(dbj_en_disctionary)
-{
-	auto dbj_dict_user = [&](auto fun, auto cb) {
-		dbj::clib::dbj_en_dictionary_retval rv = fun(cb);
-		if (rv.status != dbj_en_dictionary_OK) {
-			dbj::console::print(
-				dbj::console::painter_command::red,
-				"\n",rv.message,
-				dbj::console::painter_command::text_color_reset
-			);
-			return false;
-		}
-		return true;
-	};
-
-	dbj_dict_user(dbj::clib::dbj_en_dictionary_service.next, dbj_dict_callback);
-	dbj_dict_user(dbj::clib::dbj_en_dictionary_service.reset, dbj_dict_callback);
-	dbj_dict_user(dbj::clib::dbj_en_dictionary_service.next, dbj_dict_callback);
-}
-
 DBJ_TEST_UNIT(dbj_string_c_lib)
 {
 	dbj::clib::dbj_string_test();

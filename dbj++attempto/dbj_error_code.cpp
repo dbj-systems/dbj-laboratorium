@@ -102,10 +102,10 @@ DBJ_TEST_SPACE_OPEN(how_to_use_system_error_portably)
 DBJ_TEST_UNIT(portable) {
 	std::error_code ec;
 	// also does the set to 0
-	auto le = dbj::win32::last_error();
+	auto DBJ_MAYBE(le) = dbj::win32::last_error();
 	char lpBuffer[64]{};
 #ifdef _WIN32
-	DWORD rv = GetEnvironmentVariable(
+	DWORD DBJ_MAYBE(rv) = GetEnvironmentVariable(
 		LPCTSTR("whatever"),
 		LPTSTR(lpBuffer),
 		DWORD(64)

@@ -80,7 +80,7 @@ static dbj_en_dictionary_retval find_(const char * query_ , dbj_en_dictionary_ca
 static dbj_en_dictionary_retval reset_(dbj_en_dictionary_callback cb_)
 {
 	dbj_en_dictionary_service.close(cb_);
-	dictionary_file = fopen(dbj_en_dictionary_file, "r");
+	dictionary_file = fopen( ".\\" dbj_en_dictionary_file, "r");
 	if (dictionary_file == NULL)
 	{
 		return err_retval("could not open " dbj_en_dictionary_file " for reading");
