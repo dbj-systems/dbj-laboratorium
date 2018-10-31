@@ -14,18 +14,42 @@ int dbj_sqlite_callback(
 	char ** column [[maybe_unused]]
 )
 {
+	// this callback has all we need for "everything"
+	// we do not need another kind of a callback 
+	dbj::sqlite::value_decoder & decoder 
+		 = *(dbj::sqlite::value_decoder*)a_param;
+
 	// print the row
-	for (int i = 0; i < argc; i++)
-		dbj::console::print("\n\t", argv[i]);
 	dbj::console::print("\n");
+	// we need to know the structure of the row 
+	for (int i = 0; i < argc; i++)
+		dbj::console::print("\t", i , ": ", column[i], " --> [" , (std::string)decoder(i) , "]" );
 	return 0;
 }
 
+/*
+http://www.sqlite.org/c3ref/column_blob.html
 
-DBJ_TEST_UNIT(dbj_sql_lite) {
+once per each row
+*/
+int dbj_sqlite_statement_user( const dbj::sqlite::value_decoder & decoder )
+{
+	std::string   word_ = decoder() ;
+	dbj::console::print("\n\t", word_);
+	// all these should provoke exception
+	std::wstring DBJ_MAYBE( wword_ ) = decoder() ;
+	long   DBJ_MAYBE( number_ ) = decoder() ;
+	double DBJ_MAYBE( real_ ) = decoder() ;
+	return SQLITE_OK;
+}
 
-	// dbj::sqlite::test_insert();
+DBJ_TEST_UNIT(dbj_sql_lite) 
+{
+	dbj::sqlite::test_insert();
+	dbj::console::print("\ndbj_sqlite_callback\n");
 	dbj::sqlite::test_select(dbj_sqlite_callback);
+	dbj::console::print("\ndbj_sqlite_statement_user\n");
+	dbj::sqlite::test_statement_using(dbj_sqlite_statement_user);
 }
 
 namespace bulk_free {
