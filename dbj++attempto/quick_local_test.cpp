@@ -23,11 +23,9 @@ int dbj_sqlite_callback(
 }
 
 /*
-http://www.sqlite.org/c3ref/column_blob.html
-
 once per each row
 */
-int dbj_sqlite_statement_user( 
+int dbj_sqlite_result_row_callback( 
 	const size_t row_id ,
 	/* this is giving us column count and column names */
 	[[maybe_unused]] const std::vector<std::string> & col_names ,
@@ -53,7 +51,7 @@ DBJ_TEST_UNIT(dbj_sql_lite)
 	dbj::console::print("\ndbj_sqlite_callback\n");
 	dbj::sqlite::test_select(dbj_sqlite_callback);
 	dbj::console::print("\ndbj_sqlite_statement_user\n");
-	dbj::sqlite::test_statement_using(dbj_sqlite_statement_user);
+	dbj::sqlite::test_statement_using(dbj_sqlite_result_row_callback);
 }
 
 #undef DBJ_DB_TESTING
