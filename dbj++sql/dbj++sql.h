@@ -232,6 +232,34 @@ namespace dbj::sqlite {
 			open(storage_name.data() );
 		}
 
+		/*
+		will do 'something like':
+		sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
+		*/
+		auto register_user_defined_function
+		( 
+			string_view udf_name, 
+			void(__cdecl * udf_)(sqlite3_context *, int, sqlite3_value **)
+		) 
+		{
+			if (!handle) throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
+			auto const result 
+				= sqlite3_create_function(
+					handle.get(), 
+					udf_name.data(), 
+					1, 
+					SQLITE_UTF8, 
+					NULL, /* arbitrary pointer. can gain access using sqlite3_user_data().*/
+					udf_, 
+					NULL, 
+					NULL);
+
+			if (SQLITE_OK != result)
+			{
+				throw sql_exception{ result, sqlite3_errmsg(handle.get()) };
+			}
+		}
+
 	auto execute
 	(
 		char const * query_,
