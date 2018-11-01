@@ -1,29 +1,24 @@
 #include "pch.h"
 #include <assert.h>
+#define DBJ_DB_TESTING
 #include "..\dbj++sql\dbj++sql.h"
 
 // using callback_type = int(*)(
-// void * /* a_param */, int /* argc */, char ** /* argv */, 
-// char ** /* column */);
-
+// void * , int , char ** , char ** );
 // NOTE! carefull with large data sets, 
 // as this is called once per row
 int dbj_sqlite_callback(
 	void *  a_param[[maybe_unused]], 
 	int argc, char **  argv, 
-	char ** column [[maybe_unused]]
+	char ** column
 )
 {
-	// this callback has all we need for "everything"
-	// we do not need another kind of a callback 
-	dbj::sqlite::value_decoder & decoder 
-		 = *(dbj::sqlite::value_decoder*)a_param;
-
+	using dbj::console::print;
 	// print the row
-	dbj::console::print("\n");
+	print("\n");
 	// we need to know the structure of the row 
 	for (int i = 0; i < argc; i++)
-		dbj::console::print("\t", i , ": ", column[i], " --> [" , (std::string)decoder(i) , "]" );
+		print("\t", i , ": ", column[i], " --> [" , argv[i] , "]" );
 	return 0;
 }
 
@@ -32,14 +27,23 @@ http://www.sqlite.org/c3ref/column_blob.html
 
 once per each row
 */
-int dbj_sqlite_statement_user( const dbj::sqlite::value_decoder & decoder )
+int dbj_sqlite_statement_user( 
+	const size_t row_id ,
+	/* this is giving us column count and column names */
+	[[maybe_unused]] const std::vector<std::string> & col_names ,
+	const dbj::sqlite::value_decoder & val_user 
+)
 {
-	std::string   word_ = decoder() ;
-	dbj::console::print("\n\t", word_);
+	using dbj::console::print;
+	// 'automagic' transform to std::string
+	// of the column 0 value for this row
+	std::string   word_ = val_user(0) ;
+	print("\n\t", row_id, "\t", word_);
+
 	// all these should provoke exception
-	std::wstring DBJ_MAYBE( wword_ ) = decoder() ;
-	long   DBJ_MAYBE( number_ ) = decoder() ;
-	double DBJ_MAYBE( real_ ) = decoder() ;
+	// TODO: but they don't -- currently
+	long   DBJ_MAYBE( number_ ) = val_user(0) ;
+	double DBJ_MAYBE( real_ ) = val_user(0) ;
 	return SQLITE_OK;
 }
 
@@ -51,6 +55,8 @@ DBJ_TEST_UNIT(dbj_sql_lite)
 	dbj::console::print("\ndbj_sqlite_statement_user\n");
 	dbj::sqlite::test_statement_using(dbj_sqlite_statement_user);
 }
+
+#undef DBJ_DB_TESTING
 
 namespace bulk_free {
 

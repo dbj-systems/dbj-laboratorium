@@ -1,11 +1,50 @@
 #pragma once
-//
+//  
+// (very) small SQLITE standard C++  framework, dbj.org created
+// 
+// inspired by:
 // https://visualstudiomagazine.com/articles/2014/02/01/using-sqlite-with-modern-c.aspx
 //
+// requires C++17
+// #define DBJ_DB_TESTING for testing, see the file bottom part
+//
+#include "sqlite/sqlite3.h"
 #include <string>
 #include <optional>
+#include <vector>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <crtdbg.h>
+
+namespace dbj::sqlite {
+
+	using namespace std;
+
+	struct sql_exception
+	{
+		using message_arg_type = char const *;
+		int code;
+		string message;
+
+		sql_exception(int const result, message_arg_type text) :
+			code{ result },
+			message{ text }
+		{}
+	};
+}
+
+#ifndef DBJ_STR
+#define DBJ_STR(x) #x
+#endif
+
+#ifndef DBJ_VERIFY_
+#define DBJ_VERIFY_(R,X) if ( R != X ) \
+   throw dbj::sqlite::sql_exception( int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X))
+#endif
+//NOTE: leave it here
 #include "handle.h"
-#include "sqlite/sqlite3.h"
 
 namespace dbj::sqlite {
 
@@ -51,13 +90,20 @@ namespace dbj::sqlite {
 		int (*)(void * /* a_param */, int /* argc */, char ** /* argv */, char ** /* column */);
 	// above runs once for each line returned
 
+	/*
+	return the typed value from a single cell in a column
+	for the *current* row of the result
+	*/
 	struct value_decoder final
 	{
 		/* http://www.sqlite.org/c3ref/column_blob.html */
 	   /* TODO: https://sqlite.org/c3ref/errcode.html  */
 
+		/* if testing shows necessary we will provide error checking or safe type casts etc.  */
+		/* curently BLOB's are unhandled, they are to be implemented as vector<unsigned char> */
 		struct transformer final 
 		{
+			/* if user needs  float, the user will handle that best */
 			operator double() const noexcept {
 				return sqlite3_column_double(statement_, col_index_);
 			}
@@ -67,40 +113,71 @@ namespace dbj::sqlite {
 			operator long long() const noexcept  {
 				return sqlite3_column_int64(statement_, col_index_);
 			}
+			/* 
+			   SQLITE is by default UTF-8
+			   wstring is primarily windows curiosity
+			   multibyte chars even more so
+			   windows users will use this and perform the 
+			   required conversions themselves best
+			   for pitfalls see here
+			   https://docs.microsoft.com/en-us/windows/desktop/api/stringapiset/nf-stringapiset-widechartomultibyte
+			*/
 			operator std::string() const noexcept  {
 				const unsigned char *name = sqlite3_column_text(statement_, col_index_);
 				const size_t  sze_ = sqlite3_column_bytes(statement_, col_index_);
 				return { (const char *)name, sze_ };
-			}
-			operator std::wstring() const noexcept  {
-				const unsigned char *name = sqlite3_column_text(statement_, col_index_);
-				const size_t  sze_ = sqlite3_column_bytes(statement_, col_index_);
-				std::string local_{ (const char *)name, sze_ };
-				return { local_.begin(), local_.end() };
 			}
 
 			mutable sqlite3_stmt *	statement_;
 			mutable size_t			col_index_;
 		};
 
-		transformer operator ()(size_t col_idx = 0) const noexcept
+		/* 
+		return the transformer for particular column
+		from the current result set
+		*/
+		transformer operator ()(size_t col_idx ) const noexcept
 		{
 			_ASSERTE(this->statement_);
 			return transformer{
-				this->statement_ ,
-				(col_idx ? col_idx : this->col_index_)
+				this->statement_ ,col_idx 
 			};
 		}
 		// --------------------------------------
 		mutable sqlite3_stmt * statement_{};
-		mutable size_t col_index_{};
 	}; // value_decoder
 
-	// use as argument type for connection execute_with_statement()
-	// return the sqlite rezult code or SQLITE_OK
-	using statement_user_type = int(*)( const value_decoder &);
+	/*
+	return vector of column names from the active statement
+	*/
+	inline vector<string> column_names( const statement_handle & sh_ ) 
+	{
+		// this actually calls the traits invalid method
+		// from inside the handle bool operator
+		_ASSERTE( sh_ );
 
-	struct connection final
+		const size_t column_count = sqlite3_column_count(sh_.get());
+		vector<string> names{};
+		for (size_t n = 0; n < column_count; ++n) {
+			names.push_back( { sqlite3_column_name(sh_.get(), n) } );
+		}
+		return names;
+	}
+
+	// user created callback type for database execute_with_statement()
+    // return the sqlite rezult code or SQLITE_OK
+	// called once per the row of the result set
+	using result_row_user_type = int(*)
+		(
+        const size_t /* result row id */ ,
+		const vector<string> & /*column_names*/,
+		const value_decoder &
+		);
+
+	/*
+	main interface 
+	*/
+	class database final
 	{
 		connection_handle handle;
 
@@ -142,21 +219,32 @@ namespace dbj::sqlite {
 		return local_statement ;
 	}
 
+	public:
+		/* default constructor is non existent */
+		database() = delete;
+		/* copying and moving is no possible */
+		database( const database &) = delete;
+		database( database &&) = delete;
+
+		explicit database( string_view storage_name ) 
+		{
+			// can throw
+			open(storage_name.data() );
+		}
+
 	auto execute
 	(
 		char const * query_,
-		callback_type the_callback 
+		optional<callback_type> the_callback = nullopt
 	)
 	{
 		if (!handle) throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
-		statement_handle statement_ = prepare_statement(query_);
-		value_decoder    decoder_{ statement_.get(), 0 };
 		auto const result = sqlite3_exec(
 			handle.get(), /* the db */
 			query_,
-			the_callback,
-			&(decoder_), /* a_param passed here */
+			the_callback.value_or(nullptr) ,
+			nullptr, /* first callback void * param, passed through here */
 			nullptr);
 
 		if (SQLITE_OK != result)
@@ -169,7 +257,7 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 */
 	auto execute_with_statement (
 		char const * query_, 
-		optional<statement_user_type>  statement_user_arg_
+		optional<result_row_user_type>  statement_user_arg_
 	)
 	{
 		if ( !statement_user_arg_.has_value() )
@@ -178,20 +266,20 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 			throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
 		statement_handle statement_ = prepare_statement(query_);
-
-		statement_user_type statement_user_ = statement_user_arg_.value();  
+		result_row_user_type statement_user_ = statement_user_arg_.value(); 
+		vector<string> col_names_ { column_names( statement_ ) };
 
 		int rc{};
-		size_t col_counter{};
+		size_t row_counter{};
 		while ((rc = sqlite3_step(statement_.get())) == SQLITE_ROW) {
 			// call once per row returned
 			rc = statement_user_(
-				value_decoder{
-					statement_.get(), col_counter
-				}
+				row_counter ++ ,
+				col_names_ ,
+				{ statement_.get() }
 			);
 			// CAUTION! no other kind of exception caught 
-			// possibly coming out of statement_user_
+			// *possibly* coming out of statement_user_
 		}
 
 		if (rc != SQLITE_DONE) {
@@ -199,22 +287,26 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 		}
 	}
 
-	}; // execute_with_statement
+	}; // database
 
 	/*
 	-------------------------------------------------------------------------
 		TESTS
 	-------------------------------------------------------------------------
-	*/
-	inline  auto test_insert (const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db")
+	*/   
+#ifdef DBJ_DB_TESTING
+
+	inline  auto test_insert (const char * db_file = ":memory:")
 	{
 		try
 		{
-			connection c;
-			c.open(db_file);
+			database c(db_file);
+			// we do not send a callback in the calls bellow
 			c.execute("DROP TABLE IF EXISTS Hens");
 			c.execute("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
 			c.execute("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
+			c.execute("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
+			// p.s. Above is Kenny Kerrs humour table :)
 		}
 		catch (sql_exception const & e)
 		{
@@ -230,8 +322,7 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 	{
 		try
 		{
-			connection c;
-			c.open(db_file);
+			database c(db_file);
 			c.execute("select word from words where word like 'bb%'", cb_ );
 		}
 		catch (sql_exception const & e)
@@ -242,16 +333,15 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 	}	
 	
 	inline  auto test_statement_using ( 
-		statement_user_type statement_user_ ,
+		result_row_user_type row_user_ ,
 	    const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
-			connection c;
-			c.open(db_file);
+			database c(db_file);
 			c.execute_with_statement("select word from words where word like 'bb%'", 
-				statement_user_);
+				row_user_);
 		}
 		catch (sql_exception const & e)
 		{
@@ -259,5 +349,9 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
 	}
+#endif // DBJ_DB_TESTING
 
 } // namespace dbj::sqlite
+
+#undef DBJ_VERIFY_
+#undef DBJ_STR

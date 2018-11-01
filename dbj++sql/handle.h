@@ -1,37 +1,6 @@
 #pragma once
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <crtdbg.h>
 
-namespace dbj::sqlite {
-
-	using namespace std;
-
-	struct sql_exception
-	{
-		using message_arg_type = char const *;
-		int code;
-		string message;
-
-		sql_exception(int const result, message_arg_type text) :
-			code{ result },
-			message{ text }
-		{}
-	};
-
-
-}
-
-#ifndef DBJ_STR
-#define DBJ_STR(x) #x
-#endif
-
-#ifndef DBJ_VERIFY_
-#define DBJ_VERIFY_(R,X) if ( R != X ) \
-   throw dbj::sqlite::sql_exception( int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X))
-#endif
+// NOTE: can include this only by including dbj++sql.h 
 
 namespace KennyKerr
 {

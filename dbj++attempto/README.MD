@@ -1,11 +1,21 @@
 
-# dbj++attempto
+# dbj++sql 0.5
 
-> attempto is Latin for "make trial, tamper with, assail"
+### Small framework for using SQLITE(3) from standard  C++
 
-## Research and Development, arround and about [dbj++](https://github.com/dbj-systems/dbjplusplus)
+> Disclaimer: <br/>
+> Immediatrly usable in your projects. <br/>
+> Current release is Proof Of Concept (POC). <br/>
+> Unless stated otherwise.
 
-> Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
+**Please see dbj++sql.h for tests+usage** 
+
+This is a static library. SQLITE 3 is linked in. 
+
+Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 for x86
+
+[Inspired by Keny Kerr](
+https://visualstudiomagazine.com/articles/2014/02/01/using-sqlite-with-modern-c.aspx). Thank you.
 
 -------------------------------------
 
