@@ -29,7 +29,7 @@ int dbj_sqlite_result_row_callback(
 	const size_t row_id ,
 	/* this is giving us column count and column names */
 	[[maybe_unused]] const std::vector<std::string> & col_names ,
-	const dbj::sqlite::value_decoder & val_user 
+	const dbj::db::value_decoder & val_user 
 )
 {
 	using dbj::console::print;
@@ -47,11 +47,11 @@ int dbj_sqlite_result_row_callback(
 
 DBJ_TEST_UNIT(dbj_sql_lite) 
 {
-	dbj::sqlite::test_insert();
+	dbj::db::test_insert();
 	dbj::console::print("\ndbj_sqlite_callback\n");
-	dbj::sqlite::test_select(dbj_sqlite_callback);
+	dbj::db::test_select(dbj_sqlite_callback);
 	dbj::console::print("\ndbj_sqlite_statement_user\n");
-	dbj::sqlite::test_statement_using(dbj_sqlite_result_row_callback);
+	dbj::db::test_statement_using(dbj_sqlite_result_row_callback);
 }
 
 #undef DBJ_DB_TESTING

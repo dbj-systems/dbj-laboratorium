@@ -8,7 +8,7 @@
 // requires C++17
 // #define DBJ_DB_TESTING for testing, see the file bottom part
 //
-#include "sqlite/sqlite3.h"
+#include "sqlite++.h"
 #include <string>
 #include <optional>
 #include <vector>
@@ -18,9 +18,10 @@
 #include <windows.h>
 #include <crtdbg.h>
 
-namespace dbj::sqlite {
+namespace dbj::db {
 
-	using namespace std;
+	using namespace ::std;
+	using namespace ::sqlite;
 
 	struct sql_exception
 	{
@@ -41,15 +42,16 @@ namespace dbj::sqlite {
 
 #ifndef DBJ_VERIFY_
 #define DBJ_VERIFY_(R,X) if ( R != X ) \
-   throw dbj::sqlite::sql_exception( int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X))
+   throw ::dbj::db::sql_exception( int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X))
 #endif
 //NOTE: leave it here
 #include "handle.h"
 
-namespace dbj::sqlite {
+namespace dbj::db {
 
-	using namespace KennyKerr;
-	using namespace std;
+	using namespace ::KennyKerr;
+	using namespace ::std;
+	using namespace ::sqlite;
 
 	struct connection_handle_traits final
 	{
@@ -199,7 +201,7 @@ namespace dbj::sqlite {
 	statement_handle prepare_statement (char const * query_)
 	{
 		_ASSERTE(query_);
-		if (!handle) throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
+		if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
 		auto local_statement = statement_handle{};
 
@@ -242,7 +244,7 @@ namespace dbj::sqlite {
 			void(__cdecl * udf_)(sqlite3_context *, int, sqlite3_value **)
 		) 
 		{
-			if (!handle) throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
+			if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 			auto const result 
 				= sqlite3_create_function(
 					handle.get(), 
@@ -266,7 +268,7 @@ namespace dbj::sqlite {
 		optional<callback_type> the_callback = nullopt
 	)
 	{
-		if (!handle) throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
+		if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
 		auto const result = sqlite3_exec(
 			handle.get(), /* the db */
@@ -289,9 +291,9 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 	)
 	{
 		if ( !statement_user_arg_.has_value() )
-			throw dbj::sqlite::sql_exception(0, " statement_user_ argument must exist for  " __FUNCSIG__);
+			throw dbj::db::sql_exception(0, " statement_user_ argument must exist for  " __FUNCSIG__);
 		if (!handle) 
-			throw dbj::sqlite::sql_exception(0, " Must call open() before " __FUNCSIG__);
+			throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
 		statement_handle statement_ = prepare_statement(query_);
 		result_row_user_type statement_user_ = statement_user_arg_.value(); 
@@ -311,7 +313,7 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 		}
 
 		if (rc != SQLITE_DONE) {
-			throw dbj::sqlite::sql_exception(rc, sqlite3_errmsg(handle.get()));
+			throw dbj::db::sql_exception(rc, sqlite3_errmsg(handle.get()));
 		}
 	}
 
@@ -338,7 +340,7 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 		}
 		catch (sql_exception const & e)
 		{
-			wprintf(L"dbj::sqlite exception");
+			wprintf(L"dbj::db exception");
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
 	}
@@ -355,7 +357,7 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 		}
 		catch (sql_exception const & e)
 		{
-			wprintf(L"dbj::sqlite exception");
+			wprintf(L"dbj::db exception");
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
 	}	
@@ -373,13 +375,13 @@ https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clar
 		}
 		catch (sql_exception const & e)
 		{
-			wprintf(L"dbj::sqlite exception");
+			wprintf(L"dbj::db exception");
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
 	}
 #endif // DBJ_DB_TESTING
 
-} // namespace dbj::sqlite
+} // namespace dbj::db
 
 #undef DBJ_VERIFY_
 #undef DBJ_STR

@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="handle.h" />
+    <ClInclude Include="sqlite++.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

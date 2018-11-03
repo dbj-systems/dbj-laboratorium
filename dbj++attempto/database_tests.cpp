@@ -59,8 +59,10 @@ namespace
 
 #pragma region sqlite udf-s
 
+	using namespace ::sqlite;
 	/* this is the UDF */
-	static void palindrome(sqlite3_context *context, int argc, sqlite3_value **argv)
+	static void palindrome(
+		sqlite3_context *context, int argc, sqlite3_value **argv)
 	{
 		sqlite3_result_null(context);
 		if (sqlite3_value_type(argv[0]) != SQLITE_TEXT) return;
@@ -84,7 +86,7 @@ namespace
 	static int dbj_sqlite_result_row_callback(
 		const size_t row_id,
 		[[maybe_unused]] const std::vector<std::string> & col_names,
-		const dbj::sqlite::value_decoder & val_user
+		const dbj::db::value_decoder & val_user
 	)
 	{
 		using dbj::console::print;
@@ -108,16 +110,16 @@ namespace
 
 		try
 		{
-			dbj::sqlite::database db(db_file);
+			dbj::db::database db(db_file);
 			db.register_user_defined_function("palindrome", palindrome);
 			db.execute_with_statement(
 				query_.data(),
 				dbj_sqlite_result_row_callback 
 			);
 		}
-		catch (dbj::sqlite::sql_exception const & e)
+		catch (dbj::db::sql_exception const & e)
 		{
-			print(L"dbj::sqlite exception");
+			print(L"dbj::db exception");
 			print("\n code:", e.code, ", message: ",e.message.c_str());
 		}
 	}
