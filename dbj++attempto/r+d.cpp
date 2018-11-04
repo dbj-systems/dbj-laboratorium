@@ -13,12 +13,7 @@
 
 #include "string_literals_with_universal_character_names.h"
 #include "no_copy_no_move.h"
-/*
-#include <test/dbj_kalends_test.h>
-#include <test/dbj_string_util_test.h>
-#include <test/dbj_kv_store_test.h>
-#include <string_view>
-*/
+
 DBJ_TEST_SPACE_OPEN(local_tests)
 
 /**************************************************************************************************/

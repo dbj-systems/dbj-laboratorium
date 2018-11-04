@@ -6,6 +6,45 @@ namespace
 {
 	using namespace std;
 
+	struct qd_timer final {
+
+		using Clock = std::chrono::steady_clock;
+		using time_point = std::chrono::time_point<Clock>;
+		using nano_seconds = std::chrono::nanoseconds;
+
+		time_point start = Clock::now();
+		nano_seconds diff{};
+
+		std::string elapsed() {
+			time_point end_ = Clock::now();
+			diff = end_ - start;
+			return std::to_string(diff.count()) + " nanoseconds ";
+		}
+
+		std::string micro() {
+			// A floating point microseconds type
+			using fp_microseconds =
+				std::chrono::duration<double, std::chrono::microseconds::period>;
+			return std::to_string(fp_microseconds(diff).count()) + " microseconds ";
+		}
+
+		std::string mili() {
+			// A floating point milliseconds type
+			using fp_milliseconds =
+				std::chrono::duration<double, std::chrono::milliseconds::period>;
+			return std::to_string(fp_milliseconds(diff).count()) + " milliseconds ";
+		}
+
+		std::string sec() {
+			auto mv = std::chrono::duration_cast<std::chrono::seconds>(diff);
+			return std::to_string(mv.count()) + " seconds ";
+			// A floating point seconds type
+			using fp_seconds =
+				std::chrono::duration<double, std::chrono::milliseconds::period>;
+			return std::to_string(fp_seconds(diff).count()) + " seconds ";
+		}
+	};
+
 	extern "C" inline bool petar_pal(const char* str)
 	{
 		char* a = (char*)str,
@@ -51,8 +90,8 @@ namespace
 
 	inline void test_palindroma(const char * word_ = "012345678909876543210")
 	{
-		_ASSERTE(   is_pal("ANA"));
-		_ASSERTE(   is_pal(word_));
+		_ASSERTE(is_pal("ANA"));
+		_ASSERTE(is_pal(word_));
 		_ASSERTE(petar_pal("ANA"));
 		_ASSERTE(petar_pal(word_));
 	}
@@ -67,14 +106,14 @@ namespace
 		sqlite3_result_null(context);
 		if (sqlite3_value_type(argv[0]) != SQLITE_TEXT) return;
 		if (argc < 1) return;
-			
-			char *text = (char*)sqlite3_value_text(argv[0]);
-			_ASSERTE(text);
-			size_t text_length = sqlite3_value_bytes(argv[0]);
-			_ASSERTE(text_length > 0);
-			std::string word_{ text, text_length };
 
-		static int result = 0 ; // aka 'false'
+		char *text = (char*)sqlite3_value_text(argv[0]);
+		_ASSERTE(text);
+		size_t text_length = sqlite3_value_bytes(argv[0]);
+		_ASSERTE(text_length > 0);
+		std::string word_{ text, text_length };
+
+		static int result = 0; // aka 'false'
 		result = is_pal(word_.c_str());
 		sqlite3_result_int(context, result);
 		return;
@@ -84,11 +123,14 @@ namespace
 	once per each row
 	*/
 	static int dbj_sqlite_result_row_callback(
-		const size_t row_id,
+		[[maybe_unused]] const size_t row_id,
 		[[maybe_unused]] const std::vector<std::string> & col_names,
-		const dbj::db::value_decoder & val_user
+		[[maybe_unused]] const dbj::db::value_decoder & val_user
 	)
 	{
+#if 1
+		return SQLITE_OK;
+#else
 		using dbj::console::print;
 		// 'automagic' transform to std::string
 		// of the column 0 value for this row
@@ -98,12 +140,13 @@ namespace
 		print("\n\t", row_id, "\t", word_);
 		// print("\n\t", row_id, "\t", word_, "\t\t is palindrome: ", (is_palindrome_ ? "true" : "false")
 		return SQLITE_OK;
+#endif
 	}
 	void test_udf
 	(
-		std::string_view query_ 
+		std::string_view query_
 		= "SELECT word, palindrome(word) FROM words WHERE word LIKE('bb%')"
-	) 
+	)
 	{
 		using dbj::console::print;
 		constexpr auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
@@ -114,29 +157,34 @@ namespace
 			db.register_user_defined_function("palindrome", palindrome);
 			db.execute_with_statement(
 				query_.data(),
-				dbj_sqlite_result_row_callback 
+				dbj_sqlite_result_row_callback
 			);
 		}
 		catch (dbj::db::sql_exception const & e)
 		{
 			print(L"dbj::db exception");
-			print("\n code:", e.code, ", message: ",e.message.c_str());
+			print("\n code:", e.code, ", message: ", e.message.c_str());
 		}
 	}
 #pragma endregion
-} // namespace
 
-DBJ_TEST_UNIT(dbj_sql_lite_udf) {
-	
-	constexpr auto Q = "SELECT word FROM words WHERE 1 == palindrome(word)"sv;
+	DBJ_TEST_UNIT(dbj_sql_lite_udf)
+	{
+		using dbj::console::prinf;
+		auto test = [&]( auto fun_ ) {
+			prinf("\n%s\nMeasurement start", dbj::LINE());
+			auto rezult = fun_();
+			prinf("\nMeasurement end\t%s", rezult.c_str());
+		};
+		
+		constexpr static auto Q
+			= "SELECT word FROM words WHERE 1 == palindrome(word)"sv;
 
-	using dbj::console::print;
-	auto timer = dbj::kalends::create_timer(dbj::kalends::timer_kind::modern);
-	print("\nTimer start\n", dbj::LINE());
-	timer.start();
-	test_udf(Q);
-	print("\n", dbj::LINE() ,"\nTimer end\t",
-	dbj::kalends::to_desired_unit<dbj::kalends::MilliSeconds>( timer.elapsed() ).count(),
-		" milli seconds"
-	);
+		using namespace dbj::kalends;
+
+		test([&] {  return measure             ([&] { test_udf(Q); }); });
+		test([&] {  return microseconds_measure([&] { test_udf(Q); }); });
+		test([&] {  return miliseconds_measure ([&] { test_udf(Q); }); });
+		test([&] {  return seconds_measure     ([&] { test_udf(Q); }); });
+	}
 }
