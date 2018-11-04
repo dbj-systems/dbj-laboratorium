@@ -316,6 +316,8 @@ namespace dbj::db {
 
 	}; // database
 
+} // namespace dbj::db
+
 	/*
 	-------------------------------------------------------------------------
 		TESTS
@@ -323,17 +325,21 @@ namespace dbj::db {
 	*/   
 #ifdef DBJ_DB_TESTING
 
-	inline  auto test_insert (const char * db_file = ":memory:")
+namespace dbj_db_test_
+{
+	using namespace dbj::db;
+
+	inline  auto test_insert(const char * db_file = ":memory:")
 	{
 		try
 		{
-			database c(db_file);
-			// we do not send a callback in the calls bellow
-			c.execute("DROP TABLE IF EXISTS Hens");
-			c.execute("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
-			c.execute("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
-			c.execute("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
-			// p.s. Above is Kenny Kerrs humour table :)
+			database db(db_file);
+			//
+			db.execute("DROP TABLE IF EXISTS Hens");
+			db.execute("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
+			db.execute("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
+			db.execute("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
+			//
 		}
 		catch (sql_exception const & e)
 		{
@@ -342,32 +348,32 @@ namespace dbj::db {
 		}
 	}
 
-	inline  auto test_select ( 
+	inline  auto test_select(
 		callback_type cb_,
-	    const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
 			database c(db_file);
-			c.execute("select word from words where word like 'bb%'", cb_ );
+			c.execute("select word from words where word like 'bb%'", cb_);
 		}
 		catch (sql_exception const & e)
 		{
 			wprintf(L"dbj::db exception");
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
-	}	
-	
-	inline  auto test_statement_using ( 
-		result_row_user_type row_user_ ,
-	    const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+	}
+
+	inline  auto test_statement_using(
+		result_row_user_type row_user_,
+		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
 			database c(db_file);
-			c.execute_with_statement("select word from words where word like 'bb%'", 
+			c.execute_with_statement("select word from words where word like 'bb%'",
 				row_user_);
 		}
 		catch (sql_exception const & e)
@@ -376,9 +382,9 @@ namespace dbj::db {
 			wprintf(L"%d %S\n", e.code, e.message.c_str());
 		}
 	}
+} // nspace
 #endif // DBJ_DB_TESTING
 
-} // namespace dbj::db
 
 #undef DBJ_VERIFY_
 #undef DBJ_STR

@@ -1,65 +1,64 @@
 #include "pch.h"
 
-#include "../dbj++sql/dbj++sql.h"
+#define DBJ_DB_TESTING
+#include "..\dbj++sql\dbj++sql.h"
+namespace {
+	// using callback_type = int(*)(
+	// void * , int , char ** , char ** );
+	// NOTE! carefull with large data sets, 
+	// as this is called once per row
+	int dbj_sqlite_callback(
+		void *  a_param[[maybe_unused]],
+		int argc, char **  argv,
+		char ** column
+	)
+	{
+		using dbj::console::print;
+		// print the row
+		print("\n");
+		// we need to know the structure of the row 
+		for (int i = 0; i < argc; i++)
+			print("\t", i, ": ", column[i], " --> [", argv[i], "]");
+		return 0;
+	}
+
+	/*
+	once per each row
+	*/
+	int example_callback(
+		const size_t row_id,
+		/* this is giving us column count and column names */
+		[[maybe_unused]] const std::vector<std::string> & col_names,
+		const dbj::db::value_decoder & val_user
+	)
+	{
+		using dbj::console::print;
+		// 'automagic' transform to std::string
+		// of the column 0 value for this row
+		std::string   word_ = val_user(0);
+		print("\n\t", row_id, "\t", word_);
+
+		// all these should provoke exception
+		// TODO: but they don't -- currently
+		long   DBJ_MAYBE(number_) = val_user(0);
+		double DBJ_MAYBE(real_) = val_user(0);
+		return SQLITE_OK;
+	}
+
+	DBJ_TEST_UNIT(dbj_sql_lite)
+	{
+		dbj_db_test_::test_insert();
+		dbj::console::print("\ndbj_sqlite_callback\n");
+		dbj_db_test_::test_select(dbj_sqlite_callback);
+		dbj::console::print("\ndbj_sqlite_statement_user\n");
+		dbj_db_test_::test_statement_using(example_callback);
+	}
+} // nspace
+#undef DBJ_DB_TESTING
 
 namespace
 {
 	using namespace std;
-
-	struct qd_timer final {
-
-		using Clock = std::chrono::steady_clock;
-		using time_point = std::chrono::time_point<Clock>;
-		using nano_seconds = std::chrono::nanoseconds;
-
-		time_point start = Clock::now();
-		nano_seconds diff{};
-
-		std::string elapsed() {
-			time_point end_ = Clock::now();
-			diff = end_ - start;
-			return std::to_string(diff.count()) + " nanoseconds ";
-		}
-
-		std::string micro() {
-			// A floating point microseconds type
-			using fp_microseconds =
-				std::chrono::duration<double, std::chrono::microseconds::period>;
-			return std::to_string(fp_microseconds(diff).count()) + " microseconds ";
-		}
-
-		std::string mili() {
-			// A floating point milliseconds type
-			using fp_milliseconds =
-				std::chrono::duration<double, std::chrono::milliseconds::period>;
-			return std::to_string(fp_milliseconds(diff).count()) + " milliseconds ";
-		}
-
-		std::string sec() {
-			auto mv = std::chrono::duration_cast<std::chrono::seconds>(diff);
-			return std::to_string(mv.count()) + " seconds ";
-			// A floating point seconds type
-			using fp_seconds =
-				std::chrono::duration<double, std::chrono::milliseconds::period>;
-			return std::to_string(fp_seconds(diff).count()) + " seconds ";
-		}
-	};
-
-	extern "C" inline bool petar_pal(const char* str)
-	{
-		char* a = (char*)str,
-			*p = a,
-			*q = p;
-		int n = strlen(str);
-		for (p = a, q = a + n - 1;
-			p < q;
-			p++, q--
-			)
-		{
-			if (*p != *q) return false;
-		}
-		return true;
-	}
 
 	extern "C" inline bool is_pal(const char* str) {
 		char* s = (char*)str;
@@ -86,14 +85,6 @@ namespace
 			// rezultat je true
 		}
 		return true;
-	}
-
-	inline void test_palindroma(const char * word_ = "012345678909876543210")
-	{
-		_ASSERTE(is_pal("ANA"));
-		_ASSERTE(is_pal(word_));
-		_ASSERTE(petar_pal("ANA"));
-		_ASSERTE(petar_pal(word_));
 	}
 
 #pragma region sqlite udf-s

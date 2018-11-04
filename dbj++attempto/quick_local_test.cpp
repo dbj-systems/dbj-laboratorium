@@ -1,60 +1,58 @@
 #include "pch.h"
 #include <assert.h>
-#define DBJ_DB_TESTING
-#include "..\dbj++sql\dbj++sql.h"
 
-// using callback_type = int(*)(
-// void * , int , char ** , char ** );
-// NOTE! carefull with large data sets, 
-// as this is called once per row
-int dbj_sqlite_callback(
-	void *  a_param[[maybe_unused]], 
-	int argc, char **  argv, 
-	char ** column
-)
+extern "C" inline bool petar_pal(const char* str)
 {
-	using dbj::console::print;
-	// print the row
-	print("\n");
-	// we need to know the structure of the row 
-	for (int i = 0; i < argc; i++)
-		print("\t", i , ": ", column[i], " --> [" , argv[i] , "]" );
-	return 0;
+	char* a = (char*)str,
+		*p = a,
+		*q = p;
+	int n = strlen(str);
+	for (p = a, q = a + n - 1;
+		p < q;
+		p++, q--
+		)
+	{
+		if (*p != *q) return false;
+	}
+	return true;
 }
 
-/*
-once per each row
-*/
-int dbj_sqlite_result_row_callback( 
-	const size_t row_id ,
-	/* this is giving us column count and column names */
-	[[maybe_unused]] const std::vector<std::string> & col_names ,
-	const dbj::db::value_decoder & val_user 
-)
-{
-	using dbj::console::print;
-	// 'automagic' transform to std::string
-	// of the column 0 value for this row
-	std::string   word_ = val_user(0) ;
-	print("\n\t", row_id, "\t", word_);
 
-	// all these should provoke exception
-	// TODO: but they don't -- currently
-	long   DBJ_MAYBE( number_ ) = val_user(0) ;
-	double DBJ_MAYBE( real_ ) = val_user(0) ;
-	return SQLITE_OK;
+extern "C" inline bool is_pal(const char* str) {
+	char* s = (char*)str;
+	char* e = (char*)str;
+	// pomeri e na str kraj 
+	// tj na '\0'
+	while (*e) e++;
+	// vrati ga na zadnje slovo 
+	--e;
+	// imamo dva setacha
+	while (s < e) {
+		// razliciti sadrzaji s'leva
+		// i s'desna 
+		// dakle ne moze biti palindrom
+		if (*s != *e) return false;
+		// levi napreduje u desno
+		++s;
+		// desni napreduje u levo
+		--e;
+		// *moguca* optimizacija je 
+		// da je desni levo od levog
+		if (e < s) break;
+		// prekidamo petlju 
+		// rezultat je true
+	}
+	return true;
 }
 
-DBJ_TEST_UNIT(dbj_sql_lite) 
-{
-	dbj::db::test_insert();
-	dbj::console::print("\ndbj_sqlite_callback\n");
-	dbj::db::test_select(dbj_sqlite_callback);
-	dbj::console::print("\ndbj_sqlite_statement_user\n");
-	dbj::db::test_statement_using(dbj_sqlite_result_row_callback);
-}
 
-#undef DBJ_DB_TESTING
+inline void test_palindroma(const char * word_ = "012345678909876543210")
+{
+	_ASSERTE(is_pal("ANA"));
+	_ASSERTE(is_pal(word_));
+	_ASSERTE(petar_pal("ANA"));
+	_ASSERTE(petar_pal(word_));
+}
 
 namespace bulk_free {
 
