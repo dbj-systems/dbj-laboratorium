@@ -224,7 +224,7 @@ namespace dbj::db {
 	public:
 		/* default constructor is non existent */
 		database() = delete;
-		/* copying and moving is no possible */
+		/* copying and moving is not possible */
 		database( const database &) = delete;
 		database( database &&) = delete;
 
@@ -282,21 +282,18 @@ namespace dbj::db {
 			throw sql_exception{ result, sqlite3_errmsg(handle.get()) };
 		}
 	}	
-/*
-https://stackoverflow.com/questions/31146713/sqlite3-exec-callback-function-clarification#
-*/
+	/*
+	call with query and a callback
+	*/
 	auto execute_with_statement (
 		char const * query_, 
-		optional<result_row_user_type>  statement_user_arg_
+		result_row_user_type  statement_user_
 	)
 	{
-		if ( !statement_user_arg_.has_value() )
-			throw dbj::db::sql_exception(0, " statement_user_ argument must exist for  " __FUNCSIG__);
 		if (!handle) 
 			throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 
 		statement_handle statement_ = prepare_statement(query_);
-		result_row_user_type statement_user_ = statement_user_arg_.value(); 
 		vector<string> col_names_ { column_names( statement_ ) };
 
 		int rc{};
