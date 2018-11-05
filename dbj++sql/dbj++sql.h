@@ -176,7 +176,7 @@ namespace dbj::db {
 	*/
 	class database final
 	{
-		connection_handle handle;
+		mutable connection_handle handle;
 
 	auto open(char const * filename)
 	{
@@ -193,7 +193,7 @@ namespace dbj::db {
 		handle = move(local);
 	}	
 	
-	statement_handle prepare_statement (char const * query_)
+	statement_handle prepare_statement (char const * query_) const
 	{
 		_ASSERTE(query_);
 		if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
@@ -263,7 +263,7 @@ namespace dbj::db {
 	auto query_result (
 		char const * query_, 
 		optional<result_row_user_type>  row_user_ = nullopt
-	)
+	) const
 	{
 		if (!handle) 
 			throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
@@ -304,17 +304,21 @@ namespace dbj_db_test_
 {
 	using namespace dbj::db;
 
+	inline auto create_demo_db( const database & db)
+	{
+		//
+		db.query_result("DROP TABLE IF EXISTS Hens");
+		db.query_result("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
+		db.query_result("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
+		//
+	}
+
 	inline  auto test_insert(const char * db_file = ":memory:")
 	{
 		try
 		{
 			database db(db_file);
-			//
-			db.query_result("DROP TABLE IF EXISTS Hens");
-			db.query_result("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
-			db.query_result("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
-			db.query_result("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
-			//
+			create_demo_db(db);
 		}
 		catch (sql_exception const & e)
 		{
@@ -325,13 +329,14 @@ namespace dbj_db_test_
 
 	inline  auto test_select(
 		result_row_user_type cb_,
-		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+		const char * db_file = ":memory:" // "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
 			database db(db_file);
-			db.query_result("select word from words where word like 'bb%'", cb_);
+			create_demo_db(db);
+			db.query_result("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'", cb_);
 		}
 		catch (sql_exception const & e)
 		{
@@ -342,12 +347,14 @@ namespace dbj_db_test_
 
 	inline  auto test_statement_using(
 		result_row_user_type row_user_,
-		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+		const char * db_file = ":memory:" // "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
 			database c(db_file);
+			create_demo_db(db);
+			// provoke error
 			c.query_result("select word from words where word like 'bb%'",
 				row_user_);
 		}
