@@ -352,16 +352,15 @@ namespace dbj_db_test_
 	{
 		try
 		{
-			database c(db_file);
+			database db(db_file);
 			create_demo_db(db);
 			// provoke error
-			c.query_result("select word from words where word like 'bb%'",
+			db.query_result("select word from words where word like 'bb%'",
 				row_user_);
 		}
 		catch (sql_exception const & e)
 		{
-			wprintf(L"dbj::db exception");
-			wprintf(L"%d %S\n", e.code, e.message.c_str());
+			wprintf(L"\ndbj::db exception\n\t[%d] %S\n", e.code, e.message.c_str());
 		}
 	}
 } // nspace
