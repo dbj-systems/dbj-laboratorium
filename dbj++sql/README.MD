@@ -164,7 +164,7 @@ To operate on rows of the the result table
 */
 auto query_result(
 char const * query_,
-optional&lt;result_row_user_type&gt; row_user_ = nullopt
+optional<result_row_user_type> row_user_ = nullopt
 );
 }; // database
 } // dbj::db
@@ -180,13 +180,13 @@ NOTE: it is called once per each row
 int example_callback(
 [[maybe_unused]] const size_t row_id,
 /* this is giving us column count and column names */
-[[maybe_unused]] const std::vector &amp; col_names,
-[[maybe_unused]] const dbj::db::value_decoder &amp; val_user
+[[maybe_unused]] const std::vector & col_names,
+[[maybe_unused]] const dbj::db::value_decoder & val_user
 )
 {
 // showing the result for 
 // SELECT word from words 
-// 'automagic' transform to std::string
+// 'automagical' transformation to std::string
 // of the column 0 value for this row
 std::string   word_ = val_user(0);
 printf("\n\t%d\t%s", row_id, word_);
@@ -208,7 +208,7 @@ try {
 database db(db_file);
 db.query_result("select word from words where word like 'bb%'", cb_);
 }
-catch (sql_exception const &amp; e) {
+catch (sql_exception const & e) {
 wprintf(L"SQLite Exception\t%d, %S\n", e.code, e.message.c_str());
 }
 ```
