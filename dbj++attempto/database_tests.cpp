@@ -3,6 +3,7 @@
 #define DBJ_DB_TESTING
 #include "..\dbj++sql\dbj++sql.h"
 namespace {
+#if 0
 	// using callback_type = int(*)(
 	// void * , int , char ** , char ** );
 	// NOTE! carefull with large data sets, 
@@ -21,7 +22,7 @@ namespace {
 			print("\t", i, ": ", column[i], " --> [", argv[i], "]");
 		return 0;
 	}
-
+#endif
 	/*
 	once per each row
 	*/
@@ -49,7 +50,7 @@ namespace {
 	{
 		dbj_db_test_::test_insert();
 		dbj::console::print("\ndbj_sqlite_callback\n");
-		dbj_db_test_::test_select(dbj_sqlite_callback);
+		dbj_db_test_::test_select(example_callback);
 		dbj::console::print("\ndbj_sqlite_statement_user\n");
 		dbj_db_test_::test_statement_using(example_callback);
 	}
@@ -146,7 +147,7 @@ namespace
 		{
 			dbj::db::database db(db_file);
 			db.register_user_defined_function("palindrome", palindrome);
-			db.execute_with_statement(
+			db.query_result(
 				query_.data(),
 				dbj_sqlite_result_row_callback
 			);

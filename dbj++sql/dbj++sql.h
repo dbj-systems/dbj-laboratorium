@@ -87,11 +87,6 @@ namespace dbj::db {
 
 	using statement_handle = unique_handle<statement_handle_traits>;
 
-	// DBJ added
-	using callback_type = 
-		int (*)(void * /* a_param */, int /* argc */, char ** /* argv */, char ** /* column */);
-	// above runs once for each line returned
-
 	/*
 	return the typed value from a single cell in a column
 	for the *current* row of the result
@@ -166,7 +161,7 @@ namespace dbj::db {
 		return names;
 	}
 
-	// user created callback type for database execute_with_statement()
+	// user created callback type for database query_result()
     // return the sqlite rezult code or SQLITE_OK
 	// called once per the row of the result set
 	using result_row_user_type = int(*)
@@ -262,32 +257,12 @@ namespace dbj::db {
 			}
 		}
 
-	auto execute
-	(
-		char const * query_,
-		optional<callback_type> the_callback = nullopt
-	)
-	{
-		if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
-
-		auto const result = sqlite3_exec(
-			handle.get(), /* the db */
-			query_,
-			the_callback.value_or(nullptr) ,
-			nullptr, /* first callback void * param, passed through here */
-			nullptr);
-
-		if (SQLITE_OK != result)
-		{
-			throw sql_exception{ result, sqlite3_errmsg(handle.get()) };
-		}
-	}	
 	/*
 	call with query and a callback
 	*/
-	auto execute_with_statement (
+	auto query_result (
 		char const * query_, 
-		result_row_user_type  statement_user_
+		optional<result_row_user_type>  row_user_ = nullopt
 	)
 	{
 		if (!handle) 
@@ -295,19 +270,19 @@ namespace dbj::db {
 
 		statement_handle statement_ = prepare_statement(query_);
 		vector<string> col_names_ { column_names( statement_ ) };
-
-		int rc{};
+		
+	int rc{};
 		size_t row_counter{};
 		while ((rc = sqlite3_step(statement_.get())) == SQLITE_ROW) {
+		if (row_user_.has_value()) {
 			// call once per row returned
-			rc = statement_user_(
-				row_counter ++ ,
-				col_names_ ,
+			rc = (row_user_.value())(
+				row_counter++,
+				col_names_,
 				{ statement_.get() }
 			);
-			// CAUTION! no other kind of exception caught 
-			// *possibly* coming out of statement_user_
-		}
+		  }
+	    }
 
 		if (rc != SQLITE_DONE) {
 			throw dbj::db::sql_exception(rc, sqlite3_errmsg(handle.get()));
@@ -335,10 +310,10 @@ namespace dbj_db_test_
 		{
 			database db(db_file);
 			//
-			db.execute("DROP TABLE IF EXISTS Hens");
-			db.execute("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
-			db.execute("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
-			db.execute("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
+			db.query_result("DROP TABLE IF EXISTS Hens");
+			db.query_result("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
+			db.query_result("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
+			db.query_result("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'");
 			//
 		}
 		catch (sql_exception const & e)
@@ -349,14 +324,14 @@ namespace dbj_db_test_
 	}
 
 	inline  auto test_select(
-		callback_type cb_,
+		result_row_user_type cb_,
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
 		{
-			database c(db_file);
-			c.execute("select word from words where word like 'bb%'", cb_);
+			database db(db_file);
+			db.query_result("select word from words where word like 'bb%'", cb_);
 		}
 		catch (sql_exception const & e)
 		{
@@ -373,7 +348,7 @@ namespace dbj_db_test_
 		try
 		{
 			database c(db_file);
-			c.execute_with_statement("select word from words where word like 'bb%'",
+			c.query_result("select word from words where word like 'bb%'",
 				row_user_);
 		}
 		catch (sql_exception const & e)
