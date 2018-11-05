@@ -14,7 +14,7 @@ This is a static library. SQLITE 3 is linked in.
 
 Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 for x86
 
-[Inspired by Keny Kerr](
+[Portions inspired by Keny Kerr article](
 https://visualstudiomagazine.com/articles/2014/02/01/using-sqlite-with-modern-c.aspx). 
 
 -------------------------------------
@@ -66,7 +66,6 @@ I hope you are still reading this and you are looking for simple and comfortable
 
 My objective here is to develop the minimal but useful SQLite  API. After which, I will explain a bit about this API, we will go through a few examples and hopefully prove the usability of my approach.
 
-(<a href="https://github.com/dbj-systems/dbj-laboratorium/tree/master/dbj%2B%2Bsql" target="_blank" rel="noopener">Resulting static lib is on GitHub</a> )
 ## The Logic 
 
 Or lack of. This first thing I have done was to wrap this huge sqlite3 C API in the C++ namespace. Like so:
