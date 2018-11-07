@@ -307,10 +307,10 @@ namespace dbj_db_test_
 	inline auto create_demo_db( const database & db)
 	{
 		//
-		db.query_result("DROP TABLE IF EXISTS Hens");
-		db.query_result("CREATE TABLE Hens ( Id int primary key, Name nvarchar(100) not null )");
-		db.query_result("INSERT INTO Hens (Id, Name) values (1, 'Rowena'), (2, 'Henrietta'), (3, 'Constance')");
-		//
+		db.execute("DROP TABLE IF EXISTS demo");
+		db.execute("CREATE TABLE demo_table ( Id int primary key, word nvarchar(100) not null )");
+		// populate the table
+		db.execute("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
 	}
 
 	inline  auto test_insert(const char * db_file = ":memory:")
@@ -336,7 +336,8 @@ namespace dbj_db_test_
 		{
 			database db(db_file);
 			create_demo_db(db);
-			db.query_result("SELECT Name FROM Hens WHERE Name LIKE 'Rowena'", cb_);
+			// select from the table
+			db.execute("SELECT word FROM demo_table WHERE word LIKE 'G%'");
 		}
 		catch (sql_exception const & e)
 		{
@@ -347,7 +348,16 @@ namespace dbj_db_test_
 
 	inline  auto test_statement_using(
 		result_row_user_type row_user_,
-		const char * db_file = ":memory:" // "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+		/* 
+		   As a sample DB, I am using an English dictionary in a file,
+		   https://github.com/dwyl/english-words/
+		   which I have transformed in the SQLite 3 DB file. 
+		   It has a single table: words, with a single text column named word.
+		   this is full path to my SQLIte storage 
+		   please replace it with yours
+		   for that use one of the many available SQLite management app's
+		*/
+		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
 		try
