@@ -36,6 +36,8 @@ namespace dbj::db {
 	};
 }
 
+enum class DBJ_DB_ERROR { OK = -1, ERR = -2 };
+
 #ifndef DBJ_STR
 #define DBJ_STR(x) #x
 #endif
@@ -161,7 +163,7 @@ namespace dbj::db {
 		return names;
 	}
 
-	// user created callback type for database query_result()
+	// user created callback type for database query()
     // return the sqlite rezult code or SQLITE_OK
 	// called once per the row of the result set
 	using result_row_user_type = int(*)
@@ -246,7 +248,7 @@ namespace dbj::db {
 					udf_name.data(), 
 					1, 
 					SQLITE_UTF8, 
-					NULL, /* arbitrary pointer. can gain access using sqlite3_user_data().*/
+					NULL, /* arbitrary pointer. UDF can gain access using sqlite3_user_data().*/
 					udf_, 
 					NULL, 
 					NULL);
@@ -260,7 +262,7 @@ namespace dbj::db {
 	/*
 	call with query and a callback
 	*/
-	auto query_result (
+	auto query (
 		char const * query_, 
 		optional<result_row_user_type>  row_user_ = nullopt
 	) const
@@ -306,11 +308,9 @@ namespace dbj_db_test_
 
 	inline auto create_demo_db( const database & db)
 	{
-		//
-		db.execute("DROP TABLE IF EXISTS demo");
-		db.execute("CREATE TABLE demo_table ( Id int primary key, word nvarchar(100) not null )");
-		// populate the table
-		db.execute("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
+		db.query("DROP TABLE IF EXISTS demo");
+		db.query("CREATE TABLE demo_table ( Id int primary key, word nvarchar(100) not null )");
+		db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
 	}
 
 	inline  auto test_insert(const char * db_file = ":memory:")
@@ -337,7 +337,7 @@ namespace dbj_db_test_
 			database db(db_file);
 			create_demo_db(db);
 			// select from the table
-			db.execute("SELECT word FROM demo_table WHERE word LIKE 'G%'");
+			db.query("SELECT word FROM demo_table WHERE word LIKE 'G%'", cb_ );
 		}
 		catch (sql_exception const & e)
 		{
@@ -346,17 +346,17 @@ namespace dbj_db_test_
 		}
 	}
 
+/*
+   As a sample DB, I am using an English dictionary in a file,
+   https://github.com/dwyl/english-words/
+   which I have transformed in the SQLite 3 DB file.
+   It has a single table: words, with a single text column named word.
+   this is full path to my SQLIte storage
+   please replace it with yours
+   for that use one of the many available SQLite management app's
+*/
 	inline  auto test_statement_using(
 		result_row_user_type row_user_,
-		/* 
-		   As a sample DB, I am using an English dictionary in a file,
-		   https://github.com/dwyl/english-words/
-		   which I have transformed in the SQLite 3 DB file. 
-		   It has a single table: words, with a single text column named word.
-		   this is full path to my SQLIte storage 
-		   please replace it with yours
-		   for that use one of the many available SQLite management app's
-		*/
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
@@ -365,7 +365,7 @@ namespace dbj_db_test_
 			database db(db_file);
 			create_demo_db(db);
 			// provoke error
-			db.query_result("select word from words where word like 'bb%'",
+			db.query("select word from words where word like 'bb%'",
 				row_user_);
 		}
 		catch (sql_exception const & e)
@@ -375,7 +375,5 @@ namespace dbj_db_test_
 	}
 } // nspace
 #endif // DBJ_DB_TESTING
-
-
 #undef DBJ_VERIFY_
 #undef DBJ_STR

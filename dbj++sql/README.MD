@@ -134,7 +134,7 @@ is (almost) all in one class:
 ```cpp
 // second argument for 
 // the database method
-// query_result
+// query
 using result_row_user_type =
 int(*)(
 const size_t , const vector &amp; , const value_decoder &amp;
@@ -161,7 +161,7 @@ Call with query and an
 // optional callback row user
 To operate on rows of the the result table
 */
-auto query_result(
+auto query(
 char const * query_,
 optional<result_row_user_type> row_user_ = nullopt
 );
@@ -205,7 +205,7 @@ using namespace dbj::db ;
 try {
 // full path to your db file
 database db(db_file);
-db.query_result("select word from words where word like 'bb%'", cb_);
+db.query("select word from words where word like 'bb%'", cb_);
 }
 catch (sql_exception const & e) {
 wprintf(L"SQLite Exception\t%d, %S\n", e.code, e.message.c_str());
@@ -247,7 +247,7 @@ mutable sqlite3_stmt * statement_{};
 }; // value_decoder
 ```
 
-Before using the callback and from inside query_result method, we make and send as argument to it, instacne of the above struct. Its single functional call operator returns a <code>value_decoder::transformer</code> instance for the particular column, from the result set. The crucial line from a callnack above once more, But with explanation this time:
+Before using the callback and from inside query method, we make and send as argument to it, instacne of the above struct. Its single functional call operator returns a <code>value_decoder::transformer</code> instance for the particular column, from the result set. The crucial line from a callnack above once more, But with explanation this time:
 
 ```cpp
 std::string   word_ = val_user(0);

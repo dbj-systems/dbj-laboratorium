@@ -1,65 +1,6 @@
 #include "pch.h"
-
 #define DBJ_DB_TESTING
 #include "..\dbj++sql\dbj++sql.h"
-namespace {
-#if 0
-	// using callback_type = int(*)(
-	// void * , int , char ** , char ** );
-	// NOTE! carefull with large data sets, 
-	// as this is called once per row
-	int dbj_sqlite_callback(
-		void *  a_param[[maybe_unused]],
-		int argc, char **  argv,
-		char ** column
-	)
-	{
-		using dbj::console::print;
-		// print the row
-		print("\n");
-		// we need to know the structure of the row 
-		for (int i = 0; i < argc; i++)
-			print("\t", i, ": ", column[i], " --> [", argv[i], "]");
-		return 0;
-	}
-#endif
-	/*
-	once per each row
-	*/
-	int example_callback(
-		const size_t row_id,
-		/* this is giving us column count and column names */
-		[[maybe_unused]] const std::vector<std::string> & col_names,
-		const dbj::db::value_decoder & val_user
-	)
-	{
-		using dbj::console::print;
-		// 'automagic' transform to std::string
-		// of the column 0 value for this row
-		std::string   word_ = val_user(0);
-		print("\n\t", row_id, "\t", word_);
-
-		// all these should provoke exception
-		// TODO: but they don't -- currently
-		long   DBJ_MAYBE(number_) = val_user(0);
-		double DBJ_MAYBE(real_) = val_user(0);
-		return SQLITE_OK;
-	}
-
-	DBJ_TEST_UNIT(dbj_sql_lite)
-	{
-		dbj_db_test_::test_insert();
-		dbj::console::print("\ndbj_sqlite_callback\n");
-		dbj_db_test_::test_select(example_callback);
-		dbj::console::print("\ndbj_sqlite_statement_user\n");
-		dbj_db_test_::test_statement_using(example_callback);
-	}
-} // nspace
-#undef DBJ_DB_TESTING
-
-namespace
-{
-	using namespace std;
 
 	extern "C" inline bool is_pal(const char* str) {
 		char* s = (char*)str;
@@ -88,66 +29,164 @@ namespace
 		return true;
 	}
 
-#pragma region sqlite udf-s
-
+	using namespace std;
 	using namespace ::sqlite;
-	/* this is the UDF */
-	static void palindrome(
-		sqlite3_context *context, int argc, sqlite3_value **argv)
+
+	struct sqlite3_value_provider final
 	{
-		sqlite3_result_null(context);
-		if (sqlite3_value_type(argv[0]) != SQLITE_TEXT) return;
-		if (argc < 1) return;
+		/* curently BLOB's are unhandled, they are to be implemented as vector<unsigned char> */
+		struct transformer final
+		{
+			/* if user needs  float, the user will handle that best */
+			operator double() const noexcept {
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_FLOAT)
+				{
+				}
+				return sqlite3_value_double(argv[col_index_]);
+			}
+			operator long() const noexcept {
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_INTEGER)
+				{
+				}
+				return sqlite3_value_int(argv[col_index_]);
+			}
+			operator long long() const noexcept 
+			{
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_INTEGER) 
+				{
+				}
+				return sqlite3_value_int64 (argv[col_index_]);
+			}
+			operator std::string() const noexcept 
+			{
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) {
+				}
+				char *text = (char*)sqlite3_value_text(argv[col_index_]);
+				_ASSERTE(text);
+				size_t text_length = sqlite3_value_bytes(argv[col_index_]);
+				_ASSERTE(text_length > 0);
+				return { text, text_length };
+			}
 
-		char *text = (char*)sqlite3_value_text(argv[0]);
-		_ASSERTE(text);
-		size_t text_length = sqlite3_value_bytes(argv[0]);
-		_ASSERTE(text_length > 0);
-		std::string word_{ text, text_length };
+			mutable sqlite3_value **argv{};
+			mutable size_t			 col_index_;
+		};
 
-		static int result = 0; // aka 'false'
-		result = is_pal(word_.c_str());
-		sqlite3_result_int(context, result);
-		return;
+		/*	return the transformer for a column	*/
+		sqlite3_value_provider::transformer 
+			operator ()(size_t col_idx) const noexcept
+		{
+			_ASSERTE(this->argv_);
+			return transformer{
+				this->argv_, col_idx
+			};
+		}
+		// --------------------------------------
+		mutable sqlite3_value **argv_{};
+	}; // sqlite3_value_provider
+
+	struct sqlite3_result_provider final {
+		
+		mutable sqlite3_context *context_;
+
+		// this will cause the sqlite3 to throw the exeception from
+		// the udf using mechanism
+		void return_error (const std::string & msg_) const noexcept
+		{ sqlite3_result_error(context_, msg_.c_str(), msg_.size() ); }
+
+		// sink the result using the appropriate sqlite3 function
+
+		void  operator () (const std::string & value_) const noexcept
+		{
+			sqlite3_result_text(context_, value_.c_str(), value_.size(), nullptr); 
+		}
+
+		void  operator () (std::string_view value_) const noexcept
+		{
+			sqlite3_result_text(context_, value_.data(), value_.size(), nullptr); 
+		}
+
+		void operator () (double value_) const noexcept
+		{
+			sqlite3_result_double(context_, value_); 
+		}
+
+		void operator () (int value_) const noexcept
+		{
+			sqlite3_result_int(context_, value_); 
+		}
+
+		void operator () (long value_) const noexcept
+		{
+			sqlite3_result_int(context_, value_); 
+		}
+
+		void operator () (long long value_) const noexcept
+		{
+			sqlite3_result_int64(context_, value_);
+		}
+
+		void operator () ( nullptr_t ) const noexcept
+		{
+			sqlite3_result_null(context_); 
+		}
+	}; // sqlite3_result_provider
+
+	/* this is the UDF required */
+    inline void palindrome(
+			const sqlite3_value_provider  & value_,
+			const sqlite3_result_provider & result_
+	) 
+	{
+		std::string word_ = value_(0);
+		int result = is_pal(word_.c_str());
+		result_(result);
 	}
 
-	/*
-	once per each row
-	*/
+	using udf_type = void(__cdecl *)
+		(sqlite3_context *context, int argc, sqlite3_value **argv);
+
+	template< typename UDF>
+	inline udf_type make_udf_container ( UDF udf ) {
+		auto the_udf = [&]
+		(sqlite3_context *context,
+			int argc, 
+			sqlite3_value **argv )
+			-> void
+		{
+			(void)noexcept(argc); // unused for now
+			_ASSERTE(context);
+			_ASSERTE(argv);
+				sqlite3_value_provider  values_{ argv };
+				sqlite3_result_provider result_{ context };
+			udf(values_, result_);
+		};
+		return the_udf ;
+	} // make_udf_container
+
+	/* per each row */
 	static int dbj_sqlite_result_row_callback(
 		[[maybe_unused]] const size_t row_id,
 		[[maybe_unused]] const std::vector<std::string> & col_names,
 		[[maybe_unused]] const dbj::db::value_decoder & val_user
 	)
 	{
-#if 1
 		return SQLITE_OK;
-#else
-		using dbj::console::print;
-		// 'automagic' transform to std::string
-		// of the column 0 value for this row
-		size_t DBJ_MAYBE(col_count) = col_names.size();
-		std::string   word_ = val_user(0);
-		// int  is_palindrome_ = val_user(1);
-		print("\n\t", row_id, "\t", word_);
-		// print("\n\t", row_id, "\t", word_, "\t\t is palindrome: ", (is_palindrome_ ? "true" : "false")
-		return SQLITE_OK;
-#endif
 	}
-	void test_udf
-	(
+
+	void test_udf (
 		std::string_view query_
 		= "SELECT word, palindrome(word) FROM words WHERE word LIKE('bb%')"
 	)
 	{
 		using dbj::console::print;
 		constexpr auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
+		try	{
 
-		try
-		{
+			udf_type udf_ = make_udf_container( palindrome );
 			dbj::db::database db(db_file);
-			db.register_user_defined_function("palindrome", palindrome);
-			db.query_result(
+			db.register_user_defined_function("palindrome", udf_ );
+			db.query(
 				query_.data(),
 				dbj_sqlite_result_row_callback
 			);
@@ -157,8 +196,8 @@ namespace
 			print(L"dbj::db exception");
 			print("\n code:", e.code, ", message: ", e.message.c_str());
 		}
-	}
-#pragma endregion
+	} // test_udf
+
 
 	DBJ_TEST_UNIT(dbj_sql_lite_udf)
 	{
@@ -179,4 +218,36 @@ namespace
 		test([&] {  return miliseconds_measure ([&] { test_udf(Q); }); });
 		test([&] {  return seconds_measure     ([&] { test_udf(Q); }); });
 	}
-}
+
+namespace anyspace {
+	/*
+	once per each row
+	*/
+	int example_callback(
+		const size_t row_id,
+		[[maybe_unused]] const std::vector<std::string> & col_names,
+		const dbj::db::value_decoder & val_user
+	)
+	{
+		using dbj::console::print;
+		// 'automagic' transform to std::string
+		// of the column 0 value for this row
+		std::string   word_ = val_user(0);
+		print("\n\t", row_id, "\t", word_);
+
+		// all these should provoke exception
+		// TODO: but they don't -- currently
+		long   DBJ_MAYBE(number_) = val_user(0);
+		double DBJ_MAYBE(real_) = val_user(0);
+		return SQLITE_OK;
+	}
+
+	DBJ_TEST_UNIT(dbj_sql_lite)
+	{
+		dbj_db_test_::test_insert();
+		dbj::console::print("\ndbj_sqlite_callback\n");
+		dbj_db_test_::test_select(example_callback);
+		dbj::console::print("\ndbj_sqlite_statement_user\n");
+		dbj_db_test_::test_statement_using(example_callback);
+	}
+} // nspace
