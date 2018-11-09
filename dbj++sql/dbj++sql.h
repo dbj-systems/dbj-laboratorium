@@ -235,11 +235,11 @@ namespace dbj::db {
 		will do 'something like':
 		sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
 		*/
-		auto register_user_defined_function
+		auto register_user_defined_function 
 		( 
 			string_view udf_name, 
 			void(__cdecl * udf_)(sqlite3_context *, int, sqlite3_value **)
-		) 
+		) const
 		{
 			if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
 			auto const result 

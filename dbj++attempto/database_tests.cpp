@@ -132,29 +132,16 @@
 		}
 	}; // sqlite3_result_provider
 
-	/* this is the UDF required */
-    inline void palindrome(
-			const sqlite3_value_provider  & value_,
-			const sqlite3_result_provider & result_
-	) 
-	{
-		std::string word_ = value_(0);
-		int result = is_pal(word_.c_str());
-		result_(result);
-	}
+	using dbj_sql_udf_type = 
+		void (*) (const sqlite3_value_provider  & , const sqlite3_result_provider & );
+
 
 	using sqlite3_udf_type = void(__cdecl *)
 		(sqlite3_context *context, int argc, sqlite3_value **argv);
 
-	template<typename UDF>
+	template<dbj_sql_udf_type udf_>
 	struct udf_holder final
 	{
-		inline static UDF udf_;
-
-		explicit udf_holder(UDF new_udf_) {
-			udf_holder::udf_ = new_udf_;
-		}
-
 		static void function
 		(sqlite3_context *context,
 			int argc,
@@ -165,15 +152,31 @@
 			_ASSERTE(argv);
 			sqlite3_value_provider  values_{ argv };
 			sqlite3_result_provider result_{ context };
-			udf_holder::udf_(values_, result_);
+			udf_(values_, result_);
 		}
 	};
 
-	template< typename UDF>
-	inline auto make_udf_container ( [[maybe_unused]] UDF udf ) 
+	/* the dbj UDF required */
+	inline void palindrome(
+		const sqlite3_value_provider  & value_,
+		const sqlite3_result_provider & result_
+	)
 	{
-		return udf_holder<UDF>(udf);
-	} // make_udf_container
+		std::string word_ = value_(0);
+		int result = is_pal(word_.c_str());
+		result_(result);
+	}
+
+	/* second dbj UDF required */
+	inline void strlen(
+		const sqlite3_value_provider  & value_,
+		const sqlite3_result_provider & result_
+	)
+	{
+		std::string word_ = value_(0);
+		int result = (int)(word_.size());
+		result_(result);
+	}
 
 	/* per each row */
 	static int dbj_sqlite_result_row_callback(
@@ -183,25 +186,35 @@
 	)
 	{
 		std::string word = val_user(0);
-		dbj::console::print( "\n[", row_id , "] word: ", word);
+		int len_ = val_user(1);
+		dbj::console::print( "\n[", row_id , "] word: ", word, ", length: ", len_ );
 		return SQLITE_OK;
 	}
 
+	template<dbj_sql_udf_type dbj_udf_>
+	void register_dbj_udf (
+		const dbj::db::database & db,
+		const char * dbj_udf_name_
+		)
+	{
+		using udf_container_type = udf_holder<dbj_udf_>;
+		sqlite3_udf_type udf_ = &udf_container_type::function;
+		db.register_user_defined_function(dbj_udf_name_, udf_);
+	};
+
 	void test_udf (
 		std::string_view query_
-		= "SELECT word FROM words WHERE word (1 == palindrome(word))"
+		= "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	)
 	{
 		constexpr auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
 		try	{
-
-			dbj::console::print("\n\nquery:", query_ , " the result:\n");
-
-			auto udf_container = make_udf_container( palindrome );
-			using udf_container_type = decltype(udf_container);
-			sqlite3_udf_type udf_ = & udf_container_type::function;
+			dbj::console::print("\n\nquery:", query_ , "\nthe result:\n");
 			dbj::db::database db(db_file);
-			db.register_user_defined_function("palindrome", udf_ );
+			
+			register_dbj_udf<palindrome>( db, "palindrome");
+			register_dbj_udf<strlen>( db, "strlen");
+
 			db.query(
 				query_.data(),
 				dbj_sqlite_result_row_callback
@@ -225,15 +238,12 @@
 			prinf("\nMeasurement end\t%s", rezult.c_str());
 		};
 		
-		constexpr static auto Q
-			= "SELECT word FROM words WHERE 1 == palindrome(word)"sv;
-
 		using namespace dbj::kalends;
 
-		test([&] {  return measure             ([&] { test_udf(Q); }); });
-		test([&] {  return microseconds_measure([&] { test_udf(Q); }); });
-		test([&] {  return miliseconds_measure ([&] { test_udf(Q); }); });
-		test([&] {  return seconds_measure     ([&] { test_udf(Q); }); });
+		test([&] {  return measure             ([&] { test_udf(); }); });
+		test([&] {  return microseconds_measure([&] { test_udf(); }); });
+		test([&] {  return miliseconds_measure ([&] { test_udf(); }); });
+		test([&] {  return seconds_measure     ([&] { test_udf(); }); });
 	}
 
 namespace anyspace {
