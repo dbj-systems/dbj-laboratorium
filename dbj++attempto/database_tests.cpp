@@ -143,25 +143,36 @@
 		result_(result);
 	}
 
-	using udf_type = void(__cdecl *)
+	using sqlite3_udf_type = void(__cdecl *)
 		(sqlite3_context *context, int argc, sqlite3_value **argv);
 
-	template< typename UDF>
-	inline udf_type make_udf_container ( UDF udf ) {
-		auto the_udf = [&]
+	template<typename UDF>
+	struct udf_holder final
+	{
+		inline static UDF udf_;
+
+		explicit udf_holder(UDF new_udf_) {
+			udf_holder::udf_ = new_udf_;
+		}
+
+		static void function
 		(sqlite3_context *context,
-			int argc, 
-			sqlite3_value **argv )
-			-> void
+			int argc,
+			sqlite3_value **argv)
 		{
 			(void)noexcept(argc); // unused for now
 			_ASSERTE(context);
 			_ASSERTE(argv);
-				sqlite3_value_provider  values_{ argv };
-				sqlite3_result_provider result_{ context };
-			udf(values_, result_);
-		};
-		return the_udf ;
+			sqlite3_value_provider  values_{ argv };
+			sqlite3_result_provider result_{ context };
+			udf_holder::udf_(values_, result_);
+		}
+	};
+
+	template< typename UDF>
+	inline auto make_udf_container ( [[maybe_unused]] UDF udf ) 
+	{
+		return udf_holder<UDF>(udf);
 	} // make_udf_container
 
 	/* per each row */
@@ -171,19 +182,24 @@
 		[[maybe_unused]] const dbj::db::value_decoder & val_user
 	)
 	{
+		std::string word = val_user(0);
+		dbj::console::print( "\n[", row_id , "] word: ", word);
 		return SQLITE_OK;
 	}
 
 	void test_udf (
 		std::string_view query_
-		= "SELECT word, palindrome(word) FROM words WHERE word LIKE('bb%')"
+		= "SELECT word FROM words WHERE word (1 == palindrome(word))"
 	)
 	{
-		using dbj::console::print;
 		constexpr auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
 		try	{
 
-			udf_type udf_ = make_udf_container( palindrome );
+			dbj::console::print("\n\nquery:", query_ , " the result:\n");
+
+			auto udf_container = make_udf_container( palindrome );
+			using udf_container_type = decltype(udf_container);
+			sqlite3_udf_type udf_ = & udf_container_type::function;
 			dbj::db::database db(db_file);
 			db.register_user_defined_function("palindrome", udf_ );
 			db.query(
@@ -193,8 +209,9 @@
 		}
 		catch (dbj::db::sql_exception const & e)
 		{
-			print(L"dbj::db exception");
-			print("\n code:", e.code, ", message: ", e.message.c_str());
+			dbj::console::print(
+			"\ndbj::db exception\n code:", e.code, ", message: ", e.message.c_str()
+			);
 		}
 	} // test_udf
 
