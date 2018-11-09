@@ -30,6 +30,9 @@
     <ClInclude Include="sqlite++.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_easy_udf_sample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

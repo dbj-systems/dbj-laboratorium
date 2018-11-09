@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dbj++sql.h" />
+    <ClInclude Include="dbj_easy_udf_sample.h" />
     <ClInclude Include="handle.h" />
     <ClInclude Include="sqlite++.h" />
     <ClInclude Include="sqlite\sqlite3.h" />

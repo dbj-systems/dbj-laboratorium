@@ -1,13 +1,21 @@
 #pragma once
-//  
-// (very) small SQLITE standard C++  framework, dbj.org created
-// 
-// inspired by:
-// https://visualstudiomagazine.com/articles/2014/02/01/using-sqlite-with-modern-c.aspx
-//
-// requires C++17
-// #define DBJ_DB_TESTING for testing, see the file bottom part
-//
+/*
+Copyright 2018 by dbj@dbj.org
+
+Small SQLITE standard C++17  API, dbj.org created
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http ://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 #include "sqlite++.h"
 #include <string>
 #include <optional>
@@ -295,7 +303,7 @@ namespace dbj::db {
 
 #pragma region dbj sqlite easy udf
 
-	struct dbj_sql_udf_value final
+	struct udf_value final
 	{
 		/* curently BLOB's are unhandled, they are to be implemented as vector<unsigned char> */
 		struct transformer final
@@ -336,7 +344,7 @@ namespace dbj::db {
 		};
 
 		/*	return the transformer for a column	*/
-		dbj_sql_udf_value::transformer
+		udf_value::transformer
 			operator ()(size_t col_idx) const noexcept
 		{
 			_ASSERTE(this->argv_);
@@ -346,9 +354,9 @@ namespace dbj::db {
 		}
 		// --------------------------------------
 		mutable sqlite3_value **argv_{};
-	}; // dbj_sql_udf_value
+	}; // udf_value
 
-	struct dbj_sql_udf_retval final {
+	struct udf_retval final {
 
 		mutable sqlite3_context *context_;
 
@@ -395,10 +403,10 @@ namespace dbj::db {
 		{
 			sqlite3_result_null(context_);
 		}
-	}; // dbj_sql_udf_retval
+	}; // udf_retval
 
 	using dbj_sql_udf_type =
-		void(*) (const dbj_sql_udf_value  &, const dbj_sql_udf_retval &);
+		void(*) (const udf_value  &, const udf_retval &);
 
 
 	using sqlite3_udf_type = void(__cdecl *)
@@ -415,8 +423,8 @@ namespace dbj::db {
 			(void)noexcept(argc); // unused for now
 			_ASSERTE(context);
 			_ASSERTE(argv);
-			dbj_sql_udf_value  values_{ argv };
-			dbj_sql_udf_retval result_{ context };
+			udf_value  values_{ argv };
+			udf_retval result_{ context };
 			udf_(values_, result_);
 		}
 	};
