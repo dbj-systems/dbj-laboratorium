@@ -293,6 +293,147 @@ namespace dbj::db {
 
 	}; // database
 
+#pragma region dbj sqlite easy udf
+
+	struct dbj_sql_udf_value final
+	{
+		/* curently BLOB's are unhandled, they are to be implemented as vector<unsigned char> */
+		struct transformer final
+		{
+			/* if user needs  float, the user will handle that best */
+			operator double() const noexcept {
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_FLOAT)
+				{
+				}
+				return sqlite3_value_double(argv[col_index_]);
+			}
+			operator long() const noexcept {
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_INTEGER)
+				{
+				}
+				return sqlite3_value_int(argv[col_index_]);
+			}
+			operator long long() const noexcept
+			{
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_INTEGER)
+				{
+				}
+				return sqlite3_value_int64(argv[col_index_]);
+			}
+			operator std::string() const noexcept
+			{
+				if (sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) {
+				}
+				char *text = (char*)sqlite3_value_text(argv[col_index_]);
+				_ASSERTE(text);
+				size_t text_length = sqlite3_value_bytes(argv[col_index_]);
+				_ASSERTE(text_length > 0);
+				return { text, text_length };
+			}
+
+			mutable sqlite3_value **argv{};
+			mutable size_t			 col_index_;
+		};
+
+		/*	return the transformer for a column	*/
+		dbj_sql_udf_value::transformer
+			operator ()(size_t col_idx) const noexcept
+		{
+			_ASSERTE(this->argv_);
+			return transformer{
+				this->argv_, col_idx
+			};
+		}
+		// --------------------------------------
+		mutable sqlite3_value **argv_{};
+	}; // dbj_sql_udf_value
+
+	struct dbj_sql_udf_retval final {
+
+		mutable sqlite3_context *context_;
+
+		// this will cause the sqlite3 to throw the exeception from
+		// the udf using mechanism
+		void return_error(const std::string & msg_) const noexcept
+		{
+			sqlite3_result_error(context_, msg_.c_str(), msg_.size());
+		}
+
+		// sink the result using the appropriate sqlite3 function
+
+		void  operator () (const std::string & value_) const noexcept
+		{
+			sqlite3_result_text(context_, value_.c_str(), value_.size(), nullptr);
+		}
+
+		void  operator () (std::string_view value_) const noexcept
+		{
+			sqlite3_result_text(context_, value_.data(), value_.size(), nullptr);
+		}
+
+		void operator () (double value_) const noexcept
+		{
+			sqlite3_result_double(context_, value_);
+		}
+
+		void operator () (int value_) const noexcept
+		{
+			sqlite3_result_int(context_, value_);
+		}
+
+		void operator () (long value_) const noexcept
+		{
+			sqlite3_result_int(context_, value_);
+		}
+
+		void operator () (long long value_) const noexcept
+		{
+			sqlite3_result_int64(context_, value_);
+		}
+
+		void operator () (nullptr_t) const noexcept
+		{
+			sqlite3_result_null(context_);
+		}
+	}; // dbj_sql_udf_retval
+
+	using dbj_sql_udf_type =
+		void(*) (const dbj_sql_udf_value  &, const dbj_sql_udf_retval &);
+
+
+	using sqlite3_udf_type = void(__cdecl *)
+		(sqlite3_context *context, int argc, sqlite3_value **argv);
+
+	template<dbj_sql_udf_type udf_>
+	struct udf_holder final
+	{
+		static void function
+		(sqlite3_context *context,
+			int argc,
+			sqlite3_value **argv)
+		{
+			(void)noexcept(argc); // unused for now
+			_ASSERTE(context);
+			_ASSERTE(argv);
+			dbj_sql_udf_value  values_{ argv };
+			dbj_sql_udf_retval result_{ context };
+			udf_(values_, result_);
+		}
+	};
+
+	template<dbj_sql_udf_type dbj_udf_>
+	inline void register_dbj_udf(
+		const dbj::db::database & db,
+		const char * dbj_udf_name_
+	)
+	{
+		using udf_container_type = udf_holder<dbj_udf_>;
+		sqlite3_udf_type udf_ = &udf_container_type::function;
+		db.register_user_defined_function(dbj_udf_name_, udf_);
+	};
+
+#pragma endregion dbj sqlite easy udf
+
 } // namespace dbj::db
 
 	/*
