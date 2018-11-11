@@ -31,20 +31,37 @@ namespace dbj::db {
 	using namespace ::std;
 	using namespace ::sqlite;
 
-	struct sql_exception
+	struct sql_exception final
 	{
-		using message_arg_type = char const *;
-		int code;
-		string message;
-
-		sql_exception(int const result, message_arg_type text) :
-			code{ result },
-			message{ text }
-		{}
+		const int code;
+		const std::string message;
 	};
+
+	/*	dbj db error codes, are all < 0	*/
+	enum struct error_code : int { OK = -1, GENERIC = -2, UDF_ARGC_INVALID = -3 };
+
+	inline string_view  error_message (error_code code_)
+	{
+		switch (code_) {
+		case error_code::OK: return "Not an error"sv; break;
+		case error_code::GENERIC: return "Generic dbj db error"sv; break;
+		case error_code::UDF_ARGC_INVALID: return "Invalid dbj db udf argument index"sv; break;
+		}
+		return "Unknown dbj db error code"sv;
+	};
+
+	/*
+	here we make dbj db related sql_exception instances
+	*/
+	inline sql_exception error_instance(error_code code_ , 
+	 	optional<string_view> user_message_ = nullopt 
+	) {
+
+		return sql_exception
+		{ (int)code_,  user_message_.value_or( error_message(code_).data()).data() };
+	}
 }
 
-enum class DBJ_DB_ERROR { OK = -1, ERR = -2 };
 
 #ifndef DBJ_STR
 #define DBJ_STR(x) #x
@@ -52,7 +69,7 @@ enum class DBJ_DB_ERROR { OK = -1, ERR = -2 };
 
 #ifndef DBJ_VERIFY_
 #define DBJ_VERIFY_(R,X) if ( R != X ) \
-   throw ::dbj::db::sql_exception( int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X))
+   throw ::dbj::db::sql_exception{ int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
 #endif
 //NOTE: leave it here
 #include "handle.h"
@@ -206,7 +223,7 @@ namespace dbj::db {
 	statement_handle prepare_statement (char const * query_) const
 	{
 		_ASSERTE(query_);
-		if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
+		if (!handle) throw dbj::db::sql_exception{ 0, " Must call open() before " __FUNCSIG__ };
 
 		auto local_statement = statement_handle{};
 
@@ -249,7 +266,8 @@ namespace dbj::db {
 			void(__cdecl * udf_)(sqlite3_context *, int, sqlite3_value **)
 		) const
 		{
-			if (!handle) throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
+			if (!handle) throw 
+				dbj::db::error_instance ( error_code::GENERIC, " Must call open() before " __FUNCSIG__);
 			auto const result 
 				= sqlite3_create_function(
 					handle.get(), 
@@ -275,8 +293,8 @@ namespace dbj::db {
 		optional<result_row_user_type>  row_user_ = nullopt
 	) const
 	{
-		if (!handle) 
-			throw dbj::db::sql_exception(0, " Must call open() before " __FUNCSIG__);
+		if (!handle) throw
+			dbj::db::error_instance(error_code::GENERIC, " Must call open() before " __FUNCSIG__);
 
 		statement_handle statement_ = prepare_statement(query_);
 		vector<string> col_names_ { column_names( statement_ ) };
@@ -295,7 +313,7 @@ namespace dbj::db {
 	    }
 
 		if (rc != SQLITE_DONE) {
-			throw dbj::db::sql_exception(rc, sqlite3_errmsg(handle.get()));
+			throw dbj::db::sql_exception{ rc, sqlite3_errmsg(handle.get()) };
 		}
 	}
 
@@ -303,7 +321,7 @@ namespace dbj::db {
 
 #pragma region dbj sqlite easy udf
 
-	struct udf_value final
+	struct udf_argument final
 	{
 		/* curently BLOB's are unhandled, they are to be implemented as vector<unsigned char> */
 		struct transformer final
@@ -343,18 +361,26 @@ namespace dbj::db {
 			mutable size_t			 col_index_;
 		};
 
+		/* number of arguments */
+		size_t arg_count() const noexcept { return this->argc_; }
+
 		/*	return the transformer for a column	*/
-		udf_value::transformer
-			operator ()(size_t col_idx) const noexcept
+		udf_argument::transformer
+			operator ()(size_t col_idx) const 
 		{
 			_ASSERTE(this->argv_);
+
+			if (col_idx > argc_)
+				throw error_instance(error_code::UDF_ARGC_INVALID);
+
 			return transformer{
 				this->argv_, col_idx
 			};
 		}
 		// --------------------------------------
-		mutable sqlite3_value **argv_{};
-	}; // udf_value
+		mutable sqlite3_value	**argv_{};
+		mutable size_t			argc_;
+	}; // udf_argument
 
 	struct udf_retval final {
 
@@ -406,7 +432,7 @@ namespace dbj::db {
 	}; // udf_retval
 
 	using dbj_sql_udf_type =
-		void(*) (const udf_value  &, const udf_retval &);
+		void(*) (const udf_argument  &, const udf_retval &);
 
 
 	using sqlite3_udf_type = void(__cdecl *)
@@ -423,7 +449,7 @@ namespace dbj::db {
 			(void)noexcept(argc); // unused for now
 			_ASSERTE(context);
 			_ASSERTE(argv);
-			udf_value  values_{ argv };
+			udf_argument  values_{ argv, size_t(argc) };
 			udf_retval result_{ context };
 			udf_(values_, result_);
 		}

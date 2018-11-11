@@ -39,7 +39,7 @@ namespace dbj_easy_udfs_sample {
 		= "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"sv;
 	/* the palindrome udf */
 	inline void palindrome(
-		const udf_value  & value_,
+		const udf_argument  & value_,
 		const udf_retval & result_
 	)
 	{
@@ -65,11 +65,11 @@ namespace dbj_easy_udfs_sample {
 
 	/* the strlen udf */
 	inline void strlen(
-		const udf_value  & value_,
+		const udf_argument  & argument_,
 		const udf_retval & result_
 	)
 	{
-		std::string word_ = value_(0);
+		std::string word_ = argument_(0);
 		int result = (int)(word_.size());
 		result_(result);
 	}
@@ -114,7 +114,7 @@ namespace dbj_easy_udfs_sample {
 		catch (dbj::db::sql_exception const & e)
 		{
 			::printf(
-				"\ndbj::db exception\n code:%3d, message:%64s ", e.code, e.message.c_str()
+				"\ndbj::db exception\n code:%3d, message:%s ", e.code, e.message.c_str()
 			);
 		}
 	} // test_udf
