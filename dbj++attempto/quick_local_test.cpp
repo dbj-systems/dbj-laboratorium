@@ -1,58 +1,60 @@
 #include "pch.h"
 #include <assert.h>
 
-extern "C" inline bool petar_pal(const char* str)
-{
-	char* a = (char*)str,
-		*p = a,
-		*q = p;
-	int n = strlen(str);
-	for (p = a, q = a + n - 1;
-		p < q;
-		p++, q--
-		)
+namespace palindromes_research {
+	extern "C" inline bool petar_pal(const char* str)
 	{
-		if (*p != *q) return false;
+		char* a = (char*)str,
+			*p = a,
+			*q = p;
+		int n = strlen(str);
+		for (p = a, q = a + n - 1;
+			p < q;
+			p++, q--
+			)
+		{
+			if (*p != *q) return false;
+		}
+		return true;
 	}
-	return true;
-}
 
 
-extern "C" inline bool is_pal(const char* str) {
-	char* s = (char*)str;
-	char* e = (char*)str;
-	// pomeri e na str kraj 
-	// tj na '\0'
-	while (*e) e++;
-	// vrati ga na zadnje slovo 
-	--e;
-	// imamo dva setacha
-	while (s < e) {
-		// razliciti sadrzaji s'leva
-		// i s'desna 
-		// dakle ne moze biti palindrom
-		if (*s != *e) return false;
-		// levi napreduje u desno
-		++s;
-		// desni napreduje u levo
+	extern "C" inline bool is_pal(const char* str) {
+		char* s = (char*)str;
+		char* e = (char*)str;
+		// pomeri e na str kraj 
+		// tj na '\0'
+		while (*e) e++;
+		// vrati ga na zadnje slovo 
 		--e;
-		// *moguca* optimizacija je 
-		// da je desni levo od levog
-		if (e < s) break;
-		// prekidamo petlju 
-		// rezultat je true
+		// imamo dva setacha
+		while (s < e) {
+			// razliciti sadrzaji s'leva
+			// i s'desna 
+			// dakle ne moze biti palindrom
+			if (*s != *e) return false;
+			// levi napreduje u desno
+			++s;
+			// desni napreduje u levo
+			--e;
+			// *moguca* optimizacija je 
+			// da je desni levo od levog
+			if (e < s) break;
+			// prekidamo petlju 
+			// rezultat je true
+		}
+		return true;
 	}
-	return true;
-}
 
 
-inline void test_palindroma(const char * word_ = "012345678909876543210")
-{
-	_ASSERTE(is_pal("ANA"));
-	_ASSERTE(is_pal(word_));
-	_ASSERTE(petar_pal("ANA"));
-	_ASSERTE(petar_pal(word_));
-}
+	inline void test_palindroma(const char * word_ = "012345678909876543210")
+	{
+		_ASSERTE(is_pal("ANA"));
+		_ASSERTE(is_pal(word_));
+		_ASSERTE(petar_pal("ANA"));
+		_ASSERTE(petar_pal(word_));
+	}
+} // palindromes_research
 
 namespace bulk_free {
 
@@ -172,7 +174,7 @@ auto succ = [] (auto N) {
 		auto o_ = one() ;
 		auto t_ = two() ;
 		auto h_ = three() ;
-*/
 		system("pause");
+*/
 	}
 }

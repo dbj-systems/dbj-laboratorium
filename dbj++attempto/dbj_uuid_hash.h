@@ -44,7 +44,7 @@ struct K final {
 #define STR(x) #x
 DBJ_TEST_UNIT(dbj_compile_time_random) 
 {
-	unsigned long DBJ_MAYBE( drk ){ dbj_random_kiss() };
+//	unsigned long DBJ_MAYBE( drk ){ dbj_random_kiss() };
 
 	constexpr auto isit = dbj::util::compile_time_random();
 

@@ -431,29 +431,28 @@ namespace dbj::db {
 		}
 	}; // udf_retval
 
-	using dbj_sql_udf_type =
-		void(*) (const udf_argument  &, const udf_retval &);
+using dbj_sql_udf_type =
+	void(*) (const udf_argument  &, const udf_retval &);
 
+using sqlite3_udf_type = void(__cdecl *)
+(sqlite3_context *context, int argc, sqlite3_value **argv);
 
-	using sqlite3_udf_type = void(__cdecl *)
-		(sqlite3_context *context, int argc, sqlite3_value **argv);
-
-	template<dbj_sql_udf_type udf_>
-	struct udf_holder final
-	{
-		static void function
-		(sqlite3_context *context,
-			int argc,
-			sqlite3_value **argv)
-		{
-			(void)noexcept(argc); // unused for now
-			_ASSERTE(context);
-			_ASSERTE(argv);
-			udf_argument  values_{ argv, size_t(argc) };
-			udf_retval result_{ context };
-			udf_(values_, result_);
-		}
-	};
+template<dbj_sql_udf_type udf_>
+struct udf_holder final
+{
+static void function
+(sqlite3_context *context,
+	int argc,
+	sqlite3_value **argv)
+{
+	(void)noexcept(argc); // unused for now
+	_ASSERTE(context);
+	_ASSERTE(argv);
+	udf_argument  values_{ argv, size_t(argc) };
+	udf_retval result_{ context };
+	udf_(values_, result_);
+}
+};
 
 	template<dbj_sql_udf_type dbj_udf_>
 	inline void register_dbj_udf(
