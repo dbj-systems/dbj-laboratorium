@@ -157,13 +157,6 @@ namespace dbj::db {
 		}
 	}; // unique_handle
 
-} // dbj
-
-namespace dbj::db {
-
-	// using namespace ::KennyKerr;
-	using namespace ::std;
-	using namespace ::sqlite;
 #pragma region connection and statement traits
 	struct connection_handle_traits final
 	{
