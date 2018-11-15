@@ -20,16 +20,13 @@ limitations under the License.
 #include <string>
 #include <optional>
 #include <vector>
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 #include <crtdbg.h>
 
 namespace dbj::db {
 
 	using namespace ::std;
 	using namespace ::sqlite;
+	using namespace ::std::string_view_literals;
 
 	struct sql_exception final
 	{
@@ -60,8 +57,6 @@ namespace dbj::db {
 		return sql_exception
 		{ (int)code_,  user_message_.value_or( error_message(code_).data()).data() };
 	}
-}
-
 
 #ifndef DBJ_STR
 #define DBJ_STR(x) #x
@@ -71,15 +66,105 @@ namespace dbj::db {
 #define DBJ_VERIFY_(R,X) if ( R != X ) \
    throw ::dbj::db::sql_exception{ int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
 #endif
-//NOTE: leave it here
-#include "handle.h"
+
+	/* bastardized version of Keny Kerr's unique_handle */
+	template <typename Traits>
+	class unique_handle /* dbj added --> */ final
+	{
+		using pointer = typename Traits::pointer;
+
+		/* dbj added */ mutable
+			pointer m_value;
+
+		auto close() noexcept -> void
+		{
+			if (*this)
+			{
+				Traits::close(m_value);
+			}
+		}
+
+	public:
+
+		// DBJ: no copy, since WIN32 handles are not ok to copy them
+		unique_handle(unique_handle const &) = delete;
+		auto operator=(unique_handle const &)->unique_handle & = delete;
+
+		// DBJ: by default there is this ctor
+		explicit unique_handle(pointer value = Traits::invalid()) noexcept :
+			m_value{ value }
+		{
+		}
+
+		// DBJ: move semantics
+		unique_handle(unique_handle && other) noexcept :
+			m_value{ other.release() }
+		{
+		}
+
+		auto operator=(unique_handle && other) noexcept -> unique_handle &
+		{
+			if (this != &other)
+			{
+				reset(other.release());
+			}
+
+			return *this;
+		}
+
+		~unique_handle() noexcept
+		{
+			close();
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return m_value != Traits::invalid();
+		}
+
+		auto get() const noexcept -> pointer
+		{
+			return m_value;
+		}
+
+		auto get_address_of() noexcept -> pointer *
+		{
+			_ASSERTE(!*this);
+			return &m_value;
+		}
+
+		auto release() noexcept -> pointer
+		{
+			auto value = m_value;
+			m_value = Traits::invalid();
+			return value;
+		}
+
+		auto reset(pointer value = Traits::invalid()) noexcept -> bool
+		{
+			if (m_value != value)
+			{
+				close();
+				m_value = value;
+			}
+
+			return static_cast<bool>(*this);
+		}
+
+		auto swap(unique_handle<Traits> & other) noexcept -> void
+		{
+			std::swap(m_value, other.m_value);
+		}
+	}; // unique_handle
+
+} // dbj
 
 namespace dbj::db {
 
-	using namespace ::KennyKerr;
+	// using namespace ::KennyKerr;
 	using namespace ::std;
 	using namespace ::sqlite;
-
+#pragma region connection and statement traits
 	struct connection_handle_traits final
 	{
 		using pointer = sqlite3 * ;
@@ -113,6 +198,8 @@ namespace dbj::db {
 	};
 
 	using statement_handle = unique_handle<statement_handle_traits>;
+#pragma endregion 
+	
 
 	/*
 	return the typed value from a single cell in a column
@@ -203,21 +290,18 @@ namespace dbj::db {
 	*/
 	class database final
 	{
-		mutable connection_handle handle;
+		mutable connection_handle handle{};
 
-	auto open(char const * filename)
+	static void open(connection_handle & handle_, char const * filename)
 	{
-		auto local = connection_handle{};
-
+		handle_.reset();
 		auto const result = sqlite3_open(filename,
-			local.get_address_of());
+			handle_.get_address_of());
 
 		if (SQLITE_OK != result)
 		{
-			throw sql_exception{ result, sqlite3_errmsg(local.get()) };
+			throw sql_exception{ result, sqlite3_errmsg(handle_.get()) };
 		}
-
-		handle = move(local);
 	}	
 	
 	statement_handle prepare_statement (char const * query_) const
@@ -253,7 +337,7 @@ namespace dbj::db {
 		explicit database( string_view storage_name ) 
 		{
 			// can throw
-			open(storage_name.data() );
+			open( this->handle, storage_name.data() );
 		}
 
 		/*
@@ -483,7 +567,7 @@ namespace dbj_db_test_
 	inline auto create_demo_db( const database & db)
 	{
 		db.query("DROP TABLE IF EXISTS demo");
-		db.query("CREATE TABLE demo_table ( Id int primary key, word nvarchar(100) not null )");
+		db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
 		db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
 	}
 
@@ -503,7 +587,7 @@ namespace dbj_db_test_
 
 	inline  auto test_select(
 		result_row_user_type cb_,
-		const char * db_file = ":memory:" // "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
+		const char * db_file = ":memory:" 
 	)
 	{
 		try
@@ -511,7 +595,7 @@ namespace dbj_db_test_
 			database db(db_file);
 			create_demo_db(db);
 			// select from the table
-			db.query("SELECT word FROM demo_table WHERE word LIKE 'G%'", cb_ );
+			db.query("SELECT Name FROM demo_table WHERE Name LIKE 'G%'", cb_ );
 		}
 		catch (sql_exception const & e)
 		{
@@ -537,7 +621,6 @@ namespace dbj_db_test_
 		try
 		{
 			database db(db_file);
-			create_demo_db(db);
 			// provoke error
 			db.query("select word from words where word like 'bb%'",
 				row_user_);

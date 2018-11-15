@@ -21,9 +21,6 @@
     <ClInclude Include="sqlite\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="handle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dbj++sql.h">
       <Filter>Header Files</Filter>
     </ClInclude>
