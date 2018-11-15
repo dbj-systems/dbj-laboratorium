@@ -28,6 +28,8 @@ namespace dbj::db {
 	using namespace ::sqlite;
 	using namespace ::std::string_view_literals;
 
+	constexpr inline auto version = "1.0.0"sv;
+
 	struct sql_exception final
 	{
 		const int code;
