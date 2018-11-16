@@ -87,7 +87,8 @@ namespace dbj_easy_udfs_sample {
 			/* this is deliberately verbose code */
 			std::string word = val_user(0);
 			int len_ = val_user(1);
-			::printf("\n\t[%3d]\tword: %32s,\tlength: %12d", row_id, word.c_str(), len_);
+			::printf("\n\t[%3d]\tword: %32s,\tlength: %12d", 
+				static_cast<int>(row_id), word.c_str(), len_);
 		}
 		// make sure to return this
 		return SQLITE_OK;

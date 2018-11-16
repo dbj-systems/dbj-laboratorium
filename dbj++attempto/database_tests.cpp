@@ -1,6 +1,6 @@
 #include "pch.h"
 #define DBJ_DB_TESTING
-#include "..\dbj++sql\dbj++sql.h"
+#include "..\dbj++sql\core_tests.h"
 #include "..\dbj++sql\dbj_easy_udf_sample.h"
 
 DBJ_TEST_UNIT(dbj_sql_lite_udf)
@@ -48,7 +48,7 @@ namespace anyspace {
 	{
 		dbj_db_test_::test_insert();
 		dbj::console::print("\ndbj_sqlite_callback\n");
-		dbj_db_test_::test_select(example_callback);
+		dbj_db_test_::test_select();
 		dbj::console::print("\ndbj_sqlite_statement_user\n");
 		dbj_db_test_::test_statement_using(example_callback);
 	}

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /*
 Copyright 2018 by dbj@dbj.org
 
@@ -28,7 +28,50 @@ namespace dbj::db {
 	using namespace ::sqlite;
 	using namespace ::std::string_view_literals;
 
-	constexpr inline auto version = "1.0.0"sv;
+	// constexpr inline auto version = "1.0.0"sv;
+	// core tests moved to core_tests.h
+	// also with advice on u8 string literals 
+	constexpr inline auto version = "1.0.1"sv;
+
+	/* 
+
+	It's recommended to do not use wchar_t because it's not portable. 
+	Use narrow char UTF-8 encoded strings instead. SQLite assumes all narrow
+	char strings are UTF-8, even for file names, even on Windows. 
+	Using this approach you can get the original code to work just by saving 
+	the file as UTF-8 without BOM. This will make the string
+
+     char q[] = "SELECT * FROM 'mydb' WHERE 'something' LIKE '%ĂÎȘȚÂ%'";
+
+    UTF-8 encoded on major compilers (including MSVC and GCC).
+	Thus. For WIN32 we simply do not use wchar_t 
+	Bellow are just the two helpers one can use to pass
+	wide char strings in and out
+
+https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/	*/
+#ifdef _MSC_VER
+	namespace {
+		// Convert a wide Unicode string to an UTF8 string
+		std::string wide_to_multi(std::wstring_view wstr)
+		{
+			if (wstr.empty()) return {};
+			int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+			std::string strTo(size_needed, 0);
+			WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+			return strTo;
+		}
+
+		// Convert an UTF8 string to a wide Unicode String
+		std::wstring multi_to_wide(std::string_view str)
+		{
+			if (str.empty()) return {};
+			int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+			std::wstring wstrTo(size_needed, 0);
+			MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+			return wstrTo;
+		}
+	}
+#endif
 
 	struct sql_exception final
 	{
@@ -235,7 +278,7 @@ namespace dbj::db {
 			}
 
 			mutable sqlite3_stmt *	statement_;
-			mutable size_t			col_index_;
+			mutable int			col_index_;
 		};
 
 		/* 
@@ -246,7 +289,7 @@ namespace dbj::db {
 		{
 			_ASSERTE(this->statement_);
 			return transformer{
-				this->statement_ ,col_idx 
+				this->statement_ , static_cast<int>(col_idx) 
 			};
 		}
 		// --------------------------------------
@@ -264,7 +307,7 @@ namespace dbj::db {
 
 		const size_t column_count = sqlite3_column_count(sh_.get());
 		vector<string> names{};
-		for (size_t n = 0; n < column_count; ++n) {
+		for (int n = 0; n < column_count; ++n) {
 			names.push_back( { sqlite3_column_name(sh_.get(), n) } );
 		}
 		return names;
@@ -469,19 +512,22 @@ namespace dbj::db {
 		// the udf using mechanism
 		void return_error(const std::string & msg_) const noexcept
 		{
-			sqlite3_result_error(context_, msg_.c_str(), msg_.size());
+			sqlite3_result_error(context_, msg_.c_str(), 
+				static_cast<int>(msg_.size()));
 		}
 
 		// sink the result using the appropriate sqlite3 function
 
 		void  operator () (const std::string & value_) const noexcept
 		{
-			sqlite3_result_text(context_, value_.c_str(), value_.size(), nullptr);
+			sqlite3_result_text(context_, value_.c_str(), 
+				static_cast<int>(value_.size()), nullptr);
 		}
 
 		void  operator () (std::string_view value_) const noexcept
 		{
-			sqlite3_result_text(context_, value_.data(), value_.size(), nullptr);
+			sqlite3_result_text(context_, value_.data(), 
+				static_cast<int>(value_.size()), nullptr);
 		}
 
 		void operator () (double value_) const noexcept
@@ -553,79 +599,6 @@ static void function
 		TESTS
 	-------------------------------------------------------------------------
 	*/   
-#ifdef DBJ_DB_TESTING
 
-namespace dbj_db_test_
-{
-	using namespace dbj::db;
-
-	inline auto create_demo_db( const database & db)
-	{
-		db.query("DROP TABLE IF EXISTS demo");
-		db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
-		db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
-	}
-
-	inline  auto test_insert(const char * db_file = ":memory:")
-	{
-		try
-		{
-			database db(db_file);
-			create_demo_db(db);
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"dbj::db exception");
-			wprintf(L"%d %S\n", e.code, e.message.c_str());
-		}
-	}
-
-	inline  auto test_select(
-		result_row_user_type cb_,
-		const char * db_file = ":memory:" 
-	)
-	{
-		try
-		{
-			database db(db_file);
-			create_demo_db(db);
-			// select from the table
-			db.query("SELECT Name FROM demo_table WHERE Name LIKE 'G%'", cb_ );
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"dbj::db exception");
-			wprintf(L"%d %S\n", e.code, e.message.c_str());
-		}
-	}
-
-/*
-   As a sample DB, I am using an English dictionary in a file,
-   https://github.com/dwyl/english-words/
-   which I have transformed in the SQLite 3 DB file.
-   It has a single table: words, with a single text column named word.
-   this is full path to my SQLIte storage
-   please replace it with yours
-   for that use one of the many available SQLite management app's
-*/
-	inline  auto test_statement_using(
-		result_row_user_type row_user_,
-		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
-	)
-	{
-		try
-		{
-			database db(db_file);
-			// provoke error
-			db.query("select word from words where word like 'bb%'",
-				row_user_);
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"\ndbj::db exception\n\t[%d] %S\n", e.code, e.message.c_str());
-		}
-	}
-} // nspace
-#endif // DBJ_DB_TESTING
 #undef DBJ_VERIFY_
 #undef DBJ_STR

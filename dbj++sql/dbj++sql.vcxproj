@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core_tests.h" />
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_easy_udf_sample.h" />
     <ClInclude Include="sqlite++.h" />
