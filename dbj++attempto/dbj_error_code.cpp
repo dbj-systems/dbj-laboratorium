@@ -1,34 +1,32 @@
 #include "pch.h"
 
+/* 
+it is a standard way how to do it so
+we will copy the designb of std:: ios error coding and signaling
+*/
+#include <ios>
+
+#ifndef _HAS_CXX17
+#error C++17 required
+#endif
 /*
 http://blog.think-async.com/2010/04/system-error-support-in-c0x-part-5.html
 
-
-namespace dbj::console {
-	template<> inline void out<class std::error_code>
-	(class std::error_code ec_)
-	{
-		::dbj::console::PRN.printf(
-			"value:%d, category:'%s', message:'%s'",
-			ec_.value(),
-			ec_.category().name(),
-			ec_.message().c_str()
-		);
-	}
-}
+user defined error_category implements std::error_category
+  and a "factory function" to deliver it as a singleton ref.
 */
-/*
-   user defined error_category implements std::error_category
-   and a "factory function" to deliver it as a singleton ref.
-*/
-const std::error_category & dbj_err_category()
+inline const std::error_category & dbj_err_category()
 {
 	/*
 	for an example look into <system_error> 
 	implmentation of a class _System_error_category
 	starting at line # 529
 	*/
-	struct dbj_err_category : public std::error_category 
+	struct dbj_err_category 
+		// inheriting from MSVC STD implementation
+		// has not meaning for dbj++ 
+		// ince it is not part of std
+		: public std::error_category 
 	{
 		_NODISCARD virtual const char *name() const noexcept
 		{
@@ -37,19 +35,31 @@ const std::error_category & dbj_err_category()
 		}
 
 		// error_code is looking here for the message
-		_NODISCARD virtual std::string message(int _Errval) const
+		// if we have inherited from std::error_code
+		// and if we have caught std::system_exception 
+		// and we have ginve this to its constructor
+		// the system will call back here
+		// when we call std::system_exception message()
+		_NODISCARD virtual 
+			std::string 
+			message(int last_win32_err) const
 		{
-			switch (_Errval) {
-			case 0: return "dbj default error message";
-			case 1:
-			case 2:
-			case 3:
-			default:
-				return "dbj unknown error message";
+			switch (last_win32_err) {
+			case 0: 
+				return 
+					dbj::err::message( ::dbj::err::errc::err_generic )
+				.data() ;
+			default: {
+				// so the message is window message
+				std::error_code ec =
+					std::error_code(last_win32_err, std::system_category());
+				return
+					ec.message();
+			}
 			}
 		}
 
-		/* this is vopy paste from MSVC STL 
+		/* this is copy paste from MSVC STL 
 		   <system_error> line # 562
 		*/
 		_NODISCARD virtual std::error_condition 
@@ -94,50 +104,56 @@ This is how msvc stl uses std::error_code, std::system_category and std::system_
 		error_code _Code(static_cast<int>(GetLastError()), system_category());
 		throw(system_error(_Code));
 	}
+
+	NOTE: we do not care for the above since dbj++ is not part of a ::std
+	nor is it system specific, unless we think of WIN32 as a system?
 */
 	 
 
 DBJ_TEST_SPACE_OPEN(how_to_use_system_error_portably)
 
-DBJ_TEST_UNIT(portable) {
-	std::error_code ec;
-	// also does the set to 0
-	auto DBJ_MAYBE(le) = dbj::win32::last_error();
+#ifdef _MSC_VER
+DBJ_TEST_UNIT(win32_system_specific_errors) {
+	/*
+	we can use ::std artefacts on MSVC platform to get system error messages
+	*/
 	char lpBuffer[64]{};
-#ifdef _WIN32
+	// provoke system error
 	DWORD DBJ_MAYBE(rv) = GetEnvironmentVariable(
-		LPCTSTR("whatever"),
+		LPCTSTR("whatever_non_existent_env_var"),
 		LPTSTR(lpBuffer),
 		DWORD(64)
 	);
-	ec = std::error_code(GetLastError(), std::system_category());
-#else
-	if (-1 == open(...))
-		ec = std::error_code(errno, std::system_category());
-#endif
+	auto last_win32_err = dbj::win32::last_error();
+	std::error_code ec =
+	std::error_code(last_win32_err, std::system_category());
+	DBJ_TEST_ATOM(ec.value());
+	DBJ_TEST_ATOM(ec.default_error_condition().message());
 	DBJ_TEST_ATOM(ec.message());
-
-	dbj::console::print(ec);
+	dbj::console::print("\n\n",ec, "\n");
 }
-
+#endif
 DBJ_TEST_UNIT(standard) {
 
 	using dbj::console::print;
-#if 1
 	try
 	{
-#endif
-		int DBJ_MAYBE( err_enum ) = int(std::errc::protocol_error);
-
-//		std::string throwerr;  
-//		auto DBJ_MAYBE( c ) = throwerr.at(1); // throws std::system_error
-
-		// we might provide our own exception that will 
-		// inherit from std::system_error
-	throw std::system_error( 
-		err_enum, dbj_err_category(),	" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n" 
+// std::ercc is again ::std thing not dbj++
+// int DBJ_MAYBE( err_enum ) = int(std::errc::protocol_error);
+//
+// we do *not* need to provide our own exception that will 
+// inherit from std::system_error
+	throw std::system_error
+	( 
+		// do we need to pass std::errc value here?
+		// we coild 'invent' a system where we stat from some high value
+		// e.g.1000, but that is obviously not platform agnostic
+		int(std::errc::protocol_error), 
+		// we could have and use dbj++ error category like here
+		dbj_err_category(),	
+		// this is arbitrary prompt
+		" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n"
 	);
-#if 1
 }
 	catch (const std::system_error& ex)
 	{
@@ -164,7 +180,6 @@ DBJ_TEST_UNIT(standard) {
 
 		print("error code: ", ex.code() , '\n' , '\n', "exception what: ", ex.what() , '\n' ) ;
 	}
-#endif
 }
 
 DBJ_TEST_SPACE_CLOSE

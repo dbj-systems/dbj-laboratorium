@@ -131,7 +131,7 @@ namespace dbj {
 					return invoke(fun, forward<ArgTypes>(args)...);
 				}
 				else {
-					throw dbj::Exception(" can not call on empty data wrapped ");
+					throw dbj::exception(" can not call on empty data wrapped ");
 				}
 			}
 
@@ -140,7 +140,7 @@ namespace dbj {
 					return any_cast<value_type>(this->any_);
 				}
 				catch (std::bad_any_cast & x) {
-					throw dbj::Exception(x.what());
+					throw dbj::exception(x.what());
 				}
 			}
 
@@ -288,7 +288,7 @@ DBJ_TEST_SPACE_OPEN(dbj_any_wrapper_testing)
 			auto DBJ_MAYBE(rez_4) = any_4(true);
 		}
 		catch (...) {
-			dbj::console::print(dbj::Exception(
+			dbj::console::print(dbj::exception(
 				__FUNCSIG__ "  Unknown exception caught! "
 			));
 		}

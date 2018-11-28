@@ -7,7 +7,7 @@ namespace palindromes_research {
 		char* a = (char*)str,
 			*p = a,
 			*q = p;
-		int n = strlen(str);
+		size_t n = strlen(str);
 		for (p = a, q = a + n - 1;
 			p < q;
 			p++, q--

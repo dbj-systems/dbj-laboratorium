@@ -18,9 +18,19 @@ limitations under the License.
 */
 #include "sqlite++.h"
 #include <string>
+#include <string_view>
 #include <optional>
 #include <vector>
+#include <cstdio>
 #include <crtdbg.h>
+
+#ifndef DBJ_VANISH
+#define DBJ_VANISH(...) static_assert( (noexcept(__VA_ARGS__),true) );
+#endif
+#ifndef DBJ_VERIFY
+#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::terror( #x ", failed", file, line )
+#define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
+#endif
 
 namespace dbj::db {
 
@@ -28,6 +38,13 @@ namespace dbj::db {
 	using namespace ::sqlite;
 	using namespace ::std::string_view_literals;
 
+[[noreturn]] inline void terror
+(const char * msg_, const char * file_, const int line_)
+{
+	_ASSERTE(msg_);	_ASSERTE(file_);_ASSERTE(line_);
+	::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
+	exit(EXIT_FAILURE);
+}
 	// constexpr inline auto version = "1.0.0"sv;
 	// core tests moved to core_tests.h
 	// also with advice on u8 string literals 
@@ -214,7 +231,7 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 
 		static auto close(pointer value) 
 		{
-			DBJ_VERIFY_(SQLITE_OK, sqlite3_close(value));
+			DBJ_VERIFY(bool(SQLITE_OK == sqlite3_close(value)));
 		}
 	};
 
@@ -231,7 +248,7 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 
 		static auto close(pointer value) 
 		{
-			DBJ_VERIFY_(SQLITE_OK, sqlite3_finalize(value));
+			DBJ_VERIFY(bool(SQLITE_OK == sqlite3_finalize(value)));
 		}
 	};
 

@@ -44,7 +44,7 @@ typedef struct dbj_string {
 static dbj_string * dbj_string_null()
 {
 	dbj_string * pair_ = (dbj_string *)malloc(sizeof(dbj_string));
-	DBJ_ASSERT(pair_);
+	_ASSERTE(pair_);
 	pair_->front = 0; pair_->back = 0; pair_->full_free = false; return pair_;
 }
 
@@ -60,15 +60,15 @@ static bool dbj_valid_string(const dbj_string * str)
 
 static void dbj_string_free(dbj_string * str)
 {
-	DBJ_ASSERT(str);
+	_ASSERTE(str);
 	if (str->full_free) free((void*)str->front);
 	free(str);
 }
 
 static const size_t dbj_string_len(const dbj_string * str_)
 {
-	DBJ_ASSERT(str_);
-	DBJ_ASSERT(DBJ_MAX_STRING_LENGTH > (size_t)(str_->back - str_->front));
+	_ASSERTE(str_);
+	_ASSERTE(DBJ_MAX_STRING_LENGTH > (size_t)(str_->back - str_->front));
 	return (size_t)(str_->back - str_->front);
 }
 
@@ -79,16 +79,16 @@ static dbj_string *
 dbj_string_make(const char * string_)
 {
 	const size_t slen = strlen(string_);
-	DBJ_ASSERT(DBJ_MAX_STRING_LENGTH > slen);
+	_ASSERTE(DBJ_MAX_STRING_LENGTH > slen);
 
 	dbj_string * pair_ = (dbj_string *)malloc(sizeof(dbj_string));
-	DBJ_ASSERT(pair_);
+	_ASSERTE(pair_);
 	/* front not to be freed */
 	pair_->full_free = false;
 	pair_->front = (char *)string_;
 	/* NOTE! if string_ is empty, back == front */
 	pair_->back = (char *)string_ + slen;
-	DBJ_ASSERT((size_t)(pair_->back - pair_->front) == slen);
+	_ASSERTE((size_t)(pair_->back - pair_->front) == slen);
 	return pair_;
 }
 /*
@@ -96,9 +96,9 @@ front of the allocated dbj_string has to be freed
 */
 static dbj_string * dbj_string_alloc(size_t count)
 {
-	DBJ_ASSERT(DBJ_MAX_STRING_LENGTH > count);
+	_ASSERTE(DBJ_MAX_STRING_LENGTH > count);
 	char * payload = (char*)calloc(count + 1, 1);
-	DBJ_ASSERT(payload);
+	_ASSERTE(payload);
 	dbj_string * rez = dbj_string_make(payload);
 	// since we made it with the empty string 
 	// the back is pointing to the front 
@@ -112,8 +112,8 @@ static dbj_string * dbj_string_append(
 	const dbj_string * right_
 )
 {
-	DBJ_ASSERT(dbj_valid_string(left_));
-	DBJ_ASSERT(dbj_valid_string(right_));
+	_ASSERTE(dbj_valid_string(left_));
+	_ASSERTE(dbj_valid_string(right_));
 
 	dbj_string * rezult_ = dbj_string_alloc(dbj_string_len(left_) + dbj_string_len(right_));
 	char * w_ = 0;
@@ -127,7 +127,7 @@ static dbj_string * dbj_string_append(
 		*r_ = *w_; ++r_;
 	}
 
-	DBJ_ASSERT((rezult_->back - rezult_->front) > 0);
+	_ASSERTE((rezult_->back - rezult_->front) > 0);
 
 	return rezult_;
 }
@@ -141,8 +141,8 @@ static bool dbj_string_compare(
 	const dbj_string * right_
 )
 {
-	DBJ_ASSERT(dbj_valid_string(left_));
-	DBJ_ASSERT(dbj_valid_string(right_));
+	_ASSERTE(dbj_valid_string(left_));
+	_ASSERTE(dbj_valid_string(right_));
 
 	if (dbj_string_len(left_) != dbj_string_len(right_)) return false;
 
@@ -182,10 +182,10 @@ or NULL , with errno set to the the error
 */
 static dbj_string *  dbj_to_subrange(dbj_string * str_, dbj_string * sub_)
 {
-	DBJ_ASSERT(str_ && sub_);
-	DBJ_ASSERT(dbj_string_len(str_) > 0);
-	DBJ_ASSERT(dbj_string_len(sub_) > 0);
-	DBJ_ASSERT(dbj_string_len(sub_) < dbj_string_len(str_));
+	_ASSERTE(str_ && sub_);
+	_ASSERTE(dbj_string_len(str_) > 0);
+	_ASSERTE(dbj_string_len(sub_) > 0);
+	_ASSERTE(dbj_string_len(sub_) < dbj_string_len(str_));
 
 	dbj_string * sub_range_ = 0;
 
@@ -283,25 +283,25 @@ static void dbj_string_test()
 
 	dbj_string * sub = dbj_string_from("456", 1, 3);
 
-	DBJ_ASSERT(
+	_ASSERTE(
 		/* "456" == "456" */
 		dbj_string_compare(dbj_string_from("12456", 3, 5), dbj_string_from("45612", 1, 3))
 	);
 
 	dbj_string * o2z = dbj_string_make("1234567890");
 	// this yields DBJ_NPOS since "3" is different memory chunk 
-	DBJ_ASSERT( DBJ_NPOS == dbj_p_is_in_range("3", o2z));
+	_ASSERTE( DBJ_NPOS == dbj_p_is_in_range("3", o2z));
 	// this yields 2
-	DBJ_ASSERT(2 == dbj_p_is_in_range(o2z->front + 2, o2z));
+	_ASSERTE(2 == dbj_p_is_in_range(o2z->front + 2, o2z));
 	// this yields 2
-	DBJ_ASSERT( 2 == dbj_c_is_in_range('3', o2z));
+	_ASSERTE( 2 == dbj_c_is_in_range('3', o2z));
 	/*
 	if subrange is made, that means sub is
 	found to be a substring  of the string
 	by comparing the *contents*
 	*/
 	dbj_string * sub_range = dbj_to_subrange(o2z, sub);
-	DBJ_ASSERT(sub_range);
+	_ASSERTE(sub_range);
 
 	/*
 	thus we can use it to remove the subrange
