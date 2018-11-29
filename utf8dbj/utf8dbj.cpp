@@ -2,6 +2,8 @@
 using namespace std;
 using namespace std::string_view_literals;
 
+// NOTE: of course be sure your project is UNICODE built
+
 int main()
 {
 	// Win10 PRO 
@@ -39,6 +41,7 @@ int main()
 	// no crash on any mode
 	::wprintf(L"\n\n\tspecimen:\t%s\n\n", specimen);
 
+	// NOTE: do not use printf()!
 	// for any mode the following crashes 
 	// the UCRT (aka Universal CRT)
 	// crashes on
