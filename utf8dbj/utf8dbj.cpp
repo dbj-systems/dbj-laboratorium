@@ -28,20 +28,14 @@ int main()
 	constexpr auto specimen =
 		L"\x043a\x043e\x0448\x043a\x0430 \x65e5\x672c\x56fd";
 
-	// int result = _setmode(_fileno(stdout), _O_U16TEXT);
-	int result = _setmode(_fileno(stdout), _O_U8TEXT);
-	// int result = _setmode(_fileno(stdout), _O_WTEXT);
-	// int result = _setmode(_fileno(stdout), _O_TEXT);
-	// int result = _setmode(_fileno(stdout), _O_BINARY);
-	if (result == -1) {
+	if ( int result = _setmode(_fileno(stdout), _O_U8TEXT); result == -1) {
 		perror("Cannot set mode");
 		exit(EXIT_FAILURE);
 	}
 	// should display: кошка 日本
-	// no crash on any mode
 	::wprintf(L"\n\n\tspecimen:\t%s\n\n", specimen);
 
-	// NOTE: do not use printf()!
+	// NOTE: can not use printf()!
 	// for any mode the following crashes 
 	// the UCRT (aka Universal CRT)
 	// crashes on
