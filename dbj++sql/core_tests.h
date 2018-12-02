@@ -49,7 +49,7 @@ namespace dbj_db_test_
 	{
 		int   id_ = val_user(0);
 		std::string   name_ = val_user(1);
-		::printf("\n%d      |%d  |%s   ",
+		::wprintf(L"\n%d      |%d  |%S   ",
 			static_cast<int>(row_id), id_, name_.c_str());
 
 		return SQLITE_OK;
@@ -60,11 +60,11 @@ namespace dbj_db_test_
 		try
 		{
 			const database & db = demo_db::instance();
-			::printf("\n\n"
-				"Row Id |Id |Name");
-			::printf("\n-------+---+--------");
+			::wprintf(L"\n\n"
+				L"Row Id |Id |Name");
+			::wprintf(L"\n-------+---+--------");
 			db.query("SELECT Id,Name FROM demo_table", sample_callback);
-			::printf("\n-------+---+--------\n");
+			::wprintf(L"\n-------+---+--------\n");
 		}
 		catch (sql_exception const & e)
 		{

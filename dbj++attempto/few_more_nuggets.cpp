@@ -1,5 +1,38 @@
 ﻿#include "pch.h"
 
+namespace dbj {
+	template<typename INVOCABLE >
+	struct apply_helper final
+	{
+		const INVOCABLE & invocable_;
+
+		// apply the pair of values
+		template< typename T1, typename T2>
+		auto operator () (T1 v1, T2 v2) {
+			return  apply(invocable_, make_pair(v1, v2));
+		}
+		// apply the tuple or args
+		template< typename ... ARGS >
+		auto operator ()  (std::tuple<ARGS ...> tuple_) {
+			return  apply(invocable_, tuple_);
+		}
+
+		// apply the native array 
+		// also takes care of init list call
+		// which will otherwise clash with var args 
+		// overload above
+		template< typename T, size_t N>
+		auto operator () (const T(&array_)[N]) {
+			array<T, N> std_array = dbj::arr::native_to_std_array(array_);
+			return  apply(invocable_, std_array);
+		}
+	};
+
+	auto make_apply_helper = [](auto invocable_) {
+		return apply_helper<decltype(invocable_)>{invocable_};
+	};
+
+} // dbj
 namespace dbj::samples { // beware of anonymous namespace
 
 	using namespace std; // beware
@@ -166,42 +199,12 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	using lambda_holder_type =
 		invoke_result_t < decltype(lambda_holder), T >;
 
-	template<typename INVOCABLE >
-	struct apply_helper final
-	{
-		const INVOCABLE & invocable_;
-
-		// apply the pair of values
-		template< typename T1, typename T2>
-		auto operator () (T1 v1, T2 v2) {
-			return  apply(invocable_, make_pair(v1, v2));
-		}
-		// apply the tuple or args
-		template< typename ... ARGS >
-		auto operator ()  (std::tuple<ARGS ...> tuple_) {
-			return  apply(invocable_, tuple_);
-		}
-
-		// apply the native array 
-		// also takes care of init list call
-		// which will otherwise clash with var args 
-		// overload above
-		template< typename T, size_t N>
-		auto operator () (const T(&array_)[N]) {
-			array<T, N> std_array = dbj::arr::native_to_std_array(array_);
-			return  apply(invocable_, std_array);
-		}
-	};
-
-
-	auto make_apply_helper = [](auto invocable_) {
-		return apply_helper<decltype(invocable_)>{invocable_};
-	};
 
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_nuggets)
 	{
-		auto prev_fn = DBJ::console::get_font_name();
+		using namespace std;
+		wstring prev_fn = DBJ::console::get_font_name();
 
 		// begin() can throw the exception
 		// end() is guaranteed, even in the presence of exceptions
@@ -214,7 +217,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			DBJ::console::set_extended_chars_font();
 		},
 			[&]() {
-			DBJ::console::set_font(prev_fn);
+			DBJ::console::set_font(prev_fn.c_str());
 		}
 		);
 
@@ -270,5 +273,99 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		DBJ_VANISH(a / b);
 	}
 #pragma endregion
+	} // namespace dbj::samples 
 
+template<typename V, 
+	     typename A >
+inline auto v2i (
+	std::vector<V, A> vector_,
+	typename std::vector<V, A>::value_type value_
+		) -> int 
+{
+	// using vec_type = std::vector<V, A>;
+	using	val_type	= typename std::vector<V, A>::value_type;
+	auto	index_		= 0U;
+		for (val_type & element_ : vector_) {
+			if (element_ == value_)
+				return index_;
+			index_ += 1;
+		}
+		return index_;
+};
+
+namespace dbj::samples {
+
+	struct S final
+	{
+		const int number;
+		const char name;
+		// note: name is ignored by this comparison operator
+		friend 
+		const bool operator < (const S& q, const S& s) noexcept 
+		{ return q.number < s.number; }
+		friend
+		const bool operator == (const S& q, const S& s) noexcept 
+		{ return q.number == s.number; }
+	};
+
+	using namespace ::dbj::console;
+	void __cdecl out(struct S s_ ) {
+		::dbj::console::PRN.printf(L"{ %d : %C }", s_.number, s_.name);
+	}
+
+	using s_vector = std::vector<S>;
+
+	void out(typename s_vector::iterator const & svi_) 
+	{
+		::dbj::console::out(L"\ns_vector::iterator: ");
+		out(*svi_);
+	}
+
+	/* 
+	In any case, std::terminate calls the currently installed
+	std::terminate_handler.The default std::terminate_handler 
+	calls std::abort. 
+	
+	To use user defined std::terminate_handler, the C++ implementation 
+	provides a default std::terminate_handler.
+	If the null pointer value is installed (by means of std::set_terminate), 
+	the implementation may restore the default handler instead.
+
+	int main()
+		{
+	std::set_terminate([](){ std::cout << "Unhandled exception\n"; std::abort();});
+	throw 1;
+		}
+	*/
+
+	DBJ_TEST_UNIT(bounds)
+	{
+		/*
+		std::set_terminate([]()
+		{
+			DBJ::TRACE("Unhandled exception\n");
+			std::abort();
+		});
+		*/
+		// note: not ordered, only partitioned w.r.t. 
+		s_vector vec = { {1,'A'}, {2,'B'}, {2,'C'}, {2,'D'}, {4,'G'}, {3,'F'} };
+		// this is ok since S operator <, ignores the name member
+		s_vector::value_type value = { 2, '?' };
+		// this works OK
+		auto p1 = std::equal_range(vec.begin(), vec.end(), value);
+		// this asserts in debug builds
+		// is this not supposed to throw an std::exception 
+		// or an derivative of?
+		// auto p2 = ( std::upper_bound(last_ptr,first_ptr,4) );
+
+		typename s_vector::iterator i1 = p1.first;
+		typename s_vector::iterator i2 = p1.second;
+
+		::dbj::console::print("\n", p1 , "\n\n");
+		std::for_each(i1, i2, [&](const auto & s_) { 
+			auto pos_ = v2i(vec, s_);
+			::dbj::console::print("\n[", pos_, "] == ");
+			out(s_); 
+		});
+	}
 } // namespace dbj::samples 

@@ -100,7 +100,7 @@ namespace dbj_easy_udfs_sample {
 	)
 	{
 		try {
-			::printf("\nthe query:\n%s\nthe result:\n", query_.data());
+			::wprintf(L"\nthe query:\n%S\nthe result:\n", query_.data());
 			// assure the database presence
 			dbj::db::database db(db_file);
 			// register the udf's required
@@ -114,8 +114,8 @@ namespace dbj_easy_udfs_sample {
 		}
 		catch (dbj::db::sql_exception const & e)
 		{
-			::printf(
-				"\ndbj::db exception\n code:%3d, message:%s ", e.code, e.message.c_str()
+			::wprintf(
+				L"\ndbj::db exception\n code:%3d, message:%S ", e.code, e.message.c_str()
 			);
 		}
 	} // test_udf
