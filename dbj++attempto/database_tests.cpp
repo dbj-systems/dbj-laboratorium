@@ -19,6 +19,8 @@ DBJ_TEST_UNIT(dbj_sql_lite_udf)
 	test([&] {  return microseconds_measure([&] { test_udf(); }); });
 	test([&] {  return miliseconds_measure ([&] { test_udf(); }); });
 	test([&] {  return seconds_measure     ([&] { test_udf(); }); });
+
+	system("@pause");
 }
 
 namespace anyspace {
@@ -51,5 +53,6 @@ namespace anyspace {
 		dbj_db_test_::test_select();
 		dbj::console::print("\ndbj_sqlite_statement_user\n");
 		dbj_db_test_::test_statement_using(example_callback);
+		system("@pause");
 	}
 } // nspace

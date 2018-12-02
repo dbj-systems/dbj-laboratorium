@@ -74,7 +74,7 @@ namespace dbj_easy_udfs_sample {
 		result_(result);
 	}
 
-	constexpr inline auto show_the_query_result = false;
+	constexpr inline auto show_the_query_result = true;
 
 	/* result processor aka callback */
 	static int dbj_udfs_result_handler(
@@ -87,7 +87,7 @@ namespace dbj_easy_udfs_sample {
 			/* this is deliberately verbose code */
 			std::string word = val_user(0);
 			int len_ = val_user(1);
-			::printf("\n\t[%3d]\tword: %32s,\tlength: %12d", 
+			::wprintf(L"\n\t[%3d]\tword: %32S,\tlength: %12d", 
 				static_cast<int>(row_id), word.c_str(), len_);
 		}
 		// make sure to return this
@@ -100,7 +100,7 @@ namespace dbj_easy_udfs_sample {
 	)
 	{
 		try {
-			::wprintf(L"\nthe query:\n%S\nthe result:\n", query_.data());
+			::wprintf(L"\nthe query:\t%S\nthe result:\n", query_.data());
 			// assure the database presence
 			dbj::db::database db(db_file);
 			// register the udf's required

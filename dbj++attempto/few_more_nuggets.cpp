@@ -1,6 +1,33 @@
 ﻿#include "pch.h"
 
 namespace dbj {
+
+	// return index from vector value
+	// this obviously  returns the index of the
+	// first value found
+	// as a sanity check vector max size is 0xFFFF
+	template<typename V, typename A, size_t max_size = 0xFFFF,
+		class vec_type = std::vector<V, A>,
+		class val_type = typename std::vector<V, A>::value_type
+	>
+	inline auto v2i(
+		std::vector<V, A> vector_,
+		typename std::vector<V, A>::value_type value_
+	) -> int
+	{
+		static_assert(::dbj::is_std_vector_v<vec_type>);
+
+		DBJ_VERIFY(vector_.size() < max_size);
+		auto	index_ = 0U;
+		for (val_type & element_ : vector_) {
+			if (element_ == value_)
+				return index_;
+			index_ += 1;
+		}
+		return index_;
+	};
+
+
 	template<typename INVOCABLE >
 	struct apply_helper final
 	{
@@ -224,7 +251,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		leader_name_type_string zbir;
 
 		// this happens between begin() and end()
-		for (const wchar_t * leader : leaders) {
+		for (auto leader : leaders) {
 			DBJ::console::print(leader, '\n');
 			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
@@ -248,9 +275,9 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		auto buf = DBJ::str::optimal_buffer<char>();
 
-		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), 42);
+		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), LONG_MAX);
 
-		auto DBJ_MAYBE(rez) = 0 == dbj_ordinal_string_compareA(buf.data(), "42", true);
+		DBJ_TEST_ATOM(dbj_ordinal_string_compareA(buf.data(), "42", true));
 
 	}
 #pragma region https://stackoverflow.com/questions/52244640/if-constexpr-and-c4702-and-c4100-and-c4715/52244957#52244957
@@ -275,23 +302,6 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 #pragma endregion
 	} // namespace dbj::samples 
 
-template<typename V, 
-	     typename A >
-inline auto v2i (
-	std::vector<V, A> vector_,
-	typename std::vector<V, A>::value_type value_
-		) -> int 
-{
-	// using vec_type = std::vector<V, A>;
-	using	val_type	= typename std::vector<V, A>::value_type;
-	auto	index_		= 0U;
-		for (val_type & element_ : vector_) {
-			if (element_ == value_)
-				return index_;
-			index_ += 1;
-		}
-		return index_;
-};
 
 namespace dbj::samples {
 
@@ -302,10 +312,10 @@ namespace dbj::samples {
 		// note: name is ignored by this comparison operator
 		friend 
 		const bool operator < (const S& q, const S& s) noexcept 
-		{ return q.number < s.number; }
+		{ return ((q.number < s.number) && (q.name < s.name)); }
 		friend
 		const bool operator == (const S& q, const S& s) noexcept 
-		{ return q.number == s.number; }
+		{ return ((q.number == s.number) && (q.name == s.name)); }
 	};
 
 	using namespace ::dbj::console;
@@ -363,7 +373,7 @@ namespace dbj::samples {
 
 		::dbj::console::print("\n", p1 , "\n\n");
 		std::for_each(i1, i2, [&](const auto & s_) { 
-			auto pos_ = v2i(vec, s_);
+			auto pos_ = ::dbj::v2i(vec, s_);
 			::dbj::console::print("\n[", pos_, "] == ");
 			out(s_); 
 		});
