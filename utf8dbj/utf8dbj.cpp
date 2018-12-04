@@ -35,6 +35,7 @@ static auto console_font_info()
 
 int main()
 {
+	SetConsoleTitleW(THIS_APP_TITLE);
 	// Win10 PRO 
 	::system("@cls");
 	::system("@echo off");

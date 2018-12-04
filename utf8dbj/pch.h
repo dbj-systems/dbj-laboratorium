@@ -1,6 +1,9 @@
-
+#pragma once
 #ifndef PCH_H
 #define PCH_H
+
+#define THIS_APP_TITLE L"dbj++utf8 (c) by dbj.systems (" __DATE__ ")"
+
 #define NOMINMAX
 #define STRICT
 #include <windows.h>
