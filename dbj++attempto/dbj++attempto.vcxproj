@@ -164,7 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dbjtree.h" />
-    <ClInclude Include="dbj_any.h" />
+    <ClInclude Include="dbj_any_optional.h" />
     <ClInclude Include="dbj_any_node.h" />
     <ClInclude Include="dbj_atoms.h" />
     <ClInclude Include="dbj_command_line.h" />
@@ -181,6 +181,7 @@
     <ClInclude Include="string_literals_with_universal_character_names.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="database_tests.cpp" />
     <ClCompile Include="dbj_clib_tests.cpp" />
     <ClCompile Include="dbj_random_kiss.cpp" />
     <ClCompile Include="main.cpp" />
@@ -204,6 +205,9 @@
   <ItemGroup>
     <ProjectReference Include="..\dbj++clib\dbj++clib.vcxproj">
       <Project>{fb3f59bf-e33a-473b-a1f2-7e90510b13a6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\dbj++sql\dbj++sql.vcxproj">
+      <Project>{7f0bed4b-5cd0-45e8-aa55-b8c56b10e6cf}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

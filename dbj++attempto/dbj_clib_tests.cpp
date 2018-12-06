@@ -1,18 +1,8 @@
 #include "pch.h"
 #include "../dbj++clib/dbjclib.h"
+#include "../dbj_en_dictionary/dbj_en_dictionary.h"
 // 'hidden' inside dbj++clib
 extern "C" void dbj_string_trim_test();
-
-DBJ_TEST_UNIT(dbj_sll)
-{
-	// uses printf and thus UCRT "sometimes" fails
-	/*
-	C:\Program Files (x86)\Windows Kits\10\Source\10.0.17134.0\ucrt\inc\corecrt_internal_stdio.h
-
-	ucrtbased.dll!__acrt_stdio_char_traits<char>::validate_stream_is_ansi_if_required(_iobuf * const stream) Line 440	C++
-	*/
-	// dbj::clib::test_dbj_sll();
-}
 
 DBJ_TEST_UNIT(dbj_string_c_lib)
 {

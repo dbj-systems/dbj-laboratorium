@@ -1,11 +1,10 @@
 
-# dbj++attempto
+# Ideas
+### To be incorporated into the dbj++
 
-> attempto is Latin for "make trial, tamper with, assail"
+ATTEMPTO is Latin for TEST
 
-## Research and Development, arround and about [dbj++](https://github.com/dbj-systems/dbjplusplus)
-
-> Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
+Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.16.X
 
 -------------------------------------
 
@@ -25,5 +24,8 @@ limitations under the License.
 </pre>
 ---------------------------------------------------------------------  
 
-### &copy; 2018 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
+
+Enjoy standard C++.
+
+### &copy; 2018 [![](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
 

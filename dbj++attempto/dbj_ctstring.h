@@ -36,51 +36,63 @@ namespace dbj_samples::ct {
 			template<unsigned... indices>
 			struct  produce
 			{
-				typedef  string < lambda_str_type{}.chars[indices]... > result;
+				typedef  string < lambda_str_type().chars[indices]... > result;
 			};
 		};
 
 		template<char...  str0, char...  str1>
-		inline 
-		constexpr 
-			string<str0..., str1...>  
+		inline
+			constexpr
+			string<str0..., str1...>
 			operator+(string<str0...>, string<str1...>)
 		{
 			return {};
 		}
 	}
 
-#define  DBJ_CTSTRING(string_literal)                                                   \
-    []{                                                                                 \
-        struct  constexpr_string_type { const char * chars = string_literal; };         \
-        return  variadic_toolbox::apply_range<        \
-	        sizeof(string_literal)-1,                 \
-            compile_time::string_builder<constexpr_string_type>::produce \
-		    >::result{};    \
-    } ();
+	/*
+	Q:why the macro? A: we can not pass 'string_literal'
+	as lambda arg and then use it in seting up the 'string_struct'
+	*/
+#define  DBJ_CTSTRING(string_literal) \
+[] () constexpr { \
+	struct string_struct { \
+		const char * chars = string_literal; \
+	}; \
+  return  variadic_toolbox::apply_range< \
+	        sizeof(string_literal)-1, \
+	  compile_time::string_builder < string_struct > ::produce \
+		    >::result{}; \
+}() 
 
-#ifdef DBJ_TESTING_ONAIR
-	DBJ_TEST_UNIT(": dbj compile time string ")
+#define	 DBJ_CTS_IMP(V, SL, SS ) \
+struct SS {	const char * chars = SL; }; \
+	constexpr auto V { \
+		variadic_toolbox::apply_range< \
+			sizeof(SL) - 1, \
+			compile_time::string_builder < SS > ::produce \
+		>::result{} };
+
+#define DBJ_CTS(V, SL ) DBJ_CTS_IMP( V, SL, DBJ_CONCAT( the_struct_, __COUNTER__) )
+
+	using namespace std::string_view_literals;
+
+	DBJ_TEST_UNIT(_compile_time_string_)
 	{
+		constexpr auto sview{ "String View"sv };
+
+		DBJ_CTS(cts1, "Hello " );
+		DBJ_CTS(cts2, " World!");
+
+		DBJ_TEST_ATOM(typeid(decltype(cts1)).name());
+
+
 		auto  str_hello = DBJ_CTSTRING("hello");
 		auto  str_world = DBJ_CTSTRING(" world");
 
-		const char* concat = (str_hello + str_world).chars;
-
-		dbj::log::print("runtime concat: " , str_hello.chars , str_world.chars , "\n <=> \n",
-		"compile concat: " , concat , "\n");
-
-		using namespace std::literals::string_literals;
-
-		auto process = []( auto arg ) {
-
-			dbj::log::print("\n",__func__, "\nreceived one argument of type: ", typeid(arg).name());
-		};
-
-
-		for (auto const& str : { "foo"s, "bar"s, "baz"s }) {
-			process(str);
-		}
+		DBJ_TEST_ATOM(typeid(decltype(str_hello)).name());
+		DBJ_TEST_ATOM(str_hello.chars);
+		DBJ_TEST_ATOM((str_hello + str_world).chars);
 	}
-#endif
+#undef DBJ_CTSTRING
 } // dbj::ct

@@ -67,7 +67,7 @@ namespace dbj::samples {
 			}
 			catch (std::bad_any_cast & x) {
 				DBJ::TRACE("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
-				throw dbj::Exception(x.what());
+				throw dbj::exception(x.what());
 			}
 		}
 
@@ -236,7 +236,7 @@ namespace tree_testing {
 				}
 				catch (std::bad_any_cast & x) {
 					DBJ::TRACE("Exception at %s(%d) [%s]", __FILE__, __LINE__, x.what());
-					// throw dbj::Exception(x.what());
+					// throw dbj::exception(x.what());
 				}
 				return T{};
 			};

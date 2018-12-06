@@ -151,7 +151,7 @@ public:
 
 	// return type is a reference so we can both
 	// set and get values in the matrix cells easily
-	constexpr static value_type & data (int r, int c) noexcept 
+	constexpr static value_type & data (size_t r, size_t c) noexcept
 	{ return (value_type &)(type::data_[r][c]); }
 
 	// F signature has to be
@@ -214,7 +214,10 @@ template< typename MX>
 MX test_mx_arg_retval(MX the_mx)
 {
 	// leave the trace
-	the_mx.data(the_mx.rows() - 1, the_mx.cols() - 1) = 1234;
+	the_mx.data(
+		the_mx.rows() - size_t(1), 
+		the_mx.cols() - size_t(1)
+	) = typename MX::value_type(1234);
 	return the_mx;
 }
 
