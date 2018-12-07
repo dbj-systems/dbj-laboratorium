@@ -99,6 +99,8 @@ namespace bulk_free {
 
 		arr_type * copy_ = (arr_type*)malloc( ARRSZ * newlen );
 
+		_ASSERTE( copy_ );
+
 		for (size_t n = 0; n < ARRSZ; ++n) (*copy_)[n] = _strdup (slave[n]);
 
 	FREE(
