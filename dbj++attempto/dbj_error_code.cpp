@@ -82,6 +82,7 @@ inline const std::error_category & dbj_err_category()
 	return singleton_;
 }
 
+    // we can not place a friend inside std::error_code, so...
     using namespace dbj::console;
 	inline void out
 		(class std::error_code ec_)

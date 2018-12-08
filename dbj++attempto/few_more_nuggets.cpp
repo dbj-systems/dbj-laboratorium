@@ -316,15 +316,17 @@ namespace dbj::samples {
 		friend
 		const bool operator == (const S& q, const S& s) noexcept 
 		{ return ((q.number == s.number) && (q.name == s.name)); }
+
+		friend void out(struct S s_) {
+			::dbj::console::PRN.printf(L"{ %d : %C }", s_.number, s_.name);
+		}
 	};
 
-	using namespace ::dbj::console;
-	void __cdecl out(struct S s_ ) {
-		::dbj::console::PRN.printf(L"{ %d : %C }", s_.number, s_.name);
-	}
 
 	using s_vector = std::vector<S>;
 
+	// we can not place a friend inside s_vector iterator
+	// so 
 	void out(typename s_vector::iterator const & svi_) 
 	{
 		::dbj::console::out(L"\ns_vector::iterator: ");

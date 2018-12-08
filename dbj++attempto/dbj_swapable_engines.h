@@ -91,6 +91,12 @@ namespace car_factory {
 			if (this->engine_ != nullptr) delete this->engine_;
 			this->engine_ = engine_workshop::make_new_engine(tag_);
 		}
+
+		friend void	out	( Automobile  automobile_)
+		{
+			::dbj::console::PRN.printf(automobile_.description().c_str());
+		}
+
 	public:
 		// delegating to the engine
 		// inheritance is evil
@@ -145,7 +151,7 @@ inline Automobile assembly_line (engine_tag which_)
 }
 
 } // car_factory
-
+#if 0
 namespace dbj::console {
 	// void __cdecl dbj::console::out<class car_factory::Automobile>(class car_factory::Automobile)
 	template<> inline void
@@ -157,6 +163,7 @@ namespace dbj::console {
 		console::PRN.printf(automobile_.description().c_str());
 	}
 }
+#endif
 /*
 Copyright 2018 by dbj@dbj.org
 
