@@ -23,7 +23,7 @@
     <ProjectGuid>{7F0BED4B-5CD0-45E8-AA55-B8C56B10E6CF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dbjsql</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

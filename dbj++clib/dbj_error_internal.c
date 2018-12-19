@@ -1,7 +1,6 @@
 #include "dbjclib.h"
 
-static const unsigned location_descriptor_cache_size
-= error_descriptor_buffer_size;
+#define location_descriptor_cache_size error_descriptor_buffer_size
 
 error_descriptor
 error_descriptor_cache[location_descriptor_cache_size];

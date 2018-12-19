@@ -1,7 +1,9 @@
 #include "dbjclib.h"
 
+#ifndef _MSC_VER
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+#endif
 
 // http://www.ciphersbyritter.com/NEWS4/RANDC.HTM
 typedef unsigned long UL;

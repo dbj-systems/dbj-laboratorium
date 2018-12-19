@@ -52,7 +52,7 @@ char * dbj_str_shorten ( const char * str_, const char * chars_to_remove_ )
 
 	size_t str_size = strlen(str_);
 	// VLA 
-	char vla_buff_[str_size];
+	char * vla_buff_ = calloc(str_size, 1 );
 	char * vla_buff_first = & vla_buff_[0] ;
 	char * vla_buff_last  = & vla_buff_[str_size - 1] ;
 	char * buff_p = vla_buff_first;
@@ -65,5 +65,7 @@ char * dbj_str_shorten ( const char * str_, const char * chars_to_remove_ )
 		if (buff_p == (1 + vla_buff_last)) break; 
 	}
 	*buff_p = 0; 
-	return dbj_strndup(vla_buff_, buff_p - vla_buff_);
+	char * retval = dbj_strndup(vla_buff_, buff_p - vla_buff_);
+	free(vla_buff_);
+	return retval;
 }

@@ -40,7 +40,7 @@ static struct error_descriptor *
 	if (file_ == NULL) file_ = unknown_error_location;
 	if (msg_ == NULL)  msg_  = dbj_error_message(code_);
 
-	DBJ_ASSERT(msg_);
+	assert(msg_);
 
 		unsigned free_slot = cache_register_first_free_slot();
 

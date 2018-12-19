@@ -67,7 +67,11 @@ typedef struct dbj_error {
 extern dbj_error dbj_error_service;
 
 typedef int dbj_err_handle_type;
+#ifdef _MSC_VER
+#define DBJ_NOT_ERR -1
+#else
 static const dbj_err_handle_type DBJ_NOT_ERR = -1;
+#endif
 extern dbj_err_handle_type dbj_last_error;
 
 /*

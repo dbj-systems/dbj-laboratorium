@@ -42,11 +42,11 @@
 
 		// declare VLA
 		const int rez_size_ = back_ - front_;
-		char rezbuf[rez_size_];
+		char * rezbuf = calloc(rez_size_,1);
 		// copy to VLA
 		memcpy(rezbuf, front_, back_ - front_);
 		// return the heap allocated copy of the VLA
-		return _strdup(rezbuf) ;
+		return rezbuf ;
 	}
 
 	// return true on success
