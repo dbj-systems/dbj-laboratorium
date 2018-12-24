@@ -1,14 +1,13 @@
 ﻿#pragma once
 /*
-Copyright 2018 by dbj@dbj.org
+Copyright 2017,2018 by dbj@dbj.org
 
-Small SQLITE standard C++17  API, dbj.org created
-
-Licensed under the Apache License, Version 2.0 (the "License");
+Licensed under the GNU GPL License, Version 3.0 (the "License");
 you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+You may obtain a copy of the License in the file LICENSE enclosed in
+this project.
 
-http ://www.apache.org/licenses/LICENSE-2.0
+https://www.gnu.org/licenses/gpl-3.0.html
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +29,15 @@ limitations under the License.
 #ifndef DBJ_VERIFY
 #define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::terror( #x ", failed", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
+#endif
+
+#ifndef DBJ_STR
+#define DBJ_STR(x) #x
+#endif
+
+#ifndef DBJ_VERIFY_2
+#define DBJ_VERIFY_2(R,X) if ( R != X ) \
+   throw ::dbj::db::sql_exception{ int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
 #endif
 
 namespace dbj::db {
@@ -120,14 +128,7 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 		{ (int)code_,  user_message_.value_or( error_message(code_).data()).data() };
 	}
 
-#ifndef DBJ_STR
-#define DBJ_STR(x) #x
-#endif
 
-#ifndef DBJ_VERIFY_
-#define DBJ_VERIFY_(R,X) if ( R != X ) \
-   throw ::dbj::db::sql_exception{ int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
-#endif
 
 	/* bastardized version of Keny Kerr's unique_handle */
 	template <typename Traits>
