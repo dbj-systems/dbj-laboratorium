@@ -35,6 +35,12 @@ static auto console_font_info()
 
 int main()
 {
+	/*
+	 To change the code page of the console from your program
+	 https://docs.microsoft.com/en-us/windows/console/setconsoleoutputcp
+	 */
+	DBJ_VERIFY( 0 != SetConsoleOutputCP(CP_UTF8));
+
 	SetConsoleTitleW(THIS_APP_TITLE);
 	// Win10 PRO 
 	::system("@cls");
@@ -44,9 +50,9 @@ int main()
 	::system("@echo.");
 	::system("@echo (c) (" __DATE__ ") by dbj@dbj.org version:[" __DATE__ "][" __TIME__ "]");
 	::system("@echo.");
-	::system("@echo This app now will do: chcp 65001");
-	::system("@echo.");
+	//::system("@echo This app now will do: chcp 65001");
 	::system("@chcp 65001");
+	// ::system("@chcp");
 	::system("@echo.");
 	::system("@echo If specimen bellow is not readable, please change the console");
 	::system("@echo font to the one that will make the specimen fully readable");
