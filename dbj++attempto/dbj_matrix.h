@@ -65,11 +65,10 @@ auto two_dim_array = [num_cols, &one_dim_array](size_t row, size_t col) -> int&
 Use like :
 
      two_dim_array(i, j) = 5
-Really just like a modern macros ... but could be the fastest solution?
+Really just like modern macros. Could be the fastest solution.
 
-whatever, forst the all stack all statick pod variant.
-But in a standard C++ way.
-
+Whatever, first the all stack all static almost-a-pod variant.
+In a standard C++ way.
 */
 
 #pragma warning( push)
@@ -78,9 +77,12 @@ But in a standard C++ way.
 // NOTE: __COUNTER__ is also a GCC predefined macro 
 // not just MSVC
 #define DBJ_UID  __COUNTER__ + dbj::util::dbj_get_seed()
+// BIG WARNING: __COUNTER__ macro does not work in a loop. 
+// It is a macro, a simple text substituton pre-processing mechanism
 
 /*
-static matrix_type , almost a pod.
+GPLv3 (c) 2018 
+dbj's static matrix_type , almost a pod.
 */
 template <
 	typename	T,
@@ -88,31 +90,35 @@ template <
 	size_t		C,
 	unsigned long UID_,
 	size_t		MAXSIZE = 0xFFFF 
-	/*INT_MAX as a absolute max is 0x7FFFFFFF -- limits.h*/
+	/*
+	INT_MAX as a absolute max is 0x7FFFFFFF -- limits.h
+	but it is very unlikely your compiler will allow such 
+	a large array on the stack to be created
+	*/
 >
 class compile_time_stack_matrix final
 {
 public:
 	// this is like a 'this' for static template instances
-	// without it code bellow will be more complex
+	// without it code bellow will be much more complex
 	using type = compile_time_stack_matrix;
 	/*	we also clean const and volatile if used "by accident" */
 	using value_type		= std::remove_cv_t<T>;
 	using matrix_type		= value_type[R][C];
 	using matrix_ref_type	= value_type(&)[R][C];
 private:
-	/* here we enforce usage policies first
+	/* here we enforce usage policies first, specifically
 
 	The 64-bit PECOFF executable format used on Windows
 	doesn't support creating executables that have
 	a load size of greater than 2GB
 
-	Since this is all on stack we have choose here 
+	Since this is all on stack we have choosen here 
 	much smaller MAXSIZE then INT_MAX  which is 0x7FFFFFFF -- limits.h
-	and thus enfore stack matrix size policy here
+	and thus enforce thzt as stack matrix size policy here
 	*/
 	static_assert(
-		(R * C * sizeof(value_type)) <= MAXSIZE,
+		(R * C * sizeof(value_type)) < /* = */ MAXSIZE,
 		"Total size of compile_time_stack_matrix must not exceed 0xFFFF (65536) bytes"
 		);
 
@@ -121,10 +127,22 @@ private:
 		"compile_time_stack_matrix can be made out of POD types only"
 		);
 
-	//	just a pod 2D array on stack /
+	/*	
+	almost just a pod 2D array on stack 
+	since it is static we must implement some mechinsm so that
+	every definition does NOT share this same 2d native array
+	this is the role of the UID__ template parameter
+	*/
 	inline static value_type data_[R][C]{};
 
 public:
+	/*
+	please make sure you do understan how this makes for template definition 
+	wide uid, because it is a template parameter.
+	compile_time_stack_matrix<int,4,4,0>
+	is different type vs
+	compile_time_stack_matrix<int,4,4,1>
+	*/
 	static constexpr const unsigned long  uuid() { return UID_; }
 	static constexpr const char * type_name() { return typeid(matrix_type).name(); }
 	static constexpr size_t rows() noexcept { return R; };
@@ -137,6 +155,10 @@ public:
 	static constexpr size_t rank()		noexcept { return std::rank_v  <  matrix_type   >; }
 	static constexpr size_t max_size()	noexcept { return MAXSIZE; };
 
+	/*
+	construcotr is largely irrelevant for anything but
+	sanity cheks of the implementation
+	*/
 	constexpr explicit compile_time_stack_matrix()
 	{ 
 		static_assert(2 == std::rank_v  <  matrix_type   >);
@@ -145,20 +167,30 @@ public:
 	}
 	~compile_time_stack_matrix() { }
 
-	// Not returning pointer but reference
+	/* 
+	Not returning pointer but reference 
+	this is criticaly important quality of this design
+	alo this reference never becomes ivalid as it refers to 
+	a static data block
+	*/
 	constexpr  static matrix_ref_type data() noexcept 
 	{ return matrix_ref_type(type::data_); }
 
+	// data overload for changing the cells in the matrix
 	// return type is a reference so we can both
 	// set and get values in the matrix cells easily
 	constexpr static value_type & data (size_t r, size_t c) noexcept
 	{ return (value_type &)(type::data_[r][c]); }
 
-	// F signature has to be
+	// callback signature has to be
 	// bool (*fun)( value_type & val, size_t row, size_t col);
-	using callback =  void (*)( value_type & , size_t , size_t );
 	// if callback returns false, process stops
 	// if callback throws the exception, process stops
+	using callback =  void (*)( value_type & , size_t , size_t );
+
+	/*
+	for each row visit every column
+	*/
 	template<typename F>
 	constexpr static void for_each(const F & fun)
 	{
@@ -171,9 +203,13 @@ public:
 		}
 	}
 
+	// utility function for printing to the console
 	// F has to be a variadic print function
-	// lambda example of a such function
-	// inline auto print = [](const auto & first_param, auto && ... params);
+	// lambda example of such a function:
+	//
+	// inline auto print = 
+	//     [](const auto & first_param, auto && ... params);
+	//
 	template<typename F>
 	constexpr static void printarr(F print)
 	{
@@ -182,6 +218,7 @@ public:
 		{
 			print("\n[ ");
 			for (int c = 0; c < C; c++)
+			// note how F has to be able to print type T of this matrix
 				print(" [", type::data_[r][c], "] ");
 			print(" ]");
 		}
