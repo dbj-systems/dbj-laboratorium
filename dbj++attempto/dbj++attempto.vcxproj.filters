@@ -54,9 +54,6 @@
     <ClInclude Include="dbj_command_line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dbj_uuid_hash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
