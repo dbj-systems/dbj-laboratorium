@@ -171,7 +171,6 @@
     <ClInclude Include="dbj_ctstring.h" />
     <ClInclude Include="dbj_fontlist.h" />
     <ClInclude Include="dbj_lambda_lists.h" />
-    <ClInclude Include="dbj_matrix.h" />
     <ClInclude Include="dbj_polymorph.h" />
     <ClInclude Include="dbj_swapable_engines.h" />
     <ClInclude Include="dbj_uuid_hash.h" />

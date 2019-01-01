@@ -100,10 +100,10 @@ constexpr auto probe_array(T && )   -> size_t {
 DBJ_TEST_UNIT(_array_stays_array)
 {
 	static int ia[]{ 1,2,3,4,5,6,7,8,9,0 };
-	auto DBJ_MAYBE(s0) = try_array(ia);
-	auto DBJ_MAYBE(s1) = DBJ_IS_ARR(ia);
-	auto DBJ_MAYBE(s2) = probe_array(ia);
-	auto DBJ_MAYBE(s3) = probe_array(std::addressof(ia));
+	DBJ_TEST_ATOM( try_array(ia));
+	DBJ_TEST_ATOM( DBJ_IS_ARR(ia));
+	DBJ_TEST_ATOM( probe_array(ia)) ;
+	DBJ_TEST_ATOM( probe_array(std::addressof(ia))) ;
 }
 
 typedef enum class CODE : UINT {
