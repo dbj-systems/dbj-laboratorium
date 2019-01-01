@@ -1,5 +1,8 @@
 #include "pch.h"
 #include <assert.h>
+#include <memory>
+
+using namespace ::std;
 
 namespace palindromes_research {
 	extern "C" inline bool petar_pal(const char* str)
@@ -120,7 +123,6 @@ namespace bulk_free {
 
 }
 
-using namespace ::std ;
 
 namespace dbj {
 	template<class T, T v>
@@ -148,6 +150,8 @@ namespace dbj {
 
 DBJ_TEST_UNIT(compile_time_entities_as_objects_instead_of_types)
 {
+	 DBJ_TEST_ATOM(DBJ_ARR_LEN("ABC") );
+
 	{
 		// integral constant as type
 		using one = dbj::integral_constant<int, 1>;
