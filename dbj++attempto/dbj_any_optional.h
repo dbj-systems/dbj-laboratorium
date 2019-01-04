@@ -141,8 +141,8 @@ DBJ_TEST_SPACE_OPEN(dbj_any_wrapper_testing)
 			// interesting
 			using void_		= dbj::optional_handle<void>;
 			int_	ii		= 42;
-			float_	ff		= 42.0f;
-			size_	ss		= 1024U;
+			float_	ff{ 42.0f };
+			size_	ss(1024U);
 
 			int_			i2{ 84 };
 			float_			f2{ 84.0f };
