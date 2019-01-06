@@ -2,13 +2,14 @@
 
 /* 
 it is a standard way how to do it so
-we will copy the designb of std:: ios error coding and signaling
+we will copy the design of std:: ios error coding and signaling
 */
 #include <ios>
 
 #ifndef _HAS_CXX17
 #error C++17 required
 #endif
+
 /*
 http://blog.think-async.com/2010/04/system-error-support-in-c0x-part-5.html
 
@@ -24,8 +25,8 @@ inline const std::error_category & dbj_err_category()
 	*/
 	struct dbj_err_category 
 		// inheriting from MSVC STD implementation
-		// has not meaning for dbj++ 
-		// ince it is not part of std
+		// has no meaning for dbj++ 
+		// since dbj++ is not part of std
 		: public std::error_category 
 	{
 		_NODISCARD virtual const char *name() const noexcept
@@ -37,7 +38,7 @@ inline const std::error_category & dbj_err_category()
 		// error_code is looking here for the message
 		// if we have inherited from std::error_code
 		// and if we have caught std::system_exception 
-		// and we have ginve this to its constructor
+		// and we have given this to its constructor
 		// the system will call back here
 		// when we call std::system_exception message()
 		_NODISCARD virtual 
@@ -50,7 +51,7 @@ inline const std::error_category & dbj_err_category()
 					dbj::err::message( ::dbj::err::errc::err_generic )
 				.data() ;
 			default: {
-				// so the message is window message
+				// so the message is windows err message
 				std::error_code ec =
 					std::error_code(last_win32_err, std::system_category());
 				return
@@ -125,9 +126,9 @@ DBJ_TEST_UNIT(win32_system_specific_errors) {
 		LPTSTR(lpBuffer),
 		DWORD(64)
 	);
-	auto last_win32_err = dbj::win32::last_error();
-	std::error_code ec =
-	std::error_code(last_win32_err, std::system_category());
+	auto last_win32_err = ::GetLastError();
+	// make error code from win32 err, int code 
+	auto ec = std::error_code(last_win32_err, std::system_category());
 	DBJ_TEST_ATOM(ec.value());
 	DBJ_TEST_ATOM(ec.default_error_condition().message());
 	DBJ_TEST_ATOM(ec.message());
@@ -147,10 +148,10 @@ DBJ_TEST_UNIT(standard) {
 	throw std::system_error
 	( 
 		// do we need to pass std::errc value here?
-		// we coild 'invent' a system where we stat from some high value
+		// we could 'invent' a system where we start from some high value
 		// e.g.1000, but that is obviously not platform agnostic
 		int(std::errc::protocol_error), 
-		// we could have and use dbj++ error category like here
+		// we could use dbj++ error category like here
 		dbj_err_category(),	
 		// this is arbitrary prompt
 		" " __FILE__ " (" DBJ_EXPAND(__LINE__) ") \n"
