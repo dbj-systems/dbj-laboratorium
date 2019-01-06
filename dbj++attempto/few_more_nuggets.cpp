@@ -67,7 +67,7 @@ namespace dbj::samples { // beware of anonymous namespace
 	using leader_name_type = const wchar_t *;
 
 	using leader_name_type_string
-		= std::basic_string< DBJ::tt::to_base_t<leader_name_type>  >;
+		= std::basic_string< ::dbj::tt::to_base_t<leader_name_type>  >;
 
 	leader_name_type leaders[]{ L"Ленин", L"Сталин", L"Маленков",
 L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"Горбачёв", L"안녕하세요", L"안녕히 가십시오" };
@@ -90,11 +90,11 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	template<
 		typename T, size_t N,
-		typename tuple_type = DBJ::tt::array_as_tuple_t<T, N>
+		typename tuple_type = ::dbj::tt::array_as_tuple_t<T, N>
 	>
 		tuple_type sequence_to_tuple(const T(&narf)[N])
 	{
-		return DBJ::arr::native_arr_to_tuple(narf);
+		return ::dbj::arr::native_arr_to_tuple(narf);
 	}
 
 	template<
@@ -173,7 +173,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		{
 
-			using C3 = DBJ::arr::ARH<char, 3>;
+			using C3 = ::dbj::arr::ARH<char, 3>;
 
 			C3::ARV v_of_c{ 'A','B','C' };
 
@@ -231,7 +231,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	DBJ_TEST_UNIT(a_lot_of_nuggets)
 	{
 		using namespace std;
-		wstring prev_fn = DBJ::console::get_font_name();
+		wstring prev_fn = ::dbj::console::get_font_name();
 
 		// begin() can throw the exception
 		// end() is guaranteed, even in the presence of exceptions
@@ -241,10 +241,10 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 				return std::wcscmp(strA, strB) < 0;
 			});
 			char* DBJ_MAYBE(a) = std::setlocale(LC_ALL, "");
-			DBJ::console::set_extended_chars_font();
+			::dbj::console::set_extended_chars_font();
 		},
 			[&]() {
-			DBJ::console::set_font(prev_fn.c_str());
+			::dbj::console::set_font(prev_fn.c_str());
 		}
 		);
 
@@ -252,7 +252,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 		// this happens between begin() and end()
 		for (auto leader : leaders) {
-			DBJ::console::print(leader, '\n');
+			::dbj::console::print(leader, '\n');
 			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
 		// applicator helper testing
@@ -273,7 +273,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			std::apply(summa, std::make_pair(11, 12))
 		)));
 
-		auto buf = DBJ::str::optimal_buffer<char>();
+		auto buf = ::dbj::str::optimal_buffer<char>();
 
 		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), LONG_MAX);
 
@@ -285,7 +285,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 	/***********************************************************************************/
 	DBJ_TEST_UNIT(a_lot_of_variations)
 	{
-		using twins_ = DBJ::tt::fundamental_twins<int, const int &>;
+		using twins_ = ::dbj::tt::fundamental_twins<int, const int &>;
 		twins_ ft;
 		twins_::decay_1 DBJ_MAYBE(v1) {};
 		twins_::decay_2 DBJ_MAYBE(v2) {};

@@ -182,7 +182,6 @@
   <ItemGroup>
     <ClCompile Include="database_tests.cpp" />
     <ClCompile Include="dbj_clib_tests.cpp" />
-    <ClCompile Include="dbj_err_system.cpp" />
     <ClCompile Include="dbj_random_kiss.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="dbj_error_code.cpp" />

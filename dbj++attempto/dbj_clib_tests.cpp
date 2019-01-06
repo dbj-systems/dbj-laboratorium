@@ -25,20 +25,20 @@ DBJ_TEST_UNIT(dbj_string_trim)
 	// SEGV currently -- dbj_string_trim_test();
 }
 
-#define DBJ_ERR(n) DBJ::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
+#define DBJ_ERR(n) ::dbj::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
 
 DBJ_TEST_UNIT(dbj_err_system)
 {
 	// reaching to C code
-	using namespace DBJ::clib;
+	using namespace ::dbj::clib;
 
 	auto test = [](unsigned int err_num_) {
-		using error_descriptor = DBJ::clib::error_descriptor;
+		using error_descriptor = ::dbj::clib::error_descriptor;
 		auto * err_desc_0 = DBJ_ERR(err_num_);
 
-		_ASSERTE(DBJ::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
-		DBJ::clib::dbj_error_service.release(&err_desc_0);
-		_ASSERTE(false == DBJ::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
+		_ASSERTE(::dbj::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
+		::dbj::clib::dbj_error_service.release(&err_desc_0);
+		_ASSERTE(false == ::dbj::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
 	};
 
 	test(::dbj::clib::dbj_error_code::DBJ_EC_BAD_ERR_CODE);
@@ -107,7 +107,7 @@ struct fp_and_argument
 };
 
 Probably he has used this to cut the dependancy on the std::function
-and this is DBJ variant C++17
+and this is ::dbj variant C++17
 */
 
 /*
