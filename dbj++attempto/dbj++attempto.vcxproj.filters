@@ -80,9 +80,6 @@
     <ClCompile Include="r+d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dbj_error_code.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

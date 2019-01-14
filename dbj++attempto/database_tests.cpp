@@ -1,5 +1,9 @@
 #include "pch.h"
-#define DBJ_DB_TESTING
+
+// #define DBJ_DB_TESTING
+
+#ifdef DBJ_DB_TESTING
+
 #include "..\dbj++sql\core_tests.h"
 #include "..\dbj++sql\dbj_easy_udf_sample.h"
 
@@ -56,3 +60,5 @@ namespace anyspace {
 		system("@pause");
 	}
 } // nspace
+
+#endif // DBJ_DB_TESTING

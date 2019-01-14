@@ -1,15 +1,15 @@
 
-# dbj++pertempto
+# dbj++erc
 
-> pertempto is Latin for "probe, try out, explore, search, weigh"
+#### dbj error concept
 
-## Testing the [dbj++](https://github.com/dbj-systems/dbjplusplus)
-
-> Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
+> Various code snippets present in the core document
+> >> about dbj++error concept
+>Using the [dbj++](https://github.com/dbj-systems/dbjplusplus)
 
 -------------------------------------
 
-Copyright 2018 by dbj@dbj.org
+Copyright 2019 by dbj@dbj.org
 <pre>
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,5 +25,5 @@ limitations under the License.
 </pre>
 ---------------------------------------------------------------------  
 
-### &copy; 2018 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
+### &copy; 2019 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
 

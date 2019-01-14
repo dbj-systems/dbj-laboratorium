@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++sql", "dbj++sql\dbj++s
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utf8dbj", "utf8dbj\utf8dbj.vcxproj", "{1E6806CB-7C63-453E-85BA-0072E6D867C3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++erc", "dbj++erc\dbj++erc.vcxproj", "{8C1FA03B-DE31-4508-B212-E5EB419B9A64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +63,14 @@ Global
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Release|x64.Build.0 = Release|x64
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Release|x86.ActiveCfg = Release|Win32
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Release|x86.Build.0 = Release|Win32
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Debug|x64.ActiveCfg = Debug|x64
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Debug|x64.Build.0 = Debug|x64
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Debug|x86.ActiveCfg = Debug|Win32
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Debug|x86.Build.0 = Debug|Win32
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x64.ActiveCfg = Release|x64
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x64.Build.0 = Release|x64
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x86.ActiveCfg = Release|Win32
+		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
