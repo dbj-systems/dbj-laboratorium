@@ -2,7 +2,7 @@
 
 #include "dbj_error_code.h"
 
-namespace dbj 
+namespace dbj::err 
 {
 	using namespace ::std;
 	using namespace ::std::string_view_literals;
@@ -17,72 +17,59 @@ namespace dbj
 	// made such so that standard C++ 
 	// usage of dbj++ is "normal" in presence of
 	// multiple libs
-	class exception : public std::exception
+	class dbj_exception : public std::system_error
 	{
-		using parent_type = std::exception;
-		mutable error_code err_code_{};
+		using base = std::system_error;
+
 	public:
 
-		explicit exception(const char * const message_,
-			const error_code& erc_ = make_error_code(dbj::err::codes::ok))
-			: parent_type(message_)
-			, err_code_(erc_)
-		{			
-			DBJ_VERIFY(nullptr != message_);
+		dbj_exception(std::error_code ec) :base(ec) {
 		}
+/*
+ Constructs with error code ec and explanation string what_arg. 
+ The string returned by what() is guaranteed to contain what_arg as a substring.
+ */
+		dbj_exception(std::error_code ec, const std::string& what_arg)
+			: base(ec,what_arg)
+		{}
+		dbj_exception(std::error_code ec, const char* what_arg)
+			: base( ec, what_arg )
+		{}
+/* 
+Constructs with underlying error code ev and associated error category ecat.
+*/
+		dbj_exception(int ev, const std::error_category& ecat)
+			: base(ev,ecat)
+		{}
+/*
+Constructs with underlying error code ev, associated error category ecat 
+and explanatory string what_arg. 
+The string returned by what() is guaranteed to contain what_arg as a substring.
+*/
+		dbj_exception(int ev, const std::error_category& ecat, const std::string& what_arg)
+			: base(ev,ecat,what_arg)
+		{}
+		dbj_exception(int ev, const std::error_category& ecat, const char* what_arg)
+			: base(ev, ecat, what_arg)
+		{}
 
-		exception(wchar_t const* const message_, 
-			const error_code& erc_ = make_error_code(dbj::err::codes::ok)
-		) noexcept
-			: parent_type( 
-				nano::transform_to<string>(wstring(message_)).c_str()
-			)
-			, err_code_(erc_)
-		{
-			DBJ_VERIFY(nullptr != message_);
-		}
-
-		template< typename C >
-		exception(::std::basic_string_view<C> msg_,
-			const error_code& erc_ = make_error_code(dbj::err::codes::ok)
-		)
-			: parent_type(nano::transform_to<string>(msg_).c_str())
-			, err_code_(erc_)
-		{
-			DBJ_VERIFY(msg_.size());
-		}
-
-		template< typename C >
-		exception(const std::basic_string<C> & msg_,
-			const error_code& erc_ = make_error_code(dbj::err::codes::ok))
-			: parent_type(nano::transform_to<string>(msg_).c_str())
-			, err_code_(erc_)
-		{
-			DBJ_VERIFY(msg_.size());
-		}
-
-		std::error_code code() const noexcept
-		{
-			return this->err_code_;
-		}
-
-		wchar_t const * wwhat() const
-		{
-		  this->wwstring 
-			  = ::dbj::nano::transform_to<wstring>(string(this->what()));
-		  return this->wwstring.c_str();
-		}
 	private:
-		mutable wstring wwstring{};
+
+		friend std::wstring wwhat(const dbj_exception & x_)
+		{
+			std::wstring wwstring
+				= ::dbj::nano::transform_to<wstring>(std::string(x_.what()));
+			return wwstring;
+		}
 
 		// friend for dbj console print system
 		// print exceptions and also color the output red 
-		friend 	void out ( const dbj::exception & x_) 
+		friend 	void out ( const dbj_exception & x_) 
 		{
 			using ::dbj::console::PRN;
 			out(::dbj::console::painter_command::bright_red);
 			PRN.wchar_to_console(L"\ndbj::exception\n");
-			PRN.wchar_to_console(x_.wwhat());
+			PRN.wchar_to_console(wwhat(x_).c_str());
 			PRN.wchar_to_console(L"\ndbj::exception error_code\n");
 			PRN.wchar_to_console(L"\nCategory: ");
 			PRN.char_to_console( x_.code().category().name() );

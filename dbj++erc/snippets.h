@@ -1,9 +1,10 @@
 #include "pch.h"
+#include "dbj_status_code.h"
 
 //to be renamed to dbj::erc
 namespace dbj_erc {
 
-	struct last_win_err final 
+	struct last_win_err final
 	{
 		~last_win_err() {
 			// make sure this is done
@@ -17,14 +18,9 @@ namespace dbj_erc {
 
 	};
 
-	inline std::error_code last_win_ec	(	) {
+	inline std::error_code last_win_ec() {
 		return static_cast<std::error_code>(last_win_err{});
 	}
-
-
-
-	// default category is std::system_error
-	inline std::error_code error_code_ok{};
 
 	// here we return "system ok" 
 	[[nodiscard]]
@@ -39,29 +35,27 @@ namespace dbj_erc {
 			ec.default_error_condition()
 		);
 
-		return std::pair{ error_code_ok, 42 };
+		return std::pair{ ::dbj::err::dbj_universal_ok , 42 };
 	}
 
 	namespace {
 		using namespace ::dbj::err;
 
 		// we might return this "everywhere" we need to signal OK return
-		inline std::error_code dbj_ok
-		{
-			make_error_code(codes::ok)
-		};
+		inline std::error_code const & dbj_ok = ::dbj::err::dbj_universal_ok;
 
 		// here we return specific dbj ok
 		[[nodiscard]]
 		auto very_complex_dbj_operation
-		(::dbj::err::codes request = ::dbj::err::codes::ok)
+		(bool whatever = true )
 			noexcept
 		{
-			if (request == ::dbj::err::codes::ok)
+			if ( whatever )
 				return std::make_pair(dbj_ok, 13);
 			// else
 			return std::make_pair(
-				dbj::err::make_error_code(request),
+				dbj::err::make_error_code(
+					::dbj::err::common_codes::bad_argument),
 				-1);
 		}
 
@@ -70,11 +64,11 @@ namespace dbj_erc {
 		{
 			using ::dbj::console::print;
 
-			if (auto[e, v] = very_complex_operation(); e == error_code_ok) {
+			if (auto[e, v] = very_complex_operation(); e == dbj_universal_ok) {
 				print("\n\nSYSTEM OK, return value is: ", v);
 			}
 
-			if (auto[e, v] = very_complex_dbj_operation(::dbj::err::codes::bad_argument)
+			if (auto[e, v] = very_complex_dbj_operation()
 				; e == dbj_ok)
 			{
 				print("\n\nDBJ OK, return value is: ", v);
@@ -89,12 +83,12 @@ namespace dbj_erc {
 			(std::error_code& ec)
 				noexcept
 			{
-				ec = codes::bad_argument;
+				ec = common_codes::bad_argument;
 			};
 
 			std::error_code ec;
 			server_side_handler(ec);
-			if (ec == codes::bad_argument)
+			if (ec == common_codes::bad_argument)
 			{
 				DBJ_TEST_ATOM(ec.message());
 				DBJ_TEST_ATOM(ec.value());
@@ -133,6 +127,75 @@ namespace dbj_erc {
 			DWORD(64)
 		);
 		print_last_win32_error();
+	}
+	/*
+		the C++23 future 
+
+		int safe_divide(int i, int j) fails(arithmetic_errc) {
+		if (j == 0)
+		return failure(arithmetic_errc::divide_by_zero);
+		if (i == INT_MIN && j == -1)
+		return failure(arithmetic_errc::integer_divide_overflows);
+		if (i % j != 0)
+		return failure(arithmetic_errc::not_integer_division);
+		else return i / j;
+		}
+
+		double caller(double i, double j, double k) throws {
+		return i + safe_divide(j, k);
+		}
+
+		the immediate dbj++erc
+
+		we use "dbj_" prefix so when C++23 arrives we can easily search/replace
+		*OR* run without changes since we will not have a clash with
+		new C++23 keywords
+	*/
+	// future 'throws' function marker
+	// just nothing for the time being
+	#define dbj_throws
+	// P1095 fails used "now"
+	// declares the return value pair type
+	// to which failure/succes making inside 
+	// the same function has to conform
+	#define dbj_fails(vt,et) -> std::pair<vt,et>
+    #define dbj_erc_retval auto
+
+	template<typename T>
+	auto failure (T v, std::errc e_) { 
+		return std::pair{ v, std::make_error_code(e_) };
+	}
+
+	template<typename T>
+	auto failure (T v, std::error_code e_) {
+		return std::pair{ v, e_ };
+	}
+
+	template<typename T>
+	auto failure (T v, std::error_condition en_) {
+		return std::pair{ v, std::make_error_code(en_) };
+	}
+
+	template<typename T>
+	auto succes (T v) {
+		return std::pair{ v, dbj_universal_ok };
+	};
+
+	inline dbj_erc_retval safe_divide(int i, int j) 
+		dbj_fails(int, std::error_code)
+	{
+		// note: failure/success making has to conform to
+		// the fails declaration, or  the code
+		// won't compile
+		// note: std::errc are completely arbitrary here
+		if (j == 0)
+			return failure(0, std::errc::invalid_argument);
+		if (i == INT_MIN && j == -1)
+			return failure(0,std::errc::invalid_argument);
+		if (i % j != 0)
+			return failure(0,std::errc::invalid_argument);
+		else 
+			return succes((int)(i / j));
 	}
 
 } // dbj_erc

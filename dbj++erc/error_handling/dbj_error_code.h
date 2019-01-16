@@ -10,14 +10,8 @@ Bjarne suggests to both return "things" and throw exceptions.
 Also we will have catch almost nowhere but inside the main().
 
 Since std error codes and str error conditions are overengineered mess
-and std expected is adding into that mess we will almost follow
-how std ios is using this mess.
 
-To understand a lot about ::std exception and error observe very carefully
-the ios::base_failure exception positioning as explained here
-https://en.cppreference.com/w/cpp/io/ios_base/failure
-
-Author of std error codes concept has dissapeared, but we will follow
+Author of std error codes concept has 'dissapeared', but we will follow
 his abruptly stoped posts on the subject
 
 http://blog.think-async.com/2010/04/system-error-support-in-c0x-part-4.html
@@ -29,67 +23,86 @@ namespace dbj::err
 	using ::std::wstring;
 
 	// error codes
-	enum class codes {
-		ok = 100,
+	enum class common_codes {
 		bad_argument = 101,
 		bad_index,
 		bad_length,
 		bad_type
 	}; // codes
 
-	class common_category
+	class common_category final
 		: public std::error_category
 	{
 	public:
-		virtual const char* name()  const noexcept {
+		[[nodiscard]] virtual const char* name()  const noexcept {
 			return "dbj++common";
 		}
 
 
-		virtual std::string message(int ev) const noexcept {
+		[[nodiscard]] virtual std::string message(int ev) const noexcept {
 			/*
 			from here we should obviously call some message map
 			*/
-			switch ((codes)ev) {
-			case codes::bad_argument:
+			switch (static_cast<common_codes>(ev)) {
+			case common_codes::bad_argument:
 				return "Bad Argument";
-			case codes::bad_index:
+			case common_codes::bad_index:
 				return "Bad index";
-			case codes::bad_length:
+			case common_codes::bad_length:
 				return "Bad length";
-			case codes::bad_type:
+			case common_codes::bad_type:
 				return "Bad type";
 			default:
 				return "Unknown error";
 			}
 		}
+
+// OPTIONAL: Allow generic error conditions 
+// to be compared to this error domain aka category
+		[[nodiscard]] virtual std::error_condition
+			default_error_condition(int c) 
+				const noexcept override final
+		{
+			switch (static_cast<common_codes>(c))
+			{
+			case common_codes::bad_argument:
+			case common_codes::bad_length:
+			case common_codes::bad_type:
+				return make_error_condition(std::errc::invalid_argument);
+			case common_codes::bad_index:
+				return make_error_condition(std::errc::result_out_of_range);
+			default:
+				// No mapping 
+				return std::error_condition(c, *this);
+			}
+		}
 	};
 
-	inline const std::error_category& category()
+	inline const std::error_category& get_common_category()
 	{
 		static common_category category_;
 		return category_;
 	}
 
-	inline std::error_code make_error_code(codes e)
+	inline std::error_code make_error_code(common_codes e)
 	{
 		return std::error_code(
 			static_cast<int>(e),
-			category());
+			get_common_category());
 	}
 
-	inline  std::error_condition make_error_condition(codes e)
+	inline  std::error_condition make_error_condition(common_codes e)
 	{
 		return std::error_condition(
 			static_cast<int>(e),
-			category());
+			get_common_category());
 	}
 } // dbj::err
 
 namespace std
 {
 	template <>
-	struct is_error_code_enum<::dbj::err::codes>
+	struct is_error_code_enum<::dbj::err::common_codes>
 		: public true_type {};
 }
 #pragma endregion
