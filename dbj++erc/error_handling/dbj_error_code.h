@@ -22,6 +22,34 @@ namespace dbj::err
 	using ::std::string;
 	using ::std::wstring;
 
+#pragma region utils
+
+#ifdef _MSC_VER
+
+	// (c) dbjdbj 2019 JAN
+	struct last_win_err final
+	{
+		~last_win_err() {
+			// make sure this is done
+			// windows lore says this is required
+			::SetLastError(0);
+		}
+
+		// make error code from win32 err int code 
+		// POLICY: last WIN32 error is obtained on each call
+		operator std::error_code() const noexcept {
+			return std::error_code(::GetLastError(), std::system_category());
+		}
+
+	};
+
+	inline std::error_code last_win_ec() {
+		return static_cast<std::error_code>(last_win_err{});
+	}
+#endif // _MSC_VER
+
+#pragma endregion
+
 	// error codes
 	enum class common_codes {
 		bad_argument = 101,

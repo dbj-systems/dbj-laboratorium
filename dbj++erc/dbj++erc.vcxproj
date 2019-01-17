@@ -159,9 +159,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dbj_status_code.h" />
     <ClInclude Include="error_handling\dbj_error_code.h" />
     <ClInclude Include="error_handling\dbj_exception.h" />
+    <ClInclude Include="error_handling\dbj_p1095.h" />
+    <ClInclude Include="error_handling\dbj_status_code.h" />
     <ClInclude Include="snippets.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

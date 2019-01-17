@@ -30,7 +30,10 @@
     <ClInclude Include="error_handling\dbj_exception.h">
       <Filter>error_handling</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_status_code.h">
+    <ClInclude Include="error_handling\dbj_p1095.h">
+      <Filter>error_handling</Filter>
+    </ClInclude>
+    <ClInclude Include="error_handling\dbj_status_code.h">
       <Filter>error_handling</Filter>
     </ClInclude>
   </ItemGroup>

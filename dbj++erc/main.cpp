@@ -4,7 +4,24 @@
 #include "pch.h"
 // local, to be moved to dbj++when done
 #include "error_handling/dbj_exception.h"
+#include "error_handling/dbj_p1095.h"
 #include "snippets.h"
+
+/// <summary>
+/// just execute all the registered tests
+/// in no particular order
+/// </summary>
+static void dbj_program_start(
+	const int argc,
+	const wchar_t *argv[],
+	const wchar_t *envp[]
+)
+{
+	DBJ_VERIFY(::dbj::console_is_initialized());
+	::dbj::TRACE("\nDBJ++ERR -- ::dbj::console_is_initialized()");
+	// TODO: make this async
+	dbj::testing::execute(argc, argv, envp);
+}
 
 #ifdef UNICODE
 int wmain(const int argc, const wchar_t *argv[], const wchar_t *envp[])
@@ -14,13 +31,15 @@ int wmain(const int argc, const wchar_t *argv[], const wchar_t *envp[])
 {
 	using namespace ::dbj::console;
 	try {
+		dbj_program_start(argc, argv, envp);
 	}
 	catch (...) {
 		print(
 			painter_command::bright_red,
-			__FUNCSIG__ "  Unknown exception caught! ",
+			"\n\n" __FUNCSIG__ "  Unknown exception caught! \n\n",
 			painter_command::text_color_reset
 		);
+		return EXIT_FAILURE;
 	}
 	return  EXIT_SUCCESS;
 }

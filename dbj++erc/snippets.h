@@ -1,26 +1,10 @@
 #include "pch.h"
-#include "dbj_status_code.h"
+#include "./error_handling/dbj_status_code.h"
 
 //to be renamed to dbj::erc
 namespace dbj_erc {
 
-	struct last_win_err final
-	{
-		~last_win_err() {
-			// make sure this is done
-			::SetLastError(0);
-		}
-
-		// make error code from win32 err int code 
-		operator std::error_code() const noexcept {
-			return std::error_code(::GetLastError(), std::system_category());
-		}
-
-	};
-
-	inline std::error_code last_win_ec() {
-		return static_cast<std::error_code>(last_win_err{});
-	}
+	using ::dbj::console::print;
 
 	// here we return "system ok" 
 	[[nodiscard]]
@@ -128,75 +112,46 @@ namespace dbj_erc {
 		);
 		print_last_win32_error();
 	}
-	/*
-		the C++23 future 
 
-		int safe_divide(int i, int j) fails(arithmetic_errc) {
-		if (j == 0)
-		return failure(arithmetic_errc::divide_by_zero);
-		if (i == INT_MIN && j == -1)
-		return failure(arithmetic_errc::integer_divide_overflows);
-		if (i % j != 0)
-		return failure(arithmetic_errc::not_integer_division);
-		else return i / j;
-		}
-
-		double caller(double i, double j, double k) throws {
-		return i + safe_divide(j, k);
-		}
-
-		the immediate dbj++erc
-
-		we use "dbj_" prefix so when C++23 arrives we can easily search/replace
-		*OR* run without changes since we will not have a clash with
-		new C++23 keywords
-	*/
-	// future 'throws' function marker
-	// just nothing for the time being
-	#define dbj_throws
-	// P1095 fails used "now"
-	// declares the return value pair type
-	// to which failure/succes making inside 
-	// the same function has to conform
-	#define dbj_fails(vt,et) -> std::pair<vt,et>
-    #define dbj_erc_retval auto
-
-	template<typename T>
-	auto failure (T v, std::errc e_) { 
-		return std::pair{ v, std::make_error_code(e_) };
-	}
-
-	template<typename T>
-	auto failure (T v, std::error_code e_) {
-		return std::pair{ v, e_ };
-	}
-
-	template<typename T>
-	auto failure (T v, std::error_condition en_) {
-		return std::pair{ v, std::make_error_code(en_) };
-	}
-
-	template<typename T>
-	auto succes (T v) {
-		return std::pair{ v, dbj_universal_ok };
-	};
-
-	inline dbj_erc_retval safe_divide(int i, int j) 
-		dbj_fails(int, std::error_code)
+	void why_not() 
 	{
-		// note: failure/success making has to conform to
-		// the fails declaration, or  the code
-		// won't compile
-		// note: std::errc are completely arbitrary here
-		if (j == 0)
-			return failure(0, std::errc::invalid_argument);
-		if (i == INT_MIN && j == -1)
-			return failure(0,std::errc::invalid_argument);
-		if (i % j != 0)
-			return failure(0,std::errc::invalid_argument);
-		else 
-			return succes((int)(i / j));
+		try {
+			/*
+			throw dbj::err::make_error_code(
+				dbj::err::dbj_status_code::info
+			);
+			*/
+			throw std::errc::not_enough_memory;
+		}
+		catch (std::errc erc) {
+			DBJ_TEST_ATOM(
+				std::make_error_condition(erc)
+			);
+		}
+		catch ( std::error_code ec ) {
+			DBJ_TEST_ATOM(ec);
+		}
+		catch (std::error_condition ecn) {
+			DBJ_TEST_ATOM(ecn);
+		}
+	}
+
+	void p1095_tests() {
+		auto[v, e] = ::dbj_erc::safe_divide(1, 2);
+		DBJ_TEST_ATOM(v);
+		DBJ_TEST_ATOM(e);
 	}
 
 } // dbj_erc
+
+// use of DBJ TESTING FWK is "moved out"
+// so the users can easily opt out
+// and call directly or whatever
+DBJ_TEST_UNIT(one)
+{
+	::dbj_erc::p1095_tests();
+	::dbj_erc::why_not();
+	::dbj_erc::dbj_error_system_by_the_book();
+	::dbj_erc::win32_system_specific_errors();
+}
 
