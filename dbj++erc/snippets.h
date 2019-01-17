@@ -116,22 +116,24 @@ namespace dbj_erc {
 	void why_not() 
 	{
 		try {
-			/*
-			throw dbj::err::make_error_code(
-				dbj::err::dbj_status_code::info
-			);
-			*/
-			throw std::errc::not_enough_memory;
+			// assignment behaviour makes the
+			// error code
+			std::error_code info_	= dbj::err::dbj_status_code::info;
+			std::error_code ok_		= dbj::err::dbj_status_code::ok;
+			auto same_cat_ = info_.category() == ok_.category();
+			// just throw the bastard :)
+			throw info_;
 		}
-		catch (std::errc erc) {
-			DBJ_TEST_ATOM(
-				std::make_error_condition(erc)
-			);
-		}
-		catch ( std::error_code ec ) {
+		catch ( std::error_code ec ) 
+		{
+			// can do all the usual comparisons and
+			// interogations here
+			if (ec == std::errc::not_enough_memory) 
+				print("\nApparently there is no enough memory?");
+
 			DBJ_TEST_ATOM(ec);
-		}
-		catch (std::error_condition ecn) {
+
+		} catch (std::error_condition ecn) {
 			DBJ_TEST_ATOM(ecn);
 		}
 	}

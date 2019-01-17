@@ -45,7 +45,7 @@ namespace std {
 
 namespace dbj::err {
 
-	namespace {
+	namespace inner {
 		class dbj_status_category final : public std::error_category
 		{
 			[[nodiscard]]
@@ -82,16 +82,16 @@ namespace dbj::err {
 				}
 			}
 		};
-	} // ns
+	} // ns inner
 
 	// Declare a global function returning a static instance 
 	// of the custom category
-	extern inline const dbj_status_category &
+	inline inner::dbj_status_category const &
 		make_dbj_status_category ()
 	{
 		// dbj: this is resilient in presence of
 		// multiple threads
-		static dbj_status_category dsc_{} ;
+		static inner::dbj_status_category dsc_ ;
 		return dsc_;
 	}
 
