@@ -64,26 +64,3 @@ namespace dbj::err {
 
 } // namespace dbj::err
 
-namespace dbj_erc {
-
-	using namespace ::dbj::err;
-	// the usage
-	[[nodiscard]]
-	inline dbj_erc_retval safe_divide(int i, int j)
-		dbj_fails(int, std::error_code)
-	{
-		// note: failure/success making has to conform to
-		// the fails declaration, or  the code
-		// won't compile
-		// note: std::errc are completely arbitrary here
-		if (j == 0)
-			return failure(0, std::errc::invalid_argument);
-		if (i == INT_MIN && j == -1)
-			return failure(0, std::errc::invalid_argument);
-		if (i % j != 0)
-			return failure(0, std::errc::invalid_argument);
-		else
-			return succes((int)(i / j));
-	}
-
-}
