@@ -105,3 +105,6 @@ namespace dbj::err {
 	inline std::error_code dbj_universal_ok
 		= make_error_code(dbj_status_code::ok);
 }
+
+/* inclusion of this file defines the kind of a licence used */
+#include "dbj_gpl_license.h"

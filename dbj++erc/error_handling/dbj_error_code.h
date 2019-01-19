@@ -51,7 +51,7 @@ namespace dbj::err
 #pragma endregion
 
 	// error codes
-	enum class common_codes {
+	enum class dbj_err_code {
 		bad_argument = 101,
 		bad_index,
 		bad_length,
@@ -71,14 +71,14 @@ namespace dbj::err
 			/*
 			from here we should obviously call some message map
 			*/
-			switch (static_cast<common_codes>(ev)) {
-			case common_codes::bad_argument:
+			switch (static_cast<dbj_err_code>(ev)) {
+			case dbj_err_code::bad_argument:
 				return "Bad Argument";
-			case common_codes::bad_index:
+			case dbj_err_code::bad_index:
 				return "Bad index";
-			case common_codes::bad_length:
+			case dbj_err_code::bad_length:
 				return "Bad length";
-			case common_codes::bad_type:
+			case dbj_err_code::bad_type:
 				return "Bad type";
 			default:
 				return "Unknown error";
@@ -91,13 +91,13 @@ namespace dbj::err
 			default_error_condition(int c) 
 				const noexcept override final
 		{
-			switch (static_cast<common_codes>(c))
+			switch (static_cast<dbj_err_code>(c))
 			{
-			case common_codes::bad_argument:
-			case common_codes::bad_length:
-			case common_codes::bad_type:
+			case dbj_err_code::bad_argument:
+			case dbj_err_code::bad_length:
+			case dbj_err_code::bad_type:
 				return make_error_condition(std::errc::invalid_argument);
-			case common_codes::bad_index:
+			case dbj_err_code::bad_index:
 				return make_error_condition(std::errc::result_out_of_range);
 			default:
 				// No mapping 
@@ -112,14 +112,14 @@ namespace dbj::err
 		return category_;
 	}
 
-	inline std::error_code make_error_code(common_codes e)
+	inline std::error_code make_error_code(dbj_err_code e)
 	{
 		return std::error_code(
 			static_cast<int>(e),
 			get_common_category());
 	}
 
-	inline  std::error_condition make_error_condition(common_codes e)
+	inline  std::error_condition make_error_condition(dbj_err_code e)
 	{
 		return std::error_condition(
 			static_cast<int>(e),
@@ -130,7 +130,7 @@ namespace dbj::err
 namespace std
 {
 	template <>
-	struct is_error_code_enum<::dbj::err::common_codes>
+	struct is_error_code_enum<::dbj::err::dbj_err_code>
 		: public true_type {};
 }
 #pragma endregion

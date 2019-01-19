@@ -1,7 +1,6 @@
 #pragma once
-
+#ifdef DBJ_ERR_STANDARD_EXCEPTION
 #include "dbj_error_code.h"
-
 namespace dbj::err 
 {
 	using namespace ::std;
@@ -86,3 +85,4 @@ The string returned by what() is guaranteed to contain what_arg as a substring.
 
 /* inclusion of this file defines the kind of a licence used */
 #include "dbj_gpl_license.h"
+#endif // DBJ_ERR_STANDARD_EXCEPTION

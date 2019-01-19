@@ -1,10 +1,12 @@
 #pragma once
 #include "..\pch.h"
 #include "dbj_status_code.h"
+
+
 /*
 		dbjdbj: "The future is bright", one just needs to wait for it
 
-		P1095 
+		P1095
 		http://www.open-std.org/jtc1/sc22/wg14/www/docs/n2289.pdf
 
 		int safe_divide(int i, int j) fails(arithmetic_errc) {
@@ -28,7 +30,12 @@
 		new C++23 keywords
 	*/
 
-// handling the future 'throws' function marker, now
+// control the existence of things decribed in P1095
+#define DBJ_ERR_P1095 
+
+#ifdef DBJ_ERR_P1095
+
+// handling the future 'throws' function marker. now
 // just nothing for the time being
 #define dbj_throws
 
@@ -64,3 +71,6 @@ namespace dbj::err {
 
 } // namespace dbj::err
 
+#endif // DBJ_ERR_P1095
+/* inclusion of this file defines the kind of a licence used */
+#include "dbj_gpl_license.h"

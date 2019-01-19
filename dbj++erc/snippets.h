@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "./error_handling/dbj_status_code.h"
+#include "./error_handling/dbj_err.h"
 
 //to be renamed to dbj::erc
 namespace dbj_erc {
@@ -8,7 +8,7 @@ namespace dbj_erc {
 
 	// here we return "system ok" 
 	[[nodiscard]]
-	auto very_complex_operation()
+	inline auto very_complex_operation()
 		noexcept
 	{
 		std::error_code ec = DBJ_TEST_ATOM(
@@ -30,7 +30,7 @@ namespace dbj_erc {
 
 		// here we return specific dbj ok
 		[[nodiscard]]
-		auto very_complex_dbj_operation
+		inline auto very_complex_dbj_operation
 		(bool whatever = true )
 			noexcept
 		{
@@ -39,7 +39,7 @@ namespace dbj_erc {
 			// else
 			return std::make_pair(
 				dbj::err::make_error_code(
-					::dbj::err::common_codes::bad_argument),
+					::dbj::err::dbj_err_code::bad_argument),
 				-1);
 		}
 
@@ -67,12 +67,12 @@ namespace dbj_erc {
 			(std::error_code& ec)
 				noexcept
 			{
-				ec = common_codes::bad_argument;
+				ec = dbj_err_code::bad_argument;
 			};
 
 			std::error_code ec;
 			server_side_handler(ec);
-			if (ec == common_codes::bad_argument)
+			if (ec == dbj_err_code::bad_argument)
 			{
 				DBJ_TEST_ATOM(ec.message());
 				DBJ_TEST_ATOM(ec.value());
@@ -113,26 +113,36 @@ namespace dbj_erc {
 		print_last_win32_error();
 	}
 
-	void why_not() 
+	inline void why_not() 
 	{
 		try {
-			// assignment behaviour makes the
-			// error code
-			std::error_code info_	= dbj::err::dbj_status_code::info;
-			std::error_code ok_		= dbj::err::dbj_status_code::ok;
-			auto same_cat_ = info_.category() == ok_.category();
+			std::error_code ecodes[]{ 
+				// condition to code
+				std::make_error_code(std::errc::not_enough_memory) ,
+				// simple assignment makes the error code
+				dbj::err::dbj_status_code::info,
+				dbj::err::dbj_status_code::ok };
+
+			// test is_dbj_err
+			DBJ_TEST_ATOM( is_dbj_err(ecodes[0]));
+			DBJ_TEST_ATOM( is_dbj_err(ecodes[1]));
+			DBJ_TEST_ATOM( is_dbj_err(ecodes[2]));
 			// just throw the bastard :)
-			throw info_;
+			throw ecodes[1];
 		}
 		catch ( std::error_code ec ) 
 		{
-			// can do all the usual comparisons and
-			// interogations here
+			// all the usual tests 
 			if (ec == std::errc::not_enough_memory) 
 				print("\nApparently there is no enough memory?");
-
+			else
+			if (ec == ::dbj::err::dbj_status_code::ok)
+				print("\nSome dbj++ api sent ok signal");
+			else
+			if (ec == ::dbj::err::dbj_status_code::info)
+				print("\nSome dbj++ api sent info signal");
+			// and so on
 			DBJ_TEST_ATOM(ec);
-
 		} catch (std::error_condition ecn) {
 			DBJ_TEST_ATOM(ecn);
 		}
@@ -140,27 +150,28 @@ namespace dbj_erc {
 
 		using namespace ::dbj::err;
 		// the usage of P1095 described features
-		// implemented here
+		// used here
 		[[nodiscard]]
 		inline dbj_erc_retval safe_divide(int i, int j)
+			// effectively declare the return type 
 			dbj_fails(int, std::error_code)
 		{
 			// note: failure/success making has to conform to
 			// the fails declaration, or  the code
 			// won't compile
-			// note: std::errc are completely arbitrary here
-			if (j == 0)
-				return failure(0, std::errc::invalid_argument);
-			if (i == INT_MIN && j == -1)
-				return failure(0, std::errc::invalid_argument);
-			if (i % j != 0)
+			if ( (j == 0)
+			   ||(i == INT_MIN && j == -1)
+			   ||(i % j != 0) )
 				return failure(0, std::errc::invalid_argument);
 			else
-//		return succes((int)(i / j));  or
-			return failure((int)(i / j), dbj_status_code::info);
+#ifdef DBJ_ERR_SHOW_FAILURE_RETURN
+			   // NOT AN ERROR RETURN
+  			   return failure((int)(i / j), dbj_status_code::info);
+#endif
+			return succes(i / j);
 		}
 
-	void p1095_tests() {
+	inline void p1095_tests() {
 		if (auto[v, e] = ::dbj_erc::safe_divide(4, 2); e) {
 			DBJ_TEST_ATOM(v);
 			DBJ_TEST_ATOM(e);

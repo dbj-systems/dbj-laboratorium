@@ -36,6 +36,9 @@
     <ClInclude Include="error_handling\dbj_status_code.h">
       <Filter>error_handling</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_err.h">
+      <Filter>error_handling</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
