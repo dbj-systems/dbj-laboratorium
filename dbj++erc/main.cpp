@@ -3,8 +3,6 @@
 
 #include "pch.h"
 // local, to be moved to dbj++when done
-#include "error_handling/dbj_exception.h"
-#include "error_handling/dbj_p1095.h"
 #include "snippets.h"
 
 /// <summary>

@@ -159,11 +159,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dbj_err.h" />
-    <ClInclude Include="error_handling\dbj_error_code.h" />
-    <ClInclude Include="error_handling\dbj_exception.h" />
-    <ClInclude Include="error_handling\dbj_p1095.h" />
-    <ClInclude Include="error_handling\dbj_status_code.h" />
     <ClInclude Include="snippets.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -178,7 +173,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\dbj++pertempto\README.MD" />
-    <None Include="error_handling\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="error_handling">
-      <UniqueIdentifier>{5801847d-c627-4de8-8f86-d4a8ce9d6fea}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -23,21 +20,6 @@
     </ClInclude>
     <ClInclude Include="snippets.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="error_handling\dbj_error_code.h">
-      <Filter>error_handling</Filter>
-    </ClInclude>
-    <ClInclude Include="error_handling\dbj_exception.h">
-      <Filter>error_handling</Filter>
-    </ClInclude>
-    <ClInclude Include="error_handling\dbj_p1095.h">
-      <Filter>error_handling</Filter>
-    </ClInclude>
-    <ClInclude Include="error_handling\dbj_status_code.h">
-      <Filter>error_handling</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_err.h">
-      <Filter>error_handling</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,8 +32,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\dbj++pertempto\README.MD" />
-    <None Include="error_handling\readme.md">
-      <Filter>error_handling</Filter>
-    </None>
   </ItemGroup>
 </Project>

@@ -1,10 +1,11 @@
 #include "pch.h"
-#include "./error_handling/dbj_err.h"
+// #include "./error_handling/dbj_err.h"
 
 //to be renamed to dbj::erc
 namespace dbj_erc {
 
 	using ::dbj::console::print;
+	using namespace ::dbj::err;
 
 	// here we return "system ok" 
 	[[nodiscard]]
@@ -19,14 +20,8 @@ namespace dbj_erc {
 			ec.default_error_condition()
 		);
 
-		return std::pair{ ::dbj::err::dbj_universal_ok , 42 };
+		return std::pair{ dbj_universal_ok , 42 };
 	}
-
-	namespace {
-		using namespace ::dbj::err;
-
-		// we might return this "everywhere" we need to signal OK return
-		inline std::error_code const & dbj_ok = ::dbj::err::dbj_universal_ok;
 
 		// here we return specific dbj ok
 		[[nodiscard]]
@@ -35,25 +30,23 @@ namespace dbj_erc {
 			noexcept
 		{
 			if ( whatever )
-				return std::make_pair(dbj_ok, 13);
+				return std::make_pair(dbj_universal_ok, 13);
 			// else
 			return std::make_pair(
-				dbj::err::make_error_code(
-					::dbj::err::dbj_err_code::bad_argument),
+				make_error_code(
+					dbj_err_code::bad_argument),
 				-1);
 		}
 
 
 		inline void dbj_error_system_by_the_book ()
 		{
-			using ::dbj::console::print;
-
 			if (auto[e, v] = very_complex_operation(); e == dbj_universal_ok) {
 				print("\n\nSYSTEM OK, return value is: ", v);
 			}
 
 			if (auto[e, v] = very_complex_dbj_operation()
-				; e == dbj_ok)
+				; e == dbj_universal_ok)
 			{
 				print("\n\nDBJ OK, return value is: ", v);
 			}
@@ -83,12 +76,9 @@ namespace dbj_erc {
 			}
 
 		}
-	}
 
 	inline void win32_system_specific_errors()
 	{
-		using ::dbj::console::print;
-
 		auto print_last_win32_error = []() {
 			print("\n\nWIN32 Error:\n",
 				last_win_ec(),
@@ -120,8 +110,8 @@ namespace dbj_erc {
 				// condition to code
 				std::make_error_code(std::errc::not_enough_memory) ,
 				// simple assignment makes the error code
-				dbj::err::dbj_status_code::info,
-				dbj::err::dbj_status_code::ok };
+				dbj_status_code::info,
+				dbj_status_code::ok };
 
 			// test is_dbj_err
 			DBJ_TEST_ATOM( is_dbj_err(ecodes[0]));
@@ -136,10 +126,10 @@ namespace dbj_erc {
 			if (ec == std::errc::not_enough_memory) 
 				print("\nApparently there is no enough memory?");
 			else
-			if (ec == ::dbj::err::dbj_status_code::ok)
+			if (ec == dbj_status_code::ok)
 				print("\nSome dbj++ api sent ok signal");
 			else
-			if (ec == ::dbj::err::dbj_status_code::info)
+			if (ec == dbj_status_code::info)
 				print("\nSome dbj++ api sent info signal");
 			// and so on
 			DBJ_TEST_ATOM(ec);
@@ -147,8 +137,6 @@ namespace dbj_erc {
 			DBJ_TEST_ATOM(ecn);
 		}
 	}
-
-		using namespace ::dbj::err;
 		// the usage of P1095 described features
 		// used here
 		[[nodiscard]]
@@ -164,8 +152,8 @@ namespace dbj_erc {
 			   ||(i % j != 0) )
 				return failure(0, std::errc::invalid_argument);
 			else
-#ifdef DBJ_ERR_SHOW_FAILURE_RETURN
-			   // NOT AN ERROR RETURN
+#if 0
+			   // INFO RETURN
   			   return failure((int)(i / j), dbj_status_code::info);
 #endif
 			return succes(i / j);
@@ -185,9 +173,10 @@ namespace dbj_erc {
 // and call directly or whatever
 DBJ_TEST_UNIT(one)
 {
-	::dbj_erc::p1095_tests();
-	::dbj_erc::why_not();
-	::dbj_erc::dbj_error_system_by_the_book();
-	::dbj_erc::win32_system_specific_errors();
+	using namespace ::dbj_erc;
+		p1095_tests();
+		why_not();
+		dbj_error_system_by_the_book();
+		win32_system_specific_errors();
 }
 
