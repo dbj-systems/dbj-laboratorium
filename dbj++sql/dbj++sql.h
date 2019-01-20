@@ -22,6 +22,8 @@ limitations under the License.
 #include <vector>
 #include <cstdio>
 #include <crtdbg.h>
+#include "./err/dbj_db_err.h"
+#include "./log/dbj_log.h"
 
 #ifndef DBJ_VANISH
 #define DBJ_VANISH(...) static_assert( (noexcept(__VA_ARGS__),true) );
@@ -35,9 +37,11 @@ limitations under the License.
 #define DBJ_STR(x) #x
 #endif
 
-#ifndef DBJ_VERIFY_2
-#define DBJ_VERIFY_2(R,X) if ( R != X ) \
-   throw ::dbj::db::sql_exception{ int(R), __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
+#ifndef DBJ_DB_VERIFY
+#define DBJ_DB_VERIFY(R,X) if ( R != X ) \
+   throw ::dbj::db::err::sql_exception{ \
+         int(R), \
+    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
 #endif
 
 namespace dbj::db {
@@ -45,6 +49,8 @@ namespace dbj::db {
 	using namespace ::std;
 	using namespace ::sqlite;
 	using namespace ::std::string_view_literals;
+
+	using namespace ::dbj::db::err;
 
 [[noreturn]] inline void terror
 (const char * msg_, const char * file_, const int line_)
@@ -56,11 +62,14 @@ namespace dbj::db {
 	// constexpr inline auto version = "1.0.0"sv;
 	// core tests moved to core_tests.h
 	// also with advice on u8 string literals 
-	constexpr inline auto version = "1.0.1"sv;
+	// constexpr inline auto version = "1.0.1"sv;
+	// raised on 2019-01-20 to "1.1.0"
+    // what's new
+    // dbj err concept
+	constexpr inline auto version = "1.1.0"sv;
 
 	/* 
-
-	It's recommended to do not use wchar_t because it's not portable. 
+	It's recommended to not use wchar_t because it's not portable. 
 	Use narrow char UTF-8 encoded strings instead. SQLite assumes all narrow
 	char strings are UTF-8, even for file names, even on Windows. 
 	Using this approach you can get the original code to work just by saving 
@@ -80,9 +89,9 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 		std::string wide_to_multi(std::wstring_view wstr)
 		{
 			if (wstr.empty()) return {};
-			int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+			int size_needed = ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
 			std::string strTo(size_needed, 0);
-			WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+			::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
 			return strTo;
 		}
 
@@ -90,44 +99,52 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 		std::wstring multi_to_wide(std::string_view str)
 		{
 			if (str.empty()) return {};
-			int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+			int size_needed = ::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
 			std::wstring wstrTo(size_needed, 0);
-			MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+			::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
 			return wstrTo;
 		}
 	}
 #endif
 
-	struct sql_exception final
-	{
-		const int code;
-		const std::string message;
-	};
-
-	/*	dbj db error codes, are all < 0	*/
-	enum struct error_code : int { OK = -1, GENERIC = -2, UDF_ARGC_INVALID = -3 };
-
-	inline string_view  error_message (error_code code_)
-	{
-		switch (code_) {
-		case error_code::OK: return "Not an error"sv; break;
-		case error_code::GENERIC: return "Generic dbj db error"sv; break;
-		case error_code::UDF_ARGC_INVALID: return "Invalid dbj db udf argument index"sv; break;
-		}
-		return "Unknown dbj db error code"sv;
-	};
+namespace err {
 
 	/*
-	here we make dbj db related sql_exception instances
+	here we make dbj db error codes 
+	before returning them we log them
+	so when they are received or caught (if thrown)
+	the full info is already in the log
 	*/
-	inline sql_exception error_instance(error_code code_ , 
-	 	optional<string_view> user_message_ = nullopt 
-	) {
+	inline [[nodiscard]]
+		::std::error_code dbj_sql_err_log_get(int sqlite_retval)
+		noexcept
+	{
+		::std::error_code ec = ::std::error_code
+		(sqlite_retval, get_dbj_dbj_err_category());
+		/*
+		In SQLITE3 API
+		There are only a few non-error result codes:
+		SQLITE_OK, SQLITE_ROW, and SQLITE_DONE.
+		The term "error code" means any result code other than these three.
 
-		return sql_exception
-		{ (int)code_,  user_message_.value_or( error_message(code_).data()).data() };
+		Thus we will simply not log them. Thus, considerably downsizing the log size
+
+		we make log and return always even if SQLITE_OK == result
+		so we do not want logging to be sync-hronous
+
+		*/
+		if (
+			(ec == dbj_dbj_err_code::sqlite_ok) ||
+			(ec == dbj_dbj_err_code::sqlite_row) ||
+			(ec == dbj_dbj_err_code::sqlite_done)
+			)
+			::dbj::db::log::info( ec.message() );
+		else 
+			::dbj::db::log::error(ec.message() );
+
+		return ec;
 	}
-
+} // err nspace
 
 
 	/* bastardized version of Keny Kerr's unique_handle */
@@ -317,7 +334,9 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 	/*
 	return vector of column names from the active statement
 	*/
-	inline vector<string> column_names( const statement_handle & sh_ ) 
+	inline vector<string> 
+		column_names( const statement_handle & sh_ ) 
+		noexcept
 	{
 		// this actually calls the traits invalid method
 		// from inside the handle bool operator
@@ -332,7 +351,7 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 	}
 
 	// user created callback type for database query()
-    // return the sqlite rezult code or SQLITE_OK
+    // return the sqlite err rezult code or SQLITE_OK
 	// called once per the row of the result set
 	using result_row_user_type = int(*)
 		(
@@ -348,24 +367,33 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 	{
 		mutable connection_handle handle{};
 
-	static void open(connection_handle & handle_, char const * filename)
+/*
+this function by design does not return a value 
+so we do not return a pair, just the error_code
+*/
+	[[nodiscard]] friend std::error_code
+		dbj_sqlite_open(connection_handle & handle_, char const * filename)
+	noexcept
 	{
 		handle_.reset();
-		auto const result = sqlite3_open(filename,
+		auto const result = sqlite::sqlite3_open(filename,
 			handle_.get_address_of());
 
-		if (SQLITE_OK != result)
-		{
-			throw sql_exception{ result, sqlite3_errmsg(handle_.get()) };
-		}
+		// we make log and return always
+		// even if SQLITE_OK == result
+		return ::dbj::db::err::dbj_sql_err_log_get( result );
 	}	
 	
-	statement_handle prepare_statement (char const * query_) const
+	[[nodiscard]] 
+	::dbj::db::err::dbj_db_return_type<statement_handle>
+		prepare_statement (char const * query_) const noexcept
 	{
 		_ASSERTE(query_);
-		if (!handle) throw dbj::db::sql_exception{ 0, " Must call open() before " __FUNCSIG__ };
-
 		auto local_statement = statement_handle{};
+		// " Must call open() before " __FUNCSIG__ 
+		if (!handle)
+			return ::dbj::db::err::failure( 
+				move(local_statement), ::std::errc::protocol_error );
 
 		auto const result = sqlite3_prepare_v2(
 			handle.get(),
@@ -374,13 +402,14 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 			local_statement.get_address_of(),
 			NULL );
 
-		if (SQLITE_OK != result)
-		{
-			throw sql_exception{ result, sqlite3_errmsg(handle.get()) };
-		}
-
-		// instead of: this->statement_ = move(local_statement);
-		return local_statement ;
+		    /*
+			1. success() has no point 
+			2. caller must always peek into the E of the reval {V,E}
+			*/
+			return failure(
+				move(local_statement),
+				::dbj::db::err::dbj_sql_err_log_get(result)
+				);
 	}
 
 	public:
@@ -390,24 +419,31 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 		database( const database &) = delete;
 		database( database &&) = delete;
 
-		explicit database( string_view storage_name ) 
+		// can throw
+		explicit database( string_view storage_name )
 		{
-			// can throw
-			open( this->handle, storage_name.data() );
+			// not returning pair, by design
+			std::error_code e = dbj_sqlite_open( this->handle, storage_name.data() );
+
+			if (e != ::dbj::db::err::dbj_dbj_err_code::sqlite_ok) {
+				throw e;
+			}
 		}
 
 		/*
 		will do 'something like':
 		sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
 		*/
-		auto register_user_defined_function 
+		[[nodiscard]] std::error_code register_user_defined_function 
 		( 
 			string_view udf_name, 
 			void(__cdecl * udf_)(sqlite3_context *, int, sqlite3_value **)
-		) const
+		) const noexcept
 		{
-			if (!handle) throw 
-				dbj::db::error_instance ( error_code::GENERIC, " Must call open() before " __FUNCSIG__);
+			// " Must call open() before " __FUNCSIG__ 
+			if (!handle)
+				return ::std::error_code(::std::errc::protocol_error);
+			
 			auto const result 
 				= sqlite3_create_function(
 					handle.get(), 
@@ -419,22 +455,22 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 					NULL, 
 					NULL);
 
-			if (SQLITE_OK != result)
-			{
-				throw sql_exception{ result, sqlite3_errmsg(handle.get()) };
-			}
+			// we make log and return always
+			// even if SQLITE_OK == result
+			return ::dbj::db::err::dbj_sql_err_log_get(result);
 		}
 
 	/*
 	call with query and a callback
 	*/
-	auto query (
+	[[nodiscard]] auto query (
 		char const * query_, 
 		optional<result_row_user_type>  row_user_ = nullopt
-	) const
+	) const noexcept
 	{
-		if (!handle) throw
-			dbj::db::error_instance(error_code::GENERIC, " Must call open() before " __FUNCSIG__);
+		// " Must call open() before " __FUNCSIG__ 
+		if (!handle)
+			throw ::std::error_code(::std::errc::protocol_error);
 
 		statement_handle statement_ = prepare_statement(query_);
 		vector<string> col_names_ { column_names( statement_ ) };
@@ -452,9 +488,14 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 		  }
 	    }
 
-		if (rc != SQLITE_DONE) {
-			throw dbj::db::sql_exception{ rc, sqlite3_errmsg(handle.get()) };
-		}
+		// we make log and return always
+		// even if SQLITE_OK == result
+		auto ec_ = ::dbj::db::err::dbj_sql_err_log_get(result);
+		// caller must seek for SQLITE_DONE
+		if (ec_ != ::dbj::db::err::dbj_dbj_err_code::sqlite_done)
+			throw ec_;
+		// sqlite3 uses this callback and expects this int returned
+		return SQLITE_DONE;
 	}
 
 	}; // database
@@ -611,12 +652,6 @@ static void function
 #pragma endregion dbj sqlite easy udf
 
 } // namespace dbj::db
-
-	/*
-	-------------------------------------------------------------------------
-		TESTS
-	-------------------------------------------------------------------------
-	*/   
 
 #undef DBJ_VERIFY_
 #undef DBJ_STR

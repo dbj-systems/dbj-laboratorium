@@ -1,11 +1,11 @@
 #include "pch.h"
 
-// #define DBJ_DB_TESTING
+#define DBJ_DB_TESTING
 
 #ifdef DBJ_DB_TESTING
 
-#include "..\dbj++sql\core_tests.h"
-#include "..\dbj++sql\dbj_easy_udf_sample.h"
+#include "..\dbj++sql\test\core_tests.h"
+#include "..\dbj++sql\test\dbj_easy_udf_sample.h"
 
 DBJ_TEST_UNIT(dbj_sql_lite_udf)
 {
