@@ -23,10 +23,10 @@
 #endif
 
 #ifndef DBJ_DB_VERIFY
-#define DBJ_DB_VERIFY(R,X) if ( R != X ) \
-   throw ::dbj::db::err::dbj_sql_err_log_get( \
+#define DBJ_DB_VERIFY(R,X) if ( R != X ) { \
+   ::dbj::db::err::dbj_sql_err_log_get( \
          int(R), \
-    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) )
+    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) ); }
 #endif
 
 namespace dbj::db {
@@ -152,75 +152,42 @@ the full info is already in the log
 	}
 } // err nspace
 
-
 	/* 
 	bastardized version of Keny Kerr's unique_handle 
 	dbj's version can not be copied or moved
 	it is as simple as that ;)
 	*/
-	template <typename Traits>
-	class unique_handle /* dbj added --> */ final
+	template <typename handle_trait>
+	struct unique_handle final
 	{
-		using pointer = typename Traits::pointer;
-
-		mutable	pointer m_value{};
-
-		void close() const noexcept 
-		{
-			if (*this)
-			{
-				Traits::close(m_value);
-			}
-		}
-
-	public:
-
+		using trait = handle_trait;
 		using type = unique_handle;
-#if 0
-		// DBJ: depending on the Traits copy can throw 
-		// if not possible to copy
-		unique_handle(unique_handle const & other_ ) {
-			this->m_value = Traits::copy(other_.m_value);
-		}
-		// DBJ: depending on the Traits copy can throw 
-		// if not possible to copy
-		auto operator=(unique_handle const & other_ )->unique_handle & {
-			if (this != &other_) {
-				this->m_value = Traits::copy(other_.m_value);
-			}
-			return *this;
-		}
-#endif
-		// DBJ: by default there is this ctor
-		explicit unique_handle(pointer value = Traits::invalid()) noexcept :
+		using pointer = typename trait::pointer;
+
+		// by default there is this ctor only
+		explicit unique_handle(pointer value = handle_trait::invalid()) noexcept :
 			m_value{ value }
 		{
 		}
-#if 0
-		// DBJ: move semantics
-		unique_handle(unique_handle && other) noexcept 
-		{
-			reset(other.release());
-		}
 
-		auto operator=(unique_handle && other) noexcept -> unique_handle &
-		{
-			if (this != &other)
-			{
-				reset(other.release());
-			}
+		// no copy no move
+		// pass it as reference to/from functions
+		unique_handle(unique_handle const & other_) = delete;
+		auto operator=(unique_handle const & other_)->unique_handle & = delete;
+		unique_handle(unique_handle && other) noexcept = delete;
+		auto operator=(unique_handle && other) noexcept->unique_handle & = delete;
 
-			return *this;
-		}
-#endif
 		~unique_handle() noexcept
 		{
-			close();
+			// if error 
+			// all is already logged 
+			// relax, chill
+			auto ec = close();
 		}
 
 		explicit operator bool() const noexcept
 		{
-			return m_value != Traits::invalid();
+			return m_value != handle_trait::invalid();
 		}
 
 		auto get() const noexcept -> pointer
@@ -237,25 +204,42 @@ the full info is already in the log
 		auto release() noexcept -> pointer
 		{
 			auto value = m_value;
-			m_value = Traits::invalid();
+			m_value = handle_trait::invalid();
 			return value;
 		}
 
-		auto reset(pointer value = Traits::invalid()) noexcept -> bool
+		auto reset(pointer value = handle_trait::invalid()) -> bool
 		{
 			if (m_value != value)
 			{
-				close();
+				// the only reasonable course
+				// of action here would be
+				// to throw the error code
+				// if handle can not be closed 
+				// there is no point of using it
+				if (auto ec = close(); !is_sql_err_ok(ec)) throw ec;
+
 				m_value = value;
 			}
 
 			return static_cast<bool>(*this);
 		}
+	private:
 
-		friend auto swap(type & left_, type & right_) noexcept -> void
+		mutable	pointer m_value{};
+
+		[[nodiscard]] auto close() const noexcept
+			-> error_code 
 		{
-			std::swap(left_.m_value, right_.m_value);
+			if (*this)
+			{
+				return handle_trait::close(m_value);
+			}
+			// this automagically makes the error_code
+			// with this value
+			return dbj_err_code::sqlite_ok;
 		}
+
 	}; // unique_handle
 
 #pragma region connection and statement traits
@@ -265,10 +249,10 @@ the full info is already in the log
 
 		/*
 		be carefull with copy() protocol
-		think twice when you can copy, how to copy etc.
+		think twice if you can copy, how to copy etc.
 		*/
 		static pointer copy( pointer p_ ) noexcept {
-			// in this case this is ok
+			// in this context this is ok
 			return p_;
 		}
 
@@ -277,9 +261,9 @@ the full info is already in the log
 			return nullptr;
 		}
 
-		static auto close(pointer value) 
+		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
 		{
-			DBJ_VERIFY(bool(SQLITE_OK == sqlite::sqlite3_close(value)));
+			return dbj_sql_err_log_get( sqlite::sqlite3_close(value) );
 		}
 	};
 
@@ -303,9 +287,9 @@ the full info is already in the log
 			return nullptr;
 		}
 
-		static auto close(pointer value) 
+		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
 		{
-			DBJ_VERIFY(bool(SQLITE_OK == sqlite::sqlite3_finalize(value)));
+			return dbj_sql_err_log_get(sqlite::sqlite3_finalize(value));
 		}
 	};
 
