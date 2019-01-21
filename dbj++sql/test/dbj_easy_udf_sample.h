@@ -86,6 +86,7 @@ namespace dbj_easy_udfs_sample {
 		std::string_view query_ = query_with_udfs
 	)
 	{
+
 		try {
 			::wprintf(L"\nthe query:\t%S\nthe result:\n", query_.data());
 			// assure the database presence

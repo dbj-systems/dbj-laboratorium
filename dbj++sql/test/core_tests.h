@@ -36,7 +36,7 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 				u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
 			);
 		} catch (std::error_code ec) {
-			dbj::db::err::log(ec);
+			dbj::db::err::log_ignore_ok(ec);
 		}
 	}
 
@@ -70,7 +70,7 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 
 	}
 	catch (std::error_code ec) {
-		dbj::db::err::log(ec);
+		dbj::db::err::log_ignore_ok(ec);
 	}
 	}
 
@@ -97,7 +97,7 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 
 	}
 	catch (std::error_code ec) {
-		dbj::db::err::log(ec);
+		dbj::db::err::log_ignore_ok(ec);
 	}
 }
 } // nspace

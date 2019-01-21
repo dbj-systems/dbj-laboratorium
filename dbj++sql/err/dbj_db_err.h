@@ -134,6 +134,20 @@ string is managed internally and must not be freed by the application.
 		return category_;
 	}
 
+// a bit if a hack
+// we can do this because out error codes enum 
+// do match sqlite3 error constants
+	inline std::error_code int_to_dbj_error_code(int sqlite_retval) {
+		// careful! this is DEBUG only
+		_ASSERTE(
+			(sqlite_retval >= (int)dbj_err_code::sqlite_ok) &&
+			(sqlite_retval <= (int)dbj_err_code::sqlite_done)
+		);
+
+		return
+		::std::error_code(sqlite_retval, get_dbj_err_category());
+	}
+
 	inline std::error_code make_error_code(dbj_err_code e)
 	{
 		return std::error_code(
@@ -192,8 +206,7 @@ string is managed internally and must not be freed by the application.
 	template<typename T>
 	using dbj_db_return_type = std::pair<T, std::error_code>;
 
-#define dbj_db_fails(vt,et) -> std::pair<vt,et>
-
+    // #define dbj_db_fails(vt,et) -> std::pair<vt,et>
 
 		template<typename T>
 		auto failure(T v, std::errc e_) {

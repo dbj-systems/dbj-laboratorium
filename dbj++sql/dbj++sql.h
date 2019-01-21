@@ -24,9 +24,9 @@
 
 #ifndef DBJ_DB_VERIFY
 #define DBJ_DB_VERIFY(R,X) if ( R != X ) \
-   throw ::dbj::db::err::sql_exception{ \
+   throw ::dbj::db::err::dbj_sql_err_log_get( \
          int(R), \
-    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) }
+    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) )
 #endif
 
 namespace dbj::db {
@@ -94,61 +94,76 @@ https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approac
 
 namespace err {
 
-	inline void log(std::error_code ec, string_view  log_message = "  "sv) noexcept
+	// in sqlite3 basicaly there are errors and only 3 not errors
+	enum class log_level { ok, info, error };
+
+	inline void log_ignore_ok (std::error_code ec, string_view  log_message = "  "sv) noexcept
 	{
-		if (
-			(ec == dbj_err_code::sqlite_ok) ||
-			(ec == dbj_err_code::sqlite_row) ||
-			(ec == dbj_err_code::sqlite_done)
-			)
-			::dbj::db::log::info(ec.message(), log_message);
-		else
-			::dbj::db::log::error(ec.message(), log_message);
+		auto decider = [&]() {
+			if (ec == dbj_err_code::sqlite_ok)
+				return;
+			else
+				if (
+					(ec == dbj_err_code::sqlite_row) ||
+					(ec == dbj_err_code::sqlite_done)
+					)
+					::dbj::db::log::info(ec.message(), log_message);
+				else
+					::dbj::db::log::error(ec.message(), log_message);
+		};
+
+		// hack alert: we never store the async result
+		// thus they wait for each other
+		// making the whole logging thing, async but sequential?
+		(void)std::async(std::launch::async, [&] { decider(); });
 	}
 
-	/*
-	here we make dbj db error codes 
-	before returning them we log them
-	so when they are received or caught (if thrown)
-	the full info is already in the log
-	*/
+/*
+In SQLITE3 API	
+There are only a few non-error result codes:
+SQLITE_OK, SQLITE_ROW, and SQLITE_DONE.
+The term "error code" means any result code other than these three.
+Thus there is no concept of 'warning'
+Thus from here we will simply not log them no error's. 
+Thus, considerably downsizing the log size
+
+we make log and return always even if SQLITE_OK == result
+so we do not want logging to be sync-hronous
+if they are errors before returning them we log them
+so when they are received or caught (if thrown)
+the full info is already in the log
+*/
 	inline [[nodiscard]]
 		::std::error_code dbj_sql_err_log_get(
 			int sqlite_retval,
-			// make is longer than 1 so that logger will not complain
+			// make it longer than 1 so that logger will not complain
 			string_view  log_message = "  "sv
 		)
 		noexcept
 	{
-		::std::error_code ec = ::std::error_code
-		(sqlite_retval, get_dbj_err_category());
-		/*
-		In SQLITE3 API
-		There are only a few non-error result codes:
-		SQLITE_OK, SQLITE_ROW, and SQLITE_DONE.
-		The term "error code" means any result code other than these three.
+		::std::error_code ec = int_to_dbj_error_code(sqlite_retval);
 
-		Thus we will simply not log them. Thus, considerably downsizing the log size
+		// _ASSERTE((int)dbj_err_code::sqlite_ok == SQLITE_OK );
 
-		we make log and return always even if SQLITE_OK == result
-		so we do not want logging to be sync-hronous
-
-		*/
-
-		log(ec, log_message );
+		if( sqlite_retval != (int)dbj_err_code::sqlite_ok )
+				log_ignore_ok(ec, log_message );
 
 		return ec;
 	}
 } // err nspace
 
 
-	/* bastardized version of Keny Kerr's unique_handle */
+	/* 
+	bastardized version of Keny Kerr's unique_handle 
+	dbj's version can not be copied or moved
+	it is as simple as that ;)
+	*/
 	template <typename Traits>
 	class unique_handle /* dbj added --> */ final
 	{
 		using pointer = typename Traits::pointer;
 
-		/* dbj added mutable */ mutable	pointer m_value{};
+		mutable	pointer m_value{};
 
 		void close() const noexcept 
 		{
@@ -160,6 +175,8 @@ namespace err {
 
 	public:
 
+		using type = unique_handle;
+#if 0
 		// DBJ: depending on the Traits copy can throw 
 		// if not possible to copy
 		unique_handle(unique_handle const & other_ ) {
@@ -173,17 +190,17 @@ namespace err {
 			}
 			return *this;
 		}
-
+#endif
 		// DBJ: by default there is this ctor
 		explicit unique_handle(pointer value = Traits::invalid()) noexcept :
 			m_value{ value }
 		{
 		}
-
+#if 0
 		// DBJ: move semantics
-		unique_handle(unique_handle && other) noexcept :
-			m_value{ other.release() }
+		unique_handle(unique_handle && other) noexcept 
 		{
+			reset(other.release());
 		}
 
 		auto operator=(unique_handle && other) noexcept -> unique_handle &
@@ -195,7 +212,7 @@ namespace err {
 
 			return *this;
 		}
-
+#endif
 		~unique_handle() noexcept
 		{
 			close();
@@ -235,9 +252,9 @@ namespace err {
 			return static_cast<bool>(*this);
 		}
 
-		auto swap(unique_handle<Traits> & other) noexcept -> void
+		friend auto swap(type & left_, type & right_) noexcept -> void
 		{
-			std::swap(m_value, other.m_value);
+			std::swap(left_.m_value, right_.m_value);
 		}
 	}; // unique_handle
 
@@ -393,46 +410,36 @@ namespace err {
 this function by design does not return a value 
 so we do not return a pair, just the error_code
 */
-	[[nodiscard]] static std::error_code
-		dbj_sqlite_open(connection_handle & handle_, char const * filename)
-	noexcept
+	[[nodiscard]] static auto
+		dbj_sqlite_open(connection_handle & handle_, char const * filename)	noexcept
 	{
 		handle_.reset();
 		auto const result = sqlite::sqlite3_open(filename,
 			handle_.get_address_of());
 
-		// we make log and return always
-		// even if SQLITE_OK == result
 		return dbj_sql_err_log_get( result );
 	}	
 	
 	[[nodiscard]] 
-	dbj_db_return_type<statement_handle>
-		prepare_statement (char const * query_) const noexcept
+	auto
+		prepare_statement (char const * query_, statement_handle & statement_ ) const noexcept
+		-> std::error_code
 	{
 		_ASSERTE(query_);
-		auto local_statement = statement_handle{};
+		// auto local_statement = statement_handle{};
 		// " Must call open() before " __FUNCSIG__ 
 		if (!handle)
-			return dbj::db::err::failure( 
-				move(local_statement), ::std::errc::protocol_error 
-			);
+			return make_error_code( ::std::errc::protocol_error );
 
 		auto const result = sqlite::sqlite3_prepare_v2(
 			handle.get(),
 			query_,
 			-1,
-			local_statement.get_address_of(),
+			statement_.get_address_of(),
 			NULL );
 
-		    /*
-			1. success() has no point 
-			2. caller must always peek into the E of the reval {V,E}
-			*/
-			return failure(
-				move(local_statement),
-				dbj_sql_err_log_get(result)
-				);
+			return dbj_sql_err_log_get(result); 
+			//usualy SQLITE_OK as an error_code 
 	}
 
 	public:
@@ -498,7 +505,8 @@ so we do not return a pair, just the error_code
 		if (!handle)
 			throw make_error_code(::std::errc::protocol_error);
 
-		auto /*statement_handle*/ [statement_, e] = prepare_statement(query_);
+		statement_handle statement_;
+			auto e = prepare_statement(query_, statement_ );
 		if (!is_sql_err_ok(e)) throw e;
 
 		vector<string> col_names_ { column_names( statement_ ) };
