@@ -1,38 +1,25 @@
 ﻿#pragma once
-/*
-Copyright 2017,2018 by dbj@dbj.org
 
-Licensed under the GNU GPL License, Version 3.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License in the file LICENSE enclosed in
-this project.
-
-https://www.gnu.org/licenses/gpl-3.0.html
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 #include "../dbj++sql.h"
 
 namespace dbj_db_test_
 {
 	using namespace dbj::db;
+	using namespace dbj::db::err;
 
 	struct demo_db final {
 
+		// can throw std::error_code
 		static const database & instance()
 		{
 			static const database & instance_ = [&]()
 				-> const database &
 			{
 				static database db(":memory:");
-				db.query("DROP TABLE IF EXISTS demo");
-				db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
-				db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
-				return db;
+db.query("DROP TABLE IF EXISTS demo");
+db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
+db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
+						return db;
 			}();
 			return instance_;
 		}
@@ -40,20 +27,16 @@ namespace dbj_db_test_
 
 	inline  auto test_insert(const char * = 0)
 	{
-		try
-		{
+		try {
 			const database & db = demo_db::instance();
+			// please read here about u8 and execution_character_set
+			// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
 			db.query(
 				u8"INSERT INTO demo_table (Id, Name) "
 				u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
 			);
-			// please read here about u8 and execution_character_set
-			// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"dbj::db exception");
-			wprintf(L"%d %S\n", e.code, e.message.c_str());
+		} catch (std::error_code ec) {
+			dbj::db::err::log(ec);
 		}
 	}
 
@@ -68,25 +51,27 @@ namespace dbj_db_test_
 		::wprintf(L"\n%d      |%d  |%S   ",
 			static_cast<int>(row_id), id_, name_.c_str());
 
-		return SQLITE_OK;
+			return SQLITE_OK ;
+			/* 
+			same int value as
+			return (int)dbj::db::err::dbj_dbj_err_code::sqlite_ok ;
+			*/
 	}
 
 	inline  auto test_select()
 	{
-		try
-		{
+		try {
 			const database & db = demo_db::instance();
 			::wprintf(L"\n\n"
 				L"Row Id |Id |Name");
 			::wprintf(L"\n-------+---+--------");
 			db.query("SELECT Id,Name FROM demo_table", sample_callback);
 			::wprintf(L"\n-------+---+--------\n");
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"dbj::db exception");
-			wprintf(L"%d %S\n", e.code, e.message.c_str());
-		}
+
+	}
+	catch (std::error_code ec) {
+		dbj::db::err::log(ec);
+	}
 	}
 
 	/*
@@ -103,19 +88,18 @@ namespace dbj_db_test_
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	)
 	{
-		try
-		{
+		try {
 			database db(db_file);
 			// provoke error
 			db.query(
 				"select word from words where word like 'bb%'",
-				row_user_);
-		}
-		catch (sql_exception const & e)
-		{
-			wprintf(L"\ndbj::db exception\n\t[%d] %S\n", e.code, e.message.c_str());
-		}
+			row_user_);
+
 	}
+	catch (std::error_code ec) {
+		dbj::db::err::log(ec);
+	}
+}
 } // nspace
 
 	

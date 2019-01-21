@@ -1,20 +1,5 @@
 #pragma once
-/*
-Copyright 2017,2018 by dbj@dbj.org
 
-Licensed under the GNU GPL License, Version 3.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License in the file LICENSE enclosed in
-this project.
-
-https://www.gnu.org/licenses/gpl-3.0.html
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 #include "../dbj++sql.h"
 
 namespace dbj_easy_udfs_sample {
@@ -31,6 +16,7 @@ namespace dbj_easy_udfs_sample {
 	using namespace ::std;
 	using namespace ::std::string_view_literals;
 	using namespace ::dbj::db;
+	using namespace ::dbj::db::err ;
 
 	/* one table "words", with one text column "word" */
 	constexpr inline auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
@@ -111,12 +97,13 @@ namespace dbj_easy_udfs_sample {
 			db.query(
 				query_.data(),
 				dbj_udfs_result_handler
-			);
+			); 
 		}
-		catch (dbj::db::sql_exception const & e)
+		catch (std::error_code ec)
 		{
-			::wprintf(
-				L"\ndbj::db exception\n code:%3d, message:%S ", e.code, e.message.c_str()
+			::fprintf( stderr,
+				"\nerror code\n\t code:%3d, message:%s, category:%s ", 
+				ec.value() , ec.message().c_str(), ec.category().name()
 			);
 		}
 	} // test_udf

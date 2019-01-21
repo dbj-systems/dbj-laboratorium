@@ -154,6 +154,7 @@
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_easy_udf_sample.h" />
+    <ClInclude Include="dbj_gpl_license.h" />
     <ClInclude Include="err\dbj_db_err.h" />
     <ClInclude Include="log\dbj_log.h" />
     <ClInclude Include="sqlite++.h" />

@@ -40,47 +40,58 @@ namespace dbj::db::err
 
 #pragma endregion
 
-	enum class dbj_dbj_err_code 
+	enum class dbj_err_code
 	{
-/*
-https://sqlite.org/c3ref/c_abort.html
-note: must be carefull not to clash with sqlite3 # defines
-*/
-	sqlite_ok           = 0 ,   /* successful result */
-	/* beginning-of-error-codes */
-	sqlite_error        = 1 ,   /* generic error */
-	sqlite_internal     = 2 ,   /* internal logic error in sqlite */
-	sqlite_perm         = 3 ,   /* access permission denied */
-	sqlite_abort        = 4 ,   /* callback routine requested an abort */
-	sqlite_busy         = 5 ,   /* the database file is locked */
-	sqlite_locked       = 6 ,   /* a table in the database is locked */
-	sqlite_nomem        = 7 ,   /* a malloc() failed */
-	sqlite_readonly     = 8 ,   /* attempt to write a readonly database */
-	sqlite_interrupt    = 9 ,   /* operation terminated by sqlite= 3 ,_interrupt()*/
-	sqlite_ioerr       = 10 ,   /* some kind of disk i/o error occurred */
-	sqlite_corrupt     = 11 ,   /* the database disk image is malformed */
-	sqlite_notfound    = 12 ,   /* unknown opcode in sqlite= 3 ,_file_control() */
-	sqlite_full        = 13 ,   /* insertion failed because database is full */
-	sqlite_cantopen    = 14 ,   /* unable to open the database file */
-	sqlite_protocol    = 15 ,   /* database lock protocol error */
-	sqlite_empty       = 16 ,   /* internal use only */
-	sqlite_schema      = 17 ,   /* the database schema changed */
-	sqlite_toobig      = 18 ,   /* string or blob exceeds size limit */
-	sqlite_constraint  = 19 ,   /* abort due to constraint violation */
-	sqlite_mismatch    = 20 ,   /* data type mismatch */
-	sqlite_misuse      = 21 ,   /* library used incorrectly */
-	sqlite_nolfs       = 22 ,   /* uses os features not supported on host */
-	sqlite_auth        = 23 ,   /* authorization denied */
-	sqlite_format      = 24 ,   /* not used */
-	sqlite_range       = 25 ,   /* = 2 ,nd parameter to sqlite= 3 ,_bind out of range */
-	sqlite_notadb      = 26 ,   /* file opened that is not a database file */
-	sqlite_notice      = 27 ,   /* notifications from sqlite= 3 ,_log() */
-	sqlite_warning     = 28 ,   /* warnings from sqlite= 3 ,_log() */
-	sqlite_row         = 100 ,  /* sqlite= 3 ,_step() has another row ready */
-	sqlite_done        = 101    /* sqlite= 3 ,_step() has finished executing */
-	}; 
+		/*
+		https://sqlite.org/c3ref/c_abort.html
+		note: must be carefull not to clash with sqlite3 # defines
+		*/
+		sqlite_ok = 0,   /* successful result */
+		/* beginning-of-error-codes */
+		sqlite_error = 1,   /* generic error */
+		sqlite_internal = 2,   /* internal logic error in sqlite */
+		sqlite_perm = 3,   /* access permission denied */
+		sqlite_abort = 4,   /* callback routine requested an abort */
+		sqlite_busy = 5,   /* the database file is locked */
+		sqlite_locked = 6,   /* a table in the database is locked */
+		sqlite_nomem = 7,   /* a malloc() failed */
+		sqlite_readonly = 8,   /* attempt to write a readonly database */
+		sqlite_interrupt = 9,   /* operation terminated by sqlite= 3 ,_interrupt()*/
+		sqlite_ioerr = 10,   /* some kind of disk i/o error occurred */
+		sqlite_corrupt = 11,   /* the database disk image is malformed */
+		sqlite_notfound = 12,   /* unknown opcode in sqlite= 3 ,_file_control() */
+		sqlite_full = 13,   /* insertion failed because database is full */
+		sqlite_cantopen = 14,   /* unable to open the database file */
+		sqlite_protocol = 15,   /* database lock protocol error */
+		sqlite_empty = 16,   /* internal use only */
+		sqlite_schema = 17,   /* the database schema changed */
+		sqlite_toobig = 18,   /* string or blob exceeds size limit */
+		sqlite_constraint = 19,   /* abort due to constraint violation */
+		sqlite_mismatch = 20,   /* data type mismatch */
+		sqlite_misuse = 21,   /* library used incorrectly */
+		sqlite_nolfs = 22,   /* uses os features not supported on host */
+		sqlite_auth = 23,   /* authorization denied */
+		sqlite_format = 24,   /* not used */
+		sqlite_range = 25,   /* = 2 ,nd parameter to sqlite= 3 ,_bind out of range */
+		sqlite_notadb = 26,   /* file opened that is not a database file */
+		sqlite_notice = 27,   /* notifications from sqlite= 3 ,_log() */
+		sqlite_warning = 28,   /* warnings from sqlite= 3 ,_log() */
+		sqlite_row = 100,  /* sqlite= 3 ,_step() has another row ready */
+		sqlite_done = 101    /* sqlite= 3 ,_step() has finished executing */
+	}; // dbj_err_code
+} // dbj::db::err 
+// system_error fwk requires api private enums to be
+// registered so it can be used by the fwk
+namespace std
+{
+	template <>
+	struct is_error_code_enum<::dbj::db::err::dbj_err_code>
+		: public true_type {};
+}
 
-	class dbj_dbj_err_category final
+namespace dbj::db::err {
+
+	class dbj_err_category final
 		: public std::error_category
 	{
 	public:
@@ -117,24 +128,43 @@ string is managed internally and must not be freed by the application.
 		}
 	};
 
-	inline const std::error_category& get_dbj_dbj_err_category()
+	inline const std::error_category& get_dbj_err_category()
 	{
-		static dbj_dbj_err_category category_;
+		static dbj_err_category category_;
 		return category_;
 	}
 
-	inline std::error_code make_error_code(dbj_dbj_err_code e)
+	inline std::error_code make_error_code(dbj_err_code e)
 	{
 		return std::error_code(
 			static_cast<int>(e),
-			get_dbj_dbj_err_category());
+			get_dbj_err_category());
 	}
 
-	inline  std::error_condition make_error_condition(dbj_dbj_err_code e)
+	inline  std::error_condition make_error_condition(dbj_err_code e)
 	{
 		return std::error_condition(
 			static_cast<int>(e),
-			get_dbj_dbj_err_category());
+			get_dbj_err_category());
+	}
+
+	// ok, done and row are not considered as errors in sqlite3 
+	inline bool is_sql_err_ok( std::error_code ec_ ) 
+	{
+		static std::error_code ok_{ dbj_err_code::sqlite_ok };
+		return ec_ == ok_;
+	}
+
+	inline bool is_sql_err_done( std::error_code ec_ ) 
+	{
+		static std::error_code done_{ dbj_err_code::sqlite_done };
+		return ec_ == done_;
+	}
+
+	inline bool is_sql_err_row( std::error_code ec_ ) 
+	{
+		static std::error_code row_{ dbj_err_code::sqlite_row };
+		return ec_ == row_;
 	}
 #pragma region P1095
 /* 
@@ -149,7 +179,7 @@ string is managed internally and must not be freed by the application.
 	 {
           return sucess(42) ;
 		  // error retval example
-		  return failure(0, dbj_dbj_err_code::bad_argument ) ;
+		  return failure(0, dbj_err_code::bad_argument ) ;
 	 }
 
 	 simple usage is :
@@ -182,24 +212,12 @@ string is managed internally and must not be freed by the application.
 		
 		template<typename T>
 		auto succes(T v) {
-			return std::pair{ v, dbj_dbj_err_code::ok };
+			return std::pair{ v, dbj_err_code::sqlite_ok };
 		};
 #pragma endregion
 } // dbj::db::err
 
-// macro afficionados can indulge this
+// macro afficionados can indulge in this
 #define DBJ_DB_API(X,T) \
 [[nodiscard]] inline X noexcept -> ::dbj::dbj::err::dbj_db_return_type<T>
-
-
-// system_error fwk requires api privae enums to be
-// registered so it can be used by the fwk
-namespace std
-{
-	template <>
-	struct is_error_code_enum<::dbj::db::err::dbj_dbj_err_code>
-		: public true_type {};
-}
-
-/* inclusion of this file defines the kind of a licence used */
-#include "dbj_gpl_license.h"
+//eof
