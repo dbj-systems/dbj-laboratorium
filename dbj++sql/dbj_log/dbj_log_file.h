@@ -54,13 +54,14 @@ inline auto
 		// and create it
 		if (e) {
 			e.clear();
-			if (!create_directory(dbj_prog_data_path, e))
+			if (!create_directories(dbj_prog_data_path, e))
 			{
 				return pair(dbj_prog_data_path, e);
 			}
 		}
 		// OK return
-		_ASSERTE(dir.is_directory());
+		e.clear();  dir.refresh(e);
+		_ASSERTE( dir.is_directory(e) );
 		return pair(dir.path(), e);
 }
 

@@ -16,9 +16,17 @@ namespace dbj::db {
 
 	namespace {
 
+		constexpr inline char const * time_stamp_full_mask
+			= "%Y-%m-%d %H:%M:%S" ;
+
+		constexpr inline char const * time_stamp_simple_mask
+			= "%H:%M:%S" ;
+
 		// time stamp made size is 22 + '\0'
 		// returns POSIX retval or 0 on no error
-		[[nodiscard]] inline int make_time_stamp ( string & result_ ) noexcept
+		[[nodiscard]] inline int make_time_stamp ( 
+			string & result_ 
+		 ) noexcept
 		{
 			result_.clear();
 			// almost C
@@ -36,7 +44,7 @@ namespace dbj::db {
 			// leave the result empty if error
 			if (posix_err_code > 0) return posix_err_code;
 
-			std::strftime(buf, buf_len, "%Y-%m-%d %H:%M:%S", &local_time_);
+			std::strftime(buf, buf_len, time_stamp_simple_mask , &local_time_);
 			// Get the milliseconds
 			int millis = time_point_cast<milliseconds>(now).time_since_epoch().count() % 100;
 			// Note use snprintf for gcc
@@ -62,7 +70,7 @@ namespace dbj::db {
 
 			array<char, 64> buf{ {0} };
 			auto retval [[maybe_unused]] = ::sprintf_s(buf.data(), buf.size(),
-				"\n|%24s|%12s| ", tst.c_str(), two_
+				"\n|%s|%s| ", tst.c_str(), two_
 			);
 			return buf.data();
 		}
@@ -88,7 +96,7 @@ namespace dbj::db {
 				_ASSERT(prompt_.size() > 1);
 				_ASSERT(message1.size() > 1);
 				// pay attention, no new lines here or any other formating
-				auto log_to_stderr = []( std::string_view data_) { ::fprintf(stderr, "%s", data_.data()); };
+				auto log_to_stderr = []( std::string_view data_) { ::fprintf(stderr, "%s ", data_.data()); };
 				(void)std::async(std::launch::async, [&] { log_to_stderr(prompt_); });
 				(void)std::async(std::launch::async, [&] { log_to_stderr(message1); });
 
