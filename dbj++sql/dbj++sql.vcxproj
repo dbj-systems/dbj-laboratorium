@@ -158,6 +158,7 @@
     <ClInclude Include="dbj_log\dbj_log.h" />
     <ClInclude Include="dbj_log\dbj_log_file.h" />
     <ClInclude Include="dbj_log\dbj_log_user.h" />
+    <ClInclude Include="dbj_util.h" />
     <ClInclude Include="err\dbj_db_err.h" />
     <ClInclude Include="sqlite++.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
