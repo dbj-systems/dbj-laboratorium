@@ -52,10 +52,6 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 			static_cast<int>(row_id), id_, name_.c_str());
 
 			return SQLITE_OK ;
-			/* 
-			same int value as
-			return (int)dbj::db::err::dbj_dbj_err_code::sqlite_ok ;
-			*/
 	}
 
 	inline  auto test_select()

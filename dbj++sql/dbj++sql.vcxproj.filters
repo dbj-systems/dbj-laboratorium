@@ -19,7 +19,7 @@
     <Filter Include="test">
       <UniqueIdentifier>{8b3d0e02-185c-4c99-b851-c2d407e204dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="log">
+    <Filter Include="dbj_log">
       <UniqueIdentifier>{e06650fb-ce1f-4464-b3fa-f7ce6f1e3ba8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -51,11 +51,17 @@
     <ClInclude Include="test\dbj_easy_udf_sample.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="log\dbj_log.h">
-      <Filter>log</Filter>
-    </ClInclude>
     <ClInclude Include="dbj_gpl_license.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="log\dbj_log_user.h">
+      <Filter>dbj_log</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_log\dbj_log.h">
+      <Filter>dbj_log</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_log\dbj_log_file.h">
+      <Filter>dbj_log</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

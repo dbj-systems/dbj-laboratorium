@@ -1,5 +1,6 @@
 #pragma once
 #include "dbj_log.h"
+#include "dbj_log_file.h"
 /*
 using the generic log for specific purposes
 */

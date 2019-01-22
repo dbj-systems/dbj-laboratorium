@@ -155,8 +155,10 @@
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_easy_udf_sample.h" />
     <ClInclude Include="dbj_gpl_license.h" />
+    <ClInclude Include="dbj_log\dbj_log.h" />
+    <ClInclude Include="dbj_log\dbj_log_file.h" />
     <ClInclude Include="err\dbj_db_err.h" />
-    <ClInclude Include="log\dbj_log.h" />
+    <ClInclude Include="log\dbj_log_user.h" />
     <ClInclude Include="sqlite++.h" />
     <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="stdafx.h" />

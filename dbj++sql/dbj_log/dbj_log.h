@@ -47,8 +47,8 @@ namespace dbj::db {
 		};
 
 		// TBDone
-		constexpr size_t prompt_msg_len = 24U;
-		constexpr size_t prompt_tst_len = 24U;
+		constexpr inline size_t prompt_msg_len = 12U;
+		constexpr inline size_t prompt_tst_len = 24U;
 
 		[[nodiscard]] inline auto make_prompt( string_view msg_ ) noexcept -> std::string
 		{
@@ -62,7 +62,7 @@ namespace dbj::db {
 
 			array<char, 64> buf{ {0} };
 			auto retval [[maybe_unused]] = ::sprintf_s(buf.data(), buf.size(),
-				"\n|%24s|%24s| ", tst.c_str(), two_
+				"\n|%24s|%12s| ", tst.c_str(), two_
 			);
 			return buf.data();
 		}

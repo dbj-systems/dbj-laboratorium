@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#define DBJ_DB_TESTING
+// #define DBJ_DB_TESTING
 
 #ifdef DBJ_DB_TESTING
 
@@ -65,3 +65,24 @@ namespace anyspace {
 } // nspace
 
 #endif // DBJ_DB_TESTING
+
+#include <filesystem>
+
+DBJ_TEST_UNIT(dbj_sql_lite)
+{
+	using dbj::console::print;
+	using namespace std;
+	using namespace std::filesystem;
+
+	string prog_data( 256, '\0');
+
+	auto rez = GetEnvironmentVariableA("ProgramData", prog_data.data(), prog_data.size());
+
+	error_code ec_;
+	path dbj_app_data(prog_data);
+	 dbj_app_data = dbj_app_data.append("dbj") ;
+	if ( auto rez_2 = create_directory(dbj_app_data, ec_); ! rez_2 )
+			print("\n", ec_);
+
+}
+

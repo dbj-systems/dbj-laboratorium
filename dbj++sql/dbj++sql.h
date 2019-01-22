@@ -8,7 +8,11 @@
 #include <cstdio>
 #include <crtdbg.h>
 #include "./err/dbj_db_err.h"
-#include "./log/dbj_log.h"
+#include "./dbj_log/dbj_log_user.h"
+
+#ifndef DBJ_STR
+#define DBJ_STR(x) #x
+#endif
 
 #ifndef DBJ_VANISH
 #define DBJ_VANISH(...) static_assert( (noexcept(__VA_ARGS__),true) );
@@ -18,16 +22,6 @@
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
-#ifndef DBJ_STR
-#define DBJ_STR(x) #x
-#endif
-
-#ifndef DBJ_DB_VERIFY
-#define DBJ_DB_VERIFY(R,X) if ( R != X ) { \
-   ::dbj::db::err::dbj_sql_err_log_get( \
-         int(R), \
-    __FILE__ "(" DBJ_STR(__LINE__) ")\n" DBJ_STR(R) " != " DBJ_STR(X) ); }
-#endif
 
 namespace dbj::db {
 
@@ -54,108 +48,11 @@ namespace dbj::db {
 	constexpr inline auto version = "1.1.0"sv;
 
 	/* 
-	It's recommended to not use wchar_t because it's not portable. 
-	Use narrow char UTF-8 encoded strings instead. SQLite assumes all narrow
-	char strings are UTF-8, even for file names, even on Windows. 
-	Using this approach you can get the original code to work just by saving 
-	the file as UTF-8 without BOM. This will make the string
-
-     char q[] = "SELECT * FROM 'mydb' WHERE 'something' LIKE '%ĂÎȘȚÂ%'";
-
-    UTF-8 encoded on major compilers (including MSVC and GCC).
-	Thus. For WIN32 we simply do not use wchar_t 
-	Bellow are just the two helpers one can use to pass
-	wide char strings in and out
-
-https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/	*/
-#ifdef _MSC_VER
-	namespace {
-		// Convert a wide Unicode string to an UTF8 string
-		std::string wide_to_multi(std::wstring_view wstr)
-		{
-			if (wstr.empty()) return {};
-			int size_needed = ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
-			std::string strTo(size_needed, 0);
-			::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
-			return strTo;
-		}
-
-		// Convert an UTF8 string to a wide Unicode String
-		std::wstring multi_to_wide(std::string_view str)
-		{
-			if (str.empty()) return {};
-			int size_needed = ::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
-			std::wstring wstrTo(size_needed, 0);
-			::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
-			return wstrTo;
-		}
-	}
-#endif
-
-namespace err {
-
-	// in sqlite3 basicaly there are errors and only 3 not errors
-	enum class log_level { ok, info, error };
-
-	inline void log_ignore_ok (std::error_code ec, string_view  log_message = "  "sv) noexcept
-	{
-		auto decider = [&]() {
-			if (ec == dbj_err_code::sqlite_ok)
-				return;
-			else
-				if (
-					(ec == dbj_err_code::sqlite_row) ||
-					(ec == dbj_err_code::sqlite_done)
-					)
-					::dbj::db::log::info(ec.message(), log_message);
-				else
-					::dbj::db::log::error(ec.message(), log_message);
-		};
-
-		// hack alert: we never store the async result
-		// thus they wait for each other
-		// making the whole logging thing, async but sequential?
-		(void)std::async(std::launch::async, [&] { decider(); });
-	}
-
-/*
-In SQLITE3 API	
-There are only a few non-error result codes:
-SQLITE_OK, SQLITE_ROW, and SQLITE_DONE.
-The term "error code" means any result code other than these three.
-Thus there is no concept of 'warning'
-Thus from here we will simply not log them no error's. 
-Thus, considerably downsizing the log size
-
-we make log and return always even if SQLITE_OK == result
-so we do not want logging to be sync-hronous
-if they are errors before returning them we log them
-so when they are received or caught (if thrown)
-the full info is already in the log
-*/
-	inline [[nodiscard]]
-		::std::error_code dbj_sql_err_log_get(
-			int sqlite_retval,
-			// make it longer than 1 so that logger will not complain
-			string_view  log_message = "  "sv
-		)
-		noexcept
-	{
-		::std::error_code ec = int_to_dbj_error_code(sqlite_retval);
-
-		// _ASSERTE((int)dbj_err_code::sqlite_ok == SQLITE_OK );
-
-		if( sqlite_retval != (int)dbj_err_code::sqlite_ok )
-				log_ignore_ok(ec, log_message );
-
-		return ec;
-	}
-} // err nspace
-
-	/* 
 	bastardized version of Keny Kerr's unique_handle 
 	dbj's version can not be copied or moved
 	it is as simple as that ;)
+	and -- it is also adorned with std:error_code returns
+	so it is logicaly resilient
 	*/
 	template <typename handle_trait>
 	struct unique_handle final
@@ -182,6 +79,8 @@ the full info is already in the log
 			// if error 
 			// all is already logged 
 			// relax, chill
+			// must not throw exceptions
+			// from destructors
 			auto ec = close();
 		}
 
@@ -213,7 +112,7 @@ the full info is already in the log
 			if (m_value != value)
 			{
 				// the only reasonable course
-				// of action here would be
+				// of action here, is
 				// to throw the error code
 				// if handle can not be closed 
 				// there is no point of using it
@@ -221,7 +120,8 @@ the full info is already in the log
 
 				m_value = value;
 			}
-
+			// API designer wants to return a bool 
+			// thus we had to throw the not ok error_code
 			return static_cast<bool>(*this);
 		}
 	private:
@@ -231,12 +131,22 @@ the full info is already in the log
 		[[nodiscard]] auto close() const noexcept
 			-> error_code 
 		{
+			/*
+			if this method does not return the error_code
+			caller does not know id closing action
+			has uscceeded, and that is the whole point
+
+			logic: if handler is handling
+			something go ahead and try and close
+			return the error_code made in the close()
+			*/
 			if (*this)
 			{
 				return handle_trait::close(m_value);
 			}
-			// this automagically makes the error_code
-			// with this value
+			/*
+			otherwise just return ok 
+			*/
 			return dbj_err_code::sqlite_ok;
 		}
 
@@ -509,10 +419,9 @@ so we do not return a pair, just the error_code
 	    }
 
 		// we make log and return always
-		// even if SQLITE_OK == result
-		// user mush check for SQLITE_DONE;
-		if ( auto ec = dbj_sql_err_log_get(result);
-		    ! dbj::db::err::is_sql_err_done(ec))
+		// user must check for SQLITE_DONE;
+		if ( auto ec = dbj_sql_err_log_get(result,query_);
+		    ! is_sql_err_done(ec))
 			throw ec;
 	}
 
