@@ -90,18 +90,21 @@ namespace dbj::db {
 			inline void log_imp(
 				std::string_view prompt_,
 				std::string_view message1
-				, std::string_view message2 = ""sv
+				, std::string_view message2 = "  "sv
 			) noexcept
 			{
 				_ASSERT(prompt_.size() > 1);
 				_ASSERT(message1.size() > 1);
 				// pay attention, no new lines here or any other formating
-				auto log_to_stderr = []( std::string_view data_) { ::fprintf(stderr, "%s ", data_.data()); };
-				(void)std::async(std::launch::async, [&] { log_to_stderr(prompt_); });
-				(void)std::async(std::launch::async, [&] { log_to_stderr(message1); });
+				auto log_to_stderr = []( char const * s1, char const * s2, char const * s3 ) {
+					::fprintf(stderr, "%s %s %s", s1,s2,s3);
+				};
 
-				if (message2.size() >1 )
-				(void)std::async(std::launch::async, [&] { log_to_stderr(message2); });
+				(void)std::async(std::launch::async, [&] { 
+					log_to_stderr(
+						prompt_.data(), message1.data(), message2.data()
+					);
+				});
 
 				// temporary's dtor waits for log_to_stderr()
 				// thus making this schema queued

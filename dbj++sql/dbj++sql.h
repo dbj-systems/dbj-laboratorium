@@ -173,7 +173,7 @@ namespace dbj::db {
 
 		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
 		{
-			return dbj_sql_err_log_get( sqlite::sqlite3_close(value) );
+			return sqlite_ec( sqlite::sqlite3_close(value) );
 		}
 	};
 
@@ -199,7 +199,7 @@ namespace dbj::db {
 
 		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
 		{
-			return dbj_sql_err_log_get(sqlite::sqlite3_finalize(value));
+			return sqlite_ec(sqlite::sqlite3_finalize(value));
 		}
 	};
 
@@ -311,7 +311,7 @@ so we do not return a pair, just the error_code
 		auto const result = sqlite::sqlite3_open(filename,
 			handle_.get_address_of());
 
-		return dbj_sql_err_log_get( result );
+		return sqlite_ec( result );
 	}	
 	
 	[[nodiscard]] 
@@ -332,7 +332,7 @@ so we do not return a pair, just the error_code
 			statement_.get_address_of(),
 			NULL );
 
-			return dbj_sql_err_log_get(result); 
+			return sqlite_ec(result); 
 			//usualy SQLITE_OK as an error_code 
 	}
 
@@ -383,7 +383,7 @@ so we do not return a pair, just the error_code
 
 			// we make log and return always
 			// even if SQLITE_OK == result
-			return ::dbj::db::err::dbj_sql_err_log_get(result);
+			return ::dbj::db::err::sqlite_ec(result);
 		}
 
 	/*
@@ -420,7 +420,7 @@ so we do not return a pair, just the error_code
 
 		// we make log and return always
 		// user must check for SQLITE_DONE;
-		if ( auto ec = dbj_sql_err_log_get(result,query_);
+		if ( auto ec = sqlite_ec(result,query_);
 		    ! is_sql_err_done(ec))
 			throw ec;
 	}
