@@ -11,10 +11,14 @@ namespace dbj::db::err {
 
 	inline void log_ignore_ok(std::error_code ec, string_view  log_message = "  "sv) noexcept
 	{
-		if (ec == dbj_err_code::sqlite_ok)
+		// we ignore any zero
+		if (ec.value() == 0)
 			return;
-		else
-			if (
+
+		if (ec == dbj_err_code::sqlite_ok) // actually a zero
+			return;
+
+		if (
 			(ec == dbj_err_code::sqlite_row) ||
 			(ec == dbj_err_code::sqlite_done)
 			)

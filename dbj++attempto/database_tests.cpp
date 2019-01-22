@@ -9,21 +9,23 @@
 
 DBJ_TEST_UNIT(dbj_sql_lite_udf)
 {
-	using dbj::console::prinf;
-	using namespace dbj::kalends;
-	using namespace dbj_easy_udfs_sample;
+	namespace k = dbj::kalends;
+	namespace d = dbj_easy_udfs_sample;
 
 	auto test = [&]( auto fun_ ) {
-		prinf("\n%s\nMeasurement start", dbj::LINE().data());
+		using ::dbj::console::print;
+		print("\n", dbj::LINE(),"%s\nMeasurement start");
 		auto rezult = fun_();
-		prinf("\nMeasurement end\t%s", rezult.c_str());
+		print("\nMeasurement end\t", rezult );
 	};
 /*
 	test([&] {  return measure             ([&] { test_udf(); }); });
 	test([&] {  return microseconds_measure([&] { test_udf(); }); });
-	test([&] {  return miliseconds_measure ([&] { test_udf(); }); });
-*/
+	*/
+	test([&] {  return k::miliseconds_measure ([&] { d::test_udf(); }); });
+/*
 	test([&] {  return seconds_measure     ([&] { test_udf(); }); });
+*/
 	system("@echo.");
 	system("@echo.");
 	system("@pause");

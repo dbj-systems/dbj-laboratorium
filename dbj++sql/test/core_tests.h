@@ -16,10 +16,10 @@ namespace dbj_db_test_
 				-> const database &
 			{
 				static database db(":memory:");
-db.query("DROP TABLE IF EXISTS demo");
-db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
-db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
-						return db;
+				db.query("DROP TABLE IF EXISTS demo");
+				db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
+				db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
+				return db;
 			}();
 			return instance_;
 		}
@@ -35,11 +35,14 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 				u8"INSERT INTO demo_table (Id, Name) "
 				u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
 			);
-		} catch (std::error_code ec) {
+		}
+		catch (std::error_code ec) {
 			dbj::db::err::log_ignore_ok(ec);
 		}
 	}
-
+	/*
+	remember: this is called once per  each row in the result set
+	*/
 	int sample_callback(
 		const size_t row_id,
 		[[maybe_unused]] const std::vector<std::string> & col_names,
@@ -50,8 +53,8 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 		std::string   name_ = val_user(1);
 		::wprintf(L"\n%d      |%d  |%S   ",
 			static_cast<int>(row_id), id_, name_.c_str());
-
-			return SQLITE_OK ;
+		// otherwise the system will atop
+		return SQLITE_OK;
 	}
 
 	inline  auto test_select()
@@ -64,10 +67,10 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 			db.query("SELECT Id,Name FROM demo_table", sample_callback);
 			::wprintf(L"\n-------+---+--------\n");
 
-	}
-	catch (std::error_code ec) {
-		dbj::db::err::log_ignore_ok(ec);
-	}
+		}
+		catch (std::error_code ec) {
+			log_ignore_ok(ec);
+		}
 	}
 
 	/*
@@ -89,13 +92,12 @@ db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow')
 			// provoke error
 			db.query(
 				"select word from words where word like 'bb%'",
-			row_user_);
+				row_user_);
 
+		}
+		catch (std::error_code ec) {
+			log_ignore_ok(ec);
+		}
 	}
-	catch (std::error_code ec) {
-		dbj::db::err::log_ignore_ok(ec);
-	}
-}
 } // nspace
 
-	
