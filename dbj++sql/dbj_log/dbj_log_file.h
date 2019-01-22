@@ -2,14 +2,67 @@
 #include <io.h>
 #include <string>
 #include <string_view>
+#include <filesystem>
+
 /*
+tail of "%programdata%/dbj/dbj++sql"
 */
-#define LOG_FILE_PATH "c:/dbj/dbj++sql.log"
+#define LOG_FILE_FOLDER "dbj\\dbj++sql"
+#define LOG_FILE_NAME "dbj++sql.log"
 
 namespace dbj::db::log {
 
-	using namespace std;
-	using namespace std::string_view_literals;
+using namespace std;
+using namespace std::string_view_literals;
+using namespace std::filesystem;
+
+[[nodiscard]] auto dbj_get_envvar(std::string_view varname_) noexcept
+{
+	std::array<char, 256>	prog_data{ {0} };
+	std::error_code			ec_; // contains 0, that is OK val
+	::SetLastError(0);
+	if (1 > ::GetEnvironmentVariableA(varname_.data(), prog_data.data(), (DWORD)prog_data.size()))
+	{
+		ec_ = std::error_code(::GetLastError(), std::system_category());
+	}
+	return std::pair(std::string(prog_data.data()), ec_);
+}
+
+/*
+assure the presence of the folder: "%programdata%/dbj/dbj++sql"
+*/
+inline auto 
+  assure_log_file_folder ( path const & the_last_part )  
+	noexcept
+	-> pair<path, error_code>
+{
+	path dbj_prog_data_path;
+	directory_entry dir ;
+
+	auto[v, e] = dbj_get_envvar("ProgramData"); 
+	if(e) 	return pair(the_last_part, e);
+
+	dbj_prog_data_path = v;
+	   
+	dbj_prog_data_path += "\\"; 
+	dbj_prog_data_path += the_last_part;
+
+		e.clear();
+		dir = directory_entry(dbj_prog_data_path, e);
+		// if we do not use e arg as above exception will be thrown
+		// in case directory does not exist, instead we stay here
+		// and create it
+		if (e) {
+			e.clear();
+			if (!create_directory(dbj_prog_data_path, e))
+			{
+				return pair(dbj_prog_data_path, e);
+			}
+		}
+		// OK return
+		_ASSERTE(dir.is_directory());
+		return pair(dir.path(), e);
+}
 
 	class log_file final {
 
@@ -59,14 +112,36 @@ namespace dbj::db::log {
 			return log_file_ != nullptr;
 		}
 
-		static log_file const & instance(const char * path_ )
+		/*
+		this exits if folder/file can not be made
+		*/
+		static log_file const & instance(const char * path_, const char * name_)
 		{
-			static log_file single_(path_);
+			auto initor = [&]() {
+				auto[dir_path, e] = assure_log_file_folder(path_);
+
+				if (e) {
+					wprintf(L"\nfailed to assure log folder %s\nerror is:\t%S", 
+						dir_path.c_str(), 
+						e.message().c_str()
+					);
+					exit(1);
+				}
+				// concatenate dir path with file name
+				path log_file_path = name_;
+				path full_path = dir_path.append(log_file_path.c_str());
+				// MSVC STL path uses wchar_t by default, ditto ...
+				string path_string = full_path.string();
+				return log_file{ path_string.c_str() };
+			};
+
+			static log_file single_ = initor();
+
 			return single_;
 		}
 	};
 
 	inline log_file const & log_file_instance 
-		= log_file::instance( LOG_FILE_PATH );
+		= log_file::instance(LOG_FILE_FOLDER, LOG_FILE_NAME);
 
 } // dbj::dbj::log nspace

@@ -138,4 +138,7 @@ static void simple_test() {
 const unsigned long dbj_random_kiss () {
 	return KISS;
 }
+
+#ifdef __clang
 #pragma clang diagnostic pop
+#endif
