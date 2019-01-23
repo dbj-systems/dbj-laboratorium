@@ -3,6 +3,7 @@
 #include <string_view>
 #include <ctime>
 #include <chrono>
+#include "../dbj_util.h"
 /*
 async queued nano log olympics, are opened
 
@@ -14,65 +15,34 @@ namespace dbj::db {
 	using namespace std::chrono;
 	using namespace std::string_view_literals ;
 
+	namespace u = dbj::util;
+
 	namespace {
 
-		constexpr inline char const * time_stamp_full_mask
-			= "%Y-%m-%d %H:%M:%S" ;
+		namespace s = ::std;
 
-		constexpr inline char const * time_stamp_simple_mask
-			= "%H:%M:%S" ;
-
-		// time stamp made size is 22 + '\0'
-		// returns POSIX retval or 0 on no error
-		[[nodiscard]] inline int make_time_stamp ( 
-			string & result_ 
-		 ) noexcept
-		{
-			result_.clear();
-			// almost C
-			array<char, 32U> buf_arr{ {0} };
-			char * buf = buf_arr.data();
-			const size_t buf_len = buf_arr.size();
-
-			// Get the current time
-			auto now = system_clock::now();
-			// Format the date/time
-			time_t now_tm_t = system_clock::to_time_t(now);
-			struct tm  local_time_ {};
-
-			errno_t posix_err_code = ::localtime_s(&local_time_, &now_tm_t);
-			// leave the result empty if error
-			if (posix_err_code > 0) return posix_err_code;
-
-			std::strftime(buf, buf_len, time_stamp_simple_mask , &local_time_);
-			// Get the milliseconds
-			int millis = time_point_cast<milliseconds>(now).time_since_epoch().count() % 100;
-			// Note use snprintf for gcc
-			const auto strlen_buf = ::strlen(buf);
-			(void)::sprintf_s(buf + strlen_buf, buf_len - strlen_buf, ".%03d", millis);
-			result_ = buf;
-			return 0; // no posix error
-		};
-
-		// TBDone
 		constexpr inline size_t prompt_msg_len = 12U;
 		constexpr inline size_t prompt_tst_len = 24U;
 
-		[[nodiscard]] inline auto make_prompt( string_view msg_ ) noexcept -> std::string
+		[[nodiscard]] inline s::string 
+			make_prompt( s::string_view msg_, s::error_code & ec_ ) 
+		noexcept 
 		{
-			string tst(23, '\0');
-			auto posix_errno [[maybe_unused]] = make_time_stamp(tst); // size returned is 23
+			ec_.clear() ;
+			auto tst = u::make_time_stamp(ec_); // size returned is max 23
+			if (ec_) return {};
 #ifdef _DEBUG
 			const char * one_[[maybe_unused]] = tst.c_str();
 #endif
 			const char * two_ = 
 				msg_.size() > prompt_msg_len ? msg_.substr(0, prompt_msg_len).data() : msg_.data() ;
 
-			array<char, 64> buf{ {0} };
+			s::array<char, 64> buf{ {0} };
 			auto retval [[maybe_unused]] = ::sprintf_s(buf.data(), buf.size(),
 				"\n|%s|%s| ", tst.c_str(), two_
 			);
-			return buf.data();
+			return { buf.data() } ;
+			// ec_ stays clear
 		}
 	}
 
@@ -114,20 +84,25 @@ namespace dbj::db {
 		void info(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "info"sv;
-			log_imp(make_prompt(prompt_), msg1_, msg2_ );
+			error_code ec;
+			log_imp(make_prompt(prompt_, ec ), msg1_, msg2_ );
+			_ASSERTE(!ec);
 		}
 
 		void warning(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "warning"sv;
-			log_imp(make_prompt(prompt_), msg1_, msg2_ );
+			error_code ec;
+			log_imp(make_prompt(prompt_, ec), msg1_, msg2_ );
+			_ASSERTE(!ec);
 		}
 
 		void error(std::string_view msg1_, std::string_view msg2_ = ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "error"sv;
-			log_imp(make_prompt(prompt_), msg1_, msg2_ );
+			error_code ec;
+			log_imp(make_prompt(prompt_, ec), msg1_, msg2_ );
+			_ASSERTE(!ec);
 		}
-
 	}
 }

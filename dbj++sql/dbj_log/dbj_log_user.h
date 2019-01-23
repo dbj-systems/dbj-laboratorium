@@ -9,16 +9,10 @@ namespace dbj::db::err {
 
 	// in sqlite3 basicaly there are error code constants and only 3 are not errors
 
-	inline void log_ignore_ok(std::error_code ec, string_view  log_message = "  "sv) noexcept
+	inline void log_sql_ec(std::error_code ec, string_view  log_message = "  "sv) noexcept
 	{
-		// we ignore any zero
-		if (ec.value() == 0)
-			return;
-
-		if (ec == dbj_err_code::sqlite_ok) // actually a zero
-			return;
-
 		if (
+			(ec == dbj_err_code::sqlite_ok)  ||
 			(ec == dbj_err_code::sqlite_row) ||
 			(ec == dbj_err_code::sqlite_done)
 			)
@@ -41,7 +35,7 @@ namespace dbj::db::err {
 	so when they are received or caught (if thrown)
 	the full info is already in the log
 	*/
-	inline[[nodiscard]]
+	[[nodiscard]] inline
 		error_code sqlite_ec(
 			int sqlite_retval,
 			// make it longer than 1 so that logger will not complain
@@ -54,27 +48,28 @@ namespace dbj::db::err {
 		// _ASSERTE((int)dbj_err_code::sqlite_ok == SQLITE_OK );
 
 		if (sqlite_retval != (int)dbj_err_code::sqlite_ok)
-			log_ignore_ok(ec, log_message);
+			log_sql_ec(ec, log_message);
 
 		return ec;
 	}
 
 	// make and return std::errc as error_code
 	// also log the message
-	inline[[nodiscard]]	error_code 
+	[[nodiscard]] inline error_code
 		std_ec(
 			std::errc posix_retval,
 			// make it optional and alos longer 
 			// than 1 so that logger will not complain
 			string_view  log_message = "  "sv
-		)
-		noexcept
+		)	noexcept
 	{
 		// std::errc should not contain a 0
-		_ASSERTE(0 != (int)posix_retval);
 			::std::error_code ec = std::make_error_code(posix_retval);
 			// each posix code is seen as 'error'
-			::dbj::db::log::error(ec.message(), log_message);
+			if (0 == (int)posix_retval)
+				::dbj::db::log::info(ec.message(), log_message);
+			else
+				::dbj::db::log::error(ec.message(), log_message);
 		return ec;
 	}
 } // dbj::db::err nspace

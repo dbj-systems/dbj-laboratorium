@@ -14,6 +14,7 @@ namespace dbj::db::log {
 using namespace std;
 using namespace std::string_view_literals;
 namespace fs = std::filesystem;
+namespace u = dbj::util;
 
 constexpr inline auto LOG_FILE_FOLDER = "dbj\\dbj++sql"sv;
 constexpr inline auto LOG_FILE_NAME = "dbj++sql.log"sv;
@@ -62,18 +63,18 @@ inline auto
 		log_file(const char * file_path_param) 
 			: file_path_(file_path_param)
 		{
-/*A true posix jamboree */
+		/*A true posix jamboree */
 		old_std_err = _dup(2);   // "old_std_err" now refers to "stderr"
 
 			if (old_std_err == -1)
 			{
-				perror("\n\n_dup( 2 ) failure");
+				perror("\n\n_dup( 2 ) failure -- " __FUNCSIG__ "\n\n");
 				exit(1);
 			}
 
 			if (fopen_s(&log_file_, file_path_.data(), "w") != 0)
 			{
-				puts("\n\nCan't open file :");
+				puts("\n\nCan't open file -- " __FUNCSIG__ "\n\n");
 				puts(file_path_.data());
 				exit(1);
 			}
@@ -81,9 +82,21 @@ inline auto
 			// stderr now refers to file 
 			if (-1 == _dup2(_fileno(log_file_), 2))
 			{
-				perror("\n\nCan't _dup2 stderr");
+				perror("\n\nCan't _dup2 stderr --"  __FUNCSIG__ "\n\n");
 				exit(1);
 			}
+			// quick and dirty file header
+			// if no errors, this file will stay empty
+			// so header will have the role
+			std::error_code ec;
+			std::string tst = u::make_time_stamp(ec); // size returned is max 23
+
+			if (ec) {
+				perror("\n\nCan't make the time stamp --" __FUNCSIG__ "\n\n" );
+				perror(ec.message().c_str());
+				exit(1);
+			}
+			::fprintf(stderr, "%s | created DBJ++SQL log file -- %s", tst.c_str(), file_path_.data());
 		}
 
 		~log_file() {
