@@ -58,4 +58,23 @@ namespace dbj::db::err {
 
 		return ec;
 	}
+
+	// make and return std::errc as error_code
+	// also log the message
+	inline[[nodiscard]]	error_code 
+		std_ec(
+			std::errc posix_retval,
+			// make it optional and alos longer 
+			// than 1 so that logger will not complain
+			string_view  log_message = "  "sv
+		)
+		noexcept
+	{
+		// std::errc should not contain a 0
+		_ASSERTE(0 != (int)posix_retval);
+			::std::error_code ec = std::make_error_code(posix_retval);
+			// each posix code is seen as 'error'
+			::dbj::db::log::error(ec.message(), log_message);
+		return ec;
+	}
 } // dbj::db::err nspace

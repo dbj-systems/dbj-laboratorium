@@ -4,12 +4,8 @@
 
 namespace dbj_easy_udfs_sample {
 	/*
-	   NOTE: we do not need sqlite3 header at all
-	   thus we do not need the following line:
-
-	   using namespace ::sqlite;
-
 	   the whole sqlite3 C API is encapsulated and hidden
+	   using namespace ::sqlite;
 	   (beside the unfortunate macros)
 	*/
 
@@ -19,10 +15,10 @@ namespace dbj_easy_udfs_sample {
 	using namespace ::dbj::db::err ;
 
 	/* one table "words", with one text column "word" */
-	constexpr inline auto db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
+	constexpr inline auto DB_FILE = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
 
 	/* use case: solve executin of the following query using dbjsqlite 3 */
-	constexpr inline auto query_with_udfs
+	constexpr inline auto QRY_WITH_UDF
 		= "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"sv;
 	/* the palindrome udf */
 	inline void palindrome(
@@ -82,31 +78,19 @@ namespace dbj_easy_udfs_sample {
 	}
 
 	/* called from the test unit */
-	void test_udf(
-		std::string_view query_ = query_with_udfs
-	)
+	[[nodiscard]] error_code test_udf(
+		std::string_view query_ = QRY_WITH_UDF
+	) noexcept 
 	{
-
-		try {
 			::wprintf(L"\nthe query:\t%S\nthe result:\n", query_.data());
 			// assure the database presence
-			dbj::db::database db(db_file);
+			error_code ec;
+			database db(DB_FILE, ec); if (ec) return ec;
 			// register the udf's required
 			register_dbj_udf<palindrome>(db, "palindrome");
 			register_dbj_udf<strlen>(db, "strlen");
 
-			db.query(
-				query_.data(),
-				dbj_udfs_result_handler
-			); 
-		}
-		catch (std::error_code ec)
-		{
-			::fprintf( stderr,
-				"\nerror code\n\t code:%3d, message:%s, category:%s ", 
-				ec.value() , ec.message().c_str(), ec.category().name()
-			);
-		}
+			return db.query(query_.data(),dbj_udfs_result_handler); 
 	} // test_udf
 
 } // namespace dbj_easy_udfs_sample 

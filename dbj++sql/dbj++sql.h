@@ -304,7 +304,7 @@ namespace dbj::db {
 this function by design does not return a value 
 so we do not return a pair, just the error_code
 */
-	[[nodiscard]] static auto
+	[[nodiscard]] static error_code
 		dbj_sqlite_open(connection_handle & handle_, char const * filename)	noexcept
 	{
 		handle_.reset();
@@ -314,17 +314,15 @@ so we do not return a pair, just the error_code
 		return sqlite_ec( result );
 	}	
 	
-	[[nodiscard]] 
-	auto
+	[[nodiscard]] error_code
 		prepare_statement (char const * query_, statement_handle & statement_ ) const noexcept
-		-> std::error_code
 	{
 		_ASSERTE(query_);
-		// auto local_statement = statement_handle{};
-		// " Must call open() before " __FUNCSIG__ 
 		if (!handle)
-			return make_error_code( ::std::errc::protocol_error );
-
+			return std_ec(
+				::std::errc::protocol_error, 
+				"dbj::db::database -- Must call open() before " __FUNCSIG__ 
+			);
 		auto const result = sqlite::sqlite3_prepare_v2(
 			handle.get(),
 			query_,
@@ -343,32 +341,30 @@ so we do not return a pair, just the error_code
 		database( const database &) = delete;
 		database( database &&) = delete;
 
-		// can throw
-		explicit database( string_view storage_name )
+		// can *not* throw
+		explicit database( string_view storage_name, error_code & ec ) noexcept
 		{
+			ec.clear();
 			// not returning pair, by design
-			std::error_code e = dbj_sqlite_open( this->handle, storage_name.data() );
-
-			if ( !is_sql_err_ok( e )) {
-				throw e;
-			}
+			ec = dbj_sqlite_open( this->handle, storage_name.data() );
 		}
 
 		/*
 		will do 'something like':
 		sqlite::sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
 		*/
-		[[nodiscard]] std::error_code register_user_defined_function 
+		[[nodiscard]] error_code register_user_defined_function 
 		( 
 			string_view udf_name, 
 			void(__cdecl * udf_)(sqlite::sqlite3_context *, int, sqlite::sqlite3_value **)
 		) const noexcept
 		{
-			// " Must call open() before " __FUNCSIG__ 
-			if (!handle) {
-				error_code ec_ = make_error_code(errc::protocol_error);
-				return ec_;
-			}
+			if (!handle)
+				return std_ec(
+					::std::errc::protocol_error,
+					"dbj::db::database -- Must call open() before " __FUNCSIG__
+				);
+
 			
 			auto const result 
 				= sqlite::sqlite3_create_function(
@@ -381,36 +377,37 @@ so we do not return a pair, just the error_code
 					NULL, 
 					NULL);
 
-			// we make log and return always
-			// even if SQLITE_OK == result
-			return ::dbj::db::err::sqlite_ec(result);
+			return sqlite_ec(result);
 		}
 
 	/*
 	call with query and a callback
-	throw std::error_code on error
+	return std::error_code
 	*/
-	void query (
-		char const * query_, 
-		optional<result_row_user_type>  row_user_ = nullopt
-	) const 
+		[[nodiscard]] error_code 
+			query (
+				char const * query_, 
+				std::optional<result_row_user_type>  row_user_ = std::nullopt
+	) const noexcept
 	{
-		// " Must call open() before " __FUNCSIG__ 
 		if (!handle)
-			throw make_error_code(::std::errc::protocol_error);
+			return std_ec(
+				::std::errc::protocol_error,
+				"dbj::db::database -- Must call open() before " __FUNCSIG__
+			);
 
 		statement_handle statement_;
-			auto e = prepare_statement(query_, statement_ );
-		if (!is_sql_err_ok(e)) throw e;
+		// return anything if error_code is not 0 
+		if ( error_code e = prepare_statement(query_, statement_ );	e ) return e;
 
 		vector<string> col_names_ { column_names( statement_ ) };
 		
-	int result{};
+	int sql_result ;
 		size_t row_counter{};
-		while ((result = sqlite::sqlite3_step(statement_.get())) == SQLITE_ROW) {
+		while ((sql_result = sqlite::sqlite3_step(statement_.get())) == SQLITE_ROW) {
 		if (row_user_.has_value()) {
 			// call once per row returned
-			result = (row_user_.value())(
+			sql_result = (row_user_.value())(
 				row_counter++,
 				col_names_,
 				{ statement_.get() }
@@ -418,11 +415,11 @@ so we do not return a pair, just the error_code
 		  }
 	    }
 
-		// we make log and return always
-		// user must check for SQLITE_DONE;
-		if ( auto ec = sqlite_ec(result,query_);
-		    ! is_sql_err_done(ec))
-			throw ec;
+		// check for SQLITE_DONE;
+		if (sql_result == SQLITE_DONE)
+			return error_code{}; // returning with OK;
+		else
+		    return sqlite_ec(sql_result, "dbj::db::database -- query() ERROR exit"sv);
 	}
 
 	}; // database

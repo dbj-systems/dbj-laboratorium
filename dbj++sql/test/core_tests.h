@@ -9,36 +9,46 @@ namespace dbj_db_test_
 
 	struct demo_db final {
 
-		// can throw std::error_code
-		static const database & instance()
-		{
-			static const database & instance_ = [&]()
-				-> const database &
-			{
-				static database db(":memory:");
-				db.query("DROP TABLE IF EXISTS demo");
-				db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )");
-				db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')");
-				return db;
-			}();
-			return instance_;
-		}
-	};
-
-	inline  auto test_insert(const char * = 0)
+	// error_code is the ref argument
+	static const database & instance( error_code & ec )
 	{
-		try {
-			const database & db = demo_db::instance();
-			// please read here about u8 and execution_character_set
-			// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
-			db.query(
-				u8"INSERT INTO demo_table (Id, Name) "
-				u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
-			);
+		auto initor = [&]()
+			-> const database &
+		{
+			ec.clear();
+			static database db(":memory:", ec); if (ec) return db;
+			if (ec = db.query("DROP TABLE IF EXISTS demo"); ec) return db;
+			if (ec = db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )"); ec) return db;
+			if (ec = db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')"); ec) return db;
+			return db;
+		};
+		static const database & instance_ = initor();
+		// note: ec might be not OK here! caller must check!
+		return instance_;
+	}
+};
+	/*
+	usage is now with no exception being thrown
+	NOTE: we pass the error_code out, which is not 
+	introcuing unknown abstraction to the caller
+	since error_code is part of the std lib
+	*/
+	[[nodiscard]] inline error_code 
+		test_insert(const char * = 0) noexcept
+	{
+		error_code err_;
+		const database & db = demo_db::instance(err_);
+		if (err_) {
+			// it is already logged
+			return err_;
 		}
-		catch (std::error_code ec) {
-			dbj::db::err::log_ignore_ok(ec);
-		}
+		err_.clear(); // always advisable
+		// please read here about u8 and execution_character_set
+		// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
+		return db.query(
+			u8"INSERT INTO demo_table (Id, Name) "
+			u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
+		);
 	}
 	/*
 	remember: this is called once per  each row in the result set
@@ -57,20 +67,23 @@ namespace dbj_db_test_
 		return SQLITE_OK;
 	}
 
-	inline  auto test_select()
+	/*
+	no exceptions, but inspect the returned
+	*/
+	[[nodiscard]] inline error_code test_select() noexcept
 	{
-		try {
-			const database & db = demo_db::instance();
+			error_code err_;
+			const database & db = demo_db::instance(err_);
+			if (err_) {
+				// it is already logged
+				return err_;
+			}
 			::wprintf(L"\n\n"
 				L"Row Id |Id |Name");
 			::wprintf(L"\n-------+---+--------");
-			db.query("SELECT Id,Name FROM demo_table", sample_callback);
+			err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
 			::wprintf(L"\n-------+---+--------\n");
-
-		}
-		catch (std::error_code ec) {
-			log_ignore_ok(ec);
-		}
+			return err_;
 	}
 
 	/*
@@ -82,22 +95,21 @@ namespace dbj_db_test_
 	   please replace it with yours
 	   for that use one of the many available SQLite management app's
 	*/
-	inline  auto test_statement_using(
+	[[nodiscard]] inline error_code test_statement_using(
 		result_row_user_type row_user_,
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
-	)
+	) noexcept
 	{
-		try {
-			database db(db_file);
-			// provoke error
-			db.query(
-				"select word from words where word like 'bb%'",
-				row_user_);
-
+		error_code err_;
+		const database db(db_file, err_ ); // using the real db
+		if (err_) {
+			// it is already logged
+			return err_;
 		}
-		catch (std::error_code ec) {
-			log_ignore_ok(ec);
-		}
+		// provoke error
+		return db.query(
+			"select word from words where word like 'bb%'",
+			row_user_);
 	}
 } // nspace
 

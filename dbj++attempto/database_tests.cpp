@@ -11,6 +11,7 @@ DBJ_TEST_UNIT(dbj_sql_lite_udf)
 {
 	namespace k = dbj::kalends;
 	namespace d = dbj_easy_udfs_sample;
+	using ::dbj::console::print;
 
 	auto test = [&]( auto fun_ ) {
 		using ::dbj::console::print;
@@ -22,7 +23,11 @@ DBJ_TEST_UNIT(dbj_sql_lite_udf)
 	test([&] {  return measure             ([&] { test_udf(); }); });
 	test([&] {  return microseconds_measure([&] { test_udf(); }); });
 	*/
-	test([&] {  return k::miliseconds_measure ([&] { d::test_udf(); }); });
+	test([&] {  return k::miliseconds_measure ([&] { 
+		auto err = d::test_udf(); 
+		if (err)
+			print("\n", err );
+	}); });
 /*
 	test([&] {  return seconds_measure     ([&] { test_udf(); }); });
 */
@@ -59,12 +64,16 @@ namespace anyspace {
 	{
 		using dbj::console::print;
 
-		dbj_db_test_::test_insert();
+		std::error_code err = dbj_db_test_::test_insert();
+			if (err) print("\n", err);
+
 		print("\ndbj_sqlite_callback\n");
-		dbj_db_test_::test_select();
+		err.clear(); err = dbj_db_test_::test_select();
+			if (err) print("\n", err);
 		print("\ndbj_sqlite_statement_user\n");
-		dbj_db_test_::test_statement_using(example_callback);
-		system("@echo.");
+		err.clear(); err = dbj_db_test_::test_statement_using(example_callback);
+		if (err) print("\n", err);
+			system("@echo.");
 		system("@echo.");
 		system("@pause");
 	}
