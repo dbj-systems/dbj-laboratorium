@@ -81,4 +81,44 @@ namespace dbj::util {
 		prog_data_path_ = v;
 		return s::pair(prog_data_path_, e);
 	}
+
+	namespace str {
+	/*
+	somewhat inspired with
+	https://msdn.microsoft.com/en-us/magazine/dn913181.aspx
+	*/
+		template <typename T>
+		T frm_arg(T value) noexcept
+		{
+			return value;
+		}
+
+		template <typename T>
+		T const * frm_arg(std::basic_string<T> const & value) noexcept
+		{
+			return value.c_str();
+		}
+
+		template <typename T>
+		T const * frm_arg(std::basic_string_view<T> const & value) noexcept
+		{
+			return value.data();
+		}
+/*
+https://stackoverflow.com/a/39972671/10870835
+*/
+template<typename ... Args>
+inline std::string 
+	dbj_format(const std::string& format_, Args const & ... args)
+noexcept
+{
+	const auto fmt = format_.c_str();
+	const size_t size = std::snprintf(nullptr, 0, fmt, frm_arg(args) ...) + 1;
+	auto buf = std::make_unique<char[]>(size);
+	std::snprintf(buf.get(), size, fmt, frm_arg(args) ...);
+	auto res = std::string(buf.get(), buf.get() + size - 1);
+	return res;
+}
+
+	} // str
 } // dbj::util

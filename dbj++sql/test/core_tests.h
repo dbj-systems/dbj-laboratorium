@@ -68,7 +68,6 @@ Singature of the callback function is always the same
 */
 int sample_callback(
 	const size_t row_id,
-	// const vector<string> & col_names,
 	const sql::row_descriptor & cell
 )
 {
@@ -84,9 +83,41 @@ int sample_callback(
 	// result set traversal
 }
 
+int universal_callback(
+	const size_t row_id,
+	const sql::row_descriptor & cell
+)
+{
+	auto print_cell = [&](int j_) {
+		::wprintf(L"%10S: %S,", cell.name(j_), ((string)cell(j_)).c_str() );
+	};
+
+	::wprintf(L"\n\t%zu", row_id);
+	for (int k = 0; k < cell.column_count(); k++)
+		print_cell(k);
+	return SQLITE_OK;
+	// otherwise sqlite3 will stop the 
+	// result set traversal
+}
 /*
-use the above callback
+use the above callback's
 */
+[[nodiscard]] inline error_code 
+test_table_info () 
+noexcept
+{
+	error_code err_;
+	const sql::database & db = demo_db(err_);
+	if (err_) return err_;
+
+	::wprintf(L"\nmeta data for columns of the table 'demo_table'\n");
+	err_.clear();
+	err_ = sql::table_info(db, "demo_table", universal_callback);
+	if (err_)
+	::wprintf(L"\n\nstd::error_code domain:%S, id:%d, message:%S ", err_.category().name(), err_.value(), err_.message().c_str());
+
+	return err_;
+}
 [[nodiscard]] inline error_code 
 test_select() 
 noexcept
@@ -97,7 +128,7 @@ noexcept
 		// it is already logged
 		return err_;
 	}
-	::wprintf(L"\n\n");
+	::wprintf(L"\nexecute: 'SELECT Id, Name FROM demo_table'\n");
 	err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
 	return err_;
 }
@@ -112,7 +143,7 @@ noexcept
 	   for that use one of the many available SQLite management app's
 	*/
 	[[nodiscard]] inline error_code test_statement_using(
-		sql::result_row_user_type row_user_,
+		sql::result_row_callback row_user_,
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	) noexcept
 	{
@@ -123,6 +154,7 @@ noexcept
 			// just return it
 			return err_;
 		}
+		err_.clear();
 		// provoke error
 		return db.query(
 			"select word from words where word like 'bb%'",

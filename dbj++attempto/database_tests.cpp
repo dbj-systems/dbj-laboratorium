@@ -66,6 +66,10 @@ namespace anyspace {
 		std::error_code err = dbj_db_test_::test_insert();
 			if (err) print("\n", err);
 
+			err.clear(); err = dbj_db_test_::test_table_info() ;
+			if (err) print("\n", err);
+
+
 		print("\ndbj_sqlite_callback\n");
 		err.clear(); err = dbj_db_test_::test_select();
 			if (err) print("\n", err);
