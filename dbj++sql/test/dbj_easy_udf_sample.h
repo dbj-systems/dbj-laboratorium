@@ -61,15 +61,14 @@ namespace dbj_easy_udfs_sample {
 
 	/* result processor aka callback */
 	static int dbj_udfs_result_handler(
-		[[maybe_unused]] const size_t row_id,
-		[[maybe_unused]] const std::vector<std::string> & col_names,
-		[[maybe_unused]] const dbj::db::value_decoder & val_user
+		const size_t row_id,
+		const dbj::db::row_descriptor & row
 	)
 	{
 		if constexpr (show_the_query_result) {
 			/* this is deliberately verbose code */
-			std::string word = val_user(0);
-			int len_ = val_user(1);
+			std::string word = row(0);
+			int len_ = row(1);
 			::wprintf(L"\n\t[%3d]\tword: %32S,\tlength: %12d", 
 				static_cast<int>(row_id), word.c_str(), len_);
 		}

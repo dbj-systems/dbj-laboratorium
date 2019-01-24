@@ -4,31 +4,41 @@
 
 namespace dbj_db_test_
 {
-	using namespace dbj::db;
-	using namespace dbj::db::err;
+	using namespace  ::std;
+	namespace sql  = ::dbj::db;
+	namespace sqr  = ::dbj::db::err;
 
-	struct demo_db final {
-
-	// error_code is the ref argument
-	static const database & instance( error_code & ec )
-	{
-		auto initor = [&]()
-			-> const database &
-		{
-			ec.clear();
-			static database db(":memory:", ec); if (ec) return db;
-			if (ec = db.query("DROP TABLE IF EXISTS demo"); ec) return db;
-			if (ec = db.query("CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null )"); ec) return db;
-			if (ec = db.query("INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')"); ec) return db;
-			return db;
-		};
-		static const database & instance_ = initor();
-		// note: ec might be not OK here! caller must check!
-		return instance_;
-	}
+// in memory db for testing
+inline sql::database const & 
+   demo_db( error_code & ec ) 
+// no throwing from here
+  noexcept
+{
+auto initor = [&]()
+	-> const sql::database &
+{
+	ec.clear();
+	// notice the error_code argument 
+	// to the cosntructor
+	// it does not throw on error
+	static sql::database db(":memory:", ec); 
+	// if error return
+	if (ec) return db;
+	// create the database and 
+	// update the error code
+	ec = db.exec(
+"DROP TABLE IF EXISTS demo; "
+"CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null ); " 
+"INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')"); 
+	return db; 
 };
+static  sql::database const & instance_ = initor();
+// note: caller must check the error_code !
+return instance_;
+} // demo_db
+
 	/*
-	usage is now with no exception being thrown
+	usage is with no exception being thrown
 	NOTE: we pass the error_code out, which is not 
 	introcuing unknown abstraction to the caller
 	since error_code is part of the std lib
@@ -37,7 +47,7 @@ namespace dbj_db_test_
 		test_insert(const char * = 0) noexcept
 	{
 		error_code err_;
-		const database & db = demo_db::instance(err_);
+		const sql::database & db = demo_db(err_);
 		if (err_) {
 			// it is already logged
 			return err_;
@@ -45,46 +55,52 @@ namespace dbj_db_test_
 		err_.clear(); // always advisable
 		// please read here about u8 and execution_character_set
 		// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
-		return db.query(
+		return db.exec(
 			u8"INSERT INTO demo_table (Id, Name) "
 			u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')"
 		);
 	}
-	/*
-	remember: this is called once per  each row in the result set
-	*/
-	int sample_callback(
-		const size_t row_id,
-		[[maybe_unused]] const std::vector<std::string> & col_names,
-		const dbj::db::value_decoder & val_user
-	)
-	{
-		int   id_ = val_user(0);
-		std::string   name_ = val_user(1);
-		::wprintf(L"\n%d      |%d  |%S   ",
-			static_cast<int>(row_id), id_, name_.c_str());
-		// otherwise the system will atop
-		return SQLITE_OK;
-	}
+/*
+callback to be called per each row of 
+the result set made by:
+	SELECT Id,Name FROM demo_table
+Singature of the callback function is always the same
+*/
+int sample_callback(
+	const size_t row_id,
+	// const vector<string> & col_names,
+	const sql::row_descriptor & cell
+)
+{
+	// get the int value of the first column
+	int   id_ = cell(0);
+	// get the string value of the second column
+	string   name_ = cell(1);
+	// print what we got
+	::wprintf(L"\n\t %zu \t %S = %d \t %S = %S",
+		row_id, cell.name(0), id_, cell.name(1), name_.c_str());
+	return SQLITE_OK;
+	// otherwise sqlite3 will stop the 
+	// result set traversal
+}
 
-	/*
-	no exceptions, but inspect the returned
-	*/
-	[[nodiscard]] inline error_code test_select() noexcept
-	{
-			error_code err_;
-			const database & db = demo_db::instance(err_);
-			if (err_) {
-				// it is already logged
-				return err_;
-			}
-			::wprintf(L"\n\n"
-				L"Row Id |Id |Name");
-			::wprintf(L"\n-------+---+--------");
-			err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
-			::wprintf(L"\n-------+---+--------\n");
-			return err_;
+/*
+use the above callback
+*/
+[[nodiscard]] inline error_code 
+test_select() 
+noexcept
+{
+	error_code err_;
+	const sql::database & db = demo_db(err_);
+	if (err_) {
+		// it is already logged
+		return err_;
 	}
+	::wprintf(L"\n\n");
+	err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
+	return err_;
+}
 
 	/*
 	   As a sample DB, I am using an English dictionary in a file,
@@ -96,14 +112,15 @@ namespace dbj_db_test_
 	   for that use one of the many available SQLite management app's
 	*/
 	[[nodiscard]] inline error_code test_statement_using(
-		result_row_user_type row_user_,
+		sql::result_row_user_type row_user_,
 		const char * db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	) noexcept
 	{
 		error_code err_;
-		const database db(db_file, err_ ); // using the real db
+		const sql::database db(db_file, err_ ); // using the real db
 		if (err_) {
 			// it is already logged
+			// just return it
 			return err_;
 		}
 		// provoke error

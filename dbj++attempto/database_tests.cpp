@@ -43,20 +43,19 @@ namespace anyspace {
 	*/
 	int example_callback(
 		const size_t row_id,
-		[[maybe_unused]] const std::vector<std::string> & col_names,
-		const dbj::db::value_decoder & val_user
+		const dbj::db::row_descriptor & row_
 	)
 	{
 		using dbj::console::print;
 		// 'automagic' transform to std::string
 		// of the column 0 value for this row
-		std::string   word_ = val_user(0);
+		std::string   word_ = row_(0);
 		print("\n\t", row_id, "\t", word_);
 
 		// all these should provoke exception
 		// TODO: but they don't -- currently
-		long   DBJ_MAYBE(number_) = val_user(0);
-		double DBJ_MAYBE(real_) = val_user(0);
+		long   DBJ_MAYBE(number_) = row_(0);
+		double DBJ_MAYBE(real_) = row_(0);
 		return SQLITE_OK;
 	}
 

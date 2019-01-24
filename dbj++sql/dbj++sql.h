@@ -211,7 +211,7 @@ namespace dbj::db {
 	return the typed value from a single cell in a column
 	for the *current* row of the result
 	*/
-	struct value_decoder final
+	struct row_descriptor final
 	{
 		/* http://www.sqlite.org/c3ref/column_blob.html */
 	   /* TODO: https://sqlite.org/c3ref/errcode.html  */
@@ -253,35 +253,32 @@ namespace dbj::db {
 		return the transformer for particular column
 		from the current result set
 		*/
-		transformer operator ()(size_t col_idx ) const noexcept
+		transformer operator ()(int col_idx ) const noexcept
 		{
 			_ASSERTE(this->statement_);
+			_ASSERTE(!(col_idx > column_count()));
 			return transformer{
-				this->statement_ , static_cast<int>(col_idx) 
+				this->statement_ , col_idx 
 			};
+		}
+		// the column name
+		const char * name(int col_idx) const noexcept
+		{
+			_ASSERTE(this->statement_);
+			_ASSERTE(! (col_idx > column_count()) );
+			return sqlite3_column_name(
+				this->statement_ , col_idx
+			);
 		}
 		// --------------------------------------
 		mutable sqlite::sqlite3_stmt * statement_{};
-	}; // value_decoder
 
-	/*
-	return vector of column names from the active statement
-	*/
-	inline vector<string> 
-		column_names( const statement_handle & sh_ ) 
-		noexcept
-	{
-		// this actually calls the traits invalid method
-		// from inside the handle bool operator
-		_ASSERTE( sh_ );
-
-		const size_t column_count = sqlite::sqlite3_column_count(sh_.get());
-		vector<string> names{};
-		for (int n = 0; n < column_count; ++n) {
-			names.push_back( { sqlite::sqlite3_column_name(sh_.get(), n) } );
+		int column_count() const noexcept {
+			_ASSERTE(this->statement_);
+			static int count_ = sqlite::sqlite3_column_count(statement_);
+			return count_;
 		}
-		return names;
-	}
+	}; // row_descriptor
 
 	// user created callback type for database query()
     // return the sqlite err rezult code or SQLITE_OK
@@ -289,8 +286,7 @@ namespace dbj::db {
 	using result_row_user_type = int(*)
 		(
         const size_t /* result row id */ ,
-		const vector<string> & /*column_names*/,
-		const value_decoder &
+		const row_descriptor &
 		);
 
 	/*
@@ -380,16 +376,15 @@ so we do not return a pair, just the error_code
 			return sqlite_ec(result);
 		}
 
-	/*
-	call with query and a callback
-	return std::error_code
-	*/
-		[[nodiscard]] error_code 
-			query (
-				char const * query_, 
-				std::optional<result_row_user_type>  row_user_ = std::nullopt
-	) const noexcept
-	{
+/*
+call with query and a callback
+return std::error_code
+*/
+[[nodiscard]] error_code query (
+	char const * query_, 
+	result_row_user_type  row_user_ 
+) const noexcept
+{
 		if (!handle)
 			return std_ec(
 				::std::errc::protocol_error,
@@ -397,30 +392,43 @@ so we do not return a pair, just the error_code
 			);
 
 		statement_handle statement_;
-		// return anything if error_code is not 0 
+		// return if error_code is not 0 
 		if ( error_code e = prepare_statement(query_, statement_ );	e ) return e;
 
-		vector<string> col_names_ { column_names( statement_ ) };
-		
 	int sql_result ;
 		size_t row_counter{};
 		while ((sql_result = sqlite::sqlite3_step(statement_.get())) == SQLITE_ROW) {
-		if (row_user_.has_value()) {
 			// call once per row returned
-			sql_result = (row_user_.value())(
+			sql_result = (row_user_)(
 				row_counter++,
-				col_names_,
+				// col_names_,
 				{ statement_.get() }
 			);
-		  }
 	    }
-
-		// check for SQLITE_DONE;
-		if (sql_result == SQLITE_DONE)
-			return error_code{}; // returning with OK;
-		else
-		    return sqlite_ec(sql_result, "dbj::db::database -- query() ERROR exit"sv);
+		// users to check for SQLITE_DONE;
+	    return sqlite_ec(sql_result );
 	}
+//-------------------------------------------------------------------------------
+		[[nodiscard]] error_code exec( const char * sql_ ) const noexcept
+		{
+			_ASSERTE(sql_);
+			if (!handle)
+				return std_ec(
+					::std::errc::protocol_error,
+					"dbj::db::database -- Must call open() before " __FUNCSIG__
+				);
+
+			int sql_result = sqlite::sqlite3_exec(
+				handle.get(), /* An open database */
+				sql_,		/* SQL to be evaluated */
+				nullptr,	/* Callback function */
+				nullptr,	/* 1st argument to callback */
+				nullptr		/* Error msg written here */
+			);
+
+			// check for SQLITE_OK;
+			return sqlite_ec(sql_result);
+		}
 
 	}; // database
 
