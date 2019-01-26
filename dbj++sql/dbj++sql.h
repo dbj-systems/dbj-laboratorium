@@ -394,7 +394,7 @@ no error is SQLITE_DONE or SQLITE_OK
 		if ( error_code e = prepare_statement(query_, statement_ );	e ) return e;
 
 #ifdef _DEBUG
-		auto col_count_ = sqlite::sqlite3_column_count(statement_.get());
+		auto col_count_ [[maybe_unused]]= sqlite::sqlite3_column_count(statement_.get());
 #endif
 
 	int sql_result ;
