@@ -1,42 +1,28 @@
 ﻿#pragma once
-
+#include "stdafx.h"
 #include "sqlite++.h"
-#include <string>
-#include <string_view>
-#include <optional>
-#include <vector>
-#include <cstdio>
-#include <crtdbg.h>
 #include "dbj_util.h"
 #include "./err/dbj_db_err.h"
 #include "./dbj_log/dbj_log_user.h"
 
-#ifndef DBJ_STR
-#define DBJ_STR(x) #x
-#endif
-
-#ifndef DBJ_VANISH
-#define DBJ_VANISH(...) static_assert( (noexcept(__VA_ARGS__),true) );
-#endif
 #ifndef DBJ_VERIFY
 #define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::terror( #x ", failed", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
-
 namespace dbj::db {
 
-	using namespace ::std;
+	// intelisense goes berserk on this -- using namespace ::std;
 	// using namespace ::sqlite;
-	using namespace ::std::string_view_literals;
+	using namespace ::std::literals::string_view_literals;
 	using namespace ::dbj::db::err;
 
 [[noreturn]] inline void terror
 (const char * msg_, const char * file_, const int line_)
 {
 	_ASSERTE(msg_);	_ASSERTE(file_);_ASSERTE(line_);
-	::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
-	exit(EXIT_FAILURE);
+	std::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
+	::exit(EXIT_FAILURE);
 }
 	// constexpr inline auto version = "1.0.0"sv;
 	// core tests moved to core_tests.h
@@ -629,11 +615,11 @@ cid|name|type|notnull|dflt_value|pk
 			result_row_callback  result_callback_ )
 	noexcept
 	{
-		using namespace ::dbj::util::str ;
+		using ::dbj::util::fmt::dbj_format;
 
-		string qry = dbj_format("PRAGMA table_info('%s')", table_name);
+		std::string qry = dbj_format("PRAGMA table_info('%s')", table_name);
 
-		// list of all tables and viewa qry
+		// list of all tables and views
 		// auto qry = "SELECT name, sql FROM sqlite_master WHERE type = 'table' ORDER BY name;"sv;
 
 		return db.query(qry.data(), result_callback_ );

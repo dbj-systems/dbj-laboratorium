@@ -83,7 +83,7 @@ namespace dbj_easy_udfs_sample {
 	   to be used in this statement
 	   "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	*/
-	inline void strlen(
+	inline void strlen_udf (
 		const sql::udf_argument  & argument_,
 		const sql::udf_retval    & result_
 	)
@@ -131,7 +131,7 @@ namespace dbj_easy_udfs_sample {
 		ec.clear();
 		ec = sql::register_dbj_udf<palindrome>(db, "palindrome"); if (ec) return ec;
 		ec.clear();
-		ec = sql::register_dbj_udf<strlen>(db, "strlen"); if (ec) return ec;
+		ec = sql::register_dbj_udf<strlen_udf>(db, "strlen"); if (ec) return ec;
 		// above we could use any names we want, 
 		// as long as they match the sql select used
 

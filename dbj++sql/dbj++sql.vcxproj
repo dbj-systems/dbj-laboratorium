@@ -153,7 +153,6 @@
   <ItemGroup>
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="dbj++sql.h" />
-    <ClInclude Include="dbj_easy_udf_sample.h" />
     <ClInclude Include="dbj_gpl_license.h" />
     <ClInclude Include="dbj_log\dbj_log.h" />
     <ClInclude Include="dbj_log\dbj_log_file.h" />
