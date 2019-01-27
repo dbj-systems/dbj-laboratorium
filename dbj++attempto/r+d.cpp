@@ -19,6 +19,66 @@ DBJ_TEST_SPACE_OPEN(local_tests)
 /**************************************************************************************************/
 using namespace std::string_view_literals;
 
+#define  DBJ_LIGHT_BUFFER
+#ifdef DBJ_LIGHT_BUFFER
+
+struct char_buffer final {
+
+	using iterator = char *;
+	using value_type = char;
+	using buffer_type = std::unique_ptr<char[]>;
+
+	char_buffer(size_t size) 
+		// reference counted pointer to auto-delete the buffer
+		: data_ ( std::make_unique<char[]>(size+1) ) , size_(size)
+	{
+	}
+
+	// result of this operator to change the single char
+	char & operator [] (size_t idx_ )
+	{
+		if (idx_ > size())
+			throw std::make_error_code( std::errc::invalid_argument);
+		// use the underlying pointer
+		// http://stackoverflow.com/questions/27819809/why-is-there-no-operator-for-stdshared-ptr
+		return data_.get()[idx_]; 
+	}
+
+	iterator data () const {
+		return data_.get() ;
+	}
+
+	size_t const & size() const {
+		return size_ ;
+	}
+
+	iterator begin() { return data_.get(); }
+	iterator end()   { return data_.get() + size_ ; }
+
+private :
+	mutable size_t size_;
+	mutable	buffer_type data_{};
+};
+
+DBJ_TEST_UNIT( dbj_light_buffer ) {
+
+	char_buffer cb(26);
+	auto j = cb.size();
+
+	char k = 65; // 'A'
+	for (auto & c_ : cb)
+	{
+		c_ = char(k++);
+		char control = ( 65 + j-- );
+	}
+
+	DBJ_TEST_ATOM( cb.data() );
+}
+
+
+#endif // DBJ_LIGHT_BUFFER
+
+
 struct STANDARD {
 	constexpr static const auto compiletime_static_string_view_constant()
 	{
