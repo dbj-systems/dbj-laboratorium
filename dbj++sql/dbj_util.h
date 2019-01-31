@@ -73,7 +73,7 @@ namespace dbj {
 		/*
 		returns {V, std::std::error_code},	caller must check
 		*/
-		inline [[nodiscard]] auto dbj_get_envvar(std::string_view varname_) noexcept
+		[[nodiscard]] inline auto dbj_get_envvar(std::string_view varname_) noexcept
 		{
 			_ASSERTE(!varname_.empty());
 			std::array<char, 256>	bar{ {0} };
