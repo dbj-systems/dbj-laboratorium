@@ -16,11 +16,11 @@
 
 	// dbj easy udf c++ signature
 	void my_udf(
-		const udf_argument  & value_,
+		const udf_argument  & args_,
 		const udf_retval    & result_
 	) ;
 
-	see the two examples bellow
+	dbj++sql makes sqlite udf's realy easy, see the two examples bellow
 */
 
 namespace dbj_easy_udfs_sample {
@@ -34,7 +34,6 @@ namespace dbj_easy_udfs_sample {
 	constexpr inline auto DB_FILE = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
 
 	/* use case: solve the following query using
-	   dbj++sql,  the dbj sqlite 3 C++ api
 	   notice the two udf's required
 	   int palindrome( const char *) and int strlen( const char *)
 	   they are not available in SQLITE3 SQL as inbuilt functions
@@ -42,19 +41,21 @@ namespace dbj_easy_udfs_sample {
 	constexpr inline auto QRY_WITH_UDF
 		= "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"sv;
 	/*
-	the result set: 0:'word'(type:const char *), 1:'strlen(word)'(type:int)
+	for the above sql the result set will be: 
+	0:'word'(type:const char *), 1:'strlen(word)'(type:int)
 
 	Please observe and understand the shape of the sql select, result set
 	as this is from where we source the argument for the palindrome()
+
 	the palindrome udf has to be:  int  palindrome ( const char * )
-	we write it using the dbj easy pdf function signature
+	we write it using the dbj easy udf, function signature
 	alsways the same for any udf
 	*/
 	inline void palindrome(
-		const sql::udf_argument  & value_,
+		const sql::udf_argument  & args_,
 		const sql::udf_retval    & result_
 	)
-		// do not throw from the UDF
+		// do not throw from this UDF
 		noexcept
 	{
 		auto is_pal = [](const char* str) constexpr -> bool
@@ -73,9 +74,14 @@ namespace dbj_easy_udfs_sample {
 		};
 		/*	udf_argument and udf_retval types have all we need to pass
 			the values in and out of udf as required by the SQL statement
+
+			first and only argument is a string
 		*/
-		string word_ = value_(0);
+		string word_ = args_(0);
 		int result = is_pal(word_.c_str());
+		/*
+		as per sql statement requirements we need to reurn an int
+		*/
 		result_(result);
 	}
 
@@ -84,13 +90,13 @@ namespace dbj_easy_udfs_sample {
 	   "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	*/
 	inline void strlen_udf (
-		const sql::udf_argument  & argument_,
+		const sql::udf_argument  & args_,
 		const sql::udf_retval    & result_
 	)
 		// do not throw from the UDF
 		noexcept
 	{
-		string word_ = argument_(0);
+		string word_ = args_(0);
 		int result = (int)(word_.size());
 		result_(result);
 	}
@@ -114,7 +120,9 @@ namespace dbj_easy_udfs_sample {
 
 	/* to be called from your test unit
 	   here we register the two easy udf's we made above
-	   we do not throw, we use std::error_code
+
+	   notice how we do not throw, we use std::error_code's
+	   emanating from dbj++sql
 	*/
 	[[nodiscard]] error_code test_udf(
 		string_view query_ = QRY_WITH_UDF
@@ -126,17 +134,17 @@ namespace dbj_easy_udfs_sample {
 		error_code ec;
 		sql::database db(DB_FILE, ec); if (ec) return ec;
 		// register the two udf's required
+		// string names of udf's must match the SQL they are part of
 		// always returning the error_code on error
 		// obviuosly macro afficionados are welcome here
 		ec.clear();
 		ec = sql::register_dbj_udf<palindrome>(db, "palindrome"); if (ec) return ec;
 		ec.clear();
 		ec = sql::register_dbj_udf<strlen_udf>(db, "strlen"); if (ec) return ec;
-		// above we could use any names we want, 
-		// as long as they match the sql select used
 
 		// execute the query using the 
-		// standrd result processing calback 
+		// standard result processing calback 
+		// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 		return db.query(query_.data(), dbj_udfs_result_handler);
 		// return the error_code
 	} // test_udf

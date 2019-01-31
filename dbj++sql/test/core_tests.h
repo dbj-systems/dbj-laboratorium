@@ -29,7 +29,10 @@ auto initor = [&]()
 	ec = db.exec(
 "DROP TABLE IF EXISTS demo; "
 "CREATE TABLE demo_table ( Id int primary key, Name nvarchar(100) not null ); " 
-"INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif')"); 
+"INSERT INTO demo_table (Id, Name) values (1, 'London'), (2, 'Glasgow'), (3, 'Cardif');"
+"INSERT INTO demo_table (Id, Name) values (4, 'Belgrade'), (5, 'Roma'), (6, 'Sarajevo');"
+"INSERT INTO demo_table (Id, Name) values (7, 'Pregrevica'), (8, 'Zemun'), (9, 'Batajnica')"
+); 
 	return db; 
 };
 static  sql::database const & instance_ = initor();
@@ -40,8 +43,8 @@ return instance_;
 	/*
 	usage is with no exception being thrown
 	NOTE: we pass the error_code out, which is not 
-	introcuing unknown abstraction to the caller
-	since error_code is part of the std lib
+	introducing unknown abstraction to the calling site
+	std::error_code is part of the std lib
 	*/
 	[[nodiscard]] inline error_code 
 		test_insert(const char * = 0) noexcept

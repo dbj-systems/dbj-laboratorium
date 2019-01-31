@@ -13,7 +13,7 @@ void test_dbj_sql_lite_udf()
 		using ::dbj::console::print;
 		print("\n", dbj::LINE(), "%s\nMeasurement start");
 		auto rezult = fun_();
-		print("\nMeasurement end\t", rezult);
+		print("\n\n\tMeasurement result: ", rezult);
 	};
 	/*
 		test([&] {  return measure             ([&] { test_udf(); }); });
