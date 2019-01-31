@@ -36,12 +36,12 @@ namespace dbj {
 
 		// time stamp size is max 22 + '\0'
 		// updates ref to  std::error_code argument accordingly
-		inline [[nodiscard]]  std::string make_time_stamp(
+		[[nodiscard]] inline std::string make_time_stamp(
 			std::error_code & ec_,
 			char const * timestamp_mask_ = TIME_STAMP_SIMPLE_MASK
 		) noexcept
 		{
-			array<char, 32U> buf_arr{ {0} };
+			std::array<char, 32U> buf_arr{ {0} };
 			char * buf = buf_arr.data();
 			const size_t buf_len = buf_arr.size();
 
@@ -56,7 +56,7 @@ namespace dbj {
 			errno_t posix_err_code = ::localtime_s(&local_time_, &now_tm_t);
 			// leave the result empty if error
 			if (posix_err_code > 0) {
-				ec_ = std::make_error_code((errc)posix_err_code); return {};
+				ec_ = std::make_error_code((std::errc)posix_err_code); return {};
 			}
 
 			strftime(buf, buf_len, timestamp_mask_, &local_time_);
@@ -81,9 +81,9 @@ namespace dbj {
 			::SetLastError(0);
 			if (1 > ::GetEnvironmentVariableA(varname_.data(), bar.data(), (DWORD)bar.size()))
 			{
-				ec_ = std::error_code(::GetLastError(), system_category());
+				ec_ = std::error_code(::GetLastError(), std::system_category());
 			}
-			return pair(string(bar.data()), ec_);
+			return std::pair(std::string(bar.data()), ec_);
 		}
 
 		/*
@@ -94,11 +94,11 @@ namespace dbj {
 			auto ve_pair = dbj_get_envvar("ProgramData");
 			// if error return
 			// thus prog_data_path_ is empty
-			if (ve_pair.second) return pair(prog_data_path_, ve_pair.second);
+			if (ve_pair.second) return std::pair(prog_data_path_, ve_pair.second);
 			// ok return
 			// prog_data_path_ get the path string
 			prog_data_path_ = ve_pair.first;
-			return pair(prog_data_path_, ve_pair.second);
+			return std::pair(prog_data_path_, ve_pair.second);
 		}
 
 		namespace fmt {
