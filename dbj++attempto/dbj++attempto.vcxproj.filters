@@ -89,9 +89,6 @@
     <ClCompile Include="dbj_random_kiss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="database_tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />
