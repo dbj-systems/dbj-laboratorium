@@ -16,7 +16,7 @@ static void dbj_program_start(
 )
 {
 	DBJ_VERIFY(::dbj::console_is_initialized());
-	::dbj::TRACE("\nDBJ++ERR -- ::dbj::console_is_initialized()");
+	::dbj::core::trace("\nDBJ++ERR -- ::dbj::console_is_initialized()");
 	// TODO: make this async
 	dbj::testing::execute(argc, argv, envp);
 }
