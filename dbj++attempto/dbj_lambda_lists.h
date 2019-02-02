@@ -101,7 +101,9 @@ DBJ_TEST_UNIT(_dbj_lambda_lists_) {
 	dbj::console::print("\nIt's head: ", ll::tuple(my_head));
 	dbj::console::print("\nIt's tail: ", ll::tuple(my_tail));
 
-	 dbj::console::print("\nLength of llist --> ", DBJ_NV(ll::length(my_list)) );
+	dbj::console::print("\nLength of llist --> ");
+	
+	DBJ_TEST_ATOM(ll::length(my_list));
 
 	 dbj::console::print("\n\ndbj::print can print pairs too, here is one: ");
 
