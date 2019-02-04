@@ -226,4 +226,14 @@ DBJ_TEST_UNIT(tokenizer_test)
 	);
 }
 
+DBJ_TEST_UNIT( util_to_remove_duplicates ) 
+{
+	int ia[]{ 0,8,3,4,6,6,7,8,7,1 };
+
+	DBJ_ATOM_TEST(ia);
+	auto uniq_vec = dbj::util::remove_duplicates(ia,true); // sort too
+
+	DBJ_ATOM_TEST(uniq_vec);
+}
+
 DBJ_TEST_SPACE_CLOSE
