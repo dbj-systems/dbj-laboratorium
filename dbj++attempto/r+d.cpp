@@ -228,12 +228,14 @@ DBJ_TEST_UNIT(tokenizer_test)
 
 DBJ_TEST_UNIT( util_to_remove_duplicates ) 
 {
-	int ia[]{ 0,8,3,4,6,6,7,8,7,1 };
+	using dbj::util::remove_duplicates;
+	int ia[10]{ 0,8,3,4,6,6,7,8,7,1 };
 
 	DBJ_ATOM_TEST(ia);
-	auto smart_pair_ = dbj::util::remove_duplicates(ia,true); // sorted too
+	auto smart_pair_ 
+		= remove_duplicates( ia, ia + 10, true); // sorted too
 
-	DBJ_TEST_ATOM(smart_pair_);
+	DBJ_ATOM_TEST(smart_pair_);
 }
 
 inline auto a_ = std::array<char, 3>();
