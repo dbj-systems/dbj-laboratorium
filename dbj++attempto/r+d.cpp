@@ -231,9 +231,24 @@ DBJ_TEST_UNIT( util_to_remove_duplicates )
 	int ia[]{ 0,8,3,4,6,6,7,8,7,1 };
 
 	DBJ_ATOM_TEST(ia);
-	auto uniq_vec = dbj::util::remove_duplicates(ia,true); // sort too
+	auto smart_pair_ = dbj::util::remove_duplicates(ia,true); // sorted too
 
-	DBJ_ATOM_TEST(uniq_vec);
+	DBJ_TEST_ATOM(smart_pair_);
+}
+
+inline auto a_ = std::array<char, 3>();
+inline auto v_ = std::vector<char>(3);
+
+DBJ_TEST_UNIT(array_whatever)
+{
+	auto lambada = [](auto arr) { 
+		std::fill(arr.begin(), arr.end(), 'X'); 
+	return arr; 
+	};
+
+	auto yarr = lambada(v_);
+
+	v_.swap(yarr);
 }
 
 DBJ_TEST_SPACE_CLOSE
