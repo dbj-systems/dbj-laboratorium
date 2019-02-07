@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"
+#include "../pch.h"
 
 #if 0
 // https://ideone.com/mYh4Y3
@@ -255,7 +255,7 @@ func main() {
 	w : = new (Woman)
 	d : = new (Dog)
 
-	//an array of hobby instances - we don’t need to know whether human or dog
+	//an array of hobby instances - we donï¿½t need to know whether human or dog
 	// DBJ: all types that implement the Hobby method can be in the array
 	// of Hobby's
 	// DBJ: Think of this as "everyone who undesrtands the Hobby messages"

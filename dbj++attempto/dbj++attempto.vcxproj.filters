@@ -32,9 +32,6 @@
     <ClCompile Include="few_more_nuggets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lambda_mixer_samples.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="quick_local_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,7 +44,10 @@
     <ClCompile Include="dbj_clib_tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dbj_random_kiss.cpp">
+    <ClCompile Include="algorithms\dbj_random_kiss.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="types_and_structures\lambda_mixer_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
