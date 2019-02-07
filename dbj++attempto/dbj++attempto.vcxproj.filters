@@ -18,46 +18,7 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_any_node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_atoms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_ctstring.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_fontlist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_lambda_lists.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_polymorph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_swapable_engines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbjtree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lambda_runtime_retval_test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="no_copy_no_move.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="string_literals_with_universal_character_names.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_command_line.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_uuid_hash.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_any_optional.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
