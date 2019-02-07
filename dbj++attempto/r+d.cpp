@@ -23,8 +23,8 @@ struct STANDARD {
 	constexpr static const auto compiletime_static_string_view_constant()
 	{
 		constexpr static auto
-			make_once_and_only_if_called 
-				= "constexpr string view literal"sv;
+			make_once_and_only_if_called
+			= "constexpr string view literal"sv;
 		// on second and all the other calls 
 		// just return
 		return make_once_and_only_if_called;
@@ -226,31 +226,368 @@ DBJ_TEST_UNIT(tokenizer_test)
 	);
 }
 
-DBJ_TEST_UNIT( util_to_remove_duplicates ) 
+DBJ_TEST_UNIT(util_to_remove_duplicates)
 {
 	using dbj::util::remove_duplicates;
 	int ia[10]{ 0,8,3,4,6,6,7,8,7,1 };
 
 	DBJ_ATOM_TEST(ia);
-	auto smart_pair_ 
-		= remove_duplicates( ia, ia + 10, true); // sorted too
+	auto smart_pair_
+		= remove_duplicates(ia, ia + 10, true); // sorted too
 
 	DBJ_ATOM_TEST(smart_pair_);
 }
 
-inline auto a_ = std::array<char, 3>();
-inline auto v_ = std::vector<char>(3);
+// for C++11
+namespace cpp11
+{
+	// https://wandbox.org/permlink/WJ1tRs2NU2lxDAIi
+	using namespace std;
+
+	template<bool _Test, class T = void>
+	using enable_if_t = typename enable_if<_Test, T>::type;
+
+	template<class T>
+	using remove_extent_t = typename remove_extent<T>::type;
+
+	template<class T,
+		class... A,
+		enable_if_t<!is_array<T>::value, int> = 0>
+		inline unique_ptr<T> make_unique(A&&... args_)
+	{	// make a unique_ptr
+		return (unique_ptr<T>(new T(forward<A>(args_)...)));
+	}
+
+	template<class T,
+		enable_if_t<is_array<T>::value && extent<T>::value == 0, int> = 0>
+		inline unique_ptr<T> make_unique(size_t size_)
+	{	// make a unique_ptr
+		typedef remove_extent_t<T> E;
+		return (unique_ptr<T>(new E[size_]()));
+	}
+}
+
+/*
+http://www.strudel.org.uk/itoa/
+*/
+namespace lukas_chmela {
+	/**
+	 * C++ version 0.4 char* style "itoa":
+	 * Written by Lukás Chmela
+	 * Released under GPLv3.
+	 */
+	char* itoa(int value, char* result, int base) {
+		// check that the base if valid
+		if (base < 2 || base > 36) { *result = '\0'; return result; }
+
+		char* ptr = result, *ptr1 = result, tmp_char;
+		int tmp_value;
+
+		do {
+			tmp_value = value;
+			value /= base;
+			*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - value * base)];
+		} while (value);
+
+		// Apply negative sign
+		if (tmp_value < 0) *ptr++ = '-';
+		*ptr-- = '\0';
+		while (ptr1 < ptr) {
+			tmp_char = *ptr;
+			*ptr-- = *ptr1;
+			*ptr1++ = tmp_char;
+		}
+		return result;
+	}
+}
+
+namespace strudel {
+
+	std::string itoa_original(int value, int base) {
+
+		std::string buf;
+
+		// check that the base if valid
+		if (base < 2 || base > 16) return buf;
+
+		enum { kMaxDigits = 35 };
+		buf.reserve(kMaxDigits); // Pre-allocate enough space.
+
+
+		int quotient = value;
+
+		// Translating number to string with base:
+		do {
+			buf += "0123456789abcdef"[std::abs(quotient % base)];
+			quotient /= base;
+		} while (quotient);
+
+		// Append the negative sign
+		if (value < 0) buf += '-';
+
+		std::reverse(buf.begin(), buf.end());
+		return buf;
+	}
+
+	/*
+	 Taken this http://www.strudel.org.uk/itoa/#newest
+	 and made it work with unique_ptr<char[]>
+
+	 note: this is faster than string and vector<char>
+
+	 dbj 2019-02-06
+	 */
+	using char_buf = std::unique_ptr<char[]>;
+
+	char_buf itoa(int value, int base) {
+
+		constexpr auto kMaxDigits = 35U;
+		char_buf buf;
+
+		// check that the base if valid
+		if (base < 2 || base > 16) return buf;
+
+		buf = std::make_unique<char[]>(kMaxDigits + 1); // Pre-allocate enough space.
+
+		int quotient = value;
+		unsigned idx = 0;
+		// Translating number to string with base:
+		do {
+			buf[idx++] = "0123456789abcdef"[std::abs(quotient % base)];
+			quotient /= base;
+		} while (quotient);
+
+		// Append the negative sign
+		if (value < 0) buf[idx++] = '-';
+
+		// zero limit -- perhaps not necessary
+		buf[idx] = char(0);
+
+		std::reverse(buf.get(), buf.get() + idx);
+		return buf;
+	}
+
+
+	std::array<char,35> itoa_array(int value, int base) 
+	{
+
+		constexpr auto kMaxDigits = 35U;
+		std::array<char, 35>  buf{ {0} };
+
+		// check that the base if valid
+		if (base < 2 || base > 16) return buf;
+
+		int quotient = value;
+		unsigned idx = 0;
+		// Translating number to string with base:
+		do {
+			buf[idx++] = "0123456789abcdef"[std::abs(quotient % base)];
+			quotient /= base;
+		} while (quotient);
+
+		// Append the negative sign
+		if (value < 0) buf[idx++] = '-';
+
+		// zero limit -- perhaps not necessary
+		buf[idx] = char(0);
+
+		std::reverse(buf.data(), buf.data() + idx);
+		return buf;
+	}
+
+
+	std::vector<char> itoa_vector(int value, int base)
+	{
+
+		constexpr auto kMaxDigits = 35U;
+		std::vector<char>  buf;
+
+		// check that the base if valid
+		if (base < 2 || base > 16) return buf;
+
+		buf = std::vector<char>();
+		buf.resize(kMaxDigits); // Pre-allocate enough space.
+		buf.reserve(kMaxDigits + kMaxDigits); // Pre-allocate enough space.
+
+		int quotient = value;
+		unsigned idx = 0;
+		// Translating number to string with base:
+		do {
+			buf[idx++] = "0123456789abcdef"[std::abs(quotient % base)];
+			quotient /= base;
+		} while (quotient);
+
+		// Append the negative sign
+		if (value < 0) buf[idx++] = '-';
+
+		// zero limit -- perhaps not necessary
+		buf[idx] = char(0);
+
+		std::reverse(buf.data(), buf.data() + idx);
+		return buf;
+	}
+
+}
+
+
 
 DBJ_TEST_UNIT(array_whatever)
 {
-	auto lambada = [](auto arr) { 
-		std::fill(arr.begin(), arr.end(), 'X'); 
-	return arr; 
+	using smarty = std::unique_ptr<char[]>;
+	auto sp_ = cpp11::make_unique<char[]>(9 + 1);
+
+	auto lambada = [](auto left_, auto right_)
+	{
+		static int c = 0xFF;
+		static char buf[0xFF]{};
+		std::generate(left_, right_, [&] {
+			return dbj::util::itox::itod(c++);
+		});
 	};
 
-	auto yarr = lambada(v_);
+	lambada(sp_.get(), sp_.get() + 9);
+	DBJ_ATOM_TEST(sp_);
 
-	v_.swap(yarr);
+	DBJ_ATOM_TEST(strudel::itoa(255, 10));
 }
+
+DBJ_TEST_UNIT(measure_strudel_itoa)
+{
+	const auto iterations_count = 0xFFFF;
+	const auto integer_to_transform = 0xFFFF;
+
+	auto measure_strudel_original = [&]() {
+		for (int k{}; k < iterations_count; k++)
+			(void)strudel::itoa_original(integer_to_transform, 10);
+	};
+	auto measure_strudel_dbj = [&]() {
+		for (int k{}; k < iterations_count; k++)
+			(void)strudel::itoa(integer_to_transform, 10);
+	};
+	auto measure_strudel_vector = [&]() {
+		for (int k{}; k < iterations_count; k++)
+			(void)strudel::itoa_vector(integer_to_transform, 10);
+	};
+	auto measure_strudel_array = [&]() {
+		for (int k{}; k < iterations_count; k++)
+			(void)strudel::itoa_array(integer_to_transform, 10);
+	};
+
+	auto report = [&](auto title, auto fun_ ) 
+	{
+
+		using dbj::fmt::print;
+		print("\nalgorithm: %s,\n\titerations: %d,\tresult: %s",
+			title,
+			iterations_count,
+			dbj::kalends::miliseconds_measure(fun_)
+		);
+	};
+
+	report(	"strudel_original",measure_strudel_original);
+	report(	"strudel_dbj", measure_strudel_dbj);
+	report(	"strudel_vector", measure_strudel_vector);
+	report(	"strudel_array", measure_strudel_array);
+
+}
+
+/*
+	currently MSVC compiler 2019-07-02 wrongly allows c++
+	type casting from "anything" to function pointer
+	so the bellow will not work untill that is fixed
+
+	using FP = void (*)(int) ;
+		template <FP fun> call_fp ( int ) { }
+			// should not compile but it does
+	call_fp< FP(42) >( 0 );
+
+	*/
+#ifdef DBJ_MSVC_FIXED_FP_CASTING_FROM_ANYTHING
+
+char whatever(unsigned k) { return char(k); } char(*FP)(unsigned) = whatever;
+
+char whenever(unsigned ) { return '*' ; } char(*P1F)(unsigned)  = whenever;
+
+char whoever(unsigned ) { return 'A'; } typedef char(*P2F)(unsigned) ;
+
+static_assert(std::is_invocable_v<P2F()>);
+
+std::string char_to_int(std::string_view c) { return { c.data() }; }
+
+template<P2F fun_>
+auto call_fp( unsigned K = 65) {
+
+	static_assert(!std::is_reference_v<P2F>);
+	return fun_(K);
+}
+
+DBJ_TEST_UNIT(most_curious)
+{
+	{
+	  auto A1 = call_fp<whatever>();
+	  // works but it should not --
+	  auto A2 = call_fp<P2F(42)>();
+	}
+	// cuiruous-ity
+	auto lambada = []() -> bool {return true; };
+		DBJ_TEST_ATOM( typeid(lambada).name() );
+
+	auto lambada2 = std::function<bool()>();
+		DBJ_TEST_ATOM(typeid(lambada2).name());
+
+	DBJ_USD( whatever(65)); // 'A'
+	DBJ_USD( FP(66)); // 'B'
+	DBJ_USD( whenever(66)) ; // '6
+
+	
+
+	// the interesting part
+	// P2F is a type
+	// and it has a default constructor
+	// the returns instance of that type
+	// which is function pointer
+	DBJ_USD(whoever(42)); // '*'
+	{
+
+		//char(*P2F)(unsigned)
+		using really_p2f = dbj::function_pointer<P2F>;
+
+		DBJ_ATOM_TEST( typeid(really_p2f::empty_type).name() );
+
+		{
+			auto fun = really_p2f::is_callable<whenever>(65);
+			auto A = really_p2f::applicator(whenever, 65);
+		}
+
+		{
+			auto cheat = P2F(42);
+			// auto fun = really_p2f::is_callable<cheat>();
+			auto fun = really_p2f::is_callable<P2F(42)>(65);
+			// auto A = really_p2f::applicator(cheat, 65);
+		}
+
+		// does not compile -- static_assert(std::is_invocable_v<(P2F)whenever>);
+		using empty = std::invoke_result_t<P2F()>;
+		DBJ_TEST_ATOM(typeid(empty).name()); //
+		// does not compile -- static_assert(std::is_invocable_v<P2F(whenever)>);
+		// does not compile -- static_assert(std::is_invocable_v<P2F(decltype(whenever)>);
+		// does compile
+		auto ww5 = static_cast<P2F>(whenever);
+			DBJ_TEST_ATOM(ww5(65)); // call whoever
+		auto ww4 = static_cast<P2F>(whatever);
+			DBJ_TEST_ATOM(ww4(65)); // call whoever
+		auto ww3 = static_cast<P2F>(whoever);
+			DBJ_TEST_ATOM(ww3(65)); // call whoever
+		
+		// does not compile -- auto ww2 = static_cast<P2F>(char_to_int);
+		// does not compile -- static_assert(std::is_invocable_v<P2F(char_to_int)>);
+		// DBJ_TEST_ATOM(ww2(65)); // call whoever
+
+		auto ww = P2F(whatever);
+		DBJ_TEST_ATOM(ww);
+		DBJ_TEST_ATOM(ww(65)); // calls whoever
+	}
+}
+#endif // DBJ_MSVC_FIXED_FP_CASTING_FROM_ANYTHING
 
 DBJ_TEST_SPACE_CLOSE
