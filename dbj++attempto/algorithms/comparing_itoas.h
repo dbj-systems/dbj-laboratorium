@@ -3,13 +3,23 @@
 /*
 http://www.strudel.org.uk/itoa/
 */
-namespace lukas_chmela {
+
+namespace dbj::sample {
+
 	/**
-	 * C++ version 0.4 char* style "itoa":
-	 * Written by Lukás Chmela
-	 * Released under GPLv3.
-	 */
-	char* itoa(int value, char* result, int base) {
+		 * C++ version 0.4 char* style "itoa":
+		 * Written by Lukás Chmela
+		 * Released under GPLv3.
+
+		 dbj changed from this :
+			char* itoa(int value, char* result, int base) {
+		 to this :
+			char* itoa(int value, int base) {
+
+		 */
+	inline char* itoa_lukas(int value, int base) {
+
+		static char result[36]{ 0 };	::memset(result, 0, 36);
 		// check that the base if valid
 		if (base < 2 || base > 36) { *result = '\0'; return result; }
 
@@ -32,11 +42,8 @@ namespace lukas_chmela {
 		}
 		return result;
 	}
-}
 
-namespace strudel {
-
-	std::string itoa_original(int value, int base) {
+	inline std::string itoa_original(int value, int base) {
 
 		std::string buf;
 
@@ -72,8 +79,10 @@ namespace strudel {
 	 */
 	using char_buf = std::unique_ptr<char[]>;
 
-	char_buf itoa(int value, int base) {
-
+	char_buf itoa_unique_ptr(int value, int base) 
+	{
+		return ::dbj::buf::smart( std::string_view( itoa_lukas(value, base) ) );
+#if 0
 		constexpr auto kMaxDigits = 35U;
 		char_buf buf;
 
@@ -98,8 +107,8 @@ namespace strudel {
 
 		std::reverse(buf.get(), buf.get() + idx);
 		return buf;
+#endif
 	}
-
 
 	std::array<char, 35> itoa_array(int value, int base)
 	{
@@ -127,7 +136,6 @@ namespace strudel {
 		std::reverse(buf.data(), buf.data() + idx);
 		return buf;
 	}
-
 
 	std::vector<char> itoa_vector(int value, int base)
 	{
@@ -160,44 +168,40 @@ namespace strudel {
 		return buf;
 	}
 
-}
+	inline const auto iterations_count = 0xFFFFF;
+	inline const auto integer_to_transform = 0xFFFF;
 
-DBJ_TEST_UNIT(measure_strudel_itoa)
-{
-	const auto iterations_count = 0xFFFF;
-	const auto integer_to_transform = 0xFFFF;
-
-	auto measure_strudel_original = [&]() {
-		for (int k{}; k < iterations_count; k++)
-			(void)strudel::itoa_original(integer_to_transform, 10);
-	};
-	auto measure_strudel_dbj = [&]() {
-		for (int k{}; k < iterations_count; k++)
-			(void)strudel::itoa(integer_to_transform, 10);
-	};
-	auto measure_strudel_vector = [&]() {
-		for (int k{}; k < iterations_count; k++)
-			(void)strudel::itoa_vector(integer_to_transform, 10);
-	};
-	auto measure_strudel_array = [&]() {
-		for (int k{}; k < iterations_count; k++)
-			(void)strudel::itoa_array(integer_to_transform, 10);
-	};
-
-	auto report = [&](auto title, auto fun_)
+	DBJ_TEST_UNIT(measure_strudel_itoa)
 	{
+		auto report = [&](auto title, auto fun_)
+		{
+			auto runner = [&]() {
+				static int value = integer_to_transform; 
+				static int base = 10;
+				for (int k{}; k < iterations_count; k++)
+					(void)fun_(value, base);
+			};
 
+			using dbj::fmt::print;
+			print("\nalgorithm: %s,\n\tresult: %29s",
+				title,
+				dbj::kalends::miliseconds_measure(runner)
+			);
+		};
 		using dbj::fmt::print;
-		print("\nalgorithm: %s,\n\titerations: %d,\tresult: %s",
-			title,
-			iterations_count,
-			dbj::kalends::miliseconds_measure(fun_)
-		);
-	};
 
-	report("strudel_original", measure_strudel_original);
-	report("strudel_dbj", measure_strudel_dbj);
-	report("strudel_vector", measure_strudel_vector);
-	report("strudel_array", measure_strudel_array);
+		print("\n\nIterations: %d\nHeap based\n", iterations_count );
+		report("strudel_vector", itoa_vector);
+		report("strudel_original", itoa_original);
+		report("strudel_dbj", itoa_unique_ptr);
+		print("\n\nStack based\n");
+		report("strudel_array", itoa_array);
+		report("strudel_c", itoa_lukas);
+		
+		::system("@echo.");
+		::system("@echo.");
+		::system("@pause");
 
-}
+	}
+
+} // dbj::samples

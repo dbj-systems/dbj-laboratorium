@@ -284,8 +284,6 @@ DBJ_TEST_UNIT(array_whatever)
 
 	lambada(sp_.get(), sp_.get() + 9);
 	DBJ_ATOM_TEST(sp_);
-
-	DBJ_ATOM_TEST(strudel::itoa(255, 10));
 }
 
 

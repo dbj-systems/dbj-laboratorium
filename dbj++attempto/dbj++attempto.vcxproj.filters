@@ -21,6 +21,24 @@
     <ClInclude Include="string_literals_with_universal_character_names.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="algorithms\comparing_itoas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\dbj_apply.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\dbj_lambda_lists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\dbj_uuid_hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\dbj_vector_element_to_index.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\lambda_runtime_retval_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

@@ -1,4 +1,5 @@
 #pragma once
+#include "../pch.h"
 
 namespace dbj {
 
@@ -35,6 +36,7 @@ namespace dbj::samples {
 	{
 		const int number;
 		const char name;
+	private:
 		// note: name is ignored by this comparison operator
 		friend
 			const bool operator < (const S& q, const S& s) noexcept
@@ -66,6 +68,8 @@ namespace dbj::samples {
 
 	DBJ_TEST_UNIT(test_vector_element_to_index)
 	{
+		using ::dbj::console::print;
+		
 		// note: not ordered, only partitioned w.r.t. 
 		s_vector vec = { {1,'A'}, {2,'B'}, {2,'C'}, {2,'D'}, {4,'G'}, {3,'F'} };
 		// this is ok since S operator <, ignores the name member
@@ -80,14 +84,13 @@ namespace dbj::samples {
 		typename s_vector::iterator i1 = p1.first;
 		typename s_vector::iterator i2 = p1.second;
 
-		::dbj::console::print("\n", p1, "\n\n");
+		print("\n", p1, "\n\n");
 		std::for_each(i1, i2, [&](const auto & s_) {
+			using ::dbj::console::prinf;
 			auto pos_ = ::dbj::v2i(vec, s_);
-			::dbj::console::print("\n[", pos_, "] == ");
+			prinf("\n[%03d] == ", pos_ );
 			out(s_);
 		});
 	}
-
-
 
 } // namespace dbj::samples 
