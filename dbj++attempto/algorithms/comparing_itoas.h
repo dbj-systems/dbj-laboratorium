@@ -43,8 +43,11 @@ namespace dbj::sample {
 		return result;
 	}
 
-	inline std::string itoa_original(int value, int base) {
-
+	inline std::string itoa_original(int value, int base)
+	{
+		// much faster than impl bellow
+		return std::string(itoa_lukas(value,base)) ;
+#if 0
 		std::string buf;
 
 		// check that the base if valid
@@ -67,6 +70,7 @@ namespace dbj::sample {
 
 		std::reverse(buf.begin(), buf.end());
 		return buf;
+#endif
 	}
 
 	/*
@@ -81,12 +85,15 @@ namespace dbj::sample {
 
 	char_buf itoa_unique_ptr(int value, int base) 
 	{
+		/*
+		this is much slower than implementation bellow
 		return ::dbj::buf::smart( std::string_view( itoa_lukas(value, base) ) );
-#if 0
+		*/
+
 		constexpr auto kMaxDigits = 35U;
 		char_buf buf;
 
-		// check that the base if valid
+		// check that the base is valid
 		if (base < 2 || base > 16) return buf;
 
 		buf = std::make_unique<char[]>(kMaxDigits + 1); // Pre-allocate enough space.
@@ -107,7 +114,7 @@ namespace dbj::sample {
 
 		std::reverse(buf.get(), buf.get() + idx);
 		return buf;
-#endif
+
 	}
 
 	std::array<char, 35> itoa_array(int value, int base)
@@ -139,7 +146,11 @@ namespace dbj::sample {
 
 	std::vector<char> itoa_vector(int value, int base)
 	{
-
+		// this is much faster than implementation 
+		// bellow
+		std::string_view sv_= itoa_lukas(value, base);
+		return vector<char>(sv_.begin(), sv_.end());
+#if 0
 		constexpr auto kMaxDigits = 35U;
 		std::vector<char>  buf;
 
@@ -166,6 +177,7 @@ namespace dbj::sample {
 
 		std::reverse(buf.data(), buf.data() + idx);
 		return buf;
+#endif
 	}
 
 	inline const auto iterations_count = 0xFFFFF;
