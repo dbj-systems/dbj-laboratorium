@@ -65,9 +65,6 @@
     <ClCompile Include="algorithms\dbj_random_kiss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="types_and_structures\lambda_mixer_samples.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />

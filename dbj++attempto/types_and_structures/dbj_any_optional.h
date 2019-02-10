@@ -120,7 +120,7 @@ namespace dbj {
 } // dbj
 #pragma endregion
 
-DBJ_TEST_SPACE_OPEN(dbj_any_wrapper_testing)
+namespace dbj_any_wrapper_testing {
 
 	// TESTING
 	struct X;
@@ -135,49 +135,35 @@ DBJ_TEST_SPACE_OPEN(dbj_any_wrapper_testing)
 
 	DBJ_TEST_UNIT(dbj_strong_optional)
 	{
-			using int_		= dbj::optional_handle<int>;
-			using float_	= dbj::optional_handle<float>;
-			using size_		= dbj::optional_handle<unsigned int>;
-			// interesting
-			using void_		= dbj::optional_handle<void>;
-			int_	ii		= 42;
-			float_	ff{ 42.0f };
-			size_	ss(1024U);
+		using int_ = dbj::optional_handle<int>;
+		using float_ = dbj::optional_handle<float>;
+		using size_ = dbj::optional_handle<unsigned int>;
+		// interesting
+		using void_ = dbj::optional_handle<void>;
+		int_	ii = 42;
+		float_	ff{ 42.0f };
+		size_	ss(1024U);
 
-			int_			i2{ 84 };
-			float_			f2{ 84.0f };
-			size_			 s2{ 2048U };
+		int_			i2{ 84 };
+		float_			f2{ 84.0f };
+		size_			 s2{ 2048U };
 
-			DBJ_TEST_ATOM( ii = i2 );
-			DBJ_TEST_ATOM( ff = f2 );
-			DBJ_TEST_ATOM( ss = s2 );
+		DBJ_TEST_ATOM(ii = i2);
+		DBJ_TEST_ATOM(ff = f2);
+		DBJ_TEST_ATOM(ss = s2);
 	}
 
-		DBJ_TEST_UNIT(dbj_any_wrapper)
+	DBJ_TEST_UNIT(dbj_any_wrapper)
 	{
 		using namespace ::dbj::any;
-			int int_arr[]{ 1,2,3 };
-			auto any_0 = DBJ_TEST_ATOM(range(int_arr));
-				auto not_a_temporary = "YES CAN DO"s ;
-			auto any_2 = DBJ_TEST_ATOM(make(not_a_temporary));
-			auto DBJ_MAYBE(any_3) = DBJ_TEST_ATOM(any_2); // copy wrapper to wrapper
-			auto any_4 = make([&](auto x) { return typeid(x).name();  });
-			auto DBJ_MAYBE(rez_4) = any_4(true);
+		int int_arr[]{ 1,2,3 };
+		auto any_0 = DBJ_TEST_ATOM(range(int_arr));
+		auto not_a_temporary = "YES CAN DO"s;
+		auto any_2 = DBJ_TEST_ATOM(make(not_a_temporary));
+		auto DBJ_MAYBE(any_3) = DBJ_TEST_ATOM(any_2); // copy wrapper to wrapper
+		auto any_4 = make([&](auto x) { return typeid(x).name();  });
+		auto DBJ_MAYBE(rez_4) = any_4(true);
 	}
 
-	DBJ_TEST_SPACE_CLOSE
-/*
-Copyright 2017 by dbj@dbj.org
+} // namespace dbj_any_wrapper_testing 
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http ://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/

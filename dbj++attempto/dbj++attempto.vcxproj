@@ -186,7 +186,6 @@
     </ClCompile>
     <ClCompile Include="quick_local_test.cpp" />
     <ClCompile Include="r+d.cpp" />
-    <ClCompile Include="types_and_structures\lambda_mixer_samples.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "../pch.h"
 #pragma warning( push)
 #pragma warning( disable: 4505 4018 4244 )
 

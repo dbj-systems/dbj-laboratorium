@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"
+#include "../pch.h"
 
 /*
 Using WIN32/RPC create the UUID and UUID string representation
@@ -28,7 +28,7 @@ never been adequately explained.
 
 DBJ_TEST_UNIT(dbj_uuid_hash) 
 {
-	constexpr unsigned long seed = dbj::util::dbj_get_seed();
+	constexpr std::uint64_t seed = dbj::util::dbj_get_seed();
 	constexpr unsigned long hcode = dbj::util::hash(__FILE__);
 	dbj::util::uuid && uuid_ = dbj::util::uuid() ;
 	const char * DBJ_MAYBE(us_) = DBJ_TEST_ATOM( (const char *)uuid_.uuid_string() );

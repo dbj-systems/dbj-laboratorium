@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 
+#include "types_and_structures/mixing_lambada.h"
 #include "algorithms/dbj_vector_element_to_index.h"
 #include "algorithms/dbj_apply.h"
 
@@ -110,7 +111,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		// const size_t extent_ = get_extent(refintarr);
 		{
 			std::vector<int> vint{ 1,2,3 };
-			using DBJ_MAYBE(inarr_type) = int[];
+			using inarr_type = int[];
 			auto & DBJ_MAYBE(inarr) = *vint.data();
 		}
 
@@ -140,7 +141,7 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 
 			auto DBJ_MAYBE(isit) = std::is_array_v< decltype(vla_)>;
 
-			STD :: free(vla_);
+			::std::free(vla_);
 
 			auto DBJ_MAYBE(dummy) = true;
 		}
