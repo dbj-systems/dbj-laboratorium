@@ -62,9 +62,6 @@
     <ClCompile Include="dbj_clib_tests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="algorithms\dbj_random_kiss.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />

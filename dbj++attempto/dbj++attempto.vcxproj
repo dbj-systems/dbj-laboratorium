@@ -173,7 +173,6 @@
     <ClInclude Include="string_literals_with_universal_character_names.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="algorithms\dbj_random_kiss.cpp" />
     <ClCompile Include="dbj_clib_tests.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="dbj_web_syndication.cpp" />

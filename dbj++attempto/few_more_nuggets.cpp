@@ -115,49 +115,10 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			auto & DBJ_MAYBE(inarr) = *vint.data();
 		}
 
-		{
-
-			using C3 = ::dbj::arr::ARH<char, 3>;
-
-			C3::ARV v_of_c{ 'A','B','C' };
-
-			C3::ARR  DBJ_MAYBE(std_arr) = C3::from_vector(v_of_c);
-
-			{  // manual way
-				constexpr size_t N = 3;
-				auto DBJ_MAYBE(std_arr_) = v_2_a<char, N>(v_of_c);
-			}
-
-			const char(&DBJ_MAYBE(ref_to_arr_of_chars))[3] =
-				*(char(*)[3])v_of_c.data();
-
-			const char(&DBJ_MAYBE(ref_to_arr_of_chars_2))[] =
-				*(char(*)[])v_of_c.data();
-
-			const size_t N = v_of_c.size();
-			char * vla_ = (char*)::std::calloc(N, sizeof(char));
-
-			std::copy(v_of_c.data(), v_of_c.data() + v_of_c.size(), vla_);
-
-			auto DBJ_MAYBE(isit) = std::is_array_v< decltype(vla_)>;
-
-			::std::free(vla_);
-
-			auto DBJ_MAYBE(dummy) = true;
-		}
+	
 	}
 
 	/***********************************************************************************/
-	/* generic lambda solution */
-	auto summa = [](auto first, auto ... second) {
-
-		if constexpr (sizeof ... (second) > 0) {
-			return first + summa(second ...);
-		}
-		else {
-			return first;
-		}
-	};
 
 	auto lambda_holder = [](auto invocable_arg)
 	{
@@ -199,30 +160,6 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 			::dbj::console::print(leader, '\n');
 			zbir = (summa(zbir, leader_name_type_string(leader)));
 		}
-		// applicator helper testing
-		{
-			int ai[]{ 1,2,3,4,5 };
-			auto aplikator = make_apply_helper(summa);
-
-			DBJ_TEST_ATOM(aplikator(1, 2));
-			DBJ_TEST_ATOM(aplikator(make_tuple(1, 2, 3, 4, 5)));
-			auto ail = { 1, 2, 3, 4, 5 };
-			DBJ_TEST_ATOM(aplikator({ 1,2,3 }));
-			DBJ_TEST_ATOM(aplikator(ai));
-		}
-
-		DBJ_TEST_ATOM(std::apply(summa, std::make_pair(1, 2)));
-		DBJ_TEST_ATOM(std::apply(summa, std::make_tuple(2.0f, 3.0f, 1, 2)));
-		DBJ_TEST_ATOM(std::apply(summa, std::make_tuple(2.0f, 3.0f,
-			std::apply(summa, std::make_pair(11, 12))
-		)));
-
-		auto buf = ::dbj::str::optimal_buffer<char>();
-
-		[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), LONG_MAX);
-
-		DBJ_TEST_ATOM(dbj_ordinal_string_compareA(buf.data(), "42", true));
-
 	}
 #pragma region https://stackoverflow.com/questions/52244640/if-constexpr-and-c4702-and-c4100-and-c4715/52244957#52244957
 
