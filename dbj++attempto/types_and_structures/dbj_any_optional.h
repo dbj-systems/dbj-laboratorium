@@ -53,7 +53,6 @@ DBJ_TEST_UNIT(another_idea_about_optional_helpers)
 		DBJ_ATOM_TEST(f(o) == f2(o2));
 	}
 	{
-		// 
 		auto[f, o] = optional_pair<a::TT>(a::TT("default TT"));
 		auto[f2, o2] = optional_pair<a::TT>(a::TT("default TT"));
 		DBJ_ATOM_TEST(f(o) == f2(o2));
