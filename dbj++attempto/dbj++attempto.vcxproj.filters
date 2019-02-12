@@ -39,6 +39,9 @@
     <ClInclude Include="algorithms\lambda_runtime_retval_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="types_and_structures\dbj_any_optional.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
