@@ -42,6 +42,9 @@
     <ClInclude Include="types_and_structures\dbj_any_optional.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj++attempto.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
