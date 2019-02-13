@@ -172,7 +172,6 @@
     <ClInclude Include="dbj++attempto.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="string_literals_with_universal_character_names.h" />
-    <ClInclude Include="types_and_structures\dbj_any_optional.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbj_clib_tests.cpp" />

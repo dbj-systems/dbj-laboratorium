@@ -28,8 +28,7 @@ namespace dbj::attempto {
 		relly on the typeid name() result
 		*/
 		static auto const & type_id() noexcept {
-			static auto id_
-				= dbj::util::hash(typeid(TT).name());
+			static auto id_	= (typeid(TT).hash_code());
 			return id_;
 		}
 

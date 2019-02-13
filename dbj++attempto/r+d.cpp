@@ -13,11 +13,36 @@
 #include "utilities/string_literals_with_universal_character_names.h"
 #include "types_and_structures/no_copy_no_move.h"
 
-#include "algorithms/comparing_itoas.h"
+// #include "algorithms/comparing_itoas.h"
 
 namespace dbj_r_and_d {
 
+	DBJ_TEST_UNIT(std_array_utils)
+	{
+		{
+			using narf = char(&)[];
+			std::array<char, 255> sarr_1{ {0} };
+			std::array<char, 255> sarr_2{ {0} };
+			const char * carr_1 = "Abra Ka Dabra";
+			//char const * carr_2 = "Mamma Mia!";
+
+			DBJ_TEST_ATOM(dbj::arr::native_to_std_array("Abra Ka Dabra"));
+			DBJ_TEST_ATOM(dbj::arr::native_to_std_array("Wide String Literal"));
+
+			DBJ_ATOM_TEST(dbj::arr::assign(sarr_1, carr_1, carr_1 + ::strlen(carr_1)));
+			DBJ_ATOM_TEST(dbj::arr::assign(sarr_2, "Mamma Mia!"));
+
+			DBJ_ATOM_TEST(sarr_1 = sarr_2);
+		}
+		{
+			int iar[]{ 0,1,2,3,4,5,6,7,8,9 };
+			using narf = int(&)[];
+			std::array<int, 255> sarr;
+			DBJ_ATOM_TEST(dbj::arr::assign(sarr, iar));
+		}
+	}
 	/**************************************************************************************************/
+/*
 	using namespace std::string_view_literals;
 
 	struct STANDARD {
@@ -26,7 +51,7 @@ namespace dbj_r_and_d {
 			constexpr static auto
 				make_once_and_only_if_called
 				= "constexpr string view literal"sv;
-			// on second and all the other calls 
+			// on second and all the other calls
 			// just return
 			return make_once_and_only_if_called;
 		}
@@ -66,46 +91,49 @@ namespace dbj_r_and_d {
 
 		auto DBJ_MAYBE(where) = the_constant.find('e');
 	}
+	*/
 	/**************************************************************************************************/
-
-	template< typename T>
-	void array_analyzer(const T & specimen) {
-
-		static char const * name{ DBJ_TYPENAME(T) }; //safe?
-		constexpr bool is_array = std::is_array_v<T>;
-		if constexpr (is_array == true)
-		{
-			constexpr size_t number_of_dimension = std::rank_v<T>;
-			constexpr size_t first_extent = std::extent_v<T>;
-			std::wprintf(L"\n%S is %s", name, L"Array");
-			std::wprintf(L"\n%-20S number of dimension is %zu", name, number_of_dimension);
-			std::wprintf(L"\n%-20S size along the first dimension is %zu", name, first_extent);
-		}
-		else {
-			std::wprintf(L"\n%S is %s", name, L"Not an Array");
-		}
-	};
 
 #define DBJ_IS_ARR(x) try_array( std::addressof(x) )
 
 	template<typename T>
-	constexpr auto try_array(T *)  -> size_t
+	constexpr auto try_array()  -> size_t
 	{
-		return  std::extent_v< T >;
+		return  std::extent_v< std::remove_pointer_t<T> >;
 	}
 
-	template<typename T>
-	constexpr auto probe_array(T &&)   -> size_t {
-		return  std::extent_v< T >;
-	}
+#define dbj_bool(x) (x? "true" : "false")
+
+	template< typename T>
+	bool array_analyzer(const T & specimen) {
+
+		(void)noexcept(specimen);
+		static char const * name{ DBJ_TYPENAME(T) }; //safe?
+		constexpr bool is_array = std::is_array_v< std::remove_pointer_t<T> >;
+		const bool dbj_is_array = dbj::tt::is_array_(specimen);
+		constexpr bool try_array_result = try_array<T>();
+		const size_t number_of_dimension = std::rank_v<T>;
+		constexpr size_t first_extent = std::extent_v<T>;
+		std::wprintf(L"\n%S", name);
+		std::wprintf(L"\nnumber of dimension is \t%zu", number_of_dimension);
+		std::wprintf(L"\nsize along the first dimension is \t%zu", first_extent);
+		std::wprintf(L"\nstd::is_array_v<T> result is \t%S", dbj_bool(is_array));
+		std::wprintf(L"\ndbj::is_array_(specimen) result is \t%S", dbj_bool(dbj_is_array));
+		std::wprintf(L"\ndbj::try_array<T> result is \t%S\n", dbj_bool(try_array_result));
+
+		return is_array && try_array_result;
+	};
+
+#undef dbj_bool_show
 
 	DBJ_TEST_UNIT(_array_stays_array)
 	{
 		static int ia[]{ 1,2,3,4,5,6,7,8,9,0 };
-		DBJ_TEST_ATOM(try_array(ia));
-		DBJ_TEST_ATOM(DBJ_IS_ARR(ia));
-		DBJ_TEST_ATOM(probe_array(ia));
-		DBJ_TEST_ATOM(probe_array(std::addressof(ia)));
+		DBJ_ATOM_TEST(array_analyzer(ia));
+		DBJ_ATOM_TEST(array_analyzer(std::addressof(ia)));
+		int k = 42;
+		DBJ_ATOM_TEST(array_analyzer(k));
+		DBJ_ATOM_TEST(array_analyzer(&k));
 	}
 
 	typedef enum class CODE : UINT {
@@ -146,7 +174,7 @@ namespace dbj_r_and_d {
 		// fprintf( stdout, "\nprintf() result: %S\n",specimen);
 	}
 #endif
-
+	/*
 	DBJ_TEST_UNIT(tokenizer_test)
 	{
 		/* engine testing
@@ -160,7 +188,6 @@ namespace dbj_r_and_d {
 			auto w1_ = stok.getWord(1);
 			auto w2_ = stok.getWord(2);
 		}
-		*/
 
 		auto test_tokenizer_moving_copying
 			= [](auto src, auto token)
@@ -226,18 +253,8 @@ namespace dbj_r_and_d {
 			word_tokenizer_moving_copying(LR"(abra\nka\ndabra\nka)", LR"(\n)")
 		);
 	}
+	*/
 
-	DBJ_TEST_UNIT(util_to_remove_duplicates)
-	{
-		using dbj::util::remove_duplicates;
-		int ia[10]{ 0,8,3,4,6,6,7,8,7,1 };
-
-		DBJ_ATOM_TEST(ia);
-		auto smart_pair_
-			= remove_duplicates(ia, ia + 10, true); // sorted too
-
-		DBJ_ATOM_TEST(smart_pair_);
-	}
 
 	// for C++11
 	namespace cpp11
