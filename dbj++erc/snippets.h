@@ -168,6 +168,26 @@ namespace dbj_erc {
 
 } // dbj_erc
 
+namespace detail {
+	/*
+	return array reference to the
+	native array inside std::array
+	*/
+	template<typename T, size_t N,
+		typename ARR = std::array<T, N>, /* std::array */
+		typename ART = T[N],    /* the native array */
+		typename ARF = ART & ,  /* reference to it */
+		typename ARP = ART * >  /* pointer   to it */
+		constexpr inline
+		ARF
+		internal_array_reference(const std::array<T, N> & arr)
+	{
+		return *(ARP)
+			const_cast<typename ARR::pointer>
+			(arr.data());
+	}
+};
+
 // use of DBJ TESTING FWK is "moved out"
 // so the users can easily opt out
 // and call directly or whatever

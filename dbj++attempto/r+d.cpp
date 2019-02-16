@@ -110,7 +110,8 @@ namespace dbj_r_and_d {
 		(void)noexcept(specimen);
 		static char const * name{ DBJ_TYPENAME(T) }; //safe?
 		constexpr bool is_array = std::is_array_v< std::remove_pointer_t<T> >;
-		const bool dbj_is_array = dbj::tt::is_array_(specimen);
+		// fails at compile time is specimen is not an array
+		// const bool dbj_is_array = dbj::tt::is_array_(specimen);
 		constexpr bool try_array_result = try_array<T>();
 		const size_t number_of_dimension = std::rank_v<T>;
 		constexpr size_t first_extent = std::extent_v<T>;
@@ -118,7 +119,7 @@ namespace dbj_r_and_d {
 		std::wprintf(L"\nnumber of dimension is \t%zu", number_of_dimension);
 		std::wprintf(L"\nsize along the first dimension is \t%zu", first_extent);
 		std::wprintf(L"\nstd::is_array_v<T> result is \t%S", dbj_bool(is_array));
-		std::wprintf(L"\ndbj::is_array_(specimen) result is \t%S", dbj_bool(dbj_is_array));
+		// std::wprintf(L"\ndbj::is_array_(specimen) result is \t%S", dbj_bool(dbj_is_array));
 		std::wprintf(L"\ndbj::try_array<T> result is \t%S\n", dbj_bool(try_array_result));
 
 		return is_array && try_array_result;
