@@ -19,22 +19,68 @@ DBJ_TEST_UNIT(dbj_string_c_lib)
 
 #define DBJ_SLL_TESTING
 #include "../dbj++clib/dbj_sll/dbj_sll.h"
+
+#ifdef DBJ_SLL_TESTING
+
+extern "C" inline  
+void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, bool verbose)
+{
+	using namespace dbj::clib;
+
+	dbj_sll_node * head_ = dbj_sll_make_head();
+
+	while (1 < how_many_times--) dbj_sll_append(head_, what_to_append);
+
+	if (verbose) {
+		printf("\nDBJ SLL dump");
+		dbj_sll_foreach(head_, dbj_sll_node_dump_visitor);
+		printf("\n");
+	}
+
+	assert(0 == strcmp(dbj_sll_remove_tail(head_)->data, what_to_append));
+	dbj_sll_erase(head_);
+	if (verbose) {
+		printf("\nHead after SLL erasure");
+		dbj_sll_node_dump_visitor(head_);
+	}
+	assert(true == is_dbj_sll_empty(head_));
+
+	unsigned long k1 = dbj_sll_append(head_, "Abra")->key;
+	unsigned long k2 = dbj_sll_append(head_, "Ka")->key;
+	unsigned long k3 = dbj_sll_append(head_, "Dabra")->key;
+
+	(void)(sizeof(k1)); (void)(sizeof(k3)); // combat the no warning hassle
+
+	dbj_sll_node * node_ = dbj_sll_find(head_, k2);
+	assert(0 == strcmp(node_->data, "Ka"));
+	assert(false == is_dbj_sll_empty(head_));
+	dbj_sll_erase_with_head(head_);
+}
+#endif /*DBJ_SLL_TESTING */
+
+
+
 DBJ_TEST_UNIT(dbj_c_lib_sll)
 {
+	using namespace dbj::clib;
+
 	auto test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
-			test_dbj_sll(false);
+			test_dbj_sll_local("1234567812345678", BUFSIZ, false);
 		}
 	};
+
 	dbj::fmt::print("\ndbj clib SLL test finished in %s "sv,
 		::dbj::kalends::miliseconds_measure(test)
 	);
 }
 #undef DBJ_SLL_TESTING
 
-DBJ_TEST_UNIT(dbj_c_lib)
+DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 {
+	using namespace dbj::clib;
+
 	auto dbj_strndup_test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
