@@ -68,6 +68,7 @@ dbj_string_list_type dbj_string_list_append
 
 void dbj_string_list_free(dbj_string_list_type head_)
 {
+	assert(head_);
 	// not empty?
 	if (dbj_string_list_sentinel_ != *head_) {
 		// 

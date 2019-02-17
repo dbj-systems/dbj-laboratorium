@@ -28,7 +28,7 @@ limitations under the License.
 #pragma warning( disable : 4505 )
 #endif
 
-#ifndef DBJ_UNUSED(x)
+#ifndef DBJ_UNUSED
 #define DBJ_UNUSED(x) (void) sizeof((x))
 #endif
 
@@ -41,6 +41,8 @@ limitations under the License.
 #define dbj_malloc(type, count) malloc( count * sizeof(type))
 #endif
 
+#if 0
+/*already in this lib*/
 /*
 strdup and strndup are defined in POSIX compliant systems as :
 char *strdup(const char *str);
@@ -55,6 +57,7 @@ char * dbj_strdup(const char *s) {
 	strcpy(d, s);                        // Copy the characters
 	return d;                            // Return the new string
 }
+#endif 
 
 /* for the DBJ SLL key making */
 /* the djb2 from: http://www.cse.yorku.ca/~oz/hash.html */
@@ -232,7 +235,7 @@ dbj_sll_node *
 dbj_sll_append(dbj_sll_node * head_, const char * str_)
 {
 	dbj_sll_node * new_node = dbj_sll_node_new();
-	new_node->data = dbj_strdup(str_);
+	new_node->data = _strdup(str_);
 	new_node->key = dbj_hash((unsigned char *)str_);
 
 	dbj_sll_node * tail_node = dbj_sll_tail(head_);

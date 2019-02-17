@@ -85,6 +85,7 @@ namespace dbj { namespace clib {
 	extern "C" {
 #endif
 
+/*
 typedef unsigned char	uchar_t;
 
 #ifndef size_t
@@ -94,7 +95,7 @@ typedef unsigned char	uchar_t;
 		typedef unsigned int	size_t;
 #endif
 #endif
-
+*/
 /*
 strdup and strndup are defined in POSIX compliant systems as :
 char *strdup(const char *str);

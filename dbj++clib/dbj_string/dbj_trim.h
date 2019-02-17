@@ -4,13 +4,13 @@
 
 		typedef unsigned char	uchar_t;
 		typedef bool(*dbj_string_trim_policy)(unsigned char);
-
+/*
 #ifdef _WIN64
 		typedef unsigned __int64 size_t;
 #else
 		typedef unsigned int	size_t;
 #endif
-
+*/
 		/*
 		basic policies present in the library
 		*/
