@@ -12,6 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+#include <stdlib.h>
 #ifdef __clang__
 /*
 http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-headers
@@ -36,7 +38,7 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 extern "C" {
 #endif
 
-/* apparently only *static extern* variables can use thread local storage */
+	/* apparently only *static extern* variables can use thread local storage */
 #ifdef _MSC_VER
 #define dbj_thread_local __declspec(thread) static
 #define dbj_malloc(type, count) (type *)malloc( count * sizeof(type))
@@ -45,6 +47,8 @@ extern "C" {
 #define dbj_malloc(type, count) malloc( count * sizeof(type))
 #endif
 
+#pragma warning(push)
+#pragma warning(disable: 4706) 
 	/* for the DBJ SLL key making */
 	/* the djb2 from: http://www.cse.yorku.ca/~oz/hash.html */
 	static unsigned long dbj_hash(unsigned char *str)
@@ -57,7 +61,31 @@ extern "C" {
 
 		return hash;
 	}
+#pragma warning(pop)
 
+#ifdef DBJ_CLIB_PRESENT
+	extern char * dbj_strdup(const char *s);
+#else
+
+	/*
+	strdup and strndup are defined in POSIX compliant systems as :
+
+	char *strdup(const char *str);
+	char *strndup(const char *str, size_t len);
+	*/
+#pragma warning(push)
+#pragma warning(disable: 4996) 
+	char * dbj_strdup(const char *s) {
+		char *d = (char*)malloc(strlen(s) + 1);   // Space for length plus nul
+		if (d == NULL) {
+			errno = ENOMEM;
+			return NULL;
+		}         // No memory
+		strcpy(d, s);                        // Copy the characters
+		return d;                            // Return the new string
+	}
+#pragma warning(pop)
+#endif // !DBJ_CLIB_PRESENT
 	/*
 	Singly Linked List of strings
 	Specialised non-generic , one head per thread solution
@@ -287,24 +315,28 @@ extern "C" {
 	}
 
 	/********************************************************/
-#define DBJ_SLL_TESTING
+// #define DBJ_SLL_TESTING
 #ifdef DBJ_SLL_TESTING
-	static void test_dbj_sll()
+	inline void test_dbj_sll(bool verbose)
 	{
 		dbj_sll_node * head_ = dbj_sll_make_head();
 		dbj_sll_append(head_, "ONE");
 		dbj_sll_append(head_, "TWO");
 		dbj_sll_append(head_, "THREE");
 
-		printf("\nDBJ SLL dump");
-		dbj_sll_foreach(head_, dbj_sll_node_dump_visitor);
-		printf("\n");
+		if (verbose) {
+			printf("\nDBJ SLL dump");
+			dbj_sll_foreach(head_, dbj_sll_node_dump_visitor);
+			printf("\n");
+		}
 
 		assert(0 == strcmp(dbj_sll_remove_tail(head_)->data, "TWO"));
 		dbj_sll_erase(head_);
 
-		printf("\nHead after SLL erasure");
-		dbj_sll_node_dump_visitor(head_);
+		if (verbose) {
+			printf("\nHead after SLL erasure");
+			dbj_sll_node_dump_visitor(head_);
+		}
 		assert(true == is_dbj_sll_empty(head_));
 
 		DBJ_UNUSED unsigned long k1 = dbj_sll_append(head_, "Abra")->key;

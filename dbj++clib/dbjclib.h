@@ -17,6 +17,9 @@ limitations under the License.
 
 #pragma once
 
+#ifndef DBJ_CLIB_PRESENT
+#define DBJ_CLIB_PRESENT
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,7 +66,7 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 /* use this to remove unused code */
 /* this verion does not evaluate the expression */
 // #define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
-#define DBJ_REMOVE(expr)
+#define DBJ_REMOVE(expr) (void)(sizeof(expr))
 
 #	if ! defined(_MSC_EXTENSIONS)
 #error Need MSC EXTENSIONS DEFINED
@@ -84,10 +87,12 @@ namespace dbj { namespace clib {
 
 typedef unsigned char	uchar_t;
 
+#ifndef size_t
 #ifdef _WIN64
 		typedef unsigned __int64 size_t;
 #else
 		typedef unsigned int	size_t;
+#endif
 #endif
 
 /*
@@ -107,11 +112,12 @@ always null terminating the copied string.
 // both arguments must be zero limited
 		char * dbj_str_shorten(const char * str_, const char * chars_to_remove_);
 
-#include "dbj_error_codes.h"
-#include "dbj_error.h"
-#include "dbj_trim.h"
-#include "dbj_string.h"
-#include "dbj_sll.h"
+#include "./dbj_error/dbj_error_codes.h"
+#include "./dbj_error/dbj_error.h"
+#include "./dbj_string/dbj_trim.h"
+#include "./dbj_string/dbj_string.h"
+// #include "./dbj_sll/dbj_sll.h" 
+#include "./dbj_string_list/dbj_string_list.h"
 
 		extern const unsigned long dbj_random_kiss();
 
@@ -121,3 +127,4 @@ always null terminating the copied string.
 } // eof namespace dbj 
 #endif
 
+#endif // ! DBJ_CLIB_PRESENT

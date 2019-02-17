@@ -81,19 +81,18 @@
   <ItemGroup>
     <ClCompile Include="dbjclib.c" />
     <ClCompile Include="dbj_ctime_rnd.c" />
-    <ClCompile Include="dbj_error.c" />
-    <ClCompile Include="dbj_error_codes.c" />
-    <ClCompile Include="dbj_error_internal.c" />
-    <ClCompile Include="dbj_string_trim.c" />
-    <ClCompile Include="dbj_string_trim_test.c" />
+    <ClCompile Include="dbj_error\dbj_error.c" />
+    <ClCompile Include="dbj_error\dbj_error_codes.c" />
+    <ClCompile Include="dbj_error\dbj_error_internal.c" />
+    <ClCompile Include="dbj_string\dbj_string_trim.c" />
+    <ClCompile Include="dbj_string\dbj_string_trim_test.c" />
+    <ClCompile Include="dbj_string_list\dbj_list.c" />
+    <ClCompile Include="dbj_string_list\dbj_list_test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbjclib.h" />
-    <ClInclude Include="dbj_error.h" />
-    <ClInclude Include="dbj_error_codes.h" />
-    <ClInclude Include="dbj_sll.h" />
-    <ClInclude Include="dbj_string.h" />
-    <ClInclude Include="dbj_trim.h" />
+    <ClInclude Include="dbj_sll\dbj_sll.h" />
+    <ClInclude Include="dbj_string_list\dbj_string_list.h" />
     <ClInclude Include="reverse_no_warning.h" />
     <ClInclude Include="supress_warning.h" />
   </ItemGroup>

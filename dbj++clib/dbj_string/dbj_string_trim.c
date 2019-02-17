@@ -1,4 +1,4 @@
-#include "dbjclib.h"
+#include "../dbjclib.h"
 
 /*
 Copyright 2018 by dbj@dbj.org

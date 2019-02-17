@@ -1,4 +1,4 @@
-#include "dbjclib.h"
+#include "../dbjclib.h"
 #include <assert.h>
 
 	// DBJ proposal :
