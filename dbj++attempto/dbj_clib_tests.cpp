@@ -105,7 +105,7 @@ DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 extern "C" void dbj_string_trim_test();
 DBJ_TEST_UNIT(dbj_string_trim)
 {
-	// SEGV currently -- dbj_string_trim_test();
+	dbj_string_trim_test();
 }
 
 #define DBJ_ERR(n) ::dbj::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)

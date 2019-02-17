@@ -29,6 +29,13 @@
 	)
 	{
 		assert(text != NULL);
+
+		if (*text == '\0') {
+			char * rezbuf = calloc(1, 1);
+			rezbuf[0] = '\0';
+			return rezbuf;
+		}
+
 		const int text_size = _countof(text);
 		char * front_ = 0, *back_ = 0;
 
