@@ -11,6 +11,7 @@
 #include "types_and_structures/dbj_tree_tests.h"
 
 #include "utilities/string_literals_with_universal_character_names.h"
+#include "utilities/dbj_strictly.h"
 #include "types_and_structures/no_copy_no_move.h"
 
 // #include "algorithms/comparing_itoas.h"
