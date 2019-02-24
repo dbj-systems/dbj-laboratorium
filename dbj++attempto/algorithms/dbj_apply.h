@@ -4,6 +4,11 @@ namespace dbj {
 template<typename INVOCABLE >
 struct apply_helper final
 {
+
+	static_assert(
+		!std::is_array_v<INVOCABLE>,
+		"invoking on array? How?");
+
  INVOCABLE invocable_;
 
 // apply the pair of values

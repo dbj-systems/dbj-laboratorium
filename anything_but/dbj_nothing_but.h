@@ -22,8 +22,30 @@
 #include <iosfwd>
 
 namespace dbj {
+
 	namespace util {
 		using namespace std;
+
+		/*
+		basically is_fundamental, from here: https://en.cppreference.com/w/cpp/types/is_fundamental
+		sans the void type
+		nullptr_t we leave in for the time being at least
+
+		integral types are:
+		bool, char, char8_t, char16_t, char32_t, wchar_t, short, int, long, long long,
+		or any implementation-defined extended integer types, including any signed,
+		unsigned, and cv-qualified variants
+
+		for artihmetics add floating pint types to this.
+		*/
+		template< class T >
+		struct is_ok_for_nothing_but
+			: std::integral_constant<
+			bool,
+			std::is_arithmetic<T>::value ||
+			std::is_same<std::nullptr_t, typename std::remove_cv<T>::type>::value
+			// you can also use 'std::is_null_pointer<T>::value' instead in C++14
+			> {};
 
 		/*
 		avoid implicit conversions to/ from type T
@@ -34,13 +56,30 @@ namespace dbj {
 		template<typename T>
 		struct nothing_but final
 		{
-			static_assert(false == std::is_array_v<T>, "can not deal with arrays");
+#if __cplusplus >= 201703L
+			static_assert(std::is_ok_for_nothing_but<T>, "can not deal with this type");
+#endif
 
 			using type = nothing_but;
 
+			// default ctor makes default T
 			nothing_but() : val_(T{}) {}
+			// moving
+			nothing_but(nothing_but && other_) : val_(std::move(other_.val_)) { }
+			type & operator = (nothing_but && other_)
+			{
+				this->val_ = std::move(other_.val_);
+				return *this;
+			}
 
-			nothing_but(T const & t_) : val_(t_) {}
+			 //to convert or assign from T is allowed
+			 //to move from T is allowed
+			nothing_but(T && t_) = delete; // : val_(std::move(t_)) { }
+			type & operator = (T && new_val_) = delete; // { val_ = std::move(new_val_); return *this; }
+
+			  //to convert or assign from T is allowed
+			  // by copying
+			nothing_but(T const & t_) : val_(t_) { }
 			type & operator = (T const & new_val_)
 			{
 				val_ = new_val_;
@@ -48,33 +87,18 @@ namespace dbj {
 			}
 
 			/* to construct from X is banned */
-			template<
-				typename X,
-				std::enable_if_t<
-				false == std::is_same_v<T, X>
-				, int> = 0
-			>
-				nothing_but(X const & x_) = delete;
+			template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+				nothing_but(X & x_) = delete;
 
 			/* to assign from X is banned */
-			template<
-				typename X,
-				std::enable_if_t<
-				false == std::is_same_v<T, X>
-				, int> = 0
-			>
-				type & operator = (X const & new_val_) = delete;
+			template<typename X,std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+				type & operator = (X & new_val_) = delete;
 
 			// conversion to T&, but only if not const
 			operator T & () { return val_; }
 
 			/* conversion to X is banned */
-			template<
-				typename X,
-				std::enable_if_t<
-				false == std::is_same_v<T, X>
-				, int> = 0
-			>
+			template<typename X,std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
 				operator X & () = delete;
 
 			// as other std class types do
@@ -86,10 +110,10 @@ namespace dbj {
 			// compatibility
 			friend bool operator < (type const & left_, type const & right_)
 			{
-				return left_.val_ < right_.val_;
+				return ((left_.val_) < (right_.val_));
 			}
 
-			friend std::ostream & operator << (std::ostream & os_ , type const & right_)
+			friend std::ostream & operator << (std::ostream & os_, type const & right_)
 			{
 				return os_ << right_.val_;
 			}

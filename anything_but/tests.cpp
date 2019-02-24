@@ -19,6 +19,7 @@
 
 #include "dbj_nothing_but.h"
 #include <iostream>
+#include <cassert>
 
 /*
  By "testing" in this context we basically mean: "does it or does it not compile"
@@ -31,7 +32,7 @@
 */
 
 extern "C" {
-	void test_available_types();
+	void test_different_types();
 	void test_creation();
 	void test_assignments();
 	void test_compatibility();
@@ -39,14 +40,158 @@ extern "C" {
 
 #pragma warning( push )
 #pragma warning( disable : 4189 )
-// warning C4189 : unused local variables
+// warning C4189 : unused local variable
+
 
 /*
 -----------------------------------------------------------------------------
+utils
 */
-extern "C" void test_available_types() {
+namespace dbj {
+	template<typename T>
+	using remove_cvr = typename std::remove_reference< std::remove_cv<T> >;
+	template<typename T>
+	using remove_cvr_t = typename remove_cvr<T>::type;
+#if __cplusplus >= 201703L
+	template<typename T>
+	constexpr inline auto remove_cvr_t = remove_cvr<T>::value;
+#endif
+
+	// for testing purposes
+	struct Structure final {
+		bool member{};  auto method() const { return __func__; }
+
+		// compatibility
+		friend bool operator < (Structure const & left_, Structure const & right_)
+		{
+			return left_.member < right_.member;
+		}
+		friend std::ostream & operator << (std::ostream & os_, Structure const & right_)
+		{
+			return os_ << right_.method();
+		}
+	};
+
+	enum class Enum { a, b, c, d };
+
+	inline std::ostream & operator << (std::ostream & os_, Enum const & right_)
+	{
+		return os_ << typeid(Enum).name() ;
+	}
+
+	union  Union
+	{
+		int integer; long john;  auto method() const { return __func__; }
+
+		// compatibility
+		friend bool operator < (Union const & left_, Union const & right_)
+		{
+			return left_.integer < right_.integer;
+		}
+		friend std::ostream & operator << (std::ostream & os_, Union const & right_)
+		{
+			return os_ << right_.method();
+		}
+	};
+
+} // dbj
+/*
+-----------------------------------------------------------------------------
+*/
+
+template<typename T, typename ONLY = dbj::util::nothing_but<T> >
+auto test_basic(void) -> ONLY
+{
+	// typename dbj::remove_cvr_t<T> value_{};
+	T value_{};
+	auto mover = [](ONLY arg_b)	noexcept { return arg_b;  };
+	// default ctor
+	ONLY the_lonely_ = mover(ONLY(value_));
+	// assignment
+	the_lonely_ = value_;
+	assert(!(the_lonely_ < the_lonely_));
+	T & peeping_tom = the_lonely_.data();
+	std::cout << std::boolalpha << "\n" << typeid(the_lonely_).name() << "\n\tvalue:" << the_lonely_;
+	return the_lonely_;
+}
+
+extern "C" void test_different_types()
+{
 	// fundamental types
-	using just_bool = dbj::util::nothing_but<bool>;
+	// no can do -- test_basic<void>();
+	// no can do -- test_basic<std::nullptr_t>();
+	// floating point types
+	test_basic<float>();
+	test_basic<double>();
+	test_basic<long double>();
+	// integral types
+	test_basic<bool>();
+	test_basic<char>();
+	test_basic<signed char>();
+	test_basic<unsigned char>();
+	test_basic<char16_t>();
+	test_basic<char32_t>();
+	test_basic<wchar_t>();
+	// signed integer types
+	test_basic<short int>();
+	test_basic<int>();
+	test_basic<long int>();
+	test_basic<long long int>();
+	// unsigned integer types
+	test_basic<unsigned short int>();
+	test_basic<unsigned int>();
+	test_basic<unsigned long int>();
+	test_basic<unsigned long long int>();
+
+	// compound types
+
+	// reference types
+	// no can do -- test_basic<bool &>();
+	// no can do test_basic<int &>();
+	// no can do -- test_basic<bool &&>();
+
+	// pointer types
+	test_basic<bool *>();
+	test_basic<bool **>();
+
+	// pointers to member types
+	// NO CAN DO
+	// dbj::nothing_but is fully compliant and has 'operator <'
+	// it is illegal to apply that operator
+	// to class members pointers
+	{
+		auto mtp = & dbj::Structure::method;
+		auto mbp = & dbj::Structure::member;
+		// test_basic< decltype(mtp) >();
+		// test_basic< decltype(mbp)>();
+	}
+
+	// array types
+	// no can do -- arrays are not assignable
+	{
+		// ERROR -- test_basic<char[]>();
+		// ERROR -- test_basic<int[]>();
+		// with size 
+		// test_basic<char[0xFF]>();
+		// test_basic<int[0xFF]>();
+	}
+
+	// function types
+	{
+		test_basic<char(*)(void)>();
+	}
+
+	// enumeration types
+	{
+		test_basic< dbj::Enum >();
+	}
+
+	// class non union types
+	test_basic< dbj::Structure >();
+
+
+	// union types
+	test_basic< dbj::Union >();
 }
 /*
 -----------------------------------------------------------------------------

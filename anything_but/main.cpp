@@ -20,7 +20,7 @@
 #include <cstdio>
 
 extern "C" {
-	void test_available_types();
+	void test_different_types();
 	void test_creation();
 	void test_assignments();
 	void test_compatibility();
@@ -30,7 +30,7 @@ int main()
 {
 	using namespace std;
 	try {
-		test_available_types();
+		test_different_types();
 		test_creation();
 		test_assignments();
 		test_compatibility();
