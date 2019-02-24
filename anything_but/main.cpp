@@ -19,19 +19,18 @@
 #include <exception>
 #include <cstdio>
 
-extern "C" {
+
 	void test_different_types();
-	void test_creation();
+	void test_try_to_trick();
 	void test_assignments();
 	void test_compatibility();
-}
 
 int main()
 {
 	using namespace std;
 	try {
 		test_different_types();
-		test_creation();
+		test_try_to_trick();
 		test_assignments();
 		test_compatibility();
 	}

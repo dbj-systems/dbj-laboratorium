@@ -29,18 +29,31 @@ namespace dbj {
 		/*
 		On C++ types, start from here: https://en.cppreference.com/w/cpp/types/is_fundamental
 		Bellow one can see what type we currently allow.
+		Basicaly Arythmetic types (https://en.cppreference.com/w/cpp/types/is_arithmetic)
 		*/
 		template< class T >
 		struct is_ok_for_nothing_but
 			: std::integral_constant<
 			bool,
-			std::is_union<T>::value ||
-			std::is_class<T>::value ||
-			std::is_enum<T>::value ||
-			std::is_pointer<T>::value ||
-			std::is_arithmetic<T>::value 
+			std::is_arithmetic<T>::value
 			> {};
+		/*
+		Arythmetic literals
 
+		in general and in case you use them your code will be less of a surprise to you
+		in particular you will have much less surprises when mixing literals and
+		instances of nothing_but<T>
+
+		integer literal ( https://en.cppreference.com/w/cpp/language/integer_literal )
+		
+		floating point literal (https://en.cppreference.com/w/cpp/language/floating_literal)
+		The hexadecimal floating-point literals were not part of C++ until C++17, 
+		although they can be parsed and printed by the I/O functions since C++11
+
+		character literal (https://en.cppreference.com/w/cpp/language/character_literal) 
+
+		string literal (https://en.cppreference.com/w/cpp/language/string_literal) 
+		*/
 		/*
 		avoid implicit conversions to/ from type T
 		by handling it through this class
@@ -54,44 +67,38 @@ namespace dbj {
 
 			using type = nothing_but;
 
-			// default ctor makes default T
-			nothing_but() : val_(T{}) {}
-			// moving
-			nothing_but(nothing_but && other_) : val_(std::move(other_.val_)) { }
-			type & operator = (nothing_but && other_)
-			{
-				this->val_ = std::move(other_.val_);
-				return *this;
-			}
+			// default ctor makes default T 
+			// must exist, default is fine
+			nothing_but() = default; // : val_(T{}) {}
+			
+			// copying -- must not be user defined
+			// moving -- must not be user defined
+			// just leave it all to compiler
 
-			 //to convert or assign from T is allowed
-			 //to move from T is allowed
-			nothing_but(T && t_) = delete; // : val_(std::move(t_)) { }
-			type & operator = (T && new_val_) = delete; // { val_ = std::move(new_val_); return *this; }
+			// to convert or assign from T is allowed
+			// to move from T is allowed
+			nothing_but(T && t_) : val_(std::move(t_)) { }
+			type & operator = (T && new_val_) { val_ = std::move(new_val_); return *this; }
 
-			  //to convert or assign from T is allowed
-			  // by copying
+			//to convert or assign from T is allowed
+			// by copying
 			nothing_but(T const & t_) : val_(t_) { }
-			type & operator = (T const & new_val_)
-			{
-				val_ = new_val_;
-				return *this;
-			}
+			type & operator = (T const & new_val_) { val_ = new_val_; return *this; }
 
 			/* to construct from X is banned */
 			template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
-				nothing_but(X & x_) = delete;
+			nothing_but(X const & x_) = delete;
 
 			/* to assign from X is banned */
-			template<typename X,std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
-				type & operator = (X & new_val_) = delete;
+			template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+			type & operator = (X const & new_val_) = delete;
 
 			// conversion to T&, but only if not const
 			operator T & () { return val_; }
 
 			/* conversion to X is banned */
-			template<typename X,std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
-				operator X & () = delete;
+			template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
+			operator X & () = delete;
 
 			// as elsewhere in std 
 			// the convention is to provide 'data()' method
@@ -101,7 +108,8 @@ namespace dbj {
 		private:
 			T val_{};
 
-			// compatibility
+			// compatibility with std::
+
 			// to act as element type in some of std:: comtainers
 			// class has to provide less than operator
 			friend bool operator < (type const & left_, type const & right_)
@@ -109,9 +117,9 @@ namespace dbj {
 				return ((left_.val_) < (right_.val_));
 			}
 
-			// this means type T has to be compatible too 
+			// bellow means type T has to be compatible too 
 			// that is std::ostream & << ( std::ostream, T const & );
-			// must be defined and in the scopse
+			// must be defined and in the scope, when required
 			friend std::ostream & operator << (std::ostream & os_, type const & right_)
 			{
 				return os_ << right_.val_;
