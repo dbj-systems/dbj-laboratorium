@@ -5,6 +5,8 @@ Current Version: 0.1
 ## [0.0.1] - 2019-02-23
 
 - Added
+- Cleaned
+- Tested
 
 
 <hr/>

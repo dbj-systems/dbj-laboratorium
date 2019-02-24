@@ -2,14 +2,17 @@
 
 ####	Type Handle to Avoid Implicit Conversions in standard C++
 
-Every attampt has been made to make this into a cross-platform 
-header only standard C++ library.
+Every attempt has been made to make this into a cross-platform, 
+header only, standard C++ library.
 
-At time of this writting standard C++ is C++17. 
+At time of this writting (2019Q1) standard C++ is C++17. 
+
+This project builds and tests are passing with C++14 (/std:c++14)
+This project builds and tests are passing with C++17 (/std:c++17)
 
 ## Features
 
-
+Please look into the `tests.cpp`
 
 ## Dependencies
 
@@ -24,9 +27,8 @@ The library is header-only: it consists entirely of one header file:
 
        dbj_nothing_but.h
 
-## Compilation of the samples
+##### No compilation necessary.
 
-This is firmly and squarely Visual Studio Solution.
 
 ### License
 
@@ -34,9 +36,8 @@ Distributed under the GPLv3 License, Version 1.0.
 
 ### Contact
 
-Please report issues or questions here:
- ~/issues
-
+Please report issues or [questions here](https://github.com/dbj-systems/dbj-laboratorium/issues).
+ 
 You can contact me via twitter at @dbjdbj
 
 ---

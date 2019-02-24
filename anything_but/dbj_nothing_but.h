@@ -27,24 +27,18 @@ namespace dbj {
 		using namespace std;
 
 		/*
-		basically is_fundamental, from here: https://en.cppreference.com/w/cpp/types/is_fundamental
-		sans the void type
-		nullptr_t we leave in for the time being at least
-
-		integral types are:
-		bool, char, char8_t, char16_t, char32_t, wchar_t, short, int, long, long long,
-		or any implementation-defined extended integer types, including any signed,
-		unsigned, and cv-qualified variants
-
-		for artihmetics add floating pint types to this.
+		On C++ types, start from here: https://en.cppreference.com/w/cpp/types/is_fundamental
+		Bellow one can see what type we currently allow.
 		*/
 		template< class T >
 		struct is_ok_for_nothing_but
 			: std::integral_constant<
 			bool,
-			std::is_arithmetic<T>::value ||
-			std::is_same<std::nullptr_t, typename std::remove_cv<T>::type>::value
-			// you can also use 'std::is_null_pointer<T>::value' instead in C++14
+			std::is_union<T>::value ||
+			std::is_class<T>::value ||
+			std::is_enum<T>::value ||
+			std::is_pointer<T>::value ||
+			std::is_arithmetic<T>::value 
 			> {};
 
 		/*
@@ -56,9 +50,7 @@ namespace dbj {
 		template<typename T>
 		struct nothing_but final
 		{
-#if __cplusplus >= 201703L
-			static_assert(std::is_ok_for_nothing_but<T>, "can not deal with this type");
-#endif
+			static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
 
 			using type = nothing_but;
 
@@ -101,18 +93,25 @@ namespace dbj {
 			template<typename X,std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
 				operator X & () = delete;
 
-			// as other std class types do
+			// as elsewhere in std 
+			// the convention is to provide 'data()' method
+			// for users to reach to non const data handled
 			T & data() const { return (T&)val_; }
 
 		private:
 			T val_{};
 
 			// compatibility
+			// to act as element type in some of std:: comtainers
+			// class has to provide less than operator
 			friend bool operator < (type const & left_, type const & right_)
 			{
 				return ((left_.val_) < (right_.val_));
 			}
 
+			// this means type T has to be compatible too 
+			// that is std::ostream & << ( std::ostream, T const & );
+			// must be defined and in the scopse
 			friend std::ostream & operator << (std::ostream & os_, type const & right_)
 			{
 				return os_ << right_.val_;
