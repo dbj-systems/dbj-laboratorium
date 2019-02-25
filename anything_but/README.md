@@ -8,6 +8,7 @@ header only, standard C++ library.
 At time of this writting (2019Q1) standard C++ is C++17. 
 
 This project builds and tests are passing with C++14 (/std:c++14)
+
 This project builds and tests are passing with C++17 (/std:c++17)
 
 ## Features
