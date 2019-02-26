@@ -1,7 +1,4 @@
-﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-// testing the various stuff in this project
-#include "pch.h"
+﻿#include "pch.h"
 
 #include "types_and_structures/dbj_ctstring.h"
 #include "algorithms/dbj_lambda_lists.h"
