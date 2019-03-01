@@ -13,6 +13,13 @@
 
 // #include "algorithms/comparing_itoas.h"
 
+DBJ_TEST_UNIT(test_dbj_mtx)
+{
+#ifdef DBJ_LAMBDA_MATRIX_TESTING
+	(void)dbj_lambda_matrix_testing();
+#endif
+}
+
 namespace dbj_r_and_d {
 
 	/*
