@@ -80,6 +80,7 @@ namespace dbj::db::err
 		sqlite_done = 101    /* sqlite= 3 ,_step() has finished executing */
 	}; // dbj_err_code
 } // dbj::db::err 
+
 // system_error fwk requires api private enums to be
 // registered so it can be used by the fwk
 namespace std
@@ -135,7 +136,7 @@ string is managed internally and must not be freed by the application.
 	}
 
 // a bit if a hack
-// we can do this because out error codes enum 
+// we can do this because our error codes enum 
 // do match sqlite3 error constants
 	inline std::error_code int_to_dbj_error_code(int sqlite_retval) {
 		// careful! this is DEBUG only
@@ -162,7 +163,7 @@ string is managed internally and must not be freed by the application.
 			get_dbj_err_category());
 	}
 
-	// ok, done and row are not considered as errors in sqlite3 
+	// ok, done and row are 3 codes not considered as errors in sqlite3 
 	inline bool is_sql_err_ok( std::error_code ec_ ) 
 	{
 		static std::error_code ok_{ dbj_err_code::sqlite_ok };

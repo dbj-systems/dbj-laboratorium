@@ -13,7 +13,8 @@ namespace dbj_erc {
 		noexcept
 	{
 		std::error_code ec = DBJ_TEST_ATOM(
-			std::make_error_code(std::errc::address_family_not_supported)
+			// std::make_error_code(std::errc::address_family_not_supported)
+			std::make_error_code(std::errc::invalid_argument)
 		);
 
 		std::error_condition en = DBJ_TEST_ATOM(
