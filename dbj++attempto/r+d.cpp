@@ -13,12 +13,7 @@
 
 // #include "algorithms/comparing_itoas.h"
 
-DBJ_TEST_UNIT(test_dbj_mtx)
-{
-#ifdef DBJ_LAMBDA_MATRIX_TESTING
-	(void)dbj_lambda_matrix_testing();
-#endif
-}
+#include "utilities/dbj_lambda_matrix.h"
 
 namespace dbj_r_and_d {
 
@@ -78,9 +73,7 @@ namespace dbj_r_and_d {
 
 	Probably he has used this to cut the dependancy on the std::function
 	and this is ::dbj variant C++17
-	*/
 
-	/*
 	holder of a single argument function and its argument *value*
 	*/
 	template<class RETURNTYPE, class ARGTYPE>
