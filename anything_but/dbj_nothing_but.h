@@ -53,8 +53,7 @@ namespace dbj {
 		character literal (https://en.cppreference.com/w/cpp/language/character_literal) 
 
 		string literal (https://en.cppreference.com/w/cpp/language/string_literal) 
-		*/
-		/*
+
 		avoid implicit conversions to/ from type T
 		by handling it through this class
 
@@ -63,7 +62,8 @@ namespace dbj {
 		template<typename T>
 		struct nothing_but final
 		{
-			static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
+		
+			//static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
 
 			using type = nothing_but;
 
@@ -86,18 +86,21 @@ namespace dbj {
 			type & operator = (T const & new_val_) { val_ = new_val_; return *this; }
 
 			/* to construct from X is banned */
-			template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+			// template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+			template< typename X>
 			nothing_but(X const & x_) = delete;
 
 			/* to assign from X is banned */
-			template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+			// template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
+			template< typename X>
 			type & operator = (X const & new_val_) = delete;
 
 			// conversion to T&, but only if not const
 			operator T & () { return val_; }
 
 			/* conversion to X is banned */
-			template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
+			// template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
+			template< typename X>
 			operator X & () = delete;
 
 			// as elsewhere in std 
@@ -110,12 +113,18 @@ namespace dbj {
 
 			// compatibility with std::
 
-			// to act as element type in some of std:: comtainers
+			// to act as element type in some of std:: containers
 			// class has to provide less than operator
 			friend bool operator < (type const & left_, type const & right_)
 			{
 				return ((left_.val_) < (right_.val_));
 			}
+
+			friend bool operator == (type const & left_, type const & right_)
+			{
+				return ((left_.val_) == (right_.val_));
+			}
+
 
 			// bellow means type T has to be compatible too 
 			// that is std::ostream & << ( std::ostream, T const & );
