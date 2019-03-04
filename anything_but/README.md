@@ -125,6 +125,28 @@ _
 
 Looks almost too simple. It is almost easy to forget the safety service this API provides.
 
+## Type's handled
+
+Currently we do handle all the types and compound types beside:
+
+- References
+- Pointers
+- Arrays
+
+Why not?  Simpy because in case you need them you will naturaly use them as ever before, but combined with this API.
+
+```cpp
+     just_signed signed_char ; 
+     just_signed * signed_char_pointer ; // null_ptr as ever_
+     just_signed & signed_char_ref = signed_char ;
+     just_signed signed_char_arr[3]_;
+```
+
+Also, as we have shown in the non trivial use-case you have at your disposal all the waponry from the std space to help you.
+
+Please notice how above all the standard C++ default initializations are respected.
+
+In case of some serious bugs, singularities or edge case, we will reconsider this current rule.
 
 ## Dependencies
 
