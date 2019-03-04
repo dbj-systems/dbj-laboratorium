@@ -62,7 +62,16 @@ namespace dbj {
 		template<typename T>
 		struct nothing_but final
 		{
-		
+		  
+			static_assert( false == std::is_array_v<T>, 
+				"\n\ndbj::util::nothing_but can not deal with native arrays.\n");
+
+			static_assert( false == std::is_reference_v<T>, 
+				"\n\ndbj::util::nothing_but can not deal with references.\n");
+
+			static_assert( false == std::is_pointer_v<T>, 
+				"\n\ndbj::util::nothing_but can not deal with pointers.\n");
+
 			//static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
 
 			using type = nothing_but;
@@ -89,13 +98,11 @@ namespace dbj {
 
 			/* to construct from X is banned */
 			// template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
-			template< typename X>
-			nothing_but(X const & x_) = delete;
+			template< typename X> nothing_but(X const & x_) = delete;
 
 			/* to assign from X is banned */
 			// template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
-			template< typename X>
-			type & operator = (X const & new_val_) = delete;
+			template< typename X> type & operator = (X const & new_val_) = delete;
 
 			// conversion to T&, but only if not const
 			operator T & () { return val_; }
