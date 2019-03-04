@@ -32,7 +32,7 @@ namespace dbj {
 		Basicaly Arythmetic types (https://en.cppreference.com/w/cpp/types/is_arithmetic)
 		*/
 		template< class T >
-		struct is_ok_for_nothing_but
+		struct is_handled_by_nothing_but
 			: std::integral_constant<
 			bool,
 			std::is_arithmetic<T>::value
@@ -62,26 +62,23 @@ namespace dbj {
 		NOTE! static_assert() kick's in not before 
 		isntance of a type is made. 
 
-		So if not for SFINAE checkm, the wrong type will be made and users
-		will not be stopped untill they try to make the isntance.
+		If not for SFINAE, the wrong type will be made and users
+		will not be stopped untill they try to make the instance.
 		*/
 		template<typename T,
-			std::enable_if_t< !std::is_pointer_v<T> && !std::is_reference_v<T> && !std::is_array_v<T>, int> = 0
+			std::enable_if_t< is_handled_by_nothing_but<T>::value , int> = 0
 		>
 		struct nothing_but final
 		{
-			//static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
-
 			using type = nothing_but;
 			// as is the std custom
 			using value_type = T;
 
 			// default ctor makes default T 
 			// must exist, default is fine
-			nothing_but() = default; // : val_(T{}) {}
+			nothing_but() = default; 
 			
-			// copying -- must not be user defined
-			// moving -- must not be user defined
+			// copying --  moving 
 			// just leave it all to compiler
 
 			// to convert or assign from T is allowed
