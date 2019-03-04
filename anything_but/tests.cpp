@@ -241,12 +241,7 @@ void test_try_to_trick()
 	 { // native arr ref solution
 		 int iarr[]{ 1,2,3 };
 		 using arr_ref   = int(&)[3];
-		 using just_arfy = dbj::util::nothing_but< arr_ref >;
-
-		 // auto dumbara = [](just_arfy && jfy) { return jfy; };
-
-		 just_arfy arry_a(arr_ref(iarr));
-		 // just_arfy arry_b = dumbara (arry_a);
+		 // ERROR --> using just_arfy = dbj::util::nothing_but< arr_ref >;
 	 }
  }
 

@@ -38,7 +38,7 @@ namespace dbj {
 			std::is_arithmetic<T>::value
 			> {};
 		/*
-		Arythmetic literals
+		Arithmetic literals
 
 		in general and in case you use them your code will be less of a surprise to you
 		in particular you will have much less surprises when mixing literals and
@@ -58,20 +58,18 @@ namespace dbj {
 		by handling it through this class
 
 		terminology: type X is any other type but T
+
+		NOTE! static_assert() kick's in not before 
+		isntance of a type is made. 
+
+		So if not for SFINAE checkm, the wrong type will be made and users
+		will not be stopped untill they try to make the isntance.
 		*/
-		template<typename T>
+		template<typename T,
+			std::enable_if_t< !std::is_pointer_v<T> && !std::is_reference_v<T> && !std::is_array_v<T>, int> = 0
+		>
 		struct nothing_but final
 		{
-		  
-			static_assert( false == std::is_array_v<T>, 
-				"\n\ndbj::util::nothing_but can not deal with native arrays.\n");
-
-			static_assert( false == std::is_reference_v<T>, 
-				"\n\ndbj::util::nothing_but can not deal with references.\n");
-
-			static_assert( false == std::is_pointer_v<T>, 
-				"\n\ndbj::util::nothing_but can not deal with pointers.\n");
-
 			//static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
 
 			using type = nothing_but;
