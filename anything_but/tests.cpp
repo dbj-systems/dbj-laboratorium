@@ -24,7 +24,7 @@
 /*
  By "testing" in this context we basically mean: "does it or does it not compile"
  So we do not use any "testing framework"
- For compatibility: This is built in VS2017 15.9.X
+ For compatibility: This is built with VS2017 15.9.X
 
  NOTE: Default warning level is "LEVEL 3" aka /W3
 
@@ -70,8 +70,8 @@ auto test_basic(void) -> dbj::util::nothing_but<T>
 {
 	/*
 	Attention: T and dbj::remove_cvr_t<T>
-	are very likely two different types
-	do not mix them use only one
+	might be two different types
+	do not mix them, use only one
 	*/
 	using TT = typename dbj::remove_cvr_t<T>;
 	using NBT = dbj::util::nothing_but<TT>;
@@ -160,11 +160,11 @@ void test_try_to_trick()
 	SX(typeid(float(2.3)).name());
 	SX(typeid(42).name());
 
-	// if no float() cast then
+	// if no float() cast
 	// 'argument': truncation from 'double' to 'T'
 	just_float(2.3f);
 
-	// if no float() cast then
+	// if no float() cast 
 	// 'argument': truncation from 'double' to 'T'
 	just_float jf = 2.3f;
 	just_float jf_aggregate = { 2.3f };
@@ -184,10 +184,70 @@ void test_try_to_trick()
 /*
 -----------------------------------------------------------------------------
 */
- void test_assignments() {}
+ void test_assignments() 
+ {
+	 using just_signed   = dbj::util::nothing_but<signed char>;
+	 using just_unsigned = dbj::util::nothing_but<unsigned char>;
+
+	 just_signed s;
+	 just_unsigned u;
+
+#ifndef _MSC_VER
+	 typedef unsigned char uint8_t;
+	 typedef signed char   int8_t;
+#endif
+	 // CLANG/GNUC/G++/MSVC(UCRT) default behaviour is wrong
+	 // no warnings whatsoever here
+	 uint8_t uc = int8_t('s') ;
+	  int8_t sc =  uc;
+
+	 s =  int8_t('s');
+	 u = uint8_t('u');
+
+	 /*
+	 no can do:
+	 s = 's';
+	 u = 'u';
+	 s = u;
+	 s == u;
+	 */
+ }
 /*
 -----------------------------------------------------------------------------
 */
- void test_compatibility() {}
+ void test_compatibility() 
+ {
+	 // complex use case
+	 // must not use anything bit int[3] type
+
+	 // keep it safe and simple
+	 // on the stack and in the scope
+	 int iarr[]{ 1,2,3 };
+
+	 using arr_ref = std::reference_wrapper<int[3]>;
+	 using just_arry = dbj::util::nothing_but< arr_ref >;
+
+	 auto collector = [](just_arry  ja_) { 
+		 arr_ref arf = ja_; // casting operator kicks in
+		 arf.get()[0] = 42; 
+		 return ja_;
+	 };
+
+	 arr_ref arf = std::ref(iarr);
+	 just_arry arry(arf);
+
+	 just_arry results = collector(arry);
+	 
+	 { // native arr ref solution
+		 int iarr[]{ 1,2,3 };
+		 using arr_ref   = int(&)[3];
+		 using just_arfy = dbj::util::nothing_but< arr_ref >;
+
+		 // auto dumbara = [](just_arfy && jfy) { return jfy; };
+
+		 just_arfy arry_a(arr_ref(iarr));
+		 // just_arfy arry_b = dumbara (arry_a);
+	 }
+ }
 
 #pragma warning( pop )
