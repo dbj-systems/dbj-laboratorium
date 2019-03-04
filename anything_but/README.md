@@ -31,7 +31,7 @@ thus just a curiosity:
 ```
 
 Or you take the above so seriously you actually do not use C++ on mission critical project?
-Or in a medical equioment perhaps. 
+Or inside a medical equipment perhaps. 
 
 You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious 
 matter for you
@@ -42,7 +42,7 @@ matter for you
    // implicit conversion of double to float
    float F = 3.7;
 ```
-
+Not because you happend to be "unreasonable" , but becaue yuo need to deliver code where implicit conversion are simply not allowed. Just like for eaxmple exceptions, in many real-time projects are not allowed. They simply do not exist over there. Switched off.
 ### The suggestion
 
 Before you discard (with the heavy heart) C++ completely we might suggest you look into this ridiculously tiny single header?
@@ -54,7 +54,7 @@ Here is some code to tickle your fancy.
     using just_signed   = dbj::util::nothing_but<signed char>;
     using just_unsigned = dbj::util::nothing_but<unsigned char>;
 ```
-Juat a declarations, make default initialized content of the exact type required.
+Just declarations first. Make default initialized content of the exact type required.
 ```cpp
     just_signed s;
     just_unsigned u;
@@ -74,30 +74,32 @@ s == u;  // does not compile
 ```
 Just a perfect API to avoid those nasty little pests growing into bugs very difficult to find.
 
-In case you might think only simple implicit conversion of fundamental types, can be targeted, how about something 
+In case you might think only simple implicit conversion of fundamental types, can be targeted with this API, how about something 
 a bit more involved?
 
-Let's assume your heart monitor module at one point needs exactly an array of 3 integers.
+#### Non Trivial Use-Case
+
+Let's assume your C++ fpr the heart monitor module at one point needs exactly an array of 3 integers.
 Not a "naturaly decayed" pointer and not `unsigned int` elements,
  but exactly as customer requested: an array of three ints, and nothing else 
 but an array of  three ints.
 
-Now, I am sure if really pressed you can devise some clever SFINAE based solution.
- Provided you are allowed to use them SFINAE solutions in your heart monitoring module.
-Or perhasp we can interest you in the following snippet?
+Now, I am sure if really pressed you can devise
+ some clever C++ solution.
+ Provided you are allowed to use them "clever solutions" in your heart monitoring module.
+Alternatively, perhaps we can interest you in the following snippet?
 
 ```cpp
   // this will not require array swapping
-  // just keep it in the scope.
   using arr_ref = std::reference_wrapper<int [3]> ;
-  // using dbj nothing but API
+  // using 'dbj nothing but' API
      using just_arry   = dbj::util::nothing_but< arr_ref >;
   // here is the safe and sound static array 
-  // just keep it in the scope
+  // just keep it in the scope please
      int iarr[]{1,2,3};
-  // intermediate step not required
+  // intermediate step -- not required
     arr_ref arf = std::ref(iarr);
-  // give it to our super safe structure
+  // give it to our type safe structure
     just_arry arry( arf );
 ```
 
@@ -107,7 +109,7 @@ It can be used in a much more condensed manner.
 ```cpp
 // function thorugh which we fully move by value the "just_arry"
 // we do not use references just to show moving works 
-// standard C++ value semnatics
+// standard C++ value semantics in action
  auto collector = [] ( just_arry  ja_ ) 
 { 
    // data() method is returning what is inside 
@@ -123,11 +125,11 @@ just_arry results = collector(arry) ;
 _
 ```
 
-Looks almost too simple. It is almost easy to forget the safety service this API provides.
+Looks almost too simple. It is easy to forget the safety service this API provides.
 
-## Type's handled
+### Type's handled
 
-Currently we do handle all the types and compound types beside:
+Currently we do handle all the types and compound types, beside:
 
 - References
 - Pointers
@@ -142,9 +144,10 @@ Why not?  Simpy because in case you need them you will naturaly use them as ever
      just_signed signed_char_arr[3]_;
 ```
 
-Also, as we have shown in the non trivial use-case you have at your disposal all the waponry from the std space to help you.
+Also, as we have shown in the non trivial use-case 
+you have at your disposal all the weaponry from the std space to help you.
 
-Please notice how above all the standard C++ default initializations are respected.
+Please do notie, how above all the standard C++ default value initializations are respected.
 
 In case of some serious bugs, singularities or edge case, we will reconsider this current rule.
 
@@ -160,12 +163,14 @@ This API is header-only: it consists entirely of one header file:
 
        dbj_nothing_but.h
 
-##### No compilation necessary.
+##### No compilation necessary. No isntallation required. 
+
+Just make it part of your project.
 
 
 ### License
 
-Distributed under the GPLv3 License, Version 1.0.
+This is open source software. Distributed under the GPLv3 License, Version 1.0.
 
 ### Contact
 
