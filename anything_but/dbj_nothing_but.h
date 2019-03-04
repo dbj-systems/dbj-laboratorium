@@ -66,6 +66,8 @@ namespace dbj {
 			//static_assert(is_ok_for_nothing_but<T>::value, "\n\ndbj::util::nothing_but can not deal with this type.\n");
 
 			using type = nothing_but;
+			// as is the std custom
+			using value_type = T;
 
 			// default ctor makes default T 
 			// must exist, default is fine
