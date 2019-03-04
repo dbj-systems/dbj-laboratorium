@@ -217,32 +217,13 @@ void test_try_to_trick()
 */
  void test_compatibility() 
  {
-	 // complex use case
-	 // must not use anything bit int[3] type
+int iarr[]{ 1,2,3 };
 
-	 // keep it safe and simple
-	 // on the stack and in the scope
-	 int iarr[]{ 1,2,3 };
+using arr_ref = std::reference_wrapper<int[3]>;
+// using just_arry = dbj::util::nothing_but< arr_ref >;
 
-	 using arr_ref = std::reference_wrapper<int[3]>;
-	 using just_arry = dbj::util::nothing_but< arr_ref >;
-
-	 auto collector = [](just_arry  ja_) { 
-		 arr_ref arf = ja_; // casting operator kicks in
-		 arf.get()[0] = 42; 
-		 return ja_;
-	 };
-
-	 arr_ref arf = std::ref(iarr);
-	 just_arry arry(arf);
-
-	 just_arry results = collector(arry);
-	 
-	 { // native arr ref solution
-		 int iarr[]{ 1,2,3 };
-		 using arr_ref   = int(&)[3];
-		 // ERROR --> using just_arfy = dbj::util::nothing_but< arr_ref >;
-	 }
+using narf   = int(&)[3];
+// using just_arfy = dbj::util::nothing_but< arr_ref >;
  }
 
 #pragma warning( pop )
