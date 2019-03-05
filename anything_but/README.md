@@ -156,10 +156,21 @@ This project builds and tests are passing with C++14 (/std:c++14)
 
 This project builds and tests are passing with C++17 (/std:c++17)
 
+**streams**
+
+To include std::ostram support please 
+hash define `DBJ_NOTHING_BUT_STREAMS`, before including this API
+
+```cpp
+// std::ostream support
+#define DBJ_NOTHING_BUT_STREAMS
+#include <dbj_nothing_but.h>
+``
 
 ### License
 
-This is open source software. Distributed under the GPLv3 License, Version 1.0.
+This is open source software. It id distributed under the GPLv3 License, Version 1.0.
+Please respect the copiryght.
 
 ### Contact
 

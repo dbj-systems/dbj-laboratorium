@@ -1,6 +1,6 @@
 #pragma once
 /*
-	Type Handle to Avoid Implicit Conversions in standard C++
+	Value Handle to Avoid Implicit Conversions in standard C++
 
 	Copyright(C) 2019 Dušan B. Jovanović (dbj@dbj.org)
 
@@ -19,7 +19,9 @@
 */
 
 #include <type_traits>
+#ifdef DBJ_NOTHING_BUT_STREAMS
 #include <iosfwd>
+#endif
 
 namespace dbj {
 
@@ -29,7 +31,7 @@ namespace dbj {
 		/*
 		On C++ types, start from here: https://en.cppreference.com/w/cpp/types/is_fundamental
 		Bellow one can see what type we currently allow.
-		Basicaly Arythmetic types (https://en.cppreference.com/w/cpp/types/is_arithmetic)
+		Basicaly only Arythmetic types (https://en.cppreference.com/w/cpp/types/is_arithmetic)
 		*/
 		template< class T >
 		struct is_handled_by_nothing_but
@@ -59,8 +61,9 @@ namespace dbj {
 
 		terminology: type X is any other type but T
 
-		NOTE! static_assert() kick's in not before 
-		isntance of a type is made. 
+		NOTE! static_assert() kick's in *not* before 
+		isntance of a type is made.  
+		Using T1 = T2 will not use the static_assert's inside T2
 
 		If not for SFINAE, the wrong type will be made and users
 		will not be stopped untill they try to make the instance.
@@ -128,8 +131,7 @@ namespace dbj {
 			{
 				return ((left_.val_) == (right_.val_));
 			}
-
-
+#ifdef DBJ_NOTHING_BUT_STREAMS
 			// bellow means type T has to be compatible too 
 			// that is std::ostream & << ( std::ostream, T const & );
 			// must be defined and in the scope, when required
@@ -137,6 +139,7 @@ namespace dbj {
 			{
 				return os_ << right_.val_;
 			}
+#endif
 		};
 
 	} // util
