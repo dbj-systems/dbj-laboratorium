@@ -21,8 +21,8 @@ thus, just a curiosity for you:
     int8_t sc =  uc;
 ```
 
-Or you take the above so seriously you actually do not use C++ on mission critical project?
-Or inside some medical equipment perhaps, your company delivers.. 
+Or you take the above so seriously you actually do not use C++ on mission critical projects?
+Or perhaps, inside some medical equipment your company delivers.. 
 
 You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious 
 matter for you.
@@ -33,8 +33,8 @@ matter for you.
    // implicit conversion of double to float
    float F = 3.7;
 ```
-Not because you happen to be "unreasonable", but becaue yuo need
- to deliver code where implicit conversion are simply not allowed. 
+Not because you happen to be "unreasonable", but because yuo need
+ to deliver code where implicit conversions are simply not allowed. 
 Just like for example exceptions, in many real-time projects are not allowed. They simply do not exist over there. Simply switched off.
 
 And very likely, you have turned to the "[official sources](https://docs.microsoft.com/en-us/cpp/cpp/type-conversions-and-type-safety-modern-cpp?view=vs-2017)" just to come back dissapointed.
