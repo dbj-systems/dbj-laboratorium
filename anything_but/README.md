@@ -73,40 +73,13 @@ s == u;  // does not compile
 ```
 Just a perfect API to avoid those nasty little pests growing into bugs very difficult to find.
 
-Ok, is that it? No it is not.
+Now, this might seem like a "not a lot of code" to you, but we are just showing an API new to you. Above code looks almost too simple. It is easy to forget the safety service this API provides.
 
-In case you might think only simple implicit conversion of fundamental types, can be targeted with this API, how about something 
-a bit more involved?
-
-#### Non Trivial Use-Case
-
-Let's assume your C++, for the heart monitor module at one point needs exactly an array of 3 integers.
-Not a "naturaly decayed" pointer and not `unsigned int` elements,
- but exactly as customer requested: an array of three ints, and nothing else 
-but an array of  three ints.
-
-Now, I am sure if really pressed you can devise some clever C++ solution.
- Provided you are allowed to use them "clever solutions" in your heart monitoring module.
-Alternatively, perhaps we can interest you in the following snippet?
-
-```cpp
-    // using 'dbj nothing but' API
-    using just_int   = dbj::util::nothing_but< int >;
-    // here is the safe and sound static array 
-    // just keep it in the scope please
-    just_int safe_arr[]{1,2,3};
-```
-
-Now, this might seem like a "not a lot of code" to you, but we are just showing an API new to you. 
-It can be used in a much more condensed manner. 
-
-Above code looks almost too simple. It is easy to forget the safety service this API provides.
-
-Now the really worn out prase: Your imagination is the limit. Very true here.
+Now the really worn out phrase: *Your imagination is the limit*. Very true here.
 
 ### Type's handled
 
-We do handle all the arithmetic types, only.
+This API does handle all the arithmetic types.
 
 - integral types	
     - bool
@@ -129,15 +102,15 @@ We do handle all the arithmetic types, only.
      - double
      - long double
 
-These are the types where implicit conversions do happen, by default.
+These are the types where implicit conversions do happen, by design.
 
-But what about compound types?  For example:
+But what about compound types?  For example what about:
 
 - References
 - Pointers
 - Arrays
 
-Why not handling them too?  Simply because in case you need them 
+Why not handling them too?  Simply because, in case you need them 
 you will naturaly use them as ever before, but combined with this API.
 
 ```cpp
@@ -156,14 +129,12 @@ default value initialization rules are respected.
 
 In case of some serious bugs, singularities discovered, or edge case, we will reconsider the currently handled types. 
 
-Going beyond arithmetics it is very inlikely the implicit conversion might be the problem.
+Going beyond arithmetics it is very inlikely the implicit conversion might be the problem in your code.
 
 ## Dependencies
 
-This API depends on C++ std lib only. 
-We are developing using the Visual Studio 2017 15.9.X, 
-but always checking it is equaly usable with 
-both CLANG and GCC.
+This API depends on C++ std lib only. We are developing using the Visual Studio 2017 15.9.X, 
+But we are always checking it is equaly usable with both CLANG and GCC.
 
 ## Installation
 
@@ -171,9 +142,9 @@ This API is header-only: it consists entirely of one header file:
 
        dbj_nothing_but.h
 
-##### No compilation necessary. No isntallation required. 
+*No compilation necessary. No isntallation required.* 
 
-Just make it part of your project.
+Just drop it in and include. Make it part of your project.
 
 
 Every attempt has been made to make this into a cross-platform, 
