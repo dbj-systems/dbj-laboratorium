@@ -1,4 +1,4 @@
-# nothing_but
+# nothing_but&lt;T&gt;
 
 **Value Handle to Avoid Implicit Conversions in standard C++**
 
