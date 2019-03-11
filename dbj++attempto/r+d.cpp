@@ -15,8 +15,40 @@
 
 #include "utilities/dbj_lambda_matrix.h"
 
+#include "..\dbj++log\src\dbj++log\dbj++log.hpp"
+
 namespace dbj_r_and_d {
 
+	DBJ_TEST_UNIT( dbjpp_log ) 
+	{
+		// dbj++log
+		using namespace dbj::pplog;
+
+		if (g3log_default_initialized_log_file_name)
+		{
+			printf("\n\nG3LOG is initalized\n\tLog file path: %s", g3log_default_initialized_log_file_name);
+		}
+
+		constexpr double pi_d = 3.1415926535897932384626433832795;
+		constexpr float pi_f = 3.1415926535897932384626433832795f;
+
+		LOGF(INFO, "Test SLOG INFO");
+		LOGF(G3LOG_DEBUG, "Test SLOG DEBUG");
+		LOGF(INFO, "one: ", 1);
+		LOGF(INFO, "two: ", 2);
+		LOGF(INFO, "one and two: ", 1, " and ", 2);
+		LOGF(G3LOG_DEBUG, "float 2.14: ", 1000 / 2.14f);
+		LOGF(G3LOG_DEBUG, "pi double: ", pi_d);
+		LOGF(G3LOG_DEBUG, "pi float: ", pi_f);
+		LOGF(G3LOG_DEBUG, "pi float (width 10) %10.2f: ", pi_f);
+		LOGF(INFO, "pi float printf:%f", pi_f);
+
+		//// FATAL SECTION
+		//CHECK(1 == 2)
+		   // << "Test to see if contract works: onetwothree: " << 123
+		   // << ". This should be at the end of the log, and will exit this example";
+
+	}
 	/*
 	tuple append
 	*/

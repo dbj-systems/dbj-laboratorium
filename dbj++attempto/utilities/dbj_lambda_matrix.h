@@ -200,12 +200,14 @@ template<size_t X>
 DBJ_TEST_UNIT(compile_time_insider)
 {
 	ten_to_24<11>::value_type eleven = ten_to_24<11>::value ;
+
+	noexcept(eleven);
 	// ten_to_24<9>  nine; // does not compile
 
 	auto xxx = indexor<11>();
 
 	using one_to_nine = ct_insider<size_t, 1, 9>;
-	auto checker = [] ( one_to_nine otn ) {
+	auto checker = [] ( one_to_nine ) {
 	};
 
 	using s1 = std::integral_constant<size_t, 1>;

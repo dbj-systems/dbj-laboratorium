@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="src\dbj++log\active.hpp" />
+    <ClInclude Include="src\dbj++log\atomicbool.hpp" />
+    <ClInclude Include="src\dbj++log\crashhandler.hpp" />
+    <ClInclude Include="src\dbj++log\dbj++log.hpp" />
+    <ClInclude Include="src\dbj++log\filesink.hpp" />
+    <ClInclude Include="src\dbj++log\future.hpp" />
+    <ClInclude Include="src\dbj++log\logcapture.hpp" />
+    <ClInclude Include="src\dbj++log\loglevels.hpp" />
+    <ClInclude Include="src\dbj++log\logmessage.hpp" />
+    <ClInclude Include="src\dbj++log\logworker.hpp" />
+    <ClInclude Include="src\dbj++log\moveoncopy.hpp" />
+    <ClInclude Include="src\dbj++log\shared_queue.hpp" />
+    <ClInclude Include="src\dbj++log\sink.hpp" />
+    <ClInclude Include="src\dbj++log\sinkhandle.hpp" />
+    <ClInclude Include="src\dbj++log\sinkwrapper.hpp" />
+    <ClInclude Include="src\dbj++log\stacktrace_windows.hpp" />
+    <ClInclude Include="src\dbj++log\stlpatch_future.hpp" />
+    <ClInclude Include="src\dbj++log\time.hpp" />
+    <ClInclude Include="src\filesinkhelper.ipp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\crashhandler_windows.cpp" />
+    <ClCompile Include="src\filesink.cpp" />
+    <ClCompile Include="src\g3log.cpp" />
+    <ClCompile Include="src\logcapture.cpp" />
+    <ClCompile Include="src\loglevels.cpp" />
+    <ClCompile Include="src\logmessage.cpp" />
+    <ClCompile Include="src\logworker.cpp" />
+    <ClCompile Include="src\stacktrace_windows.cpp" />
+    <ClCompile Include="src\time.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\g3log\README.markdown" />
+  </ItemGroup>
+</Project>
