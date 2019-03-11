@@ -33,6 +33,6 @@
     <ClCompile Include="src\time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\g3log\README.markdown" />
+    <None Include="..\..\..\g3log\README.md" />
   </ItemGroup>
 </Project>

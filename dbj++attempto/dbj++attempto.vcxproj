@@ -196,9 +196,6 @@
     <ProjectReference Include="..\dbj++clib\dbj++clib.vcxproj">
       <Project>{fb3f59bf-e33a-473b-a1f2-7e90510b13a6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
-      <Project>{79fd905f-2eff-424a-b7f7-0ad870bc6847}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\dbj++sql\dbj++sql.vcxproj">
       <Project>{7f0bed4b-5cd0-45e8-aa55-b8c56b10e6cf}</Project>
     </ProjectReference>
