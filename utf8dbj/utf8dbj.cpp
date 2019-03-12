@@ -14,8 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "pch.h"
+
+#include "../dbj++log/src/dbj++log/dbj++log.hpp"
+
 using namespace std;
 using namespace std::string_view_literals;
+
 
 	// return font name and true/false 
 	// depending on is it true type or not
@@ -35,6 +39,8 @@ static auto console_font_info()
 
 int main()
 {
+
+	LOGF(WARNING, "Printf-style syntax is also %s", "available");
 	/*
 	 To change the code page of the console from your program
 	 https://docs.microsoft.com/en-us/windows/console/setconsoleoutputcp

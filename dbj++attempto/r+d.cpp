@@ -17,17 +17,6 @@
 
 #include "..\dbj++log\src\dbj++log\dbj++log.hpp"
 
-#ifdef _DEBUG
-#if ! defined( _WIN64 )
-#pragma comment(lib, "D : /GitHub/dbj - systems/dbj - laboratorium/Debug/dbj++log.lib")
-#else
-// D:\GitHub\dbj-systems\dbj-laboratorium\x64\Debug\dbj++log.lib
-#pragma comment(lib, "D : \\GitHub\\dbj - systems\\dbj - laboratorium\\x64\\Debug\\dbjpplog.lib")
-#endif
-#else
-#pragma comment(lib, "../Release/SimpleMath.lib")
-#endif
-
 namespace dbj_r_and_d {
 
 	DBJ_TEST_UNIT( dbjpp_log ) 

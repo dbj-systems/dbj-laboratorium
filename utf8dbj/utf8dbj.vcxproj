@@ -169,6 +169,11 @@
   <ItemGroup>
     <None Include="readme.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
+      <Project>{79fd905f-2eff-424a-b7f7-0ad870bc6847}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

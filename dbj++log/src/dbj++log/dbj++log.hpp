@@ -252,11 +252,9 @@ namespace dbj::pplog {
 	inline char const * g3log_default_initialized_log_file_name
 		= []() // -> char const *
 	{
-		static char const * app_name = __argv[0];
-		_ASSERTE(app_name);
 
 		auto handle = ::dbj::pplog::g3log_global_unique_worker
-			->addDefaultLogger(app_name, G3LOG_PATH_TO_LOG_FILE);
+			->addDefaultLogger("DBJ_LOG", G3LOG_PATH_TO_LOG_FILE);
 
 		::g3::initializeLogging(g3log_global_unique_worker.get());
 		std::future<std::string> log_file_name = handle->call(& ::g3::FileSink::fileName);
