@@ -15,8 +15,6 @@ limitations under the License.
 */
 #include "pch.h"
 
-#include "../dbj++log/src/dbj++log/dbj++log.hpp"
-
 using namespace std;
 using namespace std::string_view_literals;
 
@@ -39,8 +37,6 @@ static auto console_font_info()
 
 int main()
 {
-
-	LOGF(WARNING, "Printf-style syntax is also %s", "available");
 	/*
 	 To change the code page of the console from your program
 	 https://docs.microsoft.com/en-us/windows/console/setconsoleoutputcp
