@@ -39,7 +39,7 @@ namespace dbj::db {
 
 			s::array<char, 64> buf{ {0} };
 			auto retval [[maybe_unused]] = ::sprintf_s(buf.data(), buf.size(),
-				"\n|%s|%s| ", tst.c_str(), two_
+				"\n|%s|%8s| ", tst.c_str(), two_
 			);
 			return { buf.data() } ;
 			// ec_ stays clear
@@ -81,7 +81,7 @@ namespace dbj::db {
 			}
 		}
 
-		void info(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
+		inline void info(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "info"sv;
 			error_code ec;
@@ -89,7 +89,7 @@ namespace dbj::db {
 			_ASSERTE(!ec);
 		}
 
-		void warning(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
+		inline void warning(std::string_view msg1_, std::string_view msg2_= ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "warning"sv;
 			error_code ec;
@@ -97,7 +97,7 @@ namespace dbj::db {
 			_ASSERTE(!ec);
 		}
 
-		void error(std::string_view msg1_, std::string_view msg2_ = ""sv) noexcept
+		inline void error(std::string_view msg1_, std::string_view msg2_ = ""sv) noexcept
 		{
 			static constexpr auto prompt_ = "error"sv;
 			error_code ec;

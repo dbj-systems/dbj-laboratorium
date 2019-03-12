@@ -89,14 +89,17 @@ inline auto
 			// if no errors, this file will stay empty
 			// so header will have the role
 			std::error_code ec;
-			std::string tst = u::make_time_stamp(ec); // size returned is max 23
+			std::string tst = u::make_time_stamp(ec, u::TIME_STAMP_FULL_MASK); // size returned is max 23
 
 			if (ec) {
 				perror("\n\nCan't make the time stamp --" __FUNCSIG__ "\n\n" );
 				perror(ec.message().c_str());
 				exit(1);
 			}
-			::fprintf(stderr, "%s | created DBJ++SQL log file -- %s", tst.c_str(), file_path_.data());
+			
+			::fprintf(stderr, "DBJ++SQL log file -- %s", file_path_.data());
+			::fprintf(stderr, "\nCreated -- %s", tst.c_str());
+			::fprintf(stderr, "\n\n");
 		}
 
 		~log_file() {
