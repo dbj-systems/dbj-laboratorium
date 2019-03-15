@@ -19,43 +19,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\dbj++log\active.hpp" />
-    <ClInclude Include="src\dbj++log\atomicbool.hpp" />
-    <ClInclude Include="src\dbj++log\crashhandler.hpp" />
-    <ClInclude Include="src\dbj++log\dbj++log.hpp" />
-    <ClInclude Include="src\dbj++log\filesink.hpp" />
-    <ClInclude Include="src\dbj++log\future.hpp" />
-    <ClInclude Include="src\dbj++log\logcapture.hpp" />
-    <ClInclude Include="src\dbj++log\loglevels.hpp" />
-    <ClInclude Include="src\dbj++log\logmessage.hpp" />
-    <ClInclude Include="src\dbj++log\logworker.hpp" />
-    <ClInclude Include="src\dbj++log\moveoncopy.hpp" />
-    <ClInclude Include="src\dbj++log\shared_queue.hpp" />
-    <ClInclude Include="src\dbj++log\sink.hpp" />
-    <ClInclude Include="src\dbj++log\sinkhandle.hpp" />
-    <ClInclude Include="src\dbj++log\sinkwrapper.hpp" />
-    <ClInclude Include="src\dbj++log\stacktrace_windows.hpp" />
-    <ClInclude Include="src\dbj++log\stlpatch_future.hpp" />
-    <ClInclude Include="src\dbj++log\time.hpp" />
-    <ClInclude Include="src\filesinkhelper.ipp" />
+    <ClCompile Include="dbj\dbj_log.cpp" />
+    <ClCompile Include="dbj\dbj_log_file.cpp" />
+    <ClCompile Include="dbj\dbj_util.cpp" />
+    <ClCompile Include="syslog\syslogc.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\crashhandler_windows.cpp" />
-    <ClCompile Include="src\filesink.cpp" />
-    <ClCompile Include="src\g3log.cpp" />
-    <ClCompile Include="src\logcapture.cpp" />
-    <ClCompile Include="src\loglevels.cpp" />
-    <ClCompile Include="src\logmessage.cpp" />
-    <ClCompile Include="src\logworker.cpp" />
-    <ClCompile Include="src\stacktrace_windows.cpp" />
-    <ClCompile Include="src\time.cpp" />
+    <ClInclude Include="dbj++log.h" />
+    <ClInclude Include="dbj\dbj_util.h" />
+    <ClInclude Include="syslog\syslog.h" />
+    <ClInclude Include="test\dbj_log_test.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\g3log\README.md" />
+    <None Include="..\dbj++sql\README.MD" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{79FD905F-2EFF-424A-B7F7-0AD870BC6847}</ProjectGuid>
+    <ProjectGuid>{1B5860B3-1DE7-4232-9080-81AF60E1BD7F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dbjlog</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
@@ -65,27 +50,27 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -107,19 +92,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>dbj_pp_log</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>dbj_pp_log</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>dbj_pp_log</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>dbj_pp_log</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

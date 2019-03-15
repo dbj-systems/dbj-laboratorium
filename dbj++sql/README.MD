@@ -1,22 +1,88 @@
 
-# yapi -- dbj++sql 
+# dbj++log
+### syslog + local log 
 
-Yet Another API (YAPI)
+> **`syslog` project started from is Copyright (c) 2008 Secure Endpoints Inc.**
 
-#### Using SQLITE(3) from standard  C++
-
-(2019Q1, standard C++ is C++17)
 
 > Disclaimer: <br/>
-> Immediatly usable in your projects. <br/>
 > This release is Proof Of Concept (POC). <br/>
 > Use at your own risk.
 
-For descriptions and instructions [please start from here](https://dbj.org/c-sqlite-yet-another-api/).
 
-This is a static library. SQLITE 3 is linked in. 
+Currently RFC3164 is foollowed. Plan is to develop a support for the newer one: RFC5424.
 
-Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
+NOTE: `stderr` output is redirected to the local log file.
+In case you do not need or want that, please ammend the simple code doing it.
+Folder and file are under `%programdata%`. Names are here:
+
+```cpp
+/* dbj_util.h */
+	static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
+	static char const * DBJ_LOG_FILE_NAME = "dbj++.log";
+```
+
+## The API
+
+Currently the user needs to initialise the logging "manually"
+
+```cpp
+    // must know the server IP address
+    // It cab be coming from, the ini file, the app manifest
+    // and  so on?
+	init_syslog("192.168.0.202");
+```
+
+Next step is optional. But this is how you control the logging.
+
+```cpp
+/* 
+first argument is the "tag" aka the "identity"
+if NULL it will appear as "Anonymous", in the log
+
+Second argument are the options defining the behaviour of 
+the logging
+
+if LOG_PERROR is among them every line sent to the syslog server
+will be also written in the local log file.
+*/
+openlog(NULL, LOG_PERROR | LOG_CONS | LOG_PID | LOG_NDELAY, LOG_USER);
+``` 
+Other than  LOG_PERROR` special meaning the whole syslog behaviour is standard, as described on  numerous pages on the web.
+`syslog.h` header in here is 99% stndard and you are free to browse through it to understand all the options.
+
+there is also a `dbj_log_test.h` where we have a simple testing functions, from where you might start, using the syslog(), with this added functionality.
+
+```cpp
+/* 
+    standard loging as ever before since 1983 
+*/
+	syslog(LOG_EMERG,	"%s", "LOG_EMERG"	);
+	syslog(LOG_ALERT,	"%s", "LOG_ALERT"	);
+	syslog(LOG_CRIT,	"%s", "LOG_CRIT"	);
+	syslog(LOG_ERR,		"%s", "LOG_ERR"		);
+	syslog(LOG_WARNING, "%s", "LOG_WARNING" );
+	syslog(LOG_NOTICE,	"%s", "LOG_NOTICE"	);
+	syslog(LOG_INFO,	"%s", "LOG_INFO"	);
+	syslog(LOG_DEBUG,	"%s", argv[0]	);
+```
+
+### Async behaviour and Multi Threading
+
+This is all asynchronous as much as windows sockets are asynchronous.
+But all the impotrtant functions in here are capable of sequential working, 
+in the presence of multiple threads.
+
+### WARNING: Messages are composed following the RFC3164
+
+Make sure you syslog server can understand them. Which is the case with almost all of them. 
+This is simply because there are milions of devices in use (nad will be for a long time to come) who are emitting 
+syslog messages in the RFC3164 format. Device on the network, not PC's or laptops.
+
+> This is a static library. 
+
+> Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
+> (In 2019Q1, standard C++ was C++17)
 
 
 -------------------------------------

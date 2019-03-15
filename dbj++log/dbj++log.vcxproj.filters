@@ -1,38 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="src\dbj++log\active.hpp" />
-    <ClInclude Include="src\dbj++log\atomicbool.hpp" />
-    <ClInclude Include="src\dbj++log\crashhandler.hpp" />
-    <ClInclude Include="src\dbj++log\dbj++log.hpp" />
-    <ClInclude Include="src\dbj++log\filesink.hpp" />
-    <ClInclude Include="src\dbj++log\future.hpp" />
-    <ClInclude Include="src\dbj++log\logcapture.hpp" />
-    <ClInclude Include="src\dbj++log\loglevels.hpp" />
-    <ClInclude Include="src\dbj++log\logmessage.hpp" />
-    <ClInclude Include="src\dbj++log\logworker.hpp" />
-    <ClInclude Include="src\dbj++log\moveoncopy.hpp" />
-    <ClInclude Include="src\dbj++log\shared_queue.hpp" />
-    <ClInclude Include="src\dbj++log\sink.hpp" />
-    <ClInclude Include="src\dbj++log\sinkhandle.hpp" />
-    <ClInclude Include="src\dbj++log\sinkwrapper.hpp" />
-    <ClInclude Include="src\dbj++log\stacktrace_windows.hpp" />
-    <ClInclude Include="src\dbj++log\stlpatch_future.hpp" />
-    <ClInclude Include="src\dbj++log\time.hpp" />
-    <ClInclude Include="src\filesinkhelper.ipp" />
+    <Filter Include="dbj">
+      <UniqueIdentifier>{347267f8-05ac-4b2c-bf15-4d62753e6eda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="syslog">
+      <UniqueIdentifier>{c041d46e-6597-4fd7-91e9-e42381e3347e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{897f6f42-d7c0-4724-939d-7634d930c834}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\crashhandler_windows.cpp" />
-    <ClCompile Include="src\filesink.cpp" />
-    <ClCompile Include="src\g3log.cpp" />
-    <ClCompile Include="src\logcapture.cpp" />
-    <ClCompile Include="src\loglevels.cpp" />
-    <ClCompile Include="src\logmessage.cpp" />
-    <ClCompile Include="src\logworker.cpp" />
-    <ClCompile Include="src\stacktrace_windows.cpp" />
-    <ClCompile Include="src\time.cpp" />
+    <ClCompile Include="dbj\dbj_log.cpp">
+      <Filter>dbj</Filter>
+    </ClCompile>
+    <ClCompile Include="dbj\dbj_log_file.cpp">
+      <Filter>dbj</Filter>
+    </ClCompile>
+    <ClCompile Include="dbj\dbj_util.cpp">
+      <Filter>dbj</Filter>
+    </ClCompile>
+    <ClCompile Include="syslog\syslogc.c">
+      <Filter>syslog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\g3log\README.md" />
+    <ClInclude Include="dbj\dbj_util.h">
+      <Filter>dbj</Filter>
+    </ClInclude>
+    <ClInclude Include="syslog\syslog.h">
+      <Filter>syslog</Filter>
+    </ClInclude>
+    <ClInclude Include="test\dbj_log_test.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj++log.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\dbj++sql\README.MD" />
   </ItemGroup>
 </Project>
