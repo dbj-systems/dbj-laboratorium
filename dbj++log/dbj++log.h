@@ -11,6 +11,8 @@ Currently RFC3164 is foollowed. Plas is to develop a support for the newer one: 
 
 syslog project started from is Copyright (c) 2008 Secure Endpoints Inc.
 
+WARNING: syslog() is UNIX and is blisfully unaware of wchar_t
+
 */
 
 #include "syslog/syslog.h"

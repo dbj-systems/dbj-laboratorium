@@ -25,8 +25,10 @@ extern "C" static void async_log_write(
 {
 	_ASSERT(message.size() > 1);
 	// pay attention, no new lines added here!
-	auto log_to_stderr = [](char const * s1) {
-		::fprintf(stderr, "\n%s", s1);
+	auto log_to_stderr = [](char const * s1) 
+	{
+		_ASSERTE(s1);
+		dbj_local_log_file_write(s1);
 	};
 
 	(void)std::async(std::launch::async, [&] {
@@ -54,7 +56,7 @@ static BOOL init_critical() {
 
 static BOOL initialized = init_critical();
 
-void dbj_exit_write_to_local_log(void)
+static void dbj_exit_write_to_local_log(void)
 {
 	if (!initialized)
 		return;
@@ -62,14 +64,37 @@ void dbj_exit_write_to_local_log(void)
 	initialized = FALSE;
 }
 
-void dbj_write_to_local_log( char * const msg_ ,  int locked_ ) 
+void dbj_write_to_local_log(
+	char * priority_name_ ,
+	char * timestamp_rfc3164,
+	char * local_hostname,
+	char * syslog_ident,
+	char * syslog_procid_str,
+	int lock_for_mt ,
+	const char * fmt_string,
+	va_list the_message )
 {
-	DBJ_VERIFY(msg_);
+	DBJ_VERIFY(priority_name_ && timestamp_rfc3164 && local_hostname && syslog_ident && syslog_procid_str && fmt_string);
 	DBJ_VERIFY(initialized);
+
+	char datagramm[BUFSIZ * 2] = { 0 }; // yes we hardcode the datagramm size to 1KB
+	static const unsigned datagramm_size = sizeof(datagramm);
 	   
-	if (! locked_ ) ::EnterCriticalSection(&local_log);
-	async_log_write(msg_);
-	if (!locked_) ::LeaveCriticalSection(&local_log);
+	if ( lock_for_mt) ::EnterCriticalSection(&local_log);
+
+	int header_len = sprintf_s(datagramm, datagramm_size,
+		"\n%8s |%20s |%16s |%16s%s | ",
+		priority_name_, timestamp_rfc3164 ,
+		local_hostname, syslog_ident, syslog_procid_str);
+
+	// append the message
+	DBJ_VERIFY( 1 < vsprintf_s(datagramm + header_len, datagramm_size - header_len, fmt_string, the_message));
+
+	async_log_write(datagramm);
+	// above requires write buffer and mechanism that will empty the buffer on exit?
+	// No! stderr is never buffered ... each write immediately goes to disk.
+
+	if ( lock_for_mt) ::LeaveCriticalSection(&local_log);
 }
 
 

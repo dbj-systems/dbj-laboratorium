@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -7,8 +9,13 @@ extern "C" {
 	static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
 	static char const * DBJ_LOG_FILE_NAME = "dbj++.log";
 
+	/*
+	Write to the local log file
+	*/
+	void dbj_local_log_file_write(const char * );
+
 	/* prints the error and exits the app */
-	void dbj_terror(char const * msg_, char const * file_, const unsigned line_);
+	void dbj_terror(char const * /*msg_*/, char const * /*file_*/, const unsigned /*line_*/);
 
 	static char const * DBJ_TIME_STAMP_FULL_MASK
 		= "%Y-%m-%d %H:%M:%S";
@@ -24,13 +31,32 @@ extern "C" {
 
 	if timestamp_mask_ is NULL, TIME_STAMP_SIMPLE_MASK will be used
 	*/
-	char * dbj_time_stamp(char const * timestamp_mask_);
+	char * dbj_time_stamp(char const * /*timestamp_mask_*/);
 
-	// set the locked_ to TRUE for internal locking
-	void dbj_write_to_local_log(char * const, int locked_);
+	/*
+	old fashioned timestamp as required by RFC3164
+	is without milli seconds
+	*/
+	void dbj_timestamp_rfc3164(char(* /*timestamp_rfc3164*/ )[0xFF], int /*require_milli_secs*/);
 
-	const char * dbj_get_envvar(char * varname_);
+
+	/*
+	format the message by the rules of RFC3164
+	and then write to the local log file
+	*/
+	void dbj_write_to_local_log(
+		char * /* priority_name_ */,
+		char * /* timestamp_rfc3164*/,
+		char * /* local_hostname*/, 
+		char * /* syslog_ident*/, 
+		char * /* syslog_procid_str*/,
+		int    /* lock_for_mt*/,
+		const char * /* fmt_string*/,
+		va_list /* the message */);
 	
+
+	const char * dbj_get_envvar(char * /*varname_*/);
+
 #ifdef __cplusplus
 }	/*extern "C" */
 #endif

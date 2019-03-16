@@ -39,8 +39,9 @@
 #include <string.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include "syslog.h"
 #include "../dbj/dbj_util.h"
+#define SYSLOG_NAMES
+#include "syslog.h"
 
 static BOOL        dbj_local_log_ = FALSE;
 
@@ -213,7 +214,7 @@ void openlog( char* ident, int option, int facility )
 			dbj_local_log_ = TRUE;
 
     n = sizeof(local_hostname);
-    if( !GetComputerName( (LPWSTR)local_hostname, &n ) )
+    if( ! GetComputerNameA( local_hostname, &n ) )
         goto done;
 
     syslog_socket = INVALID_SOCKET;
@@ -345,6 +346,7 @@ void vsyslog( int pri, char* fmt, va_list ap )
 		stm.wYear, stm.wMonth, stm.wDay, stm.wHour, stm.wMinute, stm.wSecond, stm.wMilliseconds,
 		local_hostname, syslog_ident, syslog_procid_str);
 */
+	/* dbj comment: this does not clean them all */
     vsprintf_s( datagramm + len, datagramm_size - len, fmt, ap );
     p = strchr( datagramm, '\n' );
     if( p )
@@ -356,9 +358,26 @@ void vsyslog( int pri, char* fmt, va_list ap )
     sendto( syslog_socket, datagramm, strlen(datagramm), 0, (SOCKADDR*) &syslog_hostaddr, sizeof(SOCKADDR_IN) );
 
 	/* DBJ added */
-	if (dbj_local_log_)
-		/* FALSE is for no locking in there*/
-		dbj_write_to_local_log(datagramm, FALSE);
+	if (dbj_local_log_) 
+	{
+		int priority_ = LOG_PRI(pri);
+		CODE pri_name = prioritynames[priority_];
+
+		// char(*timestamp_rfc3164)[0xFF];
+		char timestamp_rfc3164[0xFF] = {0};
+		// TRUE == ask for milliseconds too
+		// Note: many syslog servers can not take milli seconds
+		// and produce skewed output
+		dbj_timestamp_rfc3164( timestamp_rfc3164, TRUE );
+
+		dbj_write_to_local_log(
+			pri_name.c_name,
+			timestamp_rfc3164,
+			local_hostname, syslog_ident, syslog_procid_str,
+			FALSE,
+			fmt, /*va_list*/ ap	);
+		/* last FALSE is for no locking in there*/
+	}
  done:
     LeaveCriticalSection(&cs_syslog);
 }

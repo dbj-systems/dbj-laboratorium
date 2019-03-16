@@ -176,6 +176,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
+      <Project>{1b5860b3-1de7-4232-9080-81af60e1bd7f}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\dbj++sql\dbj++sql.vcxproj">
       <Project>{7f0bed4b-5cd0-45e8-aa55-b8c56b10e6cf}</Project>
     </ProjectReference>

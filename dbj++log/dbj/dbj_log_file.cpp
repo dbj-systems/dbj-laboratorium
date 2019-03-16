@@ -69,6 +69,7 @@ inline auto
 				exit(1);
 			}
 
+			// here implement file creation with count in the file name added
 			if (fopen_s(&log_file_, file_path_.data(), "w") != 0)
 			{
 				puts("\n\nCan't open file -- " __FUNCSIG__ "\n\n");
@@ -83,22 +84,17 @@ inline auto
 				exit(1);
 			}
 			// quick and dirty file header
-			// if no errors, this file will stay empty
+			// if no errors, this file will stays empty
 			// so header will have the role
-			std::string tst = dbj_time_stamp(DBJ_TIME_STAMP_FULL_MASK); // size returned is max 23
-
-			if (tst.empty()) {
-				perror("\n\nCan't make the time stamp --" __FUNCSIG__ "\n\n" );
-				exit(1);
-			}
 			
-			::fprintf(stderr, "DBJ++LOCAL log file -- %s", file_path_.data());
-			::fprintf(stderr, "\nCreated -- %s", tst.c_str());
-			::fprintf(stderr, "\n\n");
+			::fprintf(stderr, "DBJ++ log file | %s | %s\n", file_path_.data(),
+				dbj_time_stamp(DBJ_TIME_STAMP_FULL_MASK));
 		}
 
 		~log_file() {
 			// Flush stderr stream buffer 
+			// not strictly necessary as
+			// stderr is never buffered
 			fflush(stderr);
 			fclose(log_file_);
 			// Restore original stderr
@@ -140,4 +136,46 @@ inline auto
 	static log_file const & log_file_instance 
 		= log_file::instance(DBJ_LOG_FILE_FOLDER, DBJ_LOG_FILE_NAME);
 
+	static int is_log_file_valid() {
+		return log_file_instance.valid();
+	}
+
 } // dbj_local_log nspace
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+static CRITICAL_SECTION local_log;
+
+void dbj_exit_write_to_local_log(void);
+
+static BOOL init_critical() {
+	InitializeCriticalSection(&local_log);
+	atexit(dbj_exit_write_to_local_log);
+	return TRUE;
+}
+
+static BOOL initialized = init_critical();
+
+static void dbj_exit_write_to_local_log(void)
+{
+	if (!initialized)
+		return;
+
+	fflush(stderr);
+
+	DeleteCriticalSection(&local_log);
+	initialized = FALSE;
+}
+
+void dbj_local_log_file_write(const char * text_ ) 
+{
+	if (0 == initialized)
+		return ;
+
+	EnterCriticalSection(&local_log);
+	_ASSERTE(text_);
+	DBJ_VERIFY(dbj_local_log::is_log_file_valid());
+	fprintf(stderr, "%s", text_);
+	LeaveCriticalSection(&local_log);
+}
