@@ -5,6 +5,7 @@ inherently C *and* UNIX like lib
 */
 #include "dbj++log.h"
 #include "syslog/syslog.h"
+#include <cstdio>
 
 namespace dbj::log {
 
@@ -26,74 +27,11 @@ namespace dbj::log {
 			openlog((char*)(tag_ == nullptr ? NULL : tag_), opt_1, opt_2);
 		}
 
-		void syslog_emergency(const char *format_, ...)
+		void the_great_decoupler(syslog_level level_, const char * message_ )
 		{
 			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_EMERG, format_, args_);
-			va_end(args_);
-		}
-		void syslog_alert(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_ALERT, format_, args_);
-			va_end(args_);
+			vsyslog((int)level_, message_);
 		}
 
-		void syslog_critical(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_CRIT, format_, args_);
-			va_end(args_);
-		}
 
-		void syslog_error(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_ERR, format_, args_);
-			va_end(args_);
-		}
-
-		void syslog_warning(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_WARNING, format_, args_);
-			va_end(args_);
-		}
-
-		void syslog_notice(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_NOTICE, format_, args_);
-			va_end(args_);
-		}
-
-		void syslog_info(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_INFO, format_, args_);
-			va_end(args_);
-		}
-
-		void syslog_debug(const char *format_, ...)
-		{
-			if (!is_syslog_initialized()) return;
-			va_list args_;
-			va_start(args_, format_);
-			syslog(LOG_DEBUG, format_, args_);
-			va_end(args_);
-		}
 } // dbj::log
