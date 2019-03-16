@@ -21,7 +21,7 @@ extern "C" inline int dbj_log_test( int argc, char * argv[] )
 // some syslog servers will move the tag to the message if tag len > 128
 // some will truncate it to len 128
 // tag as app base name, also log to local log file, source is "user"
-	syslog_open(basename(argv[0]));
+	syslog_open(basename(argv[0]), syslog_open_options::log_perror );
 
 // openlog(NULL, LOG_PERROR );
 // openlog(argv[0], LOG_PERROR , LOG_USER );
