@@ -22,6 +22,7 @@
     <ClCompile Include="dbj\dbj_log.cpp" />
     <ClCompile Include="dbj\dbj_log_file.cpp" />
     <ClCompile Include="dbj\dbj_util.cpp" />
+    <ClCompile Include="dbj_pp_log.cpp" />
     <ClCompile Include="syslog\syslogc.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>

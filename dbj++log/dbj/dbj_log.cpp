@@ -71,10 +71,11 @@ void dbj_write_to_local_log(
 	char * syslog_ident,
 	char * syslog_procid_str,
 	int lock_for_mt ,
-	const char * fmt_string,
-	va_list the_message )
+	const char * the_message )
 {
-	DBJ_VERIFY(priority_name_ && timestamp_rfc3164 && local_hostname && syslog_ident && syslog_procid_str && fmt_string);
+	DBJ_VERIFY(priority_name_ && timestamp_rfc3164 && local_hostname 
+		&& syslog_ident && syslog_procid_str && the_message);
+
 	DBJ_VERIFY(initialized);
 
 	char datagramm[BUFSIZ * 2] = { 0 }; // yes we hardcode the datagramm size to 1KB
@@ -82,13 +83,10 @@ void dbj_write_to_local_log(
 	   
 	if ( lock_for_mt) ::EnterCriticalSection(&local_log);
 
-	int header_len = sprintf_s(datagramm, datagramm_size,
-		"\n%8s |%20s |%16s |%16s%s | ",
+	DBJ_VERIFY( 1 < sprintf_s(datagramm, datagramm_size,
+		"\n%8s |%20s |%16s |%16s%s | %s",
 		priority_name_, timestamp_rfc3164 ,
-		local_hostname, syslog_ident, syslog_procid_str);
-
-	// append the message
-	DBJ_VERIFY( 1 < vsprintf_s(datagramm + header_len, datagramm_size - header_len, fmt_string, the_message));
+		local_hostname, syslog_ident, syslog_procid_str, the_message));
 
 	async_log_write(datagramm);
 	// above requires write buffer and mechanism that will empty the buffer on exit?

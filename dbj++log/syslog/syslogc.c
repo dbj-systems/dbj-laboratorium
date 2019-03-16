@@ -68,6 +68,11 @@ volatile BOOL initialized = FALSE;
 BOOL wsa_initialized = FALSE;
 CRITICAL_SECTION cs_syslog;
 
+/* DBJ added */
+BOOL is_syslog_initialized() {
+	return initialized;
+}
+
 void init_syslog(const char * hostname)
 {
     WSADATA wsd;
@@ -294,11 +299,18 @@ int setlogmask( int mask )
  */
 void syslog( int pri, const char *fmt, ... )
 {
-    va_list ap;
+	if (!initialized) /* dbj added */
+		return;
 
-    va_start( ap, fmt );
-    vsyslog( pri, (char *)fmt, ap );
-    va_end( ap );
+	// Caution! the message must be smaller than SYSLOG_DGRAM_SIZE
+	char  message_[SYSLOG_DGRAM_SIZE] = {0};
+
+	va_list ap;
+	va_start( ap, fmt );
+		DBJ_VERIFY( 1 < vsprintf_s(message_, sizeof(message_), fmt, ap) ) ;
+	va_end(ap);
+
+    vsyslog( pri, message_ );
 }
 
 /******************************************************************************
@@ -306,7 +318,7 @@ void syslog( int pri, const char *fmt, ... )
  *
  * Generate a log message using FMT and using arguments pointed to by AP.
  */
-void vsyslog( int pri, char* fmt, va_list ap )
+void vsyslog( int pri, const char * message_ )
 {
     static char *month[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
@@ -334,10 +346,10 @@ void vsyslog( int pri, char* fmt, va_list ap )
 
 /* THIS IS https://tools.ietf.org/html/rfc3164 FORMAT */
 	len = sprintf_s( datagramm, sizeof(datagramm),
-                     "<%d>%s %2d %02d:%02d:%02d %s %s%s: ",
+                     "<%d>%s %2d %02d:%02d:%02d %s %s%s: %s",
                      pri,
                      month[ stm.wMonth - 1 ], stm.wDay, stm.wHour, stm.wMinute, stm.wSecond,
-                     local_hostname, syslog_ident, syslog_procid_str );
+                     local_hostname, syslog_ident, syslog_procid_str, message_ );
 /* RFC5424 format */
 /*
 	len = sprintf_s(datagramm, sizeof(datagramm),
@@ -346,16 +358,15 @@ void vsyslog( int pri, char* fmt, va_list ap )
 		stm.wYear, stm.wMonth, stm.wDay, stm.wHour, stm.wMinute, stm.wSecond, stm.wMilliseconds,
 		local_hostname, syslog_ident, syslog_procid_str);
 */
-	/* dbj comment: this does not clean them all */
-    vsprintf_s( datagramm + len, datagramm_size - len, fmt, ap );
+	/* dbj comment: this does not clean them all, just the first if found */
     p = strchr( datagramm, '\n' );
-    if( p )
-        *p = 0;
+	if (p)
+		*p = ' '; /* 0; dbj replaced 0 with space */
     p = strchr( datagramm, '\r' );
-    if( p )
-        *p = 0;
+	if (p)
+		*p = ' '; /* 0;  dbj replaced 0 with space */
 
-    sendto( syslog_socket, datagramm, strlen(datagramm), 0, (SOCKADDR*) &syslog_hostaddr, sizeof(SOCKADDR_IN) );
+    sendto( syslog_socket, datagramm, (int)strlen(datagramm), 0, (SOCKADDR*) &syslog_hostaddr, sizeof(SOCKADDR_IN) );
 
 	/* DBJ added */
 	if (dbj_local_log_) 
@@ -363,19 +374,19 @@ void vsyslog( int pri, char* fmt, va_list ap )
 		int priority_ = LOG_PRI(pri);
 		CODE pri_name = prioritynames[priority_];
 
-		// char(*timestamp_rfc3164)[0xFF];
-		char timestamp_rfc3164[0xFF] = {0};
+		typedef char(*timestamp_type)[0xFF];
+		char timestamp_[0xFF] = {0};
 		// TRUE == ask for milliseconds too
 		// Note: many syslog servers can not take milli seconds
 		// and produce skewed output
-		dbj_timestamp_rfc3164( timestamp_rfc3164, TRUE );
+		dbj_timestamp_rfc3164( (timestamp_type)timestamp_, TRUE );
 
 		dbj_write_to_local_log(
-			pri_name.c_name,
-			timestamp_rfc3164,
+			(char *)pri_name.c_name,
+			timestamp_,
 			local_hostname, syslog_ident, syslog_procid_str,
 			FALSE,
-			fmt, /*va_list*/ ap	);
+			message_ );
 		/* last FALSE is for no locking in there*/
 	}
  done:

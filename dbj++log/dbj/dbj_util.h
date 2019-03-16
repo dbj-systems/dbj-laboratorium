@@ -51,8 +51,7 @@ extern "C" {
 		char * /* syslog_ident*/, 
 		char * /* syslog_procid_str*/,
 		int    /* lock_for_mt*/,
-		const char * /* fmt_string*/,
-		va_list /* the message */);
+		const char * /* the message */ );
 	
 
 	const char * dbj_get_envvar(char * /*varname_*/);
@@ -62,5 +61,5 @@ extern "C" {
 #endif
 
 // decades old VERIFY macro
-#define DBJ_VERIFY_(x, file, line ) if (false == (x) ) dbj_terror( "  " #x " , failed at", file, line )
+#define DBJ_VERIFY_(x, file, line ) if (!(x) ) dbj_terror( "  " #x " , failed at", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)

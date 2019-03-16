@@ -24,6 +24,7 @@
     <ClCompile Include="syslog\syslogc.c">
       <Filter>syslog</Filter>
     </ClCompile>
+    <ClCompile Include="dbj_pp_log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj\dbj_util.h">

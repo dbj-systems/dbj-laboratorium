@@ -65,7 +65,7 @@
 				/* mark "facility" */
 #define	INTERNAL_MARK	LOG_MAKEPRI(LOG_NFACILITIES, 0)
 typedef struct _code {
-	char	*c_name;
+	char const	*c_name; /* dbj added const */
 	int	c_val;
 } CODE;
 
@@ -170,6 +170,9 @@ CODE facilitynames[] =
 extern "C" {
 #endif
 
+	// dbj added
+	int is_syslog_initialized();
+
 /* Close desriptor used to write to system logger.  */
 extern void closelog (void);
 
@@ -182,8 +185,8 @@ extern int setlogmask (int __mask);
 /* Generate a log message using FMT string and option arguments.  */
 extern void syslog (int __pri, const char *__fmt, ...);
 
-/* Generate a log message using FMT and using arguments pointed to by AP.  */
-extern void vsyslog (int __pri, char *__fmt, va_list __ap);
+/* send the log message  by the priority given */
+extern void vsyslog (int, const char * );
 
 #ifdef _WIN32
     /* Windows specific.
