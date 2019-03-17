@@ -110,6 +110,7 @@ The total `datagramm`
 Here is the output of the above on a local syslog server/manager
 
 [![Local syslog server](./media/syslogwatcher.com.jpg)](https://syslogwatcher.com "syslogwatcher")  
+*SysLog Watcher in action (click on the image to find the 'Donwloads' page)*
 
 ### Async behaviour and Multi Threading
 
@@ -139,12 +140,15 @@ In the (yes, very near) future, we will provide config file functionality where 
 Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is followed. 
 Plan is to develop a support for the newer one: RFC5424.
 
-Make sure you syslog server can understand RFC3164. I am using the very good
+Make sure you syslog server can understand RFC3164. 
+This is the case with almost all of them syslog servers. 
+This is simply because there are milions of devices in use (and will be for a long time to come) who are emitting 
+syslog messages in the RFC3164 format. 
+Devices on the network, not PC's or laptops.
+
+I am using the very good
 [Syslog Watcher](https://syslogwatcher.com/), as it also understands RFC3164 formatting. 
 
-This is the case with almost all of them syslog server. 
-This is simply because there are milions of devices in use (and will be for a long time to come) who are emitting 
-syslog messages in the RFC3164 format. Devices on the network, not PC's or laptops.
 
 > This is a static library. 
 
