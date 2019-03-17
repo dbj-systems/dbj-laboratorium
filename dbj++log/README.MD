@@ -13,7 +13,6 @@
 
 *`syslog` [project we started from](https://github.com/asankah/syslog-win32) is Copyright (c) 2008 Secure Endpoints Inc.*
 ## The API
-### Initalization
 Start by including the single header file.
 ```cpp
 #include <dbj++log.h>
@@ -135,11 +134,15 @@ It will not be re-created each time application starts.
 In the (yes, very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
 
 
-**WARNING: Messages are composed following the RFC3164**
+**NOTE: Messages are composed following the RFC3164**
 
-Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is foollowed. Plan is to develop a support for the newer one: RFC5424.
+Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is followed. 
+Plan is to develop a support for the newer one: RFC5424.
 
-Make sure you syslog server can understand RFC3164. But, this is the case with almost all of them. 
+Make sure you syslog server can understand RFC3164. I am using the very good
+[Syslog Watcher](https://syslogwatcher.com/), as it also understands RFC3164 formatting. 
+
+This is the case with almost all of them syslog server. 
 This is simply because there are milions of devices in use (and will be for a long time to come) who are emitting 
 syslog messages in the RFC3164 format. Devices on the network, not PC's or laptops.
 
