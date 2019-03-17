@@ -88,8 +88,8 @@ Please remember the `syslog_open()` call is optional. The actuall logging is rat
 
 ```cpp
 /* 
-standard loging since 1983 
-but in 2019 from C++
+standard loging since 1983
+2019 from C++
 */
 	syslog_emergency("%s", "LOG_EMERG"	);
 	syslog_alert("%s", "LOG_ALERT"	);
@@ -112,13 +112,12 @@ Here is the output of the above on a local syslog server/manager
 ### Async behaviour and Multi Threading
 
 This is all asynchronous as much as windows sockets are asynchronous.
-All the impotrtant functions in here are capable of sequential working, 
+Also, all the important functions in here are capable of sequential working, 
 in the presence of multiple threads.
-
 ### Notes
 Inside this library `stderr` output is redirected to the local log file.
 In case you do not need or want that, please ammend the simple code doing it.
-Folder and file are under `%programdata%`. Names are here:
+Folder and file are under `%programdata%`. Names are currently:
 
 ```cpp
 /* dbj_util.h */
@@ -126,18 +125,18 @@ static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
 static char const * DBJ_LOG_FILE_NAME = "dbj++.log";
 ```
 
-Currently this file is re-created each time application starts. 
+Local log file is re-created each time application starts. 
 In the (very near) future log file name will equal the application basename, and will be alllowed to grow untill user defined size. 
 It will not be re-created each time application starts.
 
-In the (very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
+In the (yes, very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
 
 
 **WARNING: Messages are composed following the RFC3164**
 
-Currently RFC3164 is foollowed. Plan is to develop a support for the newer one: RFC5424.
+Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is foollowed. Plan is to develop a support for the newer one: RFC5424.
 
-Make sure you syslog server can understand RFC3164. Butm this is the case with almost all of them. 
+Make sure you syslog server can understand RFC3164. But, this is the case with almost all of them. 
 This is simply because there are milions of devices in use (and will be for a long time to come) who are emitting 
 syslog messages in the RFC3164 format. Devices on the network, not PC's or laptops.
 

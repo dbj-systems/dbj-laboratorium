@@ -23,6 +23,10 @@ from hash defines in the syslog.h
 
 namespace dbj::log {
 
+	constexpr inline const auto MAJOR = 1;
+	constexpr inline const auto MINOR = 0;
+	constexpr inline const auto PATCH = 0;
+
 	constexpr inline const auto syslog_dgram_size = 1024U;
 
 	void syslog_init(const char * = nullptr /*syslog_server_ip_and_port*/);
