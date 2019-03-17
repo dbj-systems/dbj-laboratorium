@@ -1,5 +1,8 @@
 
-# dbj++log
+# dbj++log 
+
+**Version: 1.0.0**
+
 ### syslog for the rest of us
 
 **Simple, standard C++ compliant, asynchronous, fast, logging library.**
