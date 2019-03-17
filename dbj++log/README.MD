@@ -8,7 +8,7 @@
 > This release is Proof Of Concept (POC). <br/>
 > Use at your own risk.
 
-*`syslog` project we started from is Copyright (c) 2008 Secure Endpoints Inc.*
+*`syslog` [project we started from](https://github.com/asankah/syslog-win32) is Copyright (c) 2008 Secure Endpoints Inc.*
 ## The API
 ### Initalization
 Start by including the single header file.
