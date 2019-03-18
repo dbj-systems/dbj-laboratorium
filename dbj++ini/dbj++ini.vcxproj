@@ -29,8 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj++ini.h" />
+    <ClInclude Include="ini_reader_sampler.h" />
     <ClInclude Include="src\ini.h" />
-    <ClInclude Include="src\ini_reader_example.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

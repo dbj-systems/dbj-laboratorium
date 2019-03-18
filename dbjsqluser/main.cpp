@@ -4,7 +4,7 @@
 #include <dbj++log/dbj++log.h>
 
 #define DBJ_INI_READER_TESTING
-#include <dbj++ini/src/ini_reader_example.h>
+#include <dbj++ini/ini_reader_sampler.h>
 
 extern void test_dbj_sql_lite_udf();
 extern void test_dbj_sql_lite();

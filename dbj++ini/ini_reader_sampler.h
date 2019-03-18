@@ -2,7 +2,7 @@
 #ifdef DBJ_INI_READER_TESTING
 
 #include <cstdio>
-#include "../dbj++ini.h"
+#include "dbj++ini.h"
 
 // argv[0] must be the valid ini file full path
 int test_dbj_ini_reader( int argc, char * argv[])
@@ -17,7 +17,7 @@ int test_dbj_ini_reader( int argc, char * argv[])
         return 1;
     }
 
-	wprintf(L"\n\nConfig loaded from 'test.ini': \nversion=%3d\nname=%16S\nemail=%16s\npi=%3.3f\nactive=%6S"
+	wprintf(L"\n\nConfig loaded from 'test.ini': \nversion=%3d\nname=%16S\nemail=%16S\npi=%3.3f\nactive=%6S"
 		, reader.get_integer("protocol", "version", -1) 
 		, reader.get("user", "name", "UNKNOWN").get()
 		, reader.get("user", "email", "UNKNOWN").get()
