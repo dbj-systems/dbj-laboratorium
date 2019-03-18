@@ -1,12 +1,10 @@
 #include "pch.h"
 
-// #include "..\dbj++sql\dbj_log\dbj_log.h"
-
 #define DBJ_LOG_TESTING
-#include "..\dbj++log\dbj++log.h"
+#include <dbj++log/dbj++log.h>
 
 #define DBJ_INI_READER_TESTING
-#include <dbj-laboratorium/dbj++ini/src/ini_reader_example.h>
+#include <dbj++ini/src/ini_reader_example.h>
 
 extern void test_dbj_sql_lite_udf();
 extern void test_dbj_sql_lite();

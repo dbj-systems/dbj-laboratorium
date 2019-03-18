@@ -23,12 +23,7 @@
     <ClCompile Include="dbj\dbj_log_file.cpp" />
     <ClCompile Include="dbj\dbj_util.cpp" />
     <ClCompile Include="dbj_pp_log.cpp" />
-    <ClCompile Include="syslog\syslogc.c">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
-    </ClCompile>
+    <ClCompile Include="syslog\syslogc.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj++log.h" />
@@ -37,7 +32,11 @@
     <ClInclude Include="test\dbj_log_test.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\dbj++sql\README.MD" />
+    <None Include="LICENSE" />
+    <None Include="README.MD" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="media\syslogwatcher.com.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

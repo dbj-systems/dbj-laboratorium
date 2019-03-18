@@ -10,6 +10,9 @@
     <Filter Include="test">
       <UniqueIdentifier>{897f6f42-d7c0-4724-939d-7634d930c834}</UniqueIdentifier>
     </Filter>
+    <Filter Include="media">
+      <UniqueIdentifier>{9032cd08-1583-4f51-af56-4ca7dbaafb02}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbj\dbj_log.cpp">
@@ -39,6 +42,12 @@
     <ClInclude Include="dbj++log.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\dbj++sql\README.MD" />
+    <None Include="LICENSE" />
+    <None Include="README.MD" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="media\syslogwatcher.com.jpg">
+      <Filter>media</Filter>
+    </Image>
   </ItemGroup>
 </Project>
