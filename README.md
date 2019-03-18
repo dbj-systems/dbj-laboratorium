@@ -5,7 +5,7 @@ Testing , Reasearch and Development. In and around  dbj++
 
 -------------------------------------
 
-Copyright 2018 by dbj@dbj.org
+Copyright 2018,2019 by dbj@dbj.org
 <pre>
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,6 @@ limitations under the License.
 </pre>
 ---------------------------------------------------------------------  
 
-### &copy; 2018 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
+### &copy; 2019 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
 
 
