@@ -55,13 +55,14 @@ namespace dbj::ini {
 		smart_buffer get(string_view section, string_view name, string_view default_value) const
 		{
 			hash_key_type key = make_key(section, name);
-			// smart_buffer rvl;
-			// 
-			return smart_buffer(
-				(char*)_strdup(
-				(kv_map_.count(key) ? kv_map_.find(key)->second.data() : default_value.data())
-				)
-			);
+
+				if (kv_map_.count(key) > 0) 
+				{
+					return kv_map_.at(key);
+				}
+				else {
+					return smart_buffer(_strdup(default_value.data()));
+				}
 		}
 
 		smart_buffer get_string(string_view section, string_view name, string_view default_value) const
@@ -110,11 +111,16 @@ namespace dbj::ini {
 		bool has_value(string_view section, string_view name) const
 		{
 			hash_key_type key = make_key(section, name);
-			return kv_map_.count(key);
+			return ( kv_map_.count(key) > 0 ? true : false );
 		}
 
 		// dbj made into static
-		static int ValueHandler(void* user, const char* section, const char* name,
+		// this is sent to the C code as a callback
+		// thus the void *, instead of ini_reader_engine &
+		static int ValueHandler(
+			void* user, 
+			const char* section, 
+			const char* name,
 			const char* value)
 		{
 			ini_reader_engine* reader = static_cast<ini_reader_engine*>(user);
@@ -132,15 +138,15 @@ namespace dbj::ini {
 
 			DBJ: what happens if value is empty string?
 			*/
-			if (reader->kv_map_.count(key)) 
+			if (reader->kv_map_.count(key) > 0 ) 
 			{
-				string new_val(reader->kv_map_[key]);
+				string new_val(reader->kv_map_[key].get());
 				new_val.append("\n");
 				new_val.append(value);
-				reader->kv_map_[key] = new_val;
+				reader->kv_map_[key] = smart_buffer(_strdup(new_val.data()));
 			}
 			else {
-				reader->kv_map_[key] = value;
+				reader->kv_map_[key] = smart_buffer(_strdup(value));
 			}
 			return 1;
 		}
@@ -165,7 +171,7 @@ namespace dbj::ini {
 		// dbj changed from:
 		// std::map<std::string, std::string> kv_map_;
 		// to:
-		std::map<hash_key_type, std::string> kv_map_{};
+		std::map<hash_key_type, smart_buffer> kv_map_{};
 	}; // ini_reader
 
 	ini_reader const & ini_reader_instance(string_view ini_file_name)
