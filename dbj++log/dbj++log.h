@@ -2,29 +2,19 @@
 /*
 (c) 2019 by dbj.systems, author: dbj@dbj.org, Licence GPLv3
 
-syslog + local file log
------------------------
-+ stderr redirection to the same file
+Please see the README.MD for base documentation 
+Please see the LICENSE for the GPLv3 info
 
-Both async and both following the syslog protocol
-Currently RFC3164 is foollowed. Plas is to develop a support for the newer one: RFC5424.
-
-syslog project started from is Copyright (c) 2008 Secure Endpoints Inc.
-
-WARNING: syslog() is UNIX and is blisfully unaware of wchar_t
-
-#include "syslog/syslog.h"
-is not done here, thus we have
-full decoupling from the syslog(), C interface and most importantly
-from hash defines in the syslog.h
+NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
 */
 
 #include <array>
 
 namespace dbj::log {
 
-	constexpr inline const auto MAJOR = 1;
-	constexpr inline const auto MINOR = 0;
+	// SEMantic VERsioning
+	constexpr inline const auto MAJOR = 0;
+	constexpr inline const auto MINOR = 1;
 	constexpr inline const auto PATCH = 0;
 
 	constexpr inline const auto syslog_dgram_size = 1024U;
