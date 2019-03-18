@@ -15,8 +15,7 @@ extern "C" inline int dbj_log_test( int argc, char * argv[] )
 // DBJ TODO : 
 // must know the server IP address
 // where is it coming from? the ini file? app manifest?
-	// syslog_init("192.168.0.202");
-	syslog_init();
+	syslog_init("192.168.0.202");
 
 // carefull! max len of the tag is 128
 // some syslog servers will move the tag to the message if tag len > 128
