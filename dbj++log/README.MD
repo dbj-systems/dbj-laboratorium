@@ -110,7 +110,7 @@ The total `datagramm`
 Here is the output of the above on a local syslog server/manager
 
 [![Local syslog server](./media/syslogwatcher.com.jpg)](https://syslogwatcher.com "syslogwatcher")  
-*SysLog Watcher in action (click on the image to find the 'Donwloads' page)*
+*Very good and comprehensive, "SysLog Watcher" in action (click on the image to find the 'Donwloads' page)*
 
 ### Async behaviour and Multi Threading
 
@@ -120,17 +120,21 @@ in the presence of multiple threads.
 ### Notes
 Inside this library `stderr` output is redirected to the local log file.
 In case you do not need or want that, please ammend the simple code doing it.
-Folder and file are under `%programdata%`. Names are currently:
+
+Folder and log file are under `%programdata%`. Folder name is currently:
 
 ```cpp
 /* dbj_util.h */
 static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
-static char const * DBJ_LOG_FILE_NAME = "dbj++.log";
+/*
+%programdata%\\dbj\\dbj++
+*/
 ```
+Local log file name does equal the `DBJ_LOG_FILE_FOLDER` + application basename + `.log`.
 
-Local log file is re-created each time application starts. 
-In the (very near) future log file name will equal the application basename, and will be alllowed to grow untill user defined size. 
-It will not be re-created each time application starts.
+> Not currently, but it will be opened in the append mode, and allowed to grow untill user defined size.
+
+right now, local log file is re-created each time application starts. 
 
 In the (yes, very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
 
