@@ -8,6 +8,14 @@
 #include <filesystem>
 #include <stdio.h>
 
+char * dbj_basename(char * full_path) {
+	char *p = full_path, *pp = 0;
+	while ((p = strchr(p + 1, '\\'))) {
+		pp = p;
+	}
+	return (pp ? pp + 1 : p);
+}
+/*----------------------------------------------------------------------*/
 [[noreturn]] void dbj_terror
 (char const * msg_, char const * file_, const unsigned line_)
 {
@@ -22,7 +30,7 @@
 #endif
 	exit(EXIT_FAILURE);
 }
-
+/*----------------------------------------------------------------------*/
 namespace h = ::std::chrono;
 
 // time stamp size is max 22 + '\0'
@@ -118,4 +126,49 @@ void dbj_timestamp_rfc3164( char (*timestamp_rfc3164)[0xFF], int require_milli_s
 			month[stm.wMonth - 1], stm.wDay, stm.wHour, stm.wMinute, stm.wSecond, stm.wMilliseconds);
 	}
 	_ASSERTE(len);
+}
+
+/*
+https://stackoverflow.com/a/54491532/10870835
+*/
+template <typename CHR, typename string_getter_func>
+std::basic_string<CHR> 
+string_from_win32_call(string_getter_func stringGetter, int initialSize = 0)
+{
+	if (initialSize <= 0)
+	{
+		initialSize = MAX_PATH;
+	}
+
+	std::basic_string<CHR> result(initialSize, 0);
+	for (;;)
+	{
+		auto length = stringGetter(&result[0], (int)result.length());
+		if (length == 0)
+		{
+			return std::basic_string<CHR>();
+		}
+
+		if (length < result.length() - 1)
+		{
+			result.resize(length);
+			result.shrink_to_fit();
+			return result;
+		}
+
+		result.resize(result.length() * 2);
+	}
+}
+
+std::string dbj_module_basename(HINSTANCE h_instance) {
+	
+	std::string module_path 
+		= string_from_win32_call<char>([h_instance](char* buffer, int size)
+	{
+		return GetModuleFileNameA(h_instance, buffer, size);
+	});
+
+	_ASSERTE(module_path.empty() == false);
+
+	return { dbj_basename(module_path.data()) };
 }

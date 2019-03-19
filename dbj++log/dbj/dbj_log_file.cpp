@@ -1,15 +1,17 @@
 
 #include "dbj_util.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <io.h>
 #include <string>
+#include <memory>
 #include <string_view>
 #include <filesystem>
 
-/*
-tail of "%programdata%/DBJ_LOG_FILE_FOLDER"
-*/
-
+/*-----------------------------------------------------------------*/
+extern std::string dbj_module_basename(HINSTANCE /*h_instance*/);
 extern std::filesystem::path dbj_program_data_path();
+/*-----------------------------------------------------------------*/
 
 namespace dbj_local_log {
 
@@ -110,7 +112,10 @@ inline auto
 		/*
 		this exits if folder/file can not be made
 		*/
-		static log_file const & instance(const char * path_, const char * name_)
+		static log_file const & instance(
+			const char * path_, 
+			const char * name_ = nullptr
+		)
 		{
 			auto initor = [&]() {
 				auto[dir_path, e] = assure_log_file_folder(path_);
@@ -122,8 +127,20 @@ inline auto
 					);
 					exit(1);
 				}
-				// concatenate dir path with file name
-				fs::path full_path = dir_path.append(name_);
+				// by default we use the module base name + ".log"
+				fs::path full_path;
+				if (name_ == nullptr) {
+					std::string module_basename
+						= dbj_module_basename(HINSTANCE(NULL));
+					module_basename.append(".log");
+
+					// concatenate dir path with file name
+					full_path = dir_path.append(module_basename);
+				}
+				else
+				{
+					full_path = dir_path.append(name_);
+				}
 				// MSVC STL path uses wchar_t by default, ditto ...
 				auto path_string{ full_path.string() };
 				return log_file{ path_string.c_str() };
@@ -134,7 +151,7 @@ inline auto
 	};
 
 	static log_file const & log_file_instance 
-		= log_file::instance(DBJ_LOG_FILE_FOLDER, DBJ_LOG_FILE_NAME);
+		= log_file::instance(DBJ_LOG_FILE_FOLDER /*, DBJ_LOG_FILE_NAME*/);
 
 	static int is_log_file_valid() {
 		return log_file_instance.valid();
@@ -142,8 +159,7 @@ inline auto
 
 } // dbj_local_log nspace
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+/////////////////////////////////////////////////////////////////////////
 
 static CRITICAL_SECTION local_log;
 

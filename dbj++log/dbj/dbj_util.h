@@ -6,8 +6,14 @@
 extern "C" {
 #endif
 
+	// under %programdata%
 	static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
-	static char const * DBJ_LOG_FILE_NAME = "dbj++.log";
+
+	// if we could not make it to ne basename() + ".log"
+	// in case of WIN32 exe's or dll's there is both base name
+	// and __argv or __argw regarding on how is executable built
+	// with main or wmain or WinMain
+	static char const * DBJ_LOG_FILE_NAME = "dbj++emergency.log";
 
 	/*
 	Write to the local log file
@@ -55,6 +61,8 @@ extern "C" {
 	
 
 	const char * dbj_get_envvar(char * /*varname_*/);
+
+	char * dbj_basename(char * full_path);
 
 #ifdef __cplusplus
 }	/*extern "C" */
