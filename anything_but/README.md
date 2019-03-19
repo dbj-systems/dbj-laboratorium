@@ -165,25 +165,16 @@ hash define `DBJ_NOTHING_BUT_STREAMS`, before including this API
 // std::ostream support
 #define DBJ_NOTHING_BUT_STREAMS
 #include <dbj_nothing_but.h>
-``
-
+```
 ### License
-
 This is open source software. It id distributed under the GPLv3 License, Version 1.0.
 Please respect the copiryght.
-
 ### Contact
-
 Please report issues or [questions here](https://github.com/dbj-systems/dbj-laboratorium/issues).
  
 You can contact me via twitter at @dbjdbj
-
-
-
 ### Contributing
-
 Any feedback from users and stakeholders will be used to improve the library.
-
 <hr/>
 	Value Handle to Avoid Implicit Conversions in standard C++
 
