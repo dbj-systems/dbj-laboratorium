@@ -136,7 +136,7 @@ namespace dbj {
 
 	// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1227r1.html
 	// dbj: this is dubious
-	ssize_t ssize( std::size_t signed_size ) {
+	inline ssize_t ssize( std::size_t signed_size ) {
 		return static_cast<ssize_t>(signed_size);
 	}
 
