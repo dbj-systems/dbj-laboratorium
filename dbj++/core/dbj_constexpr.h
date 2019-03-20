@@ -83,7 +83,7 @@ namespace dbj::util {
 			jcong = 69069 * jcong + 1234567;
 			auto cong = jcong;
 			auto kiss = (mwc^cong) + shr3;
-			return (kiss < 0 ? -1 * kiss : kiss);
+			return long(kiss < 0 ? -1 * kiss : kiss);
 		}
 
 } //dbj::util

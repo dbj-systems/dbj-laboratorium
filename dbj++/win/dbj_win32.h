@@ -199,6 +199,61 @@ inline int string_compare(LPCTSTR str1, LPCTSTR str2, unsigned char ignore_case)
 	}
 	return rez;
 }
+
+/*
+https://stackoverflow.com/a/54491532/10870835
+*/
+template <typename CHR, typename win32_api>
+inline std::basic_string<CHR>
+string_from_win32_call(win32_api win32_call, unsigned initialSize = 0U)
+{
+	std::basic_string<CHR> result((initialSize == 0 ? MAX_PATH : initialSize), 0);
+	for (;;)
+	{
+		auto length = win32_call(&result[0], (int)result.length());
+		if (length == 0)
+		{
+			return std::basic_string<CHR>();
+		}
+
+		if (length < result.length() - 1)
+		{
+			result.resize(length);
+			result.shrink_to_fit();
+			return result;
+		}
+
+		const auto rl_ = result.length();
+		result.resize(rl_ + rl_);
+	}
+}
+
+inline char * basename(
+	char * full_path,
+	bool remove_suffix = true,
+	char delimiter = '\\')
+{
+	char * base_ = strrchr(full_path, delimiter);
+	base_ = (base_ == NULL ? full_path : base_);
+	if (remove_suffix == false) return base_;
+	char * dot_pos = strchr(base_, '.');
+	if (dot_pos) *dot_pos = char(0);
+	return base_;
+}
+
+inline dbj::buf::yanb module_basename(HINSTANCE h_instance) {
+
+	std::string module_path
+		= string_from_win32_call<char>([h_instance](char* buffer, int size)
+	{
+		return GetModuleFileNameA(h_instance, buffer, size);
+	});
+
+	_ASSERTE(module_path.empty() == false);
+
+	return { basename(module_path.data()) };
+}
+
 } // win32
 } // dbj
 

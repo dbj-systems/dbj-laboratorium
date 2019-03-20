@@ -96,4 +96,4 @@ int main(int argc, char* argv[], char *envp[])
 #endif // DBJ_WMAIN_USED
 
 /* inclusion of this file defines the kind of a licence used */
-#include "dbj_gpl_license.h"
+#include "../dbj_gpl_license.h"
