@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++log", "dbj++log\dbj++l
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++ini", "dbj++ini\dbj++ini.vcxproj", "{26CC61DC-CDED-4A26-9B9A-0B8D802A4A9E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++", "dbj++\dbj++.vcxitems", "{09BA3370-4F1F-40D7-9A0D-F9B7AAFFD817}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

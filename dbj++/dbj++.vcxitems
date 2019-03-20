@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj++con.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_commander.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_fwd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_ops.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_painter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++core.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buf.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_core_utils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_crt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_format.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_insider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_synchro.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_traits.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj++.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_err.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_error_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_exception.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_p1095.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_status_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)numeric\dbj_numeric.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_interface.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_any_optional_tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_ap_env_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_array_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_buffer_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_commander_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_console_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_core_tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_crt_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_defval_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_kalends_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_kv_store_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_static_matrix_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_string_tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_string_util_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_traits_testing.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_util_test.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_win32_tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\zAllocator.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj++util.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_arh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_defval.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_kalends.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_key_value_store.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_lambda_made_matrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_narf.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_optional_any.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_stack_matrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_startend.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_string_compare.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_string_util.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_tokenizer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_util.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj++win.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_app_env.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_com.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_main.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_uuid.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_win32.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_win_inc.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)cpp.hint" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
+  </ItemGroup>
+</Project>

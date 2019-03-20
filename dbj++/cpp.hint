@@ -1,0 +1,7 @@
+/*
+https://answers.unrealengine.com/questions/787769/visual-studio-editor-saying-macro-in-skipped-regio.html
+
+https://docs.microsoft.com/en-us/cpp/ide/hint-files
+*/
+
+#define DBJ_TEST_UNIT()
