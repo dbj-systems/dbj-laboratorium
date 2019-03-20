@@ -117,7 +117,7 @@ Here is the output of the above on a local syslog server/manager
 This is all asynchronous as much as windows sockets are asynchronous.
 Also, all the important functions in here are capable of sequential working, 
 in the presence of multiple threads.
-### Notes
+### stderr
 Inside this library `stderr` output is redirected to the local log file.
 In case you do not need or want that, please ammend the simple code doing it.
 
@@ -139,7 +139,7 @@ right now, local log file is re-created each time application starts.
 In the (yes, very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
 
 
-**NOTE: Messages are composed following the RFC3164**
+#### RFC3164: Messages are composed following the RFC3164
 
 Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is followed. 
 Plan is to develop a support for the newer one: RFC5424.
@@ -150,11 +150,11 @@ This is simply because there are milions of devices in use (and will be for a lo
 syslog messages in the RFC3164 format. 
 Devices on the network, not PC's or laptops.
 
-I am using the very good
-[Syslog Watcher](https://syslogwatcher.com/), as it also understands RFC3164 formatting. 
+As a syslog server, I am using the very good
+[Syslog Watcher](https://syslogwatcher.com/). It also understands RFC3164 formatting. 
 
 
-> This is a static library. 
+> dbj++log is a static library. 
 
 > Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
 

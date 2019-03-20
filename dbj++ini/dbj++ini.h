@@ -30,6 +30,10 @@ namespace dbj::ini
 	constexpr inline const auto MINOR = 0;
 	constexpr inline const auto PATCH = 0;
 
+
+	constexpr inline const auto dbj_programdata_subfolder = "dbj";
+
+
 	// dbj: we expose the interface and hide the implementation
 	// there is usually only one ini per one process
 	// we implement this interface with a singleton
@@ -46,6 +50,14 @@ namespace dbj::ini
 	// to figure on the API
 	using smart_buffer = std::shared_ptr<char>;
 
+	struct ini_file_descriptor final {
+		smart_buffer folder;
+		smart_buffer basename;
+		smart_buffer fullpath;
+	};
+
+	ini_file_descriptor ini_file();
+
 	// this is the factory method that delivers the reference 
 	// of the implementation object aka instance
 	ini_reader const & ini_reader_instance( string_view /*ini_file_name*/ );
@@ -53,7 +65,7 @@ namespace dbj::ini
 	// this is the interface to the ini_reader
 	struct ini_reader
 	{
-
+		static smart_buffer default_inifile_path();
 		// Return the result of ini_parse(), i.e., 0 on success, line number of
 		// first error on parse error, or -1 on file open error.
 		virtual int parse_error() const = 0;

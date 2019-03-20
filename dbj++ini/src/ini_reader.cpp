@@ -165,13 +165,8 @@ namespace dbj::ini {
 		ini_reader_engine & operator = (ini_reader_engine &&) = delete;
 
 		int _error{};
-
-		// dbj: authors idea was:
-		// map key = ini section name + "=" + ini section key
-		// dbj changed from:
-		// std::map<std::string, std::string> kv_map_;
-		// to:
 		std::map<hash_key_type, smart_buffer> kv_map_{};
+
 	}; // ini_reader
 
 	ini_reader const & ini_reader_instance(string_view ini_file_name)
@@ -179,5 +174,12 @@ namespace dbj::ini {
 		static ini_reader_engine singleton_(ini_file_name);
 		return singleton_;
 	}
+
+	/*static*/ smart_buffer ini_reader::default_inifile_path()
+	{
+		auto[folder, basename, fullpath] = ini_file ();
+		return fullpath;
+	}		 
+	
 
 } // inih

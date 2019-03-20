@@ -13,7 +13,7 @@ int test_dbj_ini_reader( int argc, char * argv[])
 	ini_reader const & reader = ini_reader_instance(argv[0]);
 
     if (reader.parse_error() < 0) {
-        fprintf( stderr, "Can't load 'test.ini'\n");
+        fprintf( stderr, "Can't load %s\n", argv[0]);
         return 1;
     }
 

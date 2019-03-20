@@ -9,7 +9,7 @@
 #include <filesystem>
 
 /*-----------------------------------------------------------------*/
-extern std::string dbj_module_basename(HINSTANCE /*h_instance*/);
+extern std::string dbj_module_basename_2(HINSTANCE /*h_instance*/);
 extern std::filesystem::path dbj_program_data_path();
 /*-----------------------------------------------------------------*/
 
@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 /*
 assure the presence of the folder: "%programdata%/DBJ_LOG_FILE_FOLDER"
 */
-inline auto 
+static auto 
   assure_log_file_folder ( fs::path const & the_last_part )  
 	noexcept
 	-> pair<fs::path, error_code>
@@ -131,7 +131,7 @@ inline auto
 				fs::path full_path;
 				if (name_ == nullptr) {
 					std::string module_basename
-						= dbj_module_basename(HINSTANCE(NULL));
+						= dbj_module_basename_2(HINSTANCE(NULL));
 					module_basename.append(".log");
 
 					// concatenate dir path with file name

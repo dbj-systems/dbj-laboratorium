@@ -12,7 +12,9 @@ extern void test_dbj_sql_lite();
 // int wmain( int argc, wchar_t * argv [], wchar_t * envp )
 int main( int argc, char * argv [])
 {
-	char * my_data[] = { (char*)"C:\\ProgramData\\dbj\\test.ini" };
+
+	dbj::ini::ini_file_descriptor ifd = dbj::ini::ini_file();
+	char * my_data[] = { (char*)ifd.fullpath.get() };
 
 	test_dbj_ini_reader(1, my_data);
 	dbj_log_test(argc, argv);

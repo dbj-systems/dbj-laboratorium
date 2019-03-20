@@ -131,19 +131,14 @@ void dbj_timestamp_rfc3164( char (*timestamp_rfc3164)[0xFF], int require_milli_s
 /*
 https://stackoverflow.com/a/54491532/10870835
 */
-template <typename CHR, typename string_getter_func>
+template <typename CHR, typename win32_api>
 std::basic_string<CHR> 
-string_from_win32_call(string_getter_func stringGetter, int initialSize = 0)
+string_from_win32_call(win32_api win32_call, unsigned initialSize = 0U)
 {
-	if (initialSize <= 0)
-	{
-		initialSize = MAX_PATH;
-	}
-
-	std::basic_string<CHR> result(initialSize, 0);
+	std::basic_string<CHR> result((initialSize == 0 ? MAX_PATH : initialSize), 0);
 	for (;;)
 	{
-		auto length = stringGetter(&result[0], (int)result.length());
+		auto length = win32_call(&result[0], (int)result.length());
 		if (length == 0)
 		{
 			return std::basic_string<CHR>();
@@ -156,11 +151,12 @@ string_from_win32_call(string_getter_func stringGetter, int initialSize = 0)
 			return result;
 		}
 
-		result.resize(result.length() * 2);
+		const auto rl_ = result.length();
+		result.resize( rl_ + rl_ );
 	}
 }
 
-std::string dbj_module_basename(HINSTANCE h_instance) {
+std::string dbj_module_basename_2(HINSTANCE h_instance) {
 	
 	std::string module_path 
 		= string_from_win32_call<char>([h_instance](char* buffer, int size)
