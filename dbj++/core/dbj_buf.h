@@ -139,10 +139,10 @@ namespace dbj {
 			Do not do that. The issue:
 
 			std::cout << yanb_t<wchar_t>(L"Hello?")
-			// prints: 0x000FFCD27, aka "the pointer address"
-
-			std::cout does not use std::wostream
-			std::wcout does not use std::ostream
+		    prints: 0x000FFCD27, aka "the pointer address"
+			why? because: 
+			std::cout does not use std::wostream !
+			std::wcout does not use std::ostream !
 
 			Bellow is a version for programs targeting std::cout.
 			The wide version is trivial if you understand this one.
@@ -228,7 +228,14 @@ namespace dbj {
 
 		// this is basically just set of helpers
 		// to use the buffer from above
-		template<typename CHAR> struct smart_buf final
+		template<
+			typename CHAR,
+			std::enable_if_t<
+			std::is_same_v<char, CHAR> ||
+			std::is_same_v<wchar_t, CHAR>
+			, bool > = true
+		>
+		struct smart_buf final
 		{
 			using type = smart_buf;
 			using value_type = CHAR;
@@ -267,7 +274,13 @@ namespace dbj {
 			static auto length( pointer buf_)
 				noexcept -> inside_1_and_max
 			{
-				return std::strlen(buf_.get());
+				if constexpr (std::is_same_v<wchar_t, value_type>)
+				{
+					return std::wcslen(buf_.get());
+				}
+				else {
+					return std::strlen(buf_.get());
+				}
 			}
 
 			// the meta maker ;)
