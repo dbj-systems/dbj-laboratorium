@@ -1,5 +1,6 @@
 #pragma once
 
+#include <crtdbg.h>
 #include <vector>
 #include <thread>
 
@@ -75,6 +76,11 @@ namespace dbj::app_env {
 			wchar_t **  wenv = (_wenviron);
 #undef _CRT_DECLARE_GLOBAL_VARIABLES_DIRECTLY
 
+
+			_ASSERTE((warg, "\n\nNOTE: dbj++ runtime is WINDOWS, and that means wchar_t."
+				"\nWhich in turn mean you must not use it from apps where main() is used."
+				"\nPlease use wmain\n\n"
+				"int wmain( int argc, wchar_t * argv [], wchar_t * envp )\n\n"));
 			/// <summary>
 			///  we are here *before* main so 
 			/// __argv or __argw might be still empty
@@ -191,8 +197,12 @@ namespace dbj::app_env {
 } // dbj::app_env
 
 namespace dbj {
-	inline auto application_environment_data 
-		= app_env::instance();
+	// we do not want to provoke CLI processing before 
+	// it is required
+	// this we use the function not global var to use it
+	inline auto application_environment_data() {
+		return ::dbj::app_env::instance();
+	}
 }; // dbj
 
 

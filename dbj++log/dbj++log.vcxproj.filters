@@ -18,9 +18,6 @@
     <ClCompile Include="dbj\dbj_log.cpp">
       <Filter>dbj</Filter>
     </ClCompile>
-    <ClCompile Include="dbj\dbj_log_file.cpp">
-      <Filter>dbj</Filter>
-    </ClCompile>
     <ClCompile Include="dbj\dbj_util.cpp">
       <Filter>dbj</Filter>
     </ClCompile>

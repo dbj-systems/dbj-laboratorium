@@ -307,7 +307,11 @@ void syslog( int pri, const char *fmt, ... )
 
 	va_list ap;
 	va_start( ap, fmt );
-		DBJ_VERIFY( 1 < vsprintf_s(message_, sizeof(message_), fmt, ap) ) ;
+	if (1 < vsprintf_s(message_, sizeof(message_), fmt, ap))
+	{
+		perror("vsprintf_s() failed?\n\n" __FILE__ );
+		exit(1);
+	}
 	va_end(ap);
 
     vsyslog( pri, message_ );
@@ -385,9 +389,7 @@ void vsyslog( int pri, const char * message_ )
 			(char *)pri_name.c_name,
 			timestamp_,
 			local_hostname, syslog_ident, syslog_procid_str,
-			FALSE,
 			message_ );
-		/* last FALSE is for no locking in there*/
 	}
  done:
     LeaveCriticalSection(&cs_syslog);

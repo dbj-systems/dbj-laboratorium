@@ -21,6 +21,8 @@
 // string_view requires C++17
 #include <string_view>
 
+#include <dbj++/core/dbj++core.h>
+
 namespace dbj::ini 
 {
 	using std::string_view;
@@ -29,10 +31,6 @@ namespace dbj::ini
 	constexpr inline const auto MAJOR = 1;
 	constexpr inline const auto MINOR = 0;
 	constexpr inline const auto PATCH = 0;
-
-
-	constexpr inline const auto dbj_programdata_subfolder = "dbj";
-
 
 	// dbj: we expose the interface and hide the implementation
 	// there is usually only one ini per one process
@@ -43,12 +41,8 @@ namespace dbj::ini
 	// to keep them strings
 	struct ini_reader;
 
-	// NOTE: to avoid std::string we use std::shared_ptr<char>
-	// std::string is not to be used as buffer it is to be used for 
-	// text processing in the context of the app code
-	// we deliberately do not introduce some elaborate wrapper 
-	// to figure on the API
-	using smart_buffer = std::shared_ptr<char>;
+	// NOTE: to avoid std::string we use ::dbj::buf::yanb
+	using smart_buffer = ::dbj::buf::yanb;
 
 	struct ini_file_descriptor final {
 		smart_buffer folder;

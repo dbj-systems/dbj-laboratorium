@@ -56,34 +56,40 @@ namespace dbj::ini
 	ini_file_descriptor ini_file() 
 	{
 		namespace fs = std::filesystem;
+		using ::dbj::ini::smart_buffer;
+		using namespace std;
+
 		std::error_code ec_;
-		dbj::buf::yanb programdata = dbj::core::util::program_data_path(ec_);
+		dbj::buf::yanb programdata( dbj::core::util::program_data_path(ec_)) ;
 
 		_ASSERTE(! ec_);
 
 		fs::path folder_ = programdata.data();
-		folder_.concat("\\").concat(dbj_programdata_subfolder);
+		folder_.concat("\\").concat(::dbj::programdata_subfolder);
 
 		dbj::buf::yanb base_name_ = ::dbj::win32::module_basename(NULL);
 
-		auto fp_ = folder_.concat(base_name_.data()).concat(".ini");
+		fs::path full_path_(folder_); 
+		full_path_.concat(base_name_.data()).concat(".ini");
 
 		// NOTE: WIN32 STL filesystem is wchar_t "oriented"
 		// so we have to jump through more hoops
-		auto narrow = [](wchar_t const * wide_)
+		auto narrow = [](fs::path wide_)
 			-> std::string
 		{
 			std::wstring ws(wide_);
 			return { ws.begin(), ws.end() };
 		};
 
-		std::string nf_ = narrow(folder_.c_str());
-		std::string nfp_ = narrow(fp_.c_str());
+		std::string nf_ 
+			= narrow(folder_);
+		std::string nfp_ 
+			= narrow(full_path_);
 
 		return ini_file_descriptor{
-			smart_buffer(_strdup(nf_.data())),
-			smart_buffer(_strdup(base_name_.data())),
-			smart_buffer(_strdup(nfp_.data()))
+			smart_buffer(nf_.data()),
+			smart_buffer(base_name_.data()),
+			smart_buffer(nfp_.data())
 		};
 	}
 } // dbj::ini

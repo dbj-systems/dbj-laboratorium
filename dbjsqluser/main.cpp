@@ -12,12 +12,19 @@ extern void test_dbj_sql_lite();
 // int wmain( int argc, wchar_t * argv [], wchar_t * envp )
 int main( int argc, char * argv [])
 {
+	auto test_ini = []( dbj::buf::yanb folder_ ) 
+		-> dbj::buf::yanb 
+	{
+		std::string rv(folder_);
+		return (rv.append("\\").append("test.ini")).data() ;
+	};
 
 	dbj::ini::ini_file_descriptor ifd = dbj::ini::ini_file();
-	char * my_data[] = { (char*)ifd.fullpath.get() };
+
+	dbj::buf::yanb my_data[] = { test_ini(ifd.folder) };
 
 	test_dbj_ini_reader(1, my_data);
-	dbj_log_test(argc, argv);
+	dbj_log_test(argc, my_data);
 	// test_dbj_sql_lite_udf();
 	// test_dbj_sql_lite();
 }

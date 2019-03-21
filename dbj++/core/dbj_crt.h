@@ -147,6 +147,8 @@ namespace dbj {
 	using wstring_vector = vector<wstring>;
 	using string_vector  = vector<string>;
 
+	constexpr inline const auto programdata_subfolder = "dbj";
+
 	constexpr inline auto LINE    (){ return "--------------------------------------------------------------------------------"sv; };
 	constexpr inline auto COMPANY (){ return "DBJ.Systems Ltd."sv; };
 	constexpr inline auto YEAR    (){ return std::string_view{ (__DATE__ + 7) }; };
@@ -168,16 +170,16 @@ namespace dbj {
 	{
 		template<typename T, typename F>
 		inline T
-			transform_to(F str) noexcept
+			transform_to(F from_) noexcept
 		{
 			if constexpr (!is_same_v<T, F>) {
-				if (str.empty()) return {};
-				return { std::begin(str), std::end(str) };
+				// if (str.empty()) return {};
+				return { std::begin(from_), std::end(from_) };
 			}
 			else {
 				// T and F are the same type
 				// thus just move a copy
-				return str;
+				return from_;
 			}
 		};
 		// no native pointers please
