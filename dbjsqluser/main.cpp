@@ -24,7 +24,9 @@ int main( int argc, char * argv [])
 	dbj::buf::yanb my_data[] = { test_ini(ifd.folder) };
 
 	test_dbj_ini_reader(1, my_data);
-	dbj_log_test(argc, my_data);
+
+	// argv[0] used as syslog() tag
+	dbj_log_test(argc, argv);
 	// test_dbj_sql_lite_udf();
 	// test_dbj_sql_lite();
 }

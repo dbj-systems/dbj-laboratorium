@@ -8,7 +8,7 @@ inline char * basename( char * full_path ) {
 	return (pp ? pp + 1 : p);
 }
 
-extern "C" inline int dbj_log_test( int argc, dbj::buf::yanb argv[] )
+extern "C" inline int dbj_log_test( int argc, char * argv[] )
 {
 	using namespace ::dbj::log;
 
@@ -22,7 +22,7 @@ extern "C" inline int dbj_log_test( int argc, dbj::buf::yanb argv[] )
 // some syslog servers will move the tag to the message if tag len > 128
 // some will truncate it to len 128
 // tag as app base name, also log to local log file, source is "user"
-	syslog_open(basename(argv[0].data()), syslog_open_options::log_perror );
+	syslog_open(basename(argv[0]), syslog_open_options::log_perror );
 
 // openlog(NULL, LOG_PERROR );
 // openlog(argv[0], LOG_PERROR , LOG_USER );
@@ -42,7 +42,7 @@ extern "C" inline int dbj_log_test( int argc, dbj::buf::yanb argv[] )
 	syslog_warning("%s", "LOG_WARNING" );
 	syslog_notice("%s", "LOG_NOTICE"	);
 	syslog_info("%s", "LOG_INFO"	);
-	syslog_debug("%s", argv[0].data()	);
+	syslog_debug("%s [%s(%d)]", "This is usefull as a debug message.", __FILE__, __LINE__	);
 
 	return 0;
 }

@@ -38,6 +38,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_exception.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_p1095.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_status_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_stderr_log.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)numeric\dbj_numeric.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_interface.h" />
@@ -62,6 +63,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj++util.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_arh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_defval.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_file_util.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_kalends.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_key_value_store.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_lambda_made_matrix.h" />

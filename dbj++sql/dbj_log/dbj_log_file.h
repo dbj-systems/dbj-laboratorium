@@ -41,7 +41,7 @@ namespace dbj::db::log {
 		// let's try once more to be sure all is made ok
 		e.clear(); fs::directory_entry dir(dbj_prog_data_path, e);
 		e.clear(); dir.refresh(e); // must do refresh
-		e.clear(); dir.is_directory(e) ;
+		e.clear(); bool rez = dir.is_directory(e); noexcept(rez);
 		return pair(dir.path(), e);
 	}
 

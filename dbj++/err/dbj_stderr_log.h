@@ -9,6 +9,7 @@
 #include <future>
 #include <filesystem>
 #include <dbj++/core/dbj++core.h>
+#include <dbj++/util/dbj++util.h>
 
 /*-----------------------------------------------------------------*/
 extern "C" inline void dbj_on_exit_flush_stderr(void)
@@ -18,7 +19,7 @@ extern "C" inline void dbj_on_exit_flush_stderr(void)
 /*-----------------------------------------------------------------*/
 
 namespace dbj {
-	// under %programdata% on a local winddows machine
+	// under %programdata% on a local windows machine
 	constexpr inline const auto DBJ_LOCAL_FOLDER = "dbj";
 }
 
@@ -36,49 +37,18 @@ namespace dbj::err {
 	folder -- %programdata%\\dbj\\module_base_name
 	basename -- module_base_name + ".log"
 	*/
-	struct log_file_descriptor final {
-		smart_buffer folder;
-		smart_buffer basename;
-		smart_buffer fullpath;
+	struct log_file_descriptor final : 
+		::dbj::util::file_descriptor  
+	{
+		virtual const char * suffix() const noexcept override { return ".log"; }
 	};
 
-	log_file_descriptor log_file()
+	inline log_file_descriptor log_file() 
 	{
-		std::error_code ec_;
-		dbj::buf::yanb programdata(dbj::core::util::program_data_path(ec_));
-
-		_ASSERTE(!ec_);
-
-		fs::path folder_ = programdata.data();
-		folder_.concat("\\").concat(dbj::programdata_subfolder);
-
-		dbj::buf::yanb base_name_ = ::dbj::win32::module_basename(NULL);
-
-		fs::path full_path_(folder_);
-		full_path_.concat(base_name_.data()).concat(".log");
-
-		// NOTE: WIN32 STL filesystem is wchar_t "oriented"
-		// so we have to jump through more hoops
-		auto narrow = [](fs::path wide_)
-			-> std::string
-		{
-			std::wstring ws(wide_);
-			return { ws.begin(), ws.end() };
-		};
-
-		std::string nf_
-			= narrow(folder_);
-		std::string nfp_
-			= narrow(full_path_);
-
-		return log_file_descriptor{
-			smart_buffer(nf_.data()),
-			smart_buffer(base_name_.data()),
-			smart_buffer(nfp_.data())
-		};
+		log_file_descriptor lfd;
+		::dbj::util::make_file_descriptor(lfd);
+		return lfd;
 	}
-
-
 
 	namespace inner {
 

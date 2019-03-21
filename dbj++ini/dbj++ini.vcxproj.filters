@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="src\ini.c" />
     <ClCompile Include="src\ini_reader.cpp" />
-    <ClCompile Include="src\dbj_module_basename.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ini.h" />

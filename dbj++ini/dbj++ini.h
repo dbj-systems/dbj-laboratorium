@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <dbj++/core/dbj++core.h>
+#include <dbj++/util/dbj++util.h>
 
 namespace dbj::ini 
 {
@@ -44,13 +45,23 @@ namespace dbj::ini
 	// NOTE: to avoid std::string we use ::dbj::buf::yanb
 	using smart_buffer = ::dbj::buf::yanb;
 
-	struct ini_file_descriptor final {
-		smart_buffer folder;
-		smart_buffer basename;
-		smart_buffer fullpath;
+	/*
+	   ini file descriptor
+	   folder -- %programdata%\\dbj\\module_base_name
+	   basename -- module_base_name + ".log"
+	*/
+	struct ini_file_descriptor final :
+		::dbj::util::file_descriptor
+	{
+		virtual const char * suffix() const noexcept override { return ".ini"; }
 	};
 
-	ini_file_descriptor ini_file();
+	inline ini_file_descriptor ini_file()
+	{
+		ini_file_descriptor ifd_;
+		::dbj::util::make_file_descriptor(ifd_);
+		return ifd_;
+	}
 
 	// this is the factory method that delivers the reference 
 	// of the implementation object aka instance

@@ -16,5 +16,6 @@
 #include "dbj_string_util.h"
 #include "dbj_tokenizer.h"
 #include "dbj_util.h"
+#include "dbj_file_util.h"
 
 #endif // DBJ_UTIL_INC
