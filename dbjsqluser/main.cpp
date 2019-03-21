@@ -16,7 +16,7 @@ int main( int argc, char * argv [])
 		-> dbj::buf::yanb 
 	{
 		std::string rv(folder_);
-		return (rv.append("\\").append("test.ini")).data() ;
+		return (rv.append("\\test.ini")).data() ;
 	};
 
 	dbj::ini::ini_file_descriptor ifd = dbj::ini::ini_file();

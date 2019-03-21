@@ -48,12 +48,6 @@
     <ClInclude Include="dbj_gpl_license.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_log\dbj_log.h">
-      <Filter>dbj_log</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_log\dbj_log_file.h">
-      <Filter>dbj_log</Filter>
-    </ClInclude>
     <ClInclude Include="dbj_log\dbj_log_user.h">
       <Filter>dbj_log</Filter>
     </ClInclude>

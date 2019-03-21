@@ -72,15 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -154,8 +158,6 @@
     <ClInclude Include="core_tests.h" />
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_gpl_license.h" />
-    <ClInclude Include="dbj_log\dbj_log.h" />
-    <ClInclude Include="dbj_log\dbj_log_file.h" />
     <ClInclude Include="dbj_log\dbj_log_user.h" />
     <ClInclude Include="dbj_util.h" />
     <ClInclude Include="err\dbj_db_err.h" />

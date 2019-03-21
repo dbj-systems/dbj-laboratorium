@@ -45,8 +45,12 @@ namespace dbj::err {
 
 	inline log_file_descriptor log_file() 
 	{
-		log_file_descriptor lfd;
-		::dbj::util::make_file_descriptor(lfd);
+		static log_file_descriptor lfd = [&]() 
+		{
+			static log_file_descriptor lfd_for_this_module_;
+			::dbj::util::make_file_descriptor(lfd_for_this_module_);
+			return lfd_for_this_module_;
+		}();
 		return lfd;
 	}
 
@@ -89,46 +93,29 @@ namespace dbj::err {
 			return true;
 		}
 
-		inline auto default_local_log_file_base_name() {
-			std::string module_basename
-				= ::dbj::win32::module_basename(HINSTANCE(NULL)).data();
-			return module_basename.append(".log");
-		}
 		/*
-		assure the presence of the folder: "%programdata%/DBJ_LOG_FILE_FOLDER"
+		assure the presence of the folder: "%programdata%/dbj/dbj++sql"
 		*/
 		inline auto
 			assure_log_file_folder(fs::path const & the_last_part)
 			noexcept
 			-> pair<fs::path, error_code>
 		{
-			error_code ec_;
-			string program_data_path
-				= ::dbj::core::util::program_data_path(ec_).data();
+			log_file_descriptor lfd_ = ::dbj::err::log_file();
 
-			_ASSERTE(!ec_);
-
-			program_data_path += "\\";
-			program_data_path += ::dbj::nano::transform_to<string, wstring>(
-				the_last_part.c_str()
-				);
+			string dbj_prog_data_path( lfd_.folder.data() );
 
 			error_code e;
-			auto dir = fs::directory_entry(program_data_path, e);
-			// if we do not use e arg as above exception will be thrown
-			// in case directory does not exist, instead we stay here
-			// and create it
-			if (e) {
-				e.clear();
-				// creates al the subdirs 
-				if (!fs::create_directories(program_data_path, e))
-				{
-					return pair(program_data_path, e);
-				}
+			// creates al the subdirs if required
+			// it seems all is ok here if dir exist already
+			if (e.clear(), fs::create_directories(dbj_prog_data_path, e); e)
+			{   // we are here because there is an error 
+				return pair(dbj_prog_data_path, e);
 			}
-			// OK return
-			e.clear();  dir.refresh(e); // must do refresh!
-			_ASSERTE(dir.is_directory(e));
+			// let's try once more to be sure all is made ok
+			e.clear(); fs::directory_entry dir(dbj_prog_data_path, e);
+			e.clear(); dir.refresh(e); // must do refresh
+			e.clear(); bool rez = dir.is_directory(e); noexcept(rez);
 			return pair(dir.path(), e);
 		}
 

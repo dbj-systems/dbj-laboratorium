@@ -73,16 +73,19 @@ namespace dbj::log {
 
 	extern "C" void the_great_decoupler(syslog_level, const char *);
 
-	template<typename ... A>
-	inline void syslog_call(syslog_level level_, const char * format_, A ... args)
-	{
-		// this static is locking, no mutex necessary
-		static std::array<char, syslog_dgram_size> message_{ { 0 } };
-		message_.fill(0); // zero the buffer
-		auto kontrol = std::snprintf(message_.data(), message_.size(), args ...);
-		_ASSERTE(kontrol > 1);
-		the_great_decoupler(level_, message_.data());
-	}
+	namespace {
+
+		template<typename ... A>
+		inline void syslog_call(syslog_level level_, const char * format_, A ... args)
+		{
+			// this static is locking, no mutex necessary
+			static std::array<char, syslog_dgram_size> message_{ { 0 } };
+			message_.fill(0); // zero the buffer
+			auto kontrol = std::snprintf(message_.data(), message_.size(), args ...);
+			_ASSERTE(kontrol > 1);
+			the_great_decoupler(level_, message_.data());
+		}
+	} // ns
 
 	template<typename ... A>
 	inline void syslog_emergency(const char * format_, A ... args)

@@ -1,24 +1,30 @@
 #pragma once
-#include "dbj_log.h"
-#include "dbj_log_file.h"
+#include <string_view>
+#include <dbj++/core/dbj++core.h>
+#include <dbj++log/dbj++log.h>
 /*
-using the generic log for specific purposes
+using the syslog 
 */
 
 namespace dbj::db::err {
+
+	using namespace std;
 
 	// in sqlite3 basicaly there are error code constants and only 3 are not errors
 
 	inline void log_sql_ec(std::error_code ec, string_view  log_message = "  "sv) noexcept
 	{
+		::dbj::buf::yanb buffer_ 
+			= ::dbj::fmt::to_buff("%s %s", ec.message(), log_message);
+
 		if (
 			(ec == dbj_err_code::sqlite_ok)  ||
 			(ec == dbj_err_code::sqlite_row) ||
 			(ec == dbj_err_code::sqlite_done)
 			)
-			::dbj::db::log::info(ec.message(), log_message);
+			::dbj::log::syslog_info("%s", buffer_.data());
 		else
-			::dbj::db::log::error(ec.message(), log_message);
+			::dbj::log::syslog_error("%s", buffer_.data());
 	}
 
 	/*
@@ -67,9 +73,9 @@ namespace dbj::db::err {
 			::std::error_code ec = std::make_error_code(posix_retval);
 			// each posix code is seen as 'error'
 			if (0 == (int)posix_retval)
-				::dbj::db::log::info(ec.message(), log_message);
+				::dbj::log::syslog_info("%s %s",ec.message().data(), log_message.data());
 			else
-				::dbj::db::log::error(ec.message(), log_message);
+				::dbj::log::syslog_error("%s %s", ec.message().data(), log_message.data());
 		return ec;
 	}
 } // dbj::db::err nspace
