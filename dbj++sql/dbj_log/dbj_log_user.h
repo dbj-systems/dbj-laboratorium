@@ -25,7 +25,7 @@ namespace dbj::db::err {
 	inline void log_sql_ec(std::error_code ec, string_view  log_message = "  "sv) noexcept
 	{
 		::dbj::buf::yanb buffer_ 
-			= ::dbj::fmt::to_buff("%s %s", ec.message(), log_message);
+			= ::dbj::fmt::to_buff("%s %s", ec.message().c_str(), log_message);
 
 		if (
 			(ec == dbj_err_code::sqlite_ok)  ||

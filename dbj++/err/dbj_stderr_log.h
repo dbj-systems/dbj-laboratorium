@@ -56,69 +56,6 @@ namespace dbj::err {
 
 	namespace inner {
 
-		// return true on truncation
-		inline bool truncate_if_oversize(::dbj::buf::yanb	file_path_)
-		{
-			std::uintmax_t size_{};
-			fs::path fp(file_path_.data());
-			try {
-				if (!exists(fp))
-					return false;
-				// The size of the file, in bytes.
-				size_ = fs::file_size(fp);
-
-				if (size_ > DBJ_MAX_LOCAL_LOG_SIZE_KB) {
-					// truncate
-					FILE *log_file_{};
-					if (fopen_s(&log_file_, file_path_.data(), "w") != 0)
-					{
-						puts("\n\nCan't truncate the file -- " __FUNCSIG__ "\n\n");
-						puts(file_path_.data());
-						exit(1);
-					}
-				}
-			}
-			catch (fs::filesystem_error& e)
-			{
-				perror("\n\n");
-				perror(e.what());
-				perror("\n\n");
-#ifdef _DEBUG
-				::system("@echo.");
-				::system("@pause");
-				::system("@echo.");
-#endif
-				exit(1);
-			}
-			return true;
-		}
-
-		/*
-		assure the presence of the folder: "%programdata%/dbj/dbj++sql"
-		*/
-		inline auto
-			assure_log_file_folder(fs::path const & the_last_part)
-			noexcept
-			-> pair<fs::path, error_code>
-		{
-			log_file_descriptor lfd_ = ::dbj::err::log_file();
-
-			string dbj_prog_data_path( lfd_.folder.data() );
-
-			error_code e;
-			// creates al the subdirs if required
-			// it seems all is ok here if dir exist already
-			if (e.clear(), fs::create_directories(dbj_prog_data_path, e); e)
-			{   // we are here because there is an error 
-				return pair(dbj_prog_data_path, e);
-			}
-			// let's try once more to be sure all is made ok
-			e.clear(); fs::directory_entry dir(dbj_prog_data_path, e);
-			e.clear(); dir.refresh(e); // must do refresh
-			e.clear(); bool rez = dir.is_directory(e); noexcept(rez);
-			return pair(dir.path(), e);
-		}
-
 		class log_file final {
 
 			::dbj::buf::yanb	file_path_{};
@@ -139,7 +76,8 @@ namespace dbj::err {
 					exit(1);
 				}
 
-				bool new_created = truncate_if_oversize(file_path_);
+				bool new_created = ::dbj::util::truncate_if_oversize
+				(file_path_, DBJ_MAX_LOCAL_LOG_SIZE_KB );
 
 				if (fopen_s(&log_file_, file_path_.data(), "a") != 0)
 				{
@@ -160,7 +98,7 @@ namespace dbj::err {
 				// if no errors, this file will stay empty
 				// the header will have the role
 				if (new_created) {
-					::fprintf(stderr, "DBJ++ log file | %s | %s\n", file_path_.data(),
+					::fprintf(stderr, "\nDBJ++ log file | %s | %s\n", file_path_.data(),
 						::dbj::core::util::make_time_stamp(
 							ec_,
 							::dbj::core::util::TIME_STAMP_FULL_MASK)
@@ -194,15 +132,10 @@ namespace dbj::err {
 			)
 			{
 				auto initor = [&]() {
-					auto[dir_path, e] = assure_log_file_folder(path_);
-
-					if (e) {
-						perror("\nfailed to assure local log folder!\n");
-						perror(__FILE__);
-						exit(1);
-					}
 					::dbj::err::log_file_descriptor lfd_ 
 						= ::dbj::err::log_file();
+
+					::dbj::util::assure_folder( lfd_ );
 
 					return log_file{ lfd_.fullpath };
 				};

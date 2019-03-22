@@ -104,8 +104,9 @@ https://godbolt.org/z/jGC98L
 #define DBJ_YEAR (__DATE__ + 7)
 #define DBJ_BUILD_STAMP "(c) " __DATE__ " by " DBJ_COMPANY "| " DBJ_BUILD ": [" __DATE__ "][" __TIME__ "]" 
 #endif
+// arg must be a string literal
 #define DBJ_ERR_PROMPT(x) \
-__FILE__ "(" DBJ_EXPAND(__LINE__) ") -- " __FUNCSIG__ " -- " x " -- "
+__FILE__ "(" DBJ_EXPAND(__LINE__) ") -- " x " -- "
 
 // 
 #define DBJ_CHECK_IF static_assert
@@ -155,6 +156,7 @@ namespace dbj {
 
 	inline wchar_t const * app_base_name() noexcept {
 		auto initor = []() {
+			_ASSERTE(__wargv);
 			std::wstring base_name(__wargv[0]);
 			base_name.erase(0,
 				1 + base_name.find_last_of(L"\\")

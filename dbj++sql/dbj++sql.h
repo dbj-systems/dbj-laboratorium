@@ -419,11 +419,14 @@ no error is SQLITE_DONE or SQLITE_OK
 				nullptr		/* Error msg written here */
 			);
 
-			// if SQLITE_DONE return SQLITE_OK
-			if (sql_result == (int)dbj_err_code::sqlite_done)
+			// is SQLITE_DONE or SQLITE_OK
+			if (
+				(sql_result == (int)dbj_err_code::sqlite_ok ) ||
+				(sql_result == (int)dbj_err_code::sqlite_done)
+				)
 				return dbj_err_code::sqlite_ok;
-
-			return sqlite_ec(sql_result);
+			// otherwise log the message and return the error code
+			return sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite result is neither SQLITE_DONE or SQLITE_OK"));
 		}
 
 	}; // database

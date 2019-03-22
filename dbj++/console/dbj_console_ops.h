@@ -526,6 +526,16 @@ with reference or pointer type argument.
 		);
 	}
 
+	inline void out(::dbj::buf::yanb const & cb_)
+	{
+		PRN.printf(	L"%S", cb_.data() );
+	}
+
+	inline void out(::dbj::buf::yanwb const & cb_)
+	{
+		PRN.printf(	L"%s", cb_.data() );
+	}
+
 #pragma region error codes and options
 	// we can not place a friend inside std::error_code, so...
 	// using namespace dbj::console;
