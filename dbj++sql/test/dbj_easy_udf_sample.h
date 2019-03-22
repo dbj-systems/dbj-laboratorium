@@ -77,8 +77,8 @@ namespace dbj_easy_udfs_sample {
 
 			first and only argument is a string
 		*/
-		string word_ = args_(0);
-		int result = is_pal(word_.c_str());
+		dbj::buf::yanb word_ = args_(0);
+		int result = is_pal(word_.data());
 		/*
 		as per sql statement requirements we need to reurn an int
 		*/
@@ -96,7 +96,7 @@ namespace dbj_easy_udfs_sample {
 		// do not throw from the UDF
 		noexcept
 	{
-		string word_ = args_(0);
+		dbj::buf::yanb word_ = args_(0);
 		int result = (int)(word_.size());
 		result_(result);
 	}
@@ -110,10 +110,10 @@ namespace dbj_easy_udfs_sample {
 	)
 	{
 		/* this is deliberately verbose code */
-		string word = col(0);
+		dbj::buf::yanb word = col(0);
 		int len_ = col(1);
 		::wprintf(L"\n\t[%3zu]\tword: %32S,\t%S: %12d",
-			row_id, word.c_str(), col.name(1), len_);
+			row_id, word.data(), col.name(1), len_);
 		// make sure to return always this
 		return SQLITE_OK;
 	}

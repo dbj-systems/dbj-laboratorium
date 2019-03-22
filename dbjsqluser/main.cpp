@@ -27,6 +27,6 @@ int main( int argc, char * argv [])
 
 	// argv[0] used as syslog() tag
 	dbj_log_test(argc, argv);
-	// test_dbj_sql_lite_udf();
-	// test_dbj_sql_lite();
+	test_dbj_sql_lite_udf();
+	test_dbj_sql_lite();
 }

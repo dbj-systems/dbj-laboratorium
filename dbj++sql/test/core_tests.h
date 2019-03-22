@@ -77,10 +77,10 @@ int sample_callback(
 	// get the int value of the first column
 	int   id_ = cell(0);
 	// get the string value of the second column
-	string   name_ = cell(1);
+	dbj::buf::yanb   name_ = cell(1);
 	// print what we got
 	::wprintf(L"\n\t %zu \t %S = %d \t %S = %S",
-		row_id, cell.name(0), id_, cell.name(1), name_.c_str());
+		row_id, cell.name(0), id_, cell.name(1), name_.data());
 	return SQLITE_OK;
 	// otherwise sqlite3 will stop the 
 	// result set traversal
@@ -92,7 +92,7 @@ int universal_callback(
 )
 {
 	auto print_cell = [&](int j_) {
-		::wprintf(L"%10S: %S,", cell.name(j_), ((string)cell(j_)).c_str() );
+		::wprintf(L"%10S: %S,", cell.name(j_), ((dbj::buf::yanb)cell(j_)).data() );
 	};
 
 	::wprintf(L"\n\t%zu", row_id);

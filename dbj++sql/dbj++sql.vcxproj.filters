@@ -33,9 +33,6 @@
     <ClInclude Include="sqlite++.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core_tests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="err\dbj_db_err.h">
       <Filter>err</Filter>
     </ClInclude>
@@ -50,9 +47,6 @@
     </ClInclude>
     <ClInclude Include="dbj_log\dbj_log_user.h">
       <Filter>dbj_log</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj_util.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

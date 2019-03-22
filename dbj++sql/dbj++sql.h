@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include "stdafx.h"
 #include "sqlite++.h"
-#include "dbj_util.h"
 #include "./err/dbj_db_err.h"
 #include "./dbj_log/dbj_log_user.h"
-
+#include <dbj++/core/dbj++core.h>
 #ifndef DBJ_VERIFY
 #define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::terror( #x ", failed", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
@@ -216,10 +215,10 @@ namespace dbj::db {
 			   for pitfalls see here
 			   https://docs.microsoft.com/en-us/windows/desktop/api/stringapiset/nf-stringapiset-widechartomultibyte
 			*/
-			operator std::string() const noexcept  {
+			operator dbj::buf::yanb () const noexcept  {
 				const unsigned char *name = sqlite::sqlite3_column_text(statement_, col_index_);
 				const size_t  sze_ = sqlite::sqlite3_column_bytes(statement_, col_index_);
-				return { (const char *)name, sze_ };
+				return { (char *)name };
 			}
 
 			mutable sqlite::sqlite3_stmt *	statement_;
@@ -456,7 +455,10 @@ no error is SQLITE_DONE or SQLITE_OK
 				}
 				return sqlite::sqlite3_value_int64(argv[col_index_]);
 			}
-			operator std::string() const noexcept
+			// NOTE: we do not use std::string. It is slow and big, but 
+			// good at what it is mean for and that is not to be a char buffer
+			// dbj::buf::yanb == yet another buffer
+			operator dbj::buf::yanb () const noexcept
 			{
 				if (sqlite::sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) {
 				}
@@ -464,7 +466,7 @@ no error is SQLITE_DONE or SQLITE_OK
 				_ASSERTE(text);
 				size_t text_length = sqlite::sqlite3_value_bytes(argv[col_index_]);
 				_ASSERTE(text_length > 0);
-				return { text, text_length };
+				return { text };
 			}
 
 			mutable sqlite::sqlite3_value **argv{};
@@ -615,9 +617,9 @@ cid|name|type|notnull|dflt_value|pk
 			result_row_callback  result_callback_ )
 	noexcept
 	{
-		using ::dbj::util::fmt::dbj_format;
+		using ::dbj::fmt::to_buff;
 
-		std::string qry = dbj_format("PRAGMA table_info('%s')", table_name);
+		auto qry = to_buff("PRAGMA table_info('%s')", table_name);
 
 		// list of all tables and views
 		// auto qry = "SELECT name, sql FROM sqlite_master WHERE type = 'table' ORDER BY name;"sv;
@@ -626,6 +628,3 @@ cid|name|type|notnull|dflt_value|pk
 	}
 #pragma endregion
 } // namespace dbj::db
-
-#undef DBJ_VERIFY_
-#undef DBJ_STR

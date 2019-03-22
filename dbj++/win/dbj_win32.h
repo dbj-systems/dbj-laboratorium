@@ -241,7 +241,7 @@ inline char * basename(
 	return base_;
 }
 
-inline dbj::buf::yanb module_basename(HINSTANCE h_instance) {
+inline dbj::buf::yanb module_basename(HINSTANCE h_instance = NULL ) {
 
 	std::string module_path
 		= string_from_win32_call<char>([h_instance](char* buffer, int size)

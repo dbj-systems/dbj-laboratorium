@@ -1,6 +1,7 @@
 #pragma once
 #include <string_view>
 #include <dbj++/core/dbj++core.h>
+#include <dbj++/win/dbj++win.h>
 #include <dbj++log/dbj++log.h>
 /*
 using the syslog 
@@ -8,7 +9,16 @@ using the syslog
 
 namespace dbj::db::err {
 
-	using namespace std;
+	using namespace ::std;
+	using namespace ::dbj::log;
+
+	inline auto dumsy_ = []() {
+		syslog_init();
+		syslog_open (
+			"dbj++sql", syslog_open_options::log_perror
+		);
+		return true;
+	}();
 
 	// in sqlite3 basicaly there are error code constants and only 3 are not errors
 
@@ -64,7 +74,7 @@ namespace dbj::db::err {
 	[[nodiscard]] inline error_code
 		std_ec(
 			std::errc posix_retval,
-			// make it optional and alos longer 
+			// make it optional and also longer 
 			// than 1 so that logger will not complain
 			string_view  log_message = "  "sv
 		)	noexcept
