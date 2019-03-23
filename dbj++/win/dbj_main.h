@@ -74,21 +74,28 @@ int wmain(const int argc, const wchar_t *argv[], const wchar_t *envp[])
 int main(int argc, char* argv[], char *envp[])
 #endif
 {
-	using namespace ::dbj::console;
-	namespace  ffm = ::dbj::final_for_main;
-	try {
-		dbj_program_start(argc, argv, envp);
-	}
-	catch (std::error_code ec) {
-		print("\n\nAn error_code caught in " __FUNCSIG__ "\n\t",
-			painter_command::bright_red, 
-			ec,
-			painter_command::text_color_reset
-		);
-	}
-	catch (...) {
-		ffm::final_exceptions_processor();
-	}
+	auto main_worker = [&]() {
+		using namespace ::dbj::console;
+		namespace  ffm = ::dbj::final_for_main;
+		try {
+			dbj_program_start(argc, argv, envp);
+		}
+		catch (std::error_code ec) {
+			print("\n\nAn error_code caught in " __FUNCSIG__ "\n\t",
+				painter_command::bright_red,
+				ec,
+				painter_command::text_color_reset
+			);
+		}
+		catch (...) {
+			ffm::final_exceptions_processor();
+		}
+
+	};
+
+	(void)std::async(std::launch::async, [&] {
+		main_worker();
+	});
 
 	exit(EXIT_SUCCESS);
 }

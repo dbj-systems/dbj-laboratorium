@@ -98,7 +98,7 @@ namespace dbj::err {
 				// if no errors, this file will stay empty
 				// the header will have the role
 				if (new_created) {
-					::fprintf(stderr, "\nDBJ++ log file | %s | %s\n", file_path_.data(),
+					::fprintf(stderr, "\n\nDBJ++ log file | %s | %s\n", file_path_.data(),
 						::dbj::core::util::make_time_stamp(
 							ec_,
 							::dbj::core::util::TIME_STAMP_FULL_MASK)

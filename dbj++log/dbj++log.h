@@ -81,7 +81,7 @@ namespace dbj::log {
 			// this static is locking, no mutex necessary
 			static std::array<char, syslog_dgram_size> message_{ { 0 } };
 			message_.fill(0); // zero the buffer
-			auto kontrol = std::snprintf(message_.data(), message_.size(), args ...);
+			auto kontrol = std::snprintf(message_.data(), message_.size(), format_, args ...);
 			_ASSERTE(kontrol > 1);
 			the_great_decoupler(level_, message_.data());
 		}
