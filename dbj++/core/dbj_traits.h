@@ -44,6 +44,21 @@ if (error == -2)   return { "not a valid mangled name" };
 
 namespace dbj {
 
+	// usage:   using ascii_ordinal = inside_t<unsigned, K, 0, 127>;
+	// renders really terrible CL error messages when 
+	// doing the job of stopping outside values
+	template< typename T, T X, T L, T H>
+	using inside_t =
+		std::enable_if_t< (X <= H) && (X >= L),
+		std::integral_constant<T, X> >;
+
+	// _Is_any_of_v from <type_traits>
+	template<class _Ty,
+		class... _Types>
+		inline constexpr bool is_any_of_v 
+		= std::disjunction_v<std::is_same<_Ty, _Types>...>;
+
+
 	/*
 	currently MSVC compiler 2019-07-02 wrongly allows c++
 	type casting from "anything" to function pointer
@@ -51,7 +66,7 @@ namespace dbj {
 	
 	using FP = void (*)(int) ;
 		template <FP fun> call_fp ( int ) { } 
-			// should not compile but it does
+	// should not compile but it does
 	call_fp< FP(42) >( 0 );
 	
 	*/
@@ -66,7 +81,7 @@ namespace dbj {
 	x() ; // crash
 
 	this is the tool to test before calling function pointers
-	of seemingle the right type but of "unknown origin"
+	of seemingly the right type but of "unknown origin"
 	*/
 	template<typename FP>
 	struct function_pointer final

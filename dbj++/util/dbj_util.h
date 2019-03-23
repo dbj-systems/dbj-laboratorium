@@ -22,6 +22,32 @@
 namespace dbj {
 
 	namespace util {
+
+// instead of std::call_once I preffere to use my own version
+// why? because it is simpler and better (gasp!)
+// this is function pointer concept used
+// notice how it defineds the signature to which 
+// creator function has to conform
+// also it is a function, not a type
+// it just returns the *value*
+// of the required type
+// made inside it
+		template<typename RT, typename... ATs>
+		inline RT const & once(RT(*creator)(ATs...), ATs ... args)
+		{
+			static_assert(!std::is_reference_v<RT>,
+				"\n\nStatic assert:\tcreator return type must *not* be a reference\n");
+			static_assert(!std::is_const_v<RT>,
+				"\n\nStatic assert:\tcreator return type must *not* be const\n");
+			static_assert(std::is_copy_constructible_v <RT>,
+				"\n\nStatic assert:\tcreator return type must be copy constructible\n");
+			static_assert(std::is_move_constructible_v<RT>,
+				"\n\nStatic assert:\tcreator return type must be move constructible\n");
+
+			static RT singleton_{ creator(args...) };
+			return singleton_;
+		}
+		//------------------------------------------------------------------------
 		// itox = integer to type x
 		namespace itox {
 
@@ -163,12 +189,7 @@ namespace dbj {
 			mutable T value[N]{};
 		};
 
-		inline auto random = [](int max_val, int min_val = 1) -> int {
-			static auto initor = []() {
-				std::srand((unsigned)std::time(nullptr)); return 0;
-			}();
-			return min_val + std::rand() / ((RAND_MAX + 1u) / max_val);
-		};
+
 
 		/*
 		does not compile *if* 'range' has no begind and no end

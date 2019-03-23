@@ -194,25 +194,23 @@ namespace init {
 	// IID is Instance ID used
 	// otherwse one template definition for one T
 	// will hold all the instances of the T
-	// example of usage now:
-	// singletor<int,1> 
-	// singletor<int,2> 
-	// are two different types
-	// singletor<int,1>::call(42) 
-	// singletor<int,1>::call(24)
+	// example :
+	// singletor<int,1>::construct(42) 
+	// singletor<int,1>::construct(24)
 	// will create two different process wide int's
 	// 42 and 24
-	// the easy way to create definitions
-	// using global1 = singletor<int,__LINE__> ;
-	// using global2 = singletor<int,__LINE__> ;
+	// the easy way to create different globals:
+	// using global1 = singletor<int,__COUNTER__> ;
+	// using global2 = singletor<int,__COUNTER__> ;
 	// above are two different definitions
-	template<typename T, int IID_ARG >
+	template<
+		typename T,
+		int IID_ARG,
+		std::enable_if_t< std::is_constructible_v<T>, int> = IID_ARG
+	>
 	struct singletor final
 	{
 		using value_type = T;
-
-		static_assert(std::is_constructible_v<T>
-			, "\n\nT must be constructible\n");
 
 		constexpr int id() {
 			int retval{ IID_ARG };
@@ -220,8 +218,10 @@ namespace init {
 		}
 
 		// T does not need to be movable 
+		// construct the single_instance_ of T 
+		// and keep it
 		template< typename ...A>
-		T const & call(A...args)
+		static T const & construct(A...args)
 		{
 			// if T is function bellow will not compile
 			static T	single_instance_(args...);
@@ -229,104 +229,46 @@ namespace init {
 		}
 	};
 
-	// function pointer version
-	// notice how it defineds the signature to which 
-	// creator function has to conform
-	// also it is a function, not a type
-	// it just returns the *value*
-	// of the required type
-	// made inside it
-	template<typename RT, typename... ATs>
-	inline RT const & once(RT (* creator )(ATs...), ATs ... args)
-	{
-		static_assert(! std::is_reference_v<RT>, 
-			"\n\nStatic assert:\tcreator return type must *not* be a reference\n" );
-		static_assert(! std::is_const_v<RT>    , 
-			"\n\nStatic assert:\tcreator return type must *not* be const\n" );
-		static_assert(  std::is_copy_constructible_v <RT>,
-			"\n\nStatic assert:\tcreator return type must be copy constructible\n" );
-		static_assert(  std::is_move_constructible_v<RT>,
-			"\n\nStatic assert:\tcreator return type must be move constructible\n" );
-
-		static RT singleton_{ creator(args...) };
-		return singleton_;
-	}
-
-#ifndef _MSC_VER
-
-	template <auto RT> struct starter;
-
-	template<typename RT, typename... ATs, RT(*pF)(ATs...)>
-	struct starter<pF>  final
-	{
-		static RT const & call(ATs ... args) {
-			static RT const & singleton_ = pF(args...);
-			return singleton_;
-		}
-	};
-
-	template<typename RT, typename... ATs>
-	inline RT const & once(RT(*pF)(ATs...), ATs ... args)
-	{
-		static RT const & singleton_ = pF(args...);
-		return singleton_;
-	}
-	/*
-	using namespace std;
-	//--------------------------------------------
-	std::string highlander(const char * arg) { return { arg }; };
-	//--------------------------------------------
-	int main()
-	{
-		using  make_highlander = starter<highlander>;
-
-		cout << "Hello " << make_highlander::call("Highlander").data() << endl;
-		cout << "Hello " << make_highlander::call("Dumbleby ?").data() << endl;
-		cout << "Hello " << make_highlander::call("Michele  ?").data() << endl;
-
-		cout << "Hello " << once(highlander, "Again!").data() << endl;
-		cout << "Hello " << once(highlander, "NOT").data() << endl;
-	}
-	*/
-#endif // !_MSC_VER
-
 } // init
 
 namespace {
+
+	template<unsigned K>
+	using ascii_ordinal = ::dbj::inside_t<unsigned, K, 0, 127>;
+
+	using ascii_ordinal_t = ::dbj::core::util::insider<unsigned, 0U, 127U>;
 
 	// creator functions must return values
 	// this is to prevent them keeping static instances
 	// this is actually what is also known
 	// as 'creation policy'
-	::std::string highlander(const char * arg_) { 
-		return ::std::string(arg_);
+	bool is_ascii(const char * arg_) 
+	{ 
+		::dbj::buf::yanb str(arg_);
+		size_t N = str.size();
+		for (size_t k = 0; k < N; k++) {
+			ascii_ordinal_t  ord = int(arg_[k]);
+			if (!ord.valid()) return false;
+		}
+		return true;
 	};
 
-	int randomizer( int min, int max) 
-	{
-		std::random_device seed;
-		std::mt19937 rng(seed());
-		std::uniform_int_distribution<int> gen(min, max); // uniform, unbiased
-		int rand_val = gen(rng);
-		return rand_val;
-	};
 
 	//-------------------------------------------------------
-
-	//----------------------------------------------------------------
 	DBJ_TEST_UNIT( test_the_initor )
 	{
 		using namespace init;
+		using namespace ::dbj::util ;
 		using      ::dbj::console::print;
 
 		// this line actually creates the function definition
 		// and declaration
-		print("\n", once(highlander, "Only one"));
+		print("\n", once(is_ascii, "Only one"));
 		// second call to prove we already made and are holding 
 		// the single instance
-		print("\n", once(highlander, "Not two"));
+		print("\n", once(is_ascii, "Not two"));
 
-		print("\n", once(randomizer, 24, 42 ));
+		print("\n", once( ::dbj::num::random_from_to<int>, 24, 42 ));
 
 		// this declares + defines the type
 		// + the type wide instance of std::string
@@ -339,16 +281,16 @@ namespace {
 			print("\nid:",
 				// the first call wins
 				// the first call defines the instance 
-				// 'stringetor' is just an type alis
+				// 'stringetor' is just an type alias
 				strtor_.id(),
 				"\tvalue:  ",
-				strtor_.call(arg_)
+				strtor_.construct(arg_)
 			);
 		};
 
 		strinter(stringetor_1, "A");
-		strinter(stringetor_1, "B");
+		strinter(stringetor_1, "B"); // it stays "A"
 		strinter(stringetor_2, "C");
-		strinter(stringetor_2, "D");
+		strinter(stringetor_2, "D"); // it stays "C"
 	}
 }
