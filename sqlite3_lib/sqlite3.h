@@ -37,6 +37,12 @@
 #define SQLITE3_H
 #include <stdarg.h>     /* Needed for the definition of va_list */
 
+/* 
+2019 MAR 25 dbj added 
+https://www.sqlite.org/compile.html#enable_column_metadata
+*/
+#define SQLITE_ENABLE_COLUMN_METADATA
+
 /*
 ** Make sure we can call this stuff from C++.
 */
