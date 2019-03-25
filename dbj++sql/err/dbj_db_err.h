@@ -2,10 +2,20 @@
 #include <system_error>
 #include <string>
 #include <string_view>
+
 /*
-DBJ++ERR errors handling concept
------------------------------
+DBJ++ERR errors handling concept for the dbj++sql
+-------------------------------------------------
 */
+
+[[noreturn]] inline void dbj_terror
+(const char * msg_, const char * file_, const int line_)
+{
+	_ASSERTE(msg_ && file_ && line_);
+	std::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
+	::exit(EXIT_FAILURE);
+}
+
 namespace dbj::db::err
 {
 	using namespace ::std::string_view_literals;
@@ -164,12 +174,14 @@ string is managed internally and must not be freed by the application.
 	}
 
 	// ok, done and row are 3 codes not considered as errors in sqlite3 
-	inline bool is_sql_err_ok( std::error_code ec_ ) 
+	inline bool is_sql_not_err ( std::error_code ec_ ) 
 	{
 		static std::error_code ok_{ dbj_err_code::sqlite_ok };
-		return ec_ == ok_;
+		static std::error_code done_{ dbj_err_code::sqlite_done };
+		static std::error_code row_{ dbj_err_code::sqlite_row };
+		return ((ec_ == ok_) || (ec_ == done_ ) || (ec_ == row_ )) ;
 	}
-
+	/*
 	inline bool is_sql_err_done( std::error_code ec_ ) 
 	{
 		static std::error_code done_{ dbj_err_code::sqlite_done };
@@ -181,6 +193,7 @@ string is managed internally and must not be freed by the application.
 		static std::error_code row_{ dbj_err_code::sqlite_row };
 		return ec_ == row_;
 	}
+	*/
 #pragma region P1095
 /* 
    for details and reasoning see the 
@@ -205,33 +218,38 @@ string is managed internally and must not be freed by the application.
 */
 
 	template<typename T>
-	using dbj_db_return_type = std::pair<T, std::error_code>;
+	using dbj_err_return_type = std::pair<T, std::error_code>;
 
     // #define dbj_db_fails(vt,et) -> std::pair<vt,et>
 
 		template<typename T>
-		auto failure(T v, std::errc e_) {
+		auto failure(T v, std::errc e_) 
+		-> dbj_err_return_type<T> 
+		{
 			return std::make_pair( v, std::make_error_code(e_) );
 		}
 
 		template<typename T>
-		auto failure(T v, std::error_code e_) {
+		auto failure(T v, std::error_code e_) 
+			-> dbj_err_return_type<T>
+		{
 			return std::make_pair( v, e_ );
 		}
 
 		template<typename T>
-		auto failure(T v, std::error_condition en_) {
+		auto failure(T v, std::error_condition en_) 
+			-> dbj_err_return_type<T>
+		{
 			return std::pair{ v, std::make_error_code(en_) };
 		}
 		
 		template<typename T>
-		auto succes(T v) {
+		auto succes(T v) 
+			-> dbj_err_return_type<T>
+		{
 			return std::pair{ v, dbj_err_code::sqlite_ok };
 		};
 #pragma endregion
 } // dbj::db::err
 
-// macro afficionados can indulge in this
-#define DBJ_DB_API(X,T) \
-[[nodiscard]] inline X noexcept -> ::dbj::dbj::err::dbj_db_return_type<T>
 //eof

@@ -1,36 +1,33 @@
 #include "pch.h"
 
-#include "..\dbj++sql\test\core_tests.h"
-#include "..\dbj++sql\test\dbj_easy_udf_sample.h"
+#include <dbj++sql/test/core_tests.h>
+#include <dbj++sql/test/dbj_easy_udf_sample.h>
+
+
 
 void test_dbj_sql_lite_udf()
 {
+	using namespace ::dbj::log; 
 	namespace k = dbj::kalends;
 	namespace d = dbj_easy_udfs_sample;
 	using ::dbj::console::print;
 
 	auto test = [&](auto fun_) {
-		using ::dbj::console::print;
-		print("\n", dbj::LINE(), "%s\nMeasurement start");
-		auto rezult = fun_();
-		print("\n\n\tMeasurement result: ", rezult);
+		syslog_debug ("Measurement start, %s", DBJ_ERR_PROMPT("test_dbj_sql_lite_udf()"));
+		std::string rezult = fun_();
+		syslog_debug(
+			"Measurement end, result: %s", DBJ_ERR_PROMPT(rezult.data())
+		);
 	};
+	test([&] {  return k::miliseconds_measure([&] {
+		DBJ_LOG_STD_ERR(d::test_udf(),"dbj_easy_udfs_sample::test_udf() has failed");
+	}); });
+
 	/*
 		test([&] {  return measure             ([&] { test_udf(); }); });
 		test([&] {  return microseconds_measure([&] { test_udf(); }); });
-		*/
-	test([&] {  return k::miliseconds_measure([&] {
-		auto err = d::test_udf();
-		if (err)
-			print("\n", err);
-	}); });
-	/*
 		test([&] {  return seconds_measure     ([&] { test_udf(); }); });
 	*/
-	system("@echo.");
-	system("@echo.");
-	system("@pause");
-
 }
 
 /*
@@ -54,27 +51,25 @@ int example_callback(
 	return SQLITE_OK;
 }
 
+
+
 void test_dbj_sql_lite()
 {
 	using dbj::console::print;
+	std::error_code err;
 
-	std::error_code err = dbj_db_test_::test_insert();
-	if (err) print("\n", err);
+	DBJ_LOG_STD_ERR(dbj_db_test_::test_insert(),"dbj_db_test_::test_insert()");
 
-	err.clear(); err = dbj_db_test_::test_table_info();
-	if (err) print("\n", err);
+	err.clear(); 
+	DBJ_LOG_STD_ERR( dbj_db_test_::test_table_info(),"dbj_db_test_::test_table_info()");
 
 	print("\n\ndbj_sqlite_callback\n");
-	err.clear(); err = dbj_db_test_::test_select();
-	if (err) print("\n", err);
+	err.clear(); 
+	DBJ_LOG_STD_ERR( dbj_db_test_::test_select(), "dbj_db_test_::test_select()");
 
 	print("\n\ndbj_sqlite_statement_user\n");
-	err.clear(); err = dbj_db_test_::test_statement_using(example_callback);
-	if (err) print("\n", err);
-
-	system("@echo.");
-	system("@echo.");
-	system("@pause");
+	err.clear(); 
+	DBJ_LOG_STD_ERR(dbj_db_test_::test_statement_using(example_callback),"dbj_db_test_::test_statement_using(example_callback)");
 }
 
 

@@ -4,7 +4,7 @@
 #include <dbj++/win/dbj++win.h>
 #include <dbj++log/dbj++log.h>
 /*
-using the syslog 
+using the syslog
 */
 
 namespace dbj::db::err {
@@ -14,24 +14,27 @@ namespace dbj::db::err {
 
 	inline auto dumsy_ = []() {
 		syslog_init();
-		syslog_open (
+		syslog_open(
 			"dbj++sql", syslog_open_options::log_perror
 		);
 		return true;
 	}();
 
 	// in sqlite3 basicaly there are error code constants and only 3 are not errors
-
-	inline void log_sql_ec(std::error_code ec, string_view  log_message = "  "sv) noexcept
+	inline void log_error(
+		std::error_code ec, 
+		/* 
+		not optional, please provde more info which is not delivered by the message() method
+		on the error_code 
+		*/
+		string_view  log_message 
+	)
+		noexcept
 	{
-		::dbj::buf::yanb buffer_ 
+		::dbj::buf::yanb buffer_
 			= ::dbj::fmt::to_buff("%s %s", ec.message().c_str(), log_message);
 
-		if (
-			(ec == dbj_err_code::sqlite_ok)  ||
-			(ec == dbj_err_code::sqlite_row) ||
-			(ec == dbj_err_code::sqlite_done)
-			)
+		if (::dbj::db::err::is_sql_not_err(ec))
 			::dbj::log::syslog_info("%s", buffer_.data());
 		else
 			::dbj::log::syslog_error("%s", buffer_.data());
@@ -46,7 +49,7 @@ namespace dbj::db::err {
 	Thus from here we will simply not log them no error's.
 	Thus, considerably downsizing the log size
 
-	we do not make log if SQLITE_OK == result 
+	we do not make log if SQLITE_OK == result
 	if errors, before returning them we log them
 	so when they are received or caught (if thrown)
 	the full info is already in the log
@@ -54,8 +57,10 @@ namespace dbj::db::err {
 	[[nodiscard]] inline
 		error_code sqlite_ec(
 			int sqlite_retval,
-			// make it longer than 1 so that logger will not complain
-			string_view  log_message = "  "sv
+			// not optional so calling code has
+			// to provide more info than terse 
+			// error_code message method does
+			string_view  log_message 
 		)
 		noexcept
 	{
@@ -63,29 +68,32 @@ namespace dbj::db::err {
 
 		// _ASSERTE((int)dbj_err_code::sqlite_ok == SQLITE_OK );
 
-		if (sqlite_retval != (int)dbj_err_code::sqlite_ok)
-			log_sql_ec(ec, log_message);
+		// avoid double checking if this is SQL LITE error
+		if ( ! ::dbj::db::err::is_sql_not_err(ec))
+				log_error(ec, log_message);
 
 		return ec;
 	}
 
-	// make and return std::errc as error_code
-	// also log the message
+	// essentially transform POSIX error code
+	// into std::error_code 
 	[[nodiscard]] inline error_code
-		std_ec(
+		to_std_error_code(
 			std::errc posix_retval,
-			// make it optional and also longer 
-			// than 1 so that logger will not complain
-			string_view  log_message = "  "sv
+			// force caller to provide more info
+			string_view  log_message
 		)	noexcept
 	{
-		// std::errc should not contain a 0
-			::std::error_code ec = std::make_error_code(posix_retval);
-			// each posix code is seen as 'error'
-			if (0 == (int)posix_retval)
-				::dbj::log::syslog_info("%s %s",ec.message().data(), log_message.data());
-			else
-				::dbj::log::syslog_error("%s %s", ec.message().data(), log_message.data());
+		::std::error_code ec = std::make_error_code(posix_retval);
+#ifdef _DEBUG
+		/* 
+		the concept error_code designer has followed is 
+		if error ...
+		this is what is the logic of the bool operator on it
+		*/
+		if (ec)
+		::dbj::log::syslog_error("%s %s", ec.message().data(), log_message.data());
+#endif
 		return ec;
 	}
 } // dbj::db::err nspace

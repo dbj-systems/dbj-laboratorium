@@ -1,4 +1,5 @@
 #include <string.h>
+#include <dbj++/core/dbj_crt.h>
 
 inline char * basename( char * full_path ) {
 	char *p = full_path, *pp = 0;
@@ -8,7 +9,7 @@ inline char * basename( char * full_path ) {
 	return (pp ? pp + 1 : p);
 }
 
-extern "C" inline int dbj_log_test( int argc, char * argv[] )
+extern "C" inline int dbj_log_test( int argc, char * module_basename_ )
 {
 	using namespace ::dbj::log;
 
@@ -22,7 +23,7 @@ extern "C" inline int dbj_log_test( int argc, char * argv[] )
 // some syslog servers will move the tag to the message if tag len > 128
 // some will truncate it to len 128
 // tag as app base name, also log to local log file, source is "user"
-	syslog_open(basename(argv[0]), syslog_open_options::log_perror );
+	syslog_open(module_basename_, syslog_open_options::log_perror );
 
 // openlog(NULL, LOG_PERROR );
 // openlog(argv[0], LOG_PERROR , LOG_USER );
@@ -35,14 +36,14 @@ extern "C" inline int dbj_log_test( int argc, char * argv[] )
 // "%programdata%/dbj/dbj++" ;
 // "%programdata%/dbj/dbj++/dbj++.log";
 
-	syslog_emergency("%s", "LOG_EMERG"	);
-	syslog_alert("%s", "LOG_ALERT"	);
-	syslog_critical("%s", "LOG_CRIT"	);
-	syslog_error("%s", "LOG_ERR"		);
-	syslog_warning("%s", "LOG_WARNING" );
-	syslog_notice("%s", "LOG_NOTICE"	);
-	syslog_info("%s", "LOG_INFO"	);
-	syslog_debug("%s [%s(%d)]", "This is usefull as a debug message.", __FILE__, __LINE__	);
+	syslog_emergency("%s", DBJ_ERR_PROMPT("Emergency!"));
+	syslog_alert("%s", DBJ_ERR_PROMPT("Alert!"));
+	syslog_critical("%s", DBJ_ERR_PROMPT("Critical Event!"));
+	syslog_error("%s", DBJ_ERR_PROMPT("Just an Error"));
+	syslog_warning("%s", DBJ_ERR_PROMPT("Warning, this is usefull"));
+	syslog_notice("%s", DBJ_ERR_PROMPT("You are notified"));
+	syslog_info("%s", DBJ_ERR_PROMPT("This is information"));
+	syslog_debug("%s", DBJ_ERR_PROMPT("Debug message") );
 
 	return 0;
 }

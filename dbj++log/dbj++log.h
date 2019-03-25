@@ -9,12 +9,22 @@ NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
 */
 
 #include <array>
+#include <system_error>
+#include <dbj++/core/dbj_crt.h>
+
+#define DBJ_LOG_STD_ERR(err,msg_if_err) \
+if (err) \
+::dbj::log::syslog_error( \
+	"%s, %s", \
+	err.message().c_str(),\
+	DBJ_ERR_PROMPT(msg_if_err) \
+)
 
 namespace dbj::log {
 
 	// SEMantic VERsioning
 	constexpr inline const auto MAJOR = 0;
-	constexpr inline const auto MINOR = 1;
+	constexpr inline const auto MINOR = 2;
 	constexpr inline const auto PATCH = 0;
 
 	constexpr inline const auto syslog_dgram_size = 1024U;
@@ -136,6 +146,7 @@ namespace dbj::log {
 	}
 
 } // dbj::log
+
 
 #ifdef DBJ_LOG_TESTING
 #include "test/dbj_log_test.h"

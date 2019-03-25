@@ -17,15 +17,9 @@
 #include <system_error>
 #include <array>
 
+#include "dbj_synchro.h"
 #include "dbj_traits.h"
-#ifndef __clang__
-#ifndef _MSC_VER
-#error dbj++  requires Visual C++ 
-#endif // !_MSC_VER
-#if _MSC_VER < 1911
-#error dbj++ requires Visual C++ 14.1 or better
-#endif
-#endif
+
 
 #if (!defined(UNICODE)) || (! defined(_UNICODE))
 #error dbj++ requires UNICODE builds
@@ -43,6 +37,15 @@
 
 /* avoid macros as much as possible */
 // #ifdef NOMINMAX
+#ifdef MIN
+#undef MIN
+#pragma message (__FILE__ " -- MIN undefined ...")
+#endif // MIN
+#ifdef MAX
+#undef MAX
+#pragma message (__FILE__ " -- MAX undefined ...")
+#endif // MAX
+
 inline const auto & MIN = [](const auto & a, const auto & b) 
   constexpr -> bool { return (a < b ? a : b); };
 inline const auto & MAX = [](const auto & a, const auto & b) 
@@ -104,9 +107,24 @@ https://godbolt.org/z/jGC98L
 #define DBJ_YEAR (__DATE__ + 7)
 #define DBJ_BUILD_STAMP "(c) " __DATE__ " by " DBJ_COMPANY "| " DBJ_BUILD ": [" __DATE__ "][" __TIME__ "]" 
 #endif
-// arg must be a string literal
-#define DBJ_ERR_PROMPT(x) \
-__FILE__ "(" DBJ_EXPAND(__LINE__) ") -- " x " -- "
+
+#ifndef DBJ_ERR_PROMPT
+// is this resilient or what?
+extern "C" inline char const * dbj_err_prompt_and_msg ( 
+	char const * file_, 
+	const unsigned line_, 
+	char const * msg_) 
+{
+	::dbj::sync::lock_unlock locker_;
+	static ::std::string text_( BUFSIZ * 4, char(0) );
+	text_ = file_;
+	text_.append("(").append( std::to_string(line_)).append("): ").append(msg_);
+	return text_.data();
+};
+// note: this macro is used a lot
+#define DBJ_ERR_PROMPT(x) dbj_err_prompt_and_msg ( __FILE__, __LINE__, x )
+
+#endif // DBJ_ERR_PROMPT
 
 // 
 #define DBJ_CHECK_IF static_assert

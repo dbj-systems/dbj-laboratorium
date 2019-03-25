@@ -5,7 +5,7 @@
 #include "./dbj_log/dbj_log_user.h"
 #include <dbj++/core/dbj++core.h>
 #ifndef DBJ_VERIFY
-#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::terror( #x ", failed", file, line )
+#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::dbj_terror( #x ", failed", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
@@ -16,13 +16,7 @@ namespace dbj::db {
 	using namespace ::std::literals::string_view_literals;
 	using namespace ::dbj::db::err;
 
-[[noreturn]] inline void terror
-(const char * msg_, const char * file_, const int line_)
-{
-	_ASSERTE(msg_);	_ASSERTE(file_);_ASSERTE(line_);
-	std::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
-	::exit(EXIT_FAILURE);
-}
+
 	// constexpr inline auto version = "1.0.0"sv;
 	// core tests moved to core_tests.h
 	// also with advice on u8 string literals 
@@ -152,7 +146,7 @@ namespace dbj::db {
 		[[nodiscard]] static auto close(pointer value) noexcept 
 			-> std::error_code
 		{
-			return sqlite_ec( sqlite::sqlite3_close(value) );
+			return sqlite_ec( sqlite::sqlite3_close(value), DBJ_ERR_PROMPT("sqlite3_close() has failed"));
 		}
 	};
 
@@ -169,7 +163,7 @@ namespace dbj::db {
 
 		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
 		{
-			return sqlite_ec(sqlite::sqlite3_finalize(value));
+			return sqlite_ec(sqlite::sqlite3_finalize(value), DBJ_ERR_PROMPT("sqlite3_finalize() has failed"));
 		}
 	};
 
@@ -293,7 +287,8 @@ so we do not return a pair, just the error_code
 		if (ec) return ec;
 		// make the error_code, log if not OK and return it
 		return sqlite_ec(sqlite::sqlite3_open(filename,
-			handle_.get_address_of()));
+			handle_.get_address_of())
+		, DBJ_ERR_PROMPT("sqlite3_open has failed."));
 	}	
 	
 	[[nodiscard]] error_code
@@ -301,7 +296,7 @@ so we do not return a pair, just the error_code
 	{
 		_ASSERTE(query_);
 		if (!handle)
-			return std_ec(
+			return to_std_error_code(
 				::std::errc::protocol_error, 
 				"dbj::db::database -- Must call open() before " __FUNCSIG__ 
 			);
@@ -311,7 +306,8 @@ so we do not return a pair, just the error_code
 			query_,
 			-1,
 			statement_.get_address_of(),
-			NULL ) );
+			NULL ),
+			DBJ_ERR_PROMPT("sqlite3_prepare_v2() has failed"));
 	}
 
 	public:
@@ -339,7 +335,7 @@ so we do not return a pair, just the error_code
 		) const noexcept
 		{
 			if (!handle)
-				return std_ec(
+				return to_std_error_code(
 					::std::errc::protocol_error,
 					"dbj::db::database -- Must call open() before " __FUNCSIG__
 				);
@@ -356,7 +352,7 @@ so we do not return a pair, just the error_code
 					NULL, 
 					NULL);
 
-			return sqlite_ec(result);
+			return sqlite_ec(result, DBJ_ERR_PROMPT("sqlite3_create_function() has failed") );
 		}
 
 /*
@@ -369,7 +365,7 @@ no error is SQLITE_DONE or SQLITE_OK
 ) const noexcept
 {
 		if (!handle)
-			return std_ec(
+			return to_std_error_code(
 				::std::errc::protocol_error,
 				"dbj::db::database -- Must call open() before " __FUNCSIG__
 			);
@@ -397,7 +393,7 @@ no error is SQLITE_DONE or SQLITE_OK
 		// if SQLITE_DONE return SQLITE_OK
 		if (sql_result == (int)dbj_err_code::sqlite_done )
 			return dbj_err_code::sqlite_ok;
-	    return sqlite_ec(sql_result );
+	    return sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite3_step() has failed"));
 	}
 /*
  execute SQL statements through here for which no result set is expected
@@ -406,7 +402,7 @@ no error is SQLITE_DONE or SQLITE_OK
 		{
 			_ASSERTE(sql_);
 			if (!handle)
-				return std_ec(
+				return to_std_error_code(
 					::std::errc::protocol_error,
 					"dbj::db::database -- Must call open() before " __FUNCSIG__
 				);
@@ -419,14 +415,11 @@ no error is SQLITE_DONE or SQLITE_OK
 				nullptr		/* Error msg written here */
 			);
 
-			// is SQLITE_DONE or SQLITE_OK
-			if (
-				(sql_result == (int)dbj_err_code::sqlite_ok ) ||
-				(sql_result == (int)dbj_err_code::sqlite_done)
-				)
-				return dbj_err_code::sqlite_ok;
-			// otherwise log the message and return the error code
-			return sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite result is neither SQLITE_DONE or SQLITE_OK"));
+			// this will log if sql_result was error
+		std::error_code ec_
+				= sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite3_exec() failed"));
+
+			return ec_ ;
 		}
 
 	}; // database
