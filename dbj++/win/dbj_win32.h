@@ -1,8 +1,11 @@
 #pragma once
 //
+#include <system_error>
 #include "dbj_win_inc.h"
 #include "../util/dbj_defval.h"
 //
+#include "../core/dbj++core.h"
+
 namespace dbj {
 	namespace win32 {
 
@@ -25,9 +28,10 @@ namespace dbj {
 // which for MSVC STL delivers win32 last error message
 // by calling what() on it
 		inline auto system_error_instance()
-			->  system_error
+			->  std::system_error
 		{
-		return std::system_error(error_code(last_win32_error(), system_category()));
+			using namespace std;
+		return system_error(error_code(last_win32_error(), system_category()));
 		}
 
 		// Returns the last Win32 error message
@@ -58,7 +62,7 @@ namespace dbj {
 				
 				inline DWORD INFO_BUFFER_SIZE = 1024;
 
-				static wstring  infoBuf(INFO_BUFFER_SIZE, (wchar_t)0);
+				static STRING  infoBuf(INFO_BUFFER_SIZE, (wchar_t)0);
 				//
 				template<class F, class... Pack>
 				constexpr inline auto

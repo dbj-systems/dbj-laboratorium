@@ -31,11 +31,13 @@ namespace dbj::util
 	%programdata%/dbj/%modulename%/%modulename%.ini
 	%programdata%/dbj/%modulename%/%modulename%.log
 	*/
-	struct file_descriptor {
+	struct file_descriptor 
+	{
+		using buff_t = ::dbj::buf::yanb;
 		virtual const char * suffix() const noexcept = 0;
-		smart_buffer folder;
-		smart_buffer basename;
-		smart_buffer fullpath;
+		buff_t folder;
+		buff_t basename;
+		buff_t fullpath;
 	};
 	/*
 	users inherit a concrete f descriptor and give it a concrete suffix

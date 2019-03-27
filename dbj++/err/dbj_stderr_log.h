@@ -159,22 +159,23 @@ namespace dbj::err {
 	}
 
 	/////////////////////////////////////////////////////////////////////////
+	namespace inner {
+		inline void local_log_file_write(const char * text_)
+		{
+			::dbj::sync::lock_unlock locker_;
+			_ASSERTE(text_);
+			DBJ_VERIFY(is_log_file_valid());
+			std::fprintf(stderr, "%s", text_);
+		}
 
-	void local_log_file_write(const char * text_)
-	{
-		::dbj::sync::lock_unlock locker_;
-		_ASSERTE(text_);
-		DBJ_VERIFY(is_log_file_valid());
-		std::fprintf(stderr, "%s", text_);
-	}
-
-	void local_log_file_write(const wchar_t * w_text_)
-	{
-		::dbj::sync::lock_unlock locker_;
-		_ASSERTE(w_text_);
-		DBJ_VERIFY(is_log_file_valid());
-		std::fprintf(stderr, "%S", w_text_);
-	}
+		inline void local_log_file_write(const wchar_t * w_text_)
+		{
+			::dbj::sync::lock_unlock locker_;
+			_ASSERTE(w_text_);
+			DBJ_VERIFY(is_log_file_valid());
+			std::fprintf(stderr, "%S", w_text_);
+		}
+	} // inner
 
 	/*
 	NOTE: no new lines or any other formating are
@@ -193,7 +194,7 @@ namespace dbj::err {
 		auto log_to_stderr = [](std::basic_string_view<CHR> sv_)
 		{
 			_ASSERTE(sv_.size() > 0);
-			local_log_file_write(sv_.data());
+			inner::local_log_file_write(sv_.data());
 		};
 
 		(void)std::async(std::launch::async, [&] {
@@ -204,6 +205,22 @@ namespace dbj::err {
 
 		// temporary's dtor waits for log_to_stderr()
 		// thus making this schema queued?
+	}
+
+	template<typename CHR>
+	inline void async_log_write(
+		::dbj::buf::yanb_t<CHR> message
+	) noexcept
+	{
+		async_log_write(std::basic_string_view<CHR>{ message.data() });
+	}
+
+	template<typename C, size_t N>
+	inline void async_log_write(
+		const C (& message )[N]
+	) noexcept
+	{
+		async_log_write(std::basic_string_view<C>{ message });
 	}
 
 
