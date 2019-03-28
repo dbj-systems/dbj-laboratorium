@@ -83,7 +83,8 @@ namespace dbj::util
 		fs::path fp(file_path_.data());
 		try {
 			if (!exists(fp))
-				return false;
+				return true; // will signal to the caller to write the top header
+
 			// The size of the file, in bytes.
 			size_ = fs::file_size(fp);
 
@@ -96,6 +97,10 @@ namespace dbj::util
 					puts(file_path_.data());
 					exit(1);
 				}
+			}
+			else {
+				// file is there and was not truncated
+				return false;
 			}
 		}
 		catch (fs::filesystem_error& e)

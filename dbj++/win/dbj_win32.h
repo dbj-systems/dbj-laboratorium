@@ -36,7 +36,7 @@ namespace dbj {
 
 		// Returns the last Win32 error message
 		// with optional prefix
-		inline std::string 
+		inline ::dbj::buf::yanb 
 		get_last_error_message(
 			std::string_view prompt = std::string_view{}
 		)
@@ -45,8 +45,12 @@ namespace dbj {
 			auto syserr = system_error_instance();
 			const char * sys_err_msg = syserr.what();
 
-			if (!prompt.empty())
-				return std::string(prompt).append(sys_err_msg);
+			if (!prompt.empty()) 
+			{
+				//use std::string only and if needed
+				std::string str_(prompt); str_.append(sys_err_msg);
+				return { str_.c_str() };
+			}
 
 			return { sys_err_msg };
 		}

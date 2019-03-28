@@ -204,7 +204,7 @@ namespace dbj::console {
 					// can happen before main()
 					// and user can have no terminators set up
 					// so ...
-					std::string message_ 
+					dbj::buf::yanb message_ 
 						= ::dbj::win32::get_last_error_message(
 							"dbj console configuration has failed"sv
 						);
