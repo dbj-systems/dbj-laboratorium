@@ -25,14 +25,14 @@ namespace dbj {
 
 namespace dbj::err {
 
-	inline void errno_exit(errno_t errno_, void(*ccb_)(void) = nullptr)
+	inline void errno_exit(errno_t errno_, const char * file, const int line, void(*ccb_)(void) = nullptr)
 	{
 		if (!errno_) return;
 		char err_msg_[BUFSIZ]{ 0 };
 		strerror_s(err_msg_, BUFSIZ, errno_);
 		::dbj::core::trace(
 			"\n\nfprintf() failed\n%s(%d)\n\nerrno message: %s\nerrno was: %d\n\nExiting..\n\n"
-			, __FILE__, __LINE__, err_msg_, errno
+			, file, line, err_msg_, errno
 		);
 
 		perror(err_msg_);
@@ -40,7 +40,10 @@ namespace dbj::err {
 		exit(errno);
 	}
 
-#define	DBJ_FPF(...) do { errno_t e_ = fprintf(stderr, __VA_ARGS__); if (e_ < 0) ::dbj::err::errno_exit( errno ); } while (false)
+#define	DBJ_FPF(...) do { \
+errno_t e_ = fprintf(stderr, __VA_ARGS__); \
+if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
+} while (false)
 
 	using namespace ::std;
 	using smart_buffer = ::dbj::buf::yanb;
@@ -99,7 +102,8 @@ namespace dbj::err {
 
 				// Reassign "stderr" to file_path_
 				errno_exit(
-					freopen_s(&log_file_, file_path_.data(), "a", stderr), nullptr
+					freopen_s(&log_file_, file_path_.data(), "a", stderr), 
+					__FILE__, __LINE__
 				);
 
 				//if (fopen_s(&log_file_, file_path_.data(), "a") != 0)
@@ -117,7 +121,7 @@ namespace dbj::err {
 				//}
 
 				// Flush stdout stream buffer so it goes to correct file
-				errno_exit(fflush(stderr));
+				errno_exit(fflush(stderr), __FILE__, __LINE__);
 				clearerr_s(stderr);
 #ifdef _DEBUG
 				if (_isatty(_fileno(stderr))) {
