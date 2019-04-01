@@ -12,14 +12,6 @@ NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
 #include <system_error>
 #include <dbj++/core/dbj_crt.h>
 
-#define DBJ_LOG_STD_ERR(err,msg_if_err) \
-if (err) \
-::dbj::log::syslog_error( \
-	"%s, %s", \
-	err.message().c_str(),\
-	DBJ_ERR_PROMPT(msg_if_err) \
-)
-
 namespace dbj::log {
 
 	// SEMantic VERsioning
@@ -147,7 +139,34 @@ namespace dbj::log {
 
 } // dbj::log
 
+// macros are bad but still very effective for decoupling
+#ifdef DBJ_SYSLOG
+
+// this is for std::error_code
+#define DBJ_LOG_STD_ERR(err,msg_if_err) \
+do { if (err) ::dbj::log::syslog_error( "%s, %s", err.message().c_str(), DBJ_ERR_PROMPT(msg_if_err) ); } while(false)
+
+#define DBJ_LOG_ERR(...) ::dbj::log::syslog_error( __VA_ARGS__ ) 
+#define DBJ_LOG_CRT(...) ::dbj::log::syslog_critical( __VA_ARGS__ ) 
+#define DBJ_LOG_LRT(...) ::dbj::log::syslog_alert( __VA_ARGS__ ) 
+#define DBJ_LOG_WRG(...) ::dbj::log::syslog_warning( __VA_ARGS__ ) 
+#define DBJ_LOG_MCY(...) ::dbj::log::syslog_emergency( __VA_ARGS__ ) 
+#define DBJ_LOG_DBG(...) ::dbj::log::syslog_debug( __VA_ARGS__ ) 
+#define DBJ_LOG_INF(...) ::dbj::log::syslog_info( __VA_ARGS__ ) 
+#define DBJ_LOG_NTC(...) ::dbj::log::syslog_notice( __VA_ARGS__ ) 
+#else
+#define DBJ_LOG_ERR(...) 
+#define DBJ_LOG_CRT(...) 
+#define DBJ_LOG_LRT(...) 
+#define DBJ_LOG_WRG(...) 
+#define DBJ_LOG_MCY(...) 
+#define DBJ_LOG_DBG(...) 
+#define DBJ_LOG_INF(...) 
+#define DBJ_LOG_NTC(...)
+#define DBJ_LOG_STD_ERR(err,msg_if_err) 
+#endif
 
 #ifdef DBJ_LOG_TESTING
 #include "test/dbj_log_test.h"
 #endif
+

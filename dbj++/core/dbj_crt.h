@@ -115,10 +115,16 @@ extern "C" inline char const * dbj_err_prompt_and_msg (
 	const unsigned line_, 
 	char const * msg_) 
 {
+	auto line_to_s = [](int line_no_) {
+		static char buf_[BUFSIZ]{};
+		::memset(buf_, 0, BUFSIZ);
+		sprintf_s(buf_, "%d", line_no_);
+		return buf_;
+	};
 	::dbj::sync::lock_unlock locker_;
 	static ::std::string text_( BUFSIZ * 4, char(0) );
 	text_ = file_;
-	text_.append("(").append( std::to_string(line_)).append("): ").append(msg_);
+	text_.append("(").append(line_to_s(line_)).append("): ").append(msg_);
 	return text_.data();
 };
 // note: this macro is used a lot
