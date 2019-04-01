@@ -196,7 +196,7 @@ namespace dbj::console {
 
 					// and now the really crazy and important measure 
 					// for Windows console
-					::system("@chcp 65001");
+					::system("@chcp 65001>nul");
 					::dbj::core::trace(L"\nConsole chcp 65001 done\n");
 
 				}
