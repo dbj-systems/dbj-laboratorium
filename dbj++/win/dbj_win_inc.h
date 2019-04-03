@@ -14,7 +14,7 @@ and do it according to ancient windows lore
 #endif
 
 /*
-Why was this?
+Why was this used?
 #if (WINVER < NTDDI_WIN10_RS3)
 #else
 #error dbj++ requires Windows builds above REDSTONE 3 or above
@@ -24,12 +24,8 @@ Why was this?
 /*
 rudimentary runtime version checks
 https://docs.microsoft.com/en-us/windows/desktop/sysinfo/getting-the-system-version
-
-#include <VersionHelpers.h>
-
 */
-
-
+#include <VersionHelpers.h>
 
 /*
 GDI+

@@ -103,4 +103,27 @@ namespace dbj::num {
 		return ::abs( int( min_val + std::rand() / ((RAND_MAX + 1u) / max_val) ) );
 	};
 
+	// reverse the 32 bit integer
+	// not my code, just optimized this https://leetcode.com/articles/reverse-integer/
+	extern "C" constexpr std::int32_t reverse(std::int32_t x) noexcept
+	{
+		static const std::int32_t INT_MAX_OVER_10 = INT_MAX / 10;
+		static const std::int32_t INT_MIN_OVER_10 = INT_MIN / 10;
+
+		std::int32_t rev = 0;
+		while (x != 0) {
+			std::int32_t pop = x % 10;
+			x /= 10;
+			/*
+			Explanation:
+			The maximun of plus integer is 2^32 - 1,which mod 10 is 7,
+			The minimum of minus integer is -2^32,which mod 10 is 8.
+			*/
+			if (rev > INT_MAX_OVER_10 || (rev == INT_MAX_OVER_10 && pop > 7)) return 0;
+			if (rev < INT_MIN_OVER_10 || (rev == INT_MIN_OVER_10 && pop < -8)) return 0;
+			rev = rev * 10 + pop;
+		}
+		return rev;
+	}
+
 } // dbj::num

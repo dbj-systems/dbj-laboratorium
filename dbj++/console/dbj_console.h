@@ -189,15 +189,17 @@ namespace dbj::console {
 			static auto configure_once_ = []() -> bool
 			{
 				try {
-					::dbj::console::set_font(
-						::dbj::console::default_font
-					);
-					::dbj::core::trace(L"\nConsole font set to: %s\n", ::dbj::console::default_font);
+					
+					// NOT required for WIN10?
+					//::dbj::console::set_font(
+					//	::dbj::console::default_font
+					//);
+					//::dbj::core::trace(L"\nConsole font set to: %s\n", ::dbj::console::default_font);
 
-					// and now the really crazy and important measure 
-					// for Windows console
-					::system("@chcp 65001>nul");
-					::dbj::core::trace(L"\nConsole chcp 65001 done\n");
+					//// and now the really crazy and important measure 
+					//// for Windows console
+					//::system("@chcp 65001>nul");
+					//::dbj::core::trace(L"\nConsole chcp 65001 done\n");
 
 				}
 				catch (...) {

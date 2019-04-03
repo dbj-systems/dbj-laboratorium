@@ -9,6 +9,16 @@
 namespace dbj {
 	namespace win32 {
 
+		inline bool is_windows_10()
+		{
+			if (!IsWindows10OrGreater())
+			{
+				::dbj::core::trace(L"\n\nYou need at least Windows 10 %s\n\n", L"Version Not Supported");
+				return false;
+			}
+			return true;
+		}
+
 		inline int last_win32_error() noexcept
 		{
 			struct last final
