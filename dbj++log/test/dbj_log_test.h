@@ -1,5 +1,6 @@
 #include <string.h>
 #include <dbj++/core/dbj_crt.h>
+#include "../dbj++log.h"
 
 inline char * basename( char * full_path ) {
 	char *p = full_path, *pp = 0;
@@ -13,10 +14,7 @@ extern "C" inline int dbj_log_test( int argc, char * module_basename_ )
 {
 	using namespace ::dbj::log;
 
-// DBJ TODO : 
-// must know the server IP address
-// where is it coming from? the ini file? app manifest?
-	// syslog_init("192.168.0.202");
+// targeting the local syslog server, if one is found
 	syslog_init();
 
 // carefull! max len of the tag is 128

@@ -42,6 +42,9 @@ int main( int argc, char * argv [])
 	DBJ_TEST_ATOM(dbj::num::reverse(INT32_MAX));
 	// underflow must return 0
 	DBJ_TEST_ATOM(dbj::num::reverse(INT32_MIN));
+
+	// this requires app to have a proper manifest
+	DBJ_TEST_ATOM(dbj::win32::is_windows_10());
 #endif // _DEBUG
 
 	test_dbj_sql_lite_udf();

@@ -1,163 +1,115 @@
 
-# dbj++log 
+# dbj++log
+### syslog standard C++ API 
 
-**Version: 1.0.0**
+[![syslogwatcher](./media/syslogwatcher.com.jpg)](https://syslogwatcher.com "syslogwatcher.com")
+We recomend the "Syslogwatcher". Click on the image for the download.
 
-### syslog for the rest of us
+> The project we started from is Copyright (c) 2008 Secure Endpoints Inc.
 
-**Simple, standard C++ compliant, asynchronous, fast, logging library.**
 
 > Disclaimer: <br/>
 > This release is Proof Of Concept (POC). <br/>
 > Use at your own risk.
 
-*`syslog` [project we started from](https://github.com/asankah/syslog-win32) is Copyright (c) 2008 Secure Endpoints Inc.*
-## The API
-Start by including the single header file.
+
+Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is foollowed. Plan is to develop a support for the newer one: 
+[RFC5424](https://tools.ietf.org/html/rfc5424).
+
+### The API
+
+You need a single header to be on the path:
 ```cpp
 #include <dbj++log.h>
 ```
-All of the API is standard C++, and it is a rather simple interface to
- the full syslog implementation in the back.
+Everything is in the namespace
 ```cpp
 using namespace ::dbj::log;
 ```
-
-The user needs to initialise the logging. If remote server is in use, one must give it's IP address.
-```cpp
-    // address of the remote syslog server
-    // default syslog port is 514
-    // we do not need to type it
-	init_syslog("192.168.0.202");
-```
-
-Default behaviour is to use the local syslog server.
+Currently the user needs to initialise the logging .
 
 ```cpp
-// connect to the local syslog server
-	init_syslog();
-```
-This is the preffered syslog setup. Use the local syslog server in a "relay" mode. All the local logger send to it, and you setup the "relay" to send further to the remote  (central)  syslog server.
+// targeting the local syslog server, if one is found
+	syslog_init();
 
-Next step is optional. But this is how you control the logging behaviour.
-```cpp
-// sender tag will be "Anonymous"
-syslog_open( );
+// targeting the syslog server on the LAN
+//	init_syslog("192.168.0.202");
 ```
-First argument is the "tag" aka the "identity".
-if nullptr it will appear as "Anonymous", in the log, otherwise give it as a string literal.
+
+Next step is optional. But this is how you control the logging.
+
 ```cpp
-// sender tag will be application basename
-syslog_open( basename(argv[0]));
-```
-Tag max length is 128. Second argument is to control if user wants to use the local log file. Note: That is not a syslog local server file.
-```cpp
-// sender tag will be application basename
-// every line sent to the syslog server
-// will be also written in the local log file.
-syslog_open(basename(argv[0]), syslog_open_options::log_perror );
+// careful! max len of the tag is 128
+// some syslog servers will move the tag to the message if tag len > 128
+// some will truncate it to len 128
+syslog_open(module_basename_, syslog_open_options::log_perror );
 ``` 
-See the NOTE section bellow on the location and behaviour of this file.
 
-Third argument is syslog "facility" feature. This means the tag of the sending side, software module or device kind. Defult (if not given) is "user".
-This enum clearly lists the available facilities.
+
+Please make sure you have read once the RFC's 3164 and 5424 . (Links are at the top of the doc.)
+
+The dbj++log behaviour is standard, as described on  numerous pages on the web.
+`syslog.h` header in here is 99% standard and you are free to browse through it to understand all the options.
+
+Also, dbj++log doesn't interfere if you try to redirect 
+cout/cerr/clog 
+to somewhere else. The decision is up to you, the library user. 
+In case you are developing GUI app, make 
+sure you've check out the [example code here](https://gist.github.com/kingseva/a918ec66079a9475f19642ec31276a21).
+
+there is also a `dbj_log_test.h` where we have a simple testing functions, from where you might start, using the syslog(), with added C++ functionality.
+
+#### Decouple the logging from your code
+
+Loging and syslog are cool and best way to develop resilient software.
+
+But be carefull not to introduce too much hard-wired dependancies on the dbj++log (syslog).
+
+We recomend using the set of macros found at the botom of the dbj++log.h, in order to 
+decouple a bit more.
+
 ```cpp
-	enum class syslog_open_facilities {
-		_null_,
-		log_kern = (0 << 3), 	/* kernel messages */
-		log_user = (1 << 3), 	/* random user-level messages */
-		log_mail = (2 << 3), 	/* mail system */
-		log_daemon = (3 << 3), 	/* system daemons */
-		log_auth = (4 << 3), 	/* security/authorization messages */
-		log_syslog = (5 << 3), 	/* messages generated internally by syslogd */
-		log_lpr = (6 << 3), 	/* line printer subsystem */
-		log_news = (7 << 3), 	/* network news subsystem */
-		log_uucp = (8 << 3), 	/* UUCP subsystem */
-		log_cron = (9 << 3) 	/* clock daemon */
-	};
+#define DBJ_LOG_ERR(...) 
+#define DBJ_LOG_CRT(...) 
+#define DBJ_LOG_LRT(...) 
+#define DBJ_LOG_WRG(...) 
+#define DBJ_LOG_MCY(...) 
+#define DBJ_LOG_DBG(...) 
+#define DBJ_LOG_INF(...) 
+#define DBJ_LOG_NTC(...)
+#define DBJ_LOG_STD_ERR(err,msg_if_err) 
 ```
-That is a standard syslog protocol nomenclature. Albeit deliberately limited, to make it simple to use.
-```cpp
-// sender tag will be application basename
-// every line sent to the syslog server
-// will be also written in the local log file.
-// 'facility' is a 'kernel messages'
-syslog_open(basename(argv[0]), 
-            syslog_open_options::log_perror,
-            syslog_open_facilities::log_kern );
-``` 
-Please remember the `syslog_open()` call is optional. The actuall logging is rather simple and nothing unusual.
+
+So, please use these macros. They are active if DBJ_SYSLOG is defined before 
+including dbj++log.h
+
+Alternatively one can avoid the macros. dbj++log.h is quite simple to understand how to do that.
+
+#### std::error_code 
+
+Is logged by using that macro above. Example usage.
 
 ```cpp
-/* 
-standard loging since 1983
-2019 from C++
-*/
-	syslog_emergency("%s", "LOG_EMERG"	);
-	syslog_alert("%s", "LOG_ALERT"	);
-	syslog_critical("%s", "LOG_CRIT"	);
-	syslog_error("%s", "LOG_ERR"		);
-	syslog_warning("%s", "LOG_WARNING" );
-	syslog_notice("%s", "LOG_NOTICE"	);
-	syslog_info("%s", "LOG_INFO"	);
-	syslog_debug("%s", argv[0]		);
+std::error_code err = some_function() ;_
+if (err)
+   DBJ_LOG_STD_ERR(err,__FILE__) ;
 ```
-Interface is identical to the `printf()`. 
-#### Max log message size is 1024
-The total `datagramm` 
-(aka message), size is 1KB. This includes the standard syslog header.
-
-Here is the output of the above on a local syslog server/manager
-
-[![Local syslog server](./media/syslogwatcher.com.jpg)](https://syslogwatcher.com "syslogwatcher")  
-*Very good and comprehensive, "SysLog Watcher" in action (click on the image to find the 'Donwloads' page)*
-
-### Async behaviour and Multi Threading
+Above logs an syslog error, the std::error_code message, and user defined prompt with it.
+#### Async behaviour and Multi Threading
 
 This is all asynchronous as much as windows sockets are asynchronous.
-Also, all the important functions in here are capable of sequential working, 
+But all the impotrtant functions in here are capable of sequential working, 
 in the presence of multiple threads.
-### stderr
-Inside this library `stderr` output is redirected to the local log file.
-In case you do not need or want that, please ammend the simple code doing it.
 
-Folder and log file are under `%programdata%`. Folder name is currently:
+#### WARNING: Messages are composed following the RFC3164
 
-```cpp
-/* dbj_util.h */
-static char const * DBJ_LOG_FILE_FOLDER = "dbj\\dbj++";
-/*
-%programdata%\\dbj\\dbj++
-*/
-```
-Local log file name does equal the `DBJ_LOG_FILE_FOLDER` + application basename + `.log`.
+Make sure you syslog server can understand them. Which is the case with almost all of them. 
+This is simply because there are milions of devices in use (nad will be for a long time to come) who are emitting 
+syslog messages in the RFC3164 format. Device on the network, not PC's or laptops.
 
-> Not currently, but it will be opened in the append mode, and allowed to grow untill user defined size.
-
-right now, local log file is re-created each time application starts. 
-
-In the (yes, very near) future, we will provide config file functionality where users will be controlling this (and more) externaly.
-
-
-#### RFC3164: Messages are composed following the RFC3164
-
-Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is followed. 
-Plan is to develop a support for the newer one: RFC5424.
-
-Make sure you syslog server can understand RFC3164. 
-This is the case with almost all of them syslog servers. 
-This is simply because there are milions of devices in use (and will be for a long time to come) who are emitting 
-syslog messages in the RFC3164 format. 
-Devices on the network, not PC's or laptops.
-
-As a syslog server, I am using the very good
-[Syslog Watcher](https://syslogwatcher.com/). It also understands RFC3164 formatting. 
-
-
-> dbj++log is a static library. 
+> This is a static library. 
 
 > Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
-
 > (In 2019Q1, standard C++ was C++17)
 
 
