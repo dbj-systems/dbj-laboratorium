@@ -92,48 +92,56 @@ namespace dbj::log {
 	template<typename ... A>
 	inline void syslog_emergency(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_emerg, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_alert(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_alert, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_critical(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_crit, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_error(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_err, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_warning(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_warning, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_notice (const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_notice, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_info(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_info, format_, args ...);
 	}
 
 	template<typename ... A>
 	inline void syslog_debug(const char * format_, A ... args)
 	{
+		DBJ_AUTO_LOCK;
 		syslog_call(syslog_level::log_debug, format_, args ...);
 	}
 

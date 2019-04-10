@@ -36,17 +36,6 @@ static auto log_init = []()
 // int wmain( int argc, wchar_t * argv [], wchar_t * envp )
 int main( int argc, char * argv [])
 {
-#ifdef _DEBUG
-	DBJ_TEST_ATOM(dbj::num::reverse(12345));
-	// overflow must return 0
-	DBJ_TEST_ATOM(dbj::num::reverse(INT32_MAX));
-	// underflow must return 0
-	DBJ_TEST_ATOM(dbj::num::reverse(INT32_MIN));
-
-	// this requires app to have a proper manifest
-	DBJ_TEST_ATOM(dbj::win32::is_windows_10());
-#endif // _DEBUG
-
 	test_dbj_sql_lite_udf();
 	test_dbj_sql_lite();
 }

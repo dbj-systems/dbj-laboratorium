@@ -221,6 +221,46 @@ namespace dbj {
 	} //core
 } // dbj
 
+namespace dbj {
+
+	inline void errno_exit(errno_t errno_, const char * file, const int line, void(*ccb_)(void) = nullptr)
+	{
+		if (errno_t(0) == errno_) 
+			return;
+		char err_msg_[BUFSIZ]{ 0 };
+		strerror_s(err_msg_, BUFSIZ, errno_);
+		::dbj::core::trace(
+			"\n\n\n%s(%d)\n\nerrno message: %s\nerrno was: %d\n\nExiting..\n\n"
+			, file, line, err_msg_, errno_
+		);
+
+		perror(err_msg_);
+
+#ifdef _DEBUG
+		::DebugBreak();
+#endif // _DEBUG
+
+		if (ccb_) ccb_();
+		exit(errno_);
+	}
+
+#define	DBJ_ERRP(...) do { \
+errno_t e_ = ::fprintf(stderr, __VA_ARGS__); \
+if (e_ < 0) ::dbj::errno_exit( errno, __FILE__, __LINE__ ); \
+} while (false)
+
+#define	DBJ_WERRP(...) do { \
+errno_t e_ = ::fwprintf(stderr, __VA_ARGS__); \
+if (e_ < 0) ::dbj::errno_exit( errno, __FILE__, __LINE__ ); \
+} while (false)
+
+#define DBJ_FPRINTF(...) \
+	do { if (errno_t result_ = ::fprintf(__VA_ARGS__); result_ < 0) \
+		dbj::errno_exit(errno, __FILE__, __LINE__); } while(false)
+
+}
+
+
 #include "../dbj_gpl_license.h"
 
 #pragma comment( user, DBJ_BUILD_STAMP ) 

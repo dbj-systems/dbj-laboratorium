@@ -172,11 +172,15 @@ namespace dbj {
 	using wstring_vector = vector<wstring>;
 	using string_vector  = vector<string>;
 
-	constexpr inline const auto programdata_subfolder = "dbj";
-
 	constexpr inline auto LINE    (){ return "--------------------------------------------------------------------------------"sv; };
 	constexpr inline auto COMPANY (){ return "DBJ.Systems Ltd."sv; };
 	constexpr inline auto YEAR    (){ return std::string_view{ (__DATE__ + 7) }; };
+
+	// this is the folder under which all the dbj apps are 
+	// holding ini, log files and a such
+	// under %programdata% on a local windows machine
+	constexpr inline const auto dbj_programdata_subfolder = "dbj";
+	// constexpr inline const auto DBJ_LOCAL_FOLDER = "dbj";
 
 	inline wchar_t const * app_base_name() noexcept {
 		auto initor = []() {
@@ -310,6 +314,8 @@ namespace dbj {
 	  }
 
 } // dbj
+
+
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"

@@ -18,32 +18,7 @@ extern "C" inline void dbj_on_exit_flush_stderr(void)
 }
 /*-----------------------------------------------------------------*/
 
-namespace dbj {
-	// under %programdata% on a local windows machine
-	constexpr inline const auto DBJ_LOCAL_FOLDER = "dbj";
-}
-
 namespace dbj::err {
-
-	inline void errno_exit(errno_t errno_, const char * file, const int line, void(*ccb_)(void) = nullptr)
-	{
-		if (!errno_) return;
-		char err_msg_[BUFSIZ]{ 0 };
-		strerror_s(err_msg_, BUFSIZ, errno_);
-		::dbj::core::trace(
-			"\n\nfprintf() failed\n%s(%d)\n\nerrno message: %s\nerrno was: %d\n\nExiting..\n\n"
-			, file, line, err_msg_, errno
-		);
-
-		perror(err_msg_);
-		if (ccb_) ccb_();
-		exit(errno);
-	}
-
-#define	DBJ_FPF(...) do { \
-errno_t e_ = fprintf(stderr, __VA_ARGS__); \
-if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
-} while (false)
 
 	using namespace ::std;
 	using smart_buffer = ::dbj::buf::yanb;
@@ -80,45 +55,43 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 
 			::dbj::buf::yanb	file_path_{};
 			int		old_std_err{};
-			FILE	*log_file_{};
+			mutable FILE	*log_file_{};
+			mutable bool opened = false;
 
 		public:
+
+			operator FILE * () const noexcept {
+				return log_file_;
+			}
+
+			void open()  const noexcept {
+				if (this->opened) return;
+				dbj::errno_exit(
+					fopen_s(&log_file_, file_path_.data(), "a"), __FILE__, __LINE__
+				);
+				this->opened = true;
+			}
+			void close() const noexcept {
+				if (!this->opened) return;
+				dbj::errno_exit(
+					fclose (log_file_), __FILE__, __LINE__
+				);
+				this->opened = false;
+			}
 
 			log_file(::dbj::buf::yanb file_path_param)
 				: file_path_(file_path_param)
 			{
-				///*A true posix jamboree */
-				//old_std_err = _dup(2);   // "old_std_err" now refers to "stderr"
-
-				//if (old_std_err == -1)
-				//{
-				//	perror("\n\n_dup( 2 ) failure -- " __FUNCSIG__ "\n\n");
-				//	exit(1);
-				//}
-
 				bool new_created
 					= ::dbj::util::truncate_if_oversize
 					(file_path_, DBJ_MAX_LOCAL_LOG_SIZE_KB);
 
+#ifdef REASSIGN_STDERR_TO_FILE
 				// Reassign "stderr" to file_path_
 				errno_exit(
 					freopen_s(&log_file_, file_path_.data(), "a", stderr), 
 					__FILE__, __LINE__
 				);
-
-				//if (fopen_s(&log_file_, file_path_.data(), "a") != 0)
-				//{
-				//	puts("\n\nCan't open file -- " __FUNCSIG__ "\n\n");
-				//	puts(file_path_.data());
-				//	exit(1);
-				//}
-
-				//// stderr now refers to file 
-				//if (-1 == _dup2(_fileno(log_file_), 2))
-				//{
-				//	perror("\n\nCan't _dup2 stderr --"  __FUNCSIG__ "\n\n");
-				//	exit(1);
-				//}
 
 				// Flush stdout stream buffer so it goes to correct file
 				errno_exit(fflush(stderr), __FILE__, __LINE__);
@@ -132,6 +105,13 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 					perror("stderr has been redirected to a file\n");
 				}
 #endif // _DEBUG
+#else
+				this->open();
+
+				// Flush stdout stream buffer so it goes to correct file
+				dbj::errno_exit(fflush(log_file_), __FILE__, __LINE__);
+				clearerr_s(log_file_);
+#endif // REASSIGN_STDERR_TO_FILE
 
 				std::error_code ec_;
 				// quick and dirty file header
@@ -141,17 +121,23 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 				// 1: do the SetLastError(0)
 				(void)SetLastError(0);
 				// 2: try the fprintf
-				DBJ_FPF("\n\nDBJ++ log file | %s | %s\n", file_path_.data(),
+
+				DBJ_FPRINTF(log_file_,"DBJ++ log file | %s | %s\n", file_path_.data(),
 					::dbj::core::util::make_time_stamp(
-						ec_,
-						::dbj::core::util::TIME_STAMP_FULL_MASK)
-					.data()
-				);
+						ec_,::dbj::core::util::TIME_STAMP_FULL_MASK).data()
+					); 
+
+				if (ec_) {
+					DBJ_FPRINTF(log_file_, "std error in local log file constructor: %s", ec_.message().c_str() );
+				}
+
+				this->close();
 			}
 
 			void clear_after_myself_() noexcept {
 				if (!log_file_)  return;
 				try {
+#ifdef REASSIGN_STDERR_TO_FILE
 					// Flush stderr stream buffer 
 					// not strictly necessary as
 					// stderr is never buffered
@@ -161,6 +147,12 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 					_dup2(old_std_err, 2);
 					_flushall();
 					log_file_ = nullptr;
+#else
+					fflush(log_file_);
+					this->close();
+					_flushall();
+					log_file_ = nullptr;
+#endif
 				}
 				catch (...)
 				{
@@ -180,7 +172,7 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 			this exits if folder/file can not be made
 			*/
 			static log_file const & instance(
-				const char * path_ = ::dbj::DBJ_LOCAL_FOLDER,
+				const char * path_ = ::dbj::dbj_programdata_subfolder,
 				const char * name_ = nullptr
 			)
 			{
@@ -213,20 +205,36 @@ if (e_ < 0) ::dbj::err::errno_exit( errno, __FILE__, __LINE__ ); \
 
 	/////////////////////////////////////////////////////////////////////////
 	namespace inner {
+		/*
+		be very carefull not to mix wide and narrow file writes!
+		*/
+		static bool & narrow_write () {
+				static bool narrow_write_ = true ;
+				return narrow_write_ ;
+		}
+
 		inline void local_log_file_write(const char * text_)
 		{
 			::dbj::sync::lock_unlock locker_;
+			_ASSERTE(narrow_write());
 			_ASSERTE(text_);
 			_ASSERTE(is_log_file_valid());
-			DBJ_FPF("%s", text_);
+			inner::log_file const & file_log_ = log_file_instance();
+			file_log_.open();
+			::fprintf(file_log_, "%s", text_);
+			file_log_.close();
 		}
 
 		inline void local_log_file_write(const wchar_t * w_text_)
 		{
 			::dbj::sync::lock_unlock locker_;
+			_ASSERTE( narrow_write() == false );
+			inner::log_file const & file_log_ = log_file_instance();
 			_ASSERTE(w_text_);
 			_ASSERTE(is_log_file_valid());
-			DBJ_FPF("%S", w_text_);
+			file_log_.open();
+			::fwprintf(file_log_, L"%s", w_text_);
+			file_log_.close();
 		}
 	} // inner
 

@@ -2,12 +2,26 @@
 #include "../core/dbj++core.h"
 #include "../win/dbj_win32.h"
 #include <filesystem>
+/*
+things in here are mainly for helping managing 
+local ini files, log files and a sutch.
 
+Schema is:
+
+	%programdata%/dbj				-- the root of all dbj system files
+	%modulename%					-- module base name with no suffix
+	%programdata%/dbj/%modulename%	-- for each dbj system module
+
+	each module has two default files
+
+	%programdata%/dbj/%modulename%/%modulename%.ini
+	%programdata%/dbj/%modulename%/%modulename%.log
+*/
 namespace dbj::util
 {
 	namespace fs = ::std::filesystem;
 
-	// note: yanb is char oriented
+	// note: yanb ('yet another buffer')) is char oriented
 	using smart_buffer = ::dbj::buf::yanb;
 
 	// NOTE: WIN32 STL filesystem is wchar_t "oriented"
@@ -20,16 +34,7 @@ namespace dbj::util
 
 	/*
 	by making the folder,basename and full path in one place we actually define
-	the file locations policy system wide
-
-	%programdata%/dbj				-- the root of all dbj system files
-	%modulename%					-- module base name with no suffix
-	%programdata%/dbj/%modulename%	-- for each dbj system module
-
-	each module has two default files
-
-	%programdata%/dbj/%modulename%/%modulename%.ini
-	%programdata%/dbj/%modulename%/%modulename%.log
+	the app file locations policy system wide
 	*/
 	struct file_descriptor 
 	{
@@ -40,8 +45,11 @@ namespace dbj::util
 		buff_t fullpath;
 	};
 	/*
-	users inherit a concrete f descriptor and give it a concrete suffix
-	for example:
+
+	Usage:
+
+	for a particular ap system file	inherit a concrete f descriptor and give 
+	it a concrete suffix for example:
 
 	struct log_file final : file_descriptor {
 		virtual const char * suffix() const noexcept { return ".log"; }
@@ -50,7 +58,7 @@ namespace dbj::util
 	function bellow does the rest.
 
 	We do not do all of this all in one struct, so that we can decouple ini from log
-	from whatver user might require.
+	from whatever else app or user might require.
 	*/
 	inline void make_file_descriptor(file_descriptor & descriptor_)
 	{
@@ -62,7 +70,7 @@ namespace dbj::util
 		_ASSERTE(!ec_);
 
 		fs::path folder_ = programdata.data();
-		folder_.concat("\\").concat(dbj::programdata_subfolder)
+		folder_.concat("\\").concat(dbj::dbj_programdata_subfolder)
 		       .concat("\\").concat(base_name_.data());
 
 		fs::path full_path_(folder_);
@@ -73,7 +81,9 @@ namespace dbj::util
 		descriptor_.fullpath = narrow(full_path_);
 	}
 
-
+	/*
+	currently we just truncate the files. old versons are lost.
+	*/
 	// return true on truncation
 	inline bool truncate_if_oversize(
 		smart_buffer	file_path_,

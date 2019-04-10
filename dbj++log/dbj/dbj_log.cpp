@@ -34,9 +34,7 @@ void dbj_write_to_local_log(
 		local_hostname, syslog_ident, syslog_procid_str, the_message));
 
 	::dbj::err::async_log_write<char>(datagramm);
-
-	// above requires write buffer and mechanism that will empty the buffer on exit?
-	// No! stderr is never buffered ... each write immediately goes to disk.
+	// above requires write buffer and mechanism that will empty the buffer on exit
 }
 
 
