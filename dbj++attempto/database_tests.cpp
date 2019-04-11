@@ -15,15 +15,16 @@ void test_dbj_sql_lite_udf()
 
 	auto test = [&](auto fun_) 
 	{
-		DBJ_LOG_INF("Measurement start, %s", DBJ_ERR_PROMPT("test_dbj_sql_lite_udf()"));
-		std::string rezult = fun_();
+		DBJ_LOG_INF("Measurement start, %s", 
+			DBJ_ERR_PROMPT("test_dbj_sql_lite_udf()"));
+		;  std::string rezult = fun_();
 		DBJ_LOG_INF(
 			"Measurement end, result: %s", DBJ_ERR_PROMPT(rezult.data())
 		);
 	};
 
 	test([&] {  return k::miliseconds_measure([&] {
-		DBJ_LOG_STD_ERR(d::test_udf(),"dbj_easy_udfs_sample::test_udf() has failed");
+		// DBJ_LOG_STD_ERR(d::test_udf(),"dbj_easy_udfs_sample::test_udf() has failed");
 	}); });
 
 	/*

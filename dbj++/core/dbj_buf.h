@@ -72,7 +72,7 @@ namespace dbj {
 					std::reference_wrapper< std::shared_ptr<char> > storage_ref,
 					char const * payload_
 				) {
-					assert(payload_ != nullptr);
+					_ASSERTE(payload_ != nullptr);
 					storage_ref.get().reset(_strdup(payload_));
 				}
 
@@ -80,21 +80,21 @@ namespace dbj {
 					std::reference_wrapper< std::shared_ptr<wchar_t> > storage_ref,
 					wchar_t const * payload_
 				) {
-					assert(payload_ != nullptr);
+					_ASSERTE(payload_ != nullptr);
 					storage_ref.get().reset(_wcsdup(payload_));
 				}
 				/*--------------------------------------------------------*/
 				static size_t length(
 					std::reference_wrapper< std::shared_ptr<char> > storage_ref
 				) {
-					assert(storage_ref.get());
+					_ASSERTE(storage_ref.get());
 					return (std::strlen(storage_ref.get().get()));
 				}
 
 				static size_t length(
 					std::reference_wrapper< std::shared_ptr<wchar_t> > storage_ref
 				) {
-					assert(storage_ref.get());
+					_ASSERTE(storage_ref.get());
 					return (std::wcslen(storage_ref.get().get()));
 				}
 
@@ -288,17 +288,17 @@ namespace dbj {
 				value_type const * first_, value_type const * last_
 			) noexcept
 			{
-				assert(first_ && last_);
+				_ASSERTE(first_ && last_);
 				std::basic_string_view<value_type> sv_ (
 					first_, std::distance(first_, last_)
 					);
-				assert(sv_.size() > 0);
+				_ASSERTE(sv_.size() > 0);
 				return { sv_.data() }; 
 			}
 			// here we depend on a zero terminated string
 			static storage_t make(value_type const * first_) noexcept
 			{
-				assert(first_);
+				_ASSERTE(first_);
 				return { first_ };
 			}
 			/*	from array of char's	*/
@@ -332,7 +332,7 @@ namespace dbj {
 			/* from An Other */
 			static storage_t make( storage_t another_) noexcept
 			{
-				assert( true == another_);
+				_ASSERTE( true == another_);
 				return { another_.data() };
 			}
 
@@ -350,12 +350,12 @@ namespace dbj {
 				size_t N = 0
 				) noexcept
 			{
-				assert(buff_);
+				_ASSERTE(buff_);
 				if ( buff_ )
 				{
 					const auto bufsiz_ = buff_.size();
 					N = (N >= 0 ? N : bufsiz_);
-					assert(N <= bufsiz_);
+					_ASSERTE(N <= bufsiz_);
 					::std::fill(buff_.data(), buff_.data() + N, val_);
 				}
 				return buff_;
@@ -379,7 +379,7 @@ namespace dbj {
 		inline auto	assign(yanb_t<C> & sp_, const C(&arr)[N])
 			noexcept -> yanb_t<C> &
 		{
-			assert(sp_);
+			_ASSERTE(sp_);
 			sp_.reset(arr);
 			return sp_;
 		}

@@ -110,26 +110,43 @@ https://godbolt.org/z/jGC98L
 
 #ifndef DBJ_ERR_PROMPT
 // is this resilient or what?
-extern "C" inline char const * dbj_err_prompt_and_msg ( 
+inline auto dbj_err_prompt_and_msg 
+( 
 	char const * file_, 
 	const unsigned line_, 
-	char const * msg_) 
+	char const * msg_
+) 
 {
+	_ASSERTE(file_ && msg_);
 	auto line_to_s = [](int line_no_) {
-		static char buf_[BUFSIZ]{};
-		::memset(buf_, 0, BUFSIZ);
-		sprintf_s(buf_, "%d", line_no_);
-		return buf_;
+		static std::array<char, 64> buf_{ {0} };
+		buf_.fill(0);
+		std::snprintf(buf_.data(), 64U, "%d", line_no_);
+		return buf_.data();
 	};
 	::dbj::sync::lock_unlock locker_;
-	static ::std::string text_( BUFSIZ * 4, char(0) );
-	text_ = file_;
-	text_.append("(").append(line_to_s(line_)).append("): ").append(msg_);
-	return text_.data();
+	::std::string text_( BUFSIZ * 4, char(0) );
+	text_ = msg_;
+	text_.append(" -- ")
+		.append(file_)
+		.append("(")
+		.append(line_to_s(line_))
+		.append(") ");
+
+	struct to_cp final {
+		mutable std::string data;
+		operator char const * () const {
+			return data.c_str(); 
+		}
+		operator std::string_view () const {
+			return { data.c_str() };
+		}
+	};
+
+	return to_cp{ text_ };
 };
 // note: this macro is used a lot
-#define DBJ_ERR_PROMPT(x) dbj_err_prompt_and_msg ( __FILE__, __LINE__, x )
-
+#define DBJ_ERR_PROMPT(x) (char const *)dbj_err_prompt_and_msg ( __FILE__, __LINE__, x )
 #endif // DBJ_ERR_PROMPT
 
 // 

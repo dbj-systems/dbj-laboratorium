@@ -251,12 +251,13 @@ inline char * basename(
 	bool remove_suffix = true,
 	char delimiter = '\\')
 {
+	assert(full_path && (full_path[0] != char(0)));
 	char * base_ = strrchr(full_path, delimiter);
 	base_ = (base_ == NULL ? full_path : base_);
 	if (remove_suffix == false) return base_;
 	char * dot_pos = strchr(base_, '.');
 	if (dot_pos) *dot_pos = char(0);
-	return base_;
+	return base_ + 1;
 }
 
 inline dbj::buf::yanb module_basename(HINSTANCE h_instance = NULL ) {

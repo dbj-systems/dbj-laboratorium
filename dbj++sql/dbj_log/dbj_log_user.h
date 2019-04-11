@@ -27,7 +27,7 @@ namespace dbj::db::err {
 		not optional, please provde more info which is not delivered by the message() method
 		on the error_code 
 		*/
-		string_view  log_message 
+		string_view  log_message
 	)
 		noexcept
 	{

@@ -212,6 +212,7 @@ namespace dbj::db {
 			operator dbj::buf::yanb () const noexcept  {
 				const unsigned char *name = sqlite::sqlite3_column_text(statement_, col_index_);
 				const size_t  sze_ = sqlite::sqlite3_column_bytes(statement_, col_index_);
+				_ASSERTE(name);
 				return { (char *)name };
 			}
 
@@ -352,7 +353,7 @@ so we do not return a pair, just the error_code
 					NULL, 
 					NULL);
 
-			return sqlite_ec(result, DBJ_ERR_PROMPT("sqlite3_create_function() has failed") );
+			return sqlite_ec(result, DBJ_ERR_PROMPT("sqlite3_create_function() has failed"));
 		}
 
 /*

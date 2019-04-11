@@ -16,12 +16,14 @@ namespace dbj::log {
 
 	// SEMantic VERsioning
 	constexpr inline const auto MAJOR = 0;
-	constexpr inline const auto MINOR = 4;
+	constexpr inline const auto MINOR = 8;
 	constexpr inline const auto PATCH = 0;
 
 	constexpr inline const auto syslog_dgram_size = 1024U;
 
-	extern "C" void syslog_init(const char * = nullptr /*syslog_server_ip_and_port*/);
+	extern "C" inline void syslog_init(const char * = nullptr 
+	/* syslog_server_ip_and_port if none give local syslog server will be targeted */
+	);
 
 	/*
 	 Option flag for syslog_open() is this or NULL.
@@ -55,7 +57,7 @@ namespace dbj::log {
 	};
 
 	/* open is optional */
-	extern "C" void syslog_open(
+	extern "C" inline void syslog_open(
 		const char * /*tag*/ = nullptr,
 		syslog_open_options = syslog_open_options::_null_,
 		syslog_open_facilities = syslog_open_facilities::log_user
@@ -73,21 +75,86 @@ namespace dbj::log {
 		log_debug = 7	 /* debug-level messages */
 	};
 
-	 extern "C" void syslog_emergency(const char * format_, ...);
+	namespace inner {
+		// dbj added
+		extern "C" int is_syslog_initialized();
+		/* send the log message  by the priority given */
+		extern "C" void vsyslog(int, const char *);
 
-	 extern "C" void syslog_alert(const char * format_, ...);
+		template<typename ... T>
+		inline void syslog_call(syslog_level level_, const char * format_, T ... args)
+		{
+			static auto check_once_is_syslog_initialized
+				= []() -> bool {
+				if (!is_syslog_initialized()) {
+					syslog_init(); // looking for local server
+					::OutputDebugStringA(
+						"\n\n" __FILE__ "\n\n"
+						"dbj++;pg found not to be initialized on first use and then initialized for a localhost syslog server"
+						"\n\n"
+					);
+				}
+				return true;
+			}();
+			// this static is locking, no mutex necessary
+			static std::array<char, syslog_dgram_size> message_{ { 0 } };
+			message_.fill(0); // zero the buffer
+			auto kontrol = std::snprintf(message_.data(), message_.size(), format_, args...);
+			_ASSERTE(kontrol > 1);
+			vsyslog((int)level_, message_.data());
+		}
 
-	 extern "C" void syslog_critical(const char * format_, ...);
+	} // inner
 
-	 extern "C" void syslog_error(const char * format_, ...);
+	template<typename ... T> inline void  syslog_emergency(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_emerg, format_, args...);
+	}
 
-	 extern "C" void syslog_warning(const char * format_, ...);
+	template<typename ... T> inline void  syslog_alert(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_alert, format_, args...);
+	}
 
-	 extern "C" void syslog_notice(const char * format_, ...);
+	template<typename ... T> inline void  syslog_critical(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_crit, format_, args...);
+	}
 
-	 extern "C" void syslog_info(const char * format_, ...);
+	template<typename ... T> inline void  syslog_error(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_err, format_, args...);
+	}
 
-	 extern "C" void syslog_debug(const char * format_, ...);
+
+	template<typename ... T> inline void  syslog_warning(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_warning, format_, args...);
+	}
+
+
+	template<typename ... T> inline void  syslog_notice(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_notice, format_, args...);
+	}
+
+	template<typename ... T> inline void  syslog_info(const char * format_, T ... args)
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_info, format_, args... );
+	}
+
+	 template<typename ... T> inline void  syslog_debug(const char * format_, T ... args )
+	{
+		DBJ_AUTO_LOCK;
+		inner::syslog_call(syslog_level::log_debug, format_, args...);
+	}
 
 } // dbj::log
 

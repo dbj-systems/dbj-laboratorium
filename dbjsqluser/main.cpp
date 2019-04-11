@@ -26,15 +26,14 @@ static auto log_init = []()
 	using namespace ::dbj::win32;
 	using namespace ::dbj::log;
 
-	yanb basename_ = module_basename();
+	yanb basename_{ module_basename() };
 	syslog_init();
 	// syslog_open_options::log_perror
 	// makes use of local log file
 	syslog_open(
-		"dbjsqluser" /*, syslog_open_options::log_perror*/
+		basename_.data() /*, syslog_open_options::log_perror*/
 	);
-	DBJ_LOG_INF("syslog connection opened from %s", basename_.data() );
-	trace("\ndbj++log is initialized");
+	trace("syslog connection opened from %s", basename_.data() );
 	return true;
 }();
 
