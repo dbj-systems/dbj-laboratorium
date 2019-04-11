@@ -11,18 +11,17 @@ NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
 
 #include <array>
 #include <system_error>
-#include <dbj++/core/dbj_crt.h>
 
 namespace dbj::log {
 
 	// SEMantic VERsioning
 	constexpr inline const auto MAJOR = 0;
-	constexpr inline const auto MINOR = 2;
+	constexpr inline const auto MINOR = 4;
 	constexpr inline const auto PATCH = 0;
 
 	constexpr inline const auto syslog_dgram_size = 1024U;
 
-	void syslog_init(const char * = nullptr /*syslog_server_ip_and_port*/);
+	extern "C" void syslog_init(const char * = nullptr /*syslog_server_ip_and_port*/);
 
 	/*
 	 Option flag for syslog_open() is this or NULL.
@@ -56,7 +55,7 @@ namespace dbj::log {
 	};
 
 	/* open is optional */
-	void syslog_open(
+	extern "C" void syslog_open(
 		const char * /*tag*/ = nullptr,
 		syslog_open_options = syslog_open_options::_null_,
 		syslog_open_facilities = syslog_open_facilities::log_user
@@ -74,77 +73,21 @@ namespace dbj::log {
 		log_debug = 7	 /* debug-level messages */
 	};
 
-	extern "C" void the_great_decoupler(syslog_level, const char *);
+	 extern "C" void syslog_emergency(const char * format_, ...);
 
-	namespace {
+	 extern "C" void syslog_alert(const char * format_, ...);
 
-		template<typename ... A>
-		inline void syslog_call(syslog_level level_, const char * format_, A ... args)
-		{
-			// this static is locking, no mutex necessary
-			static std::array<char, syslog_dgram_size> message_{ { 0 } };
-			message_.fill(0); // zero the buffer
-			auto kontrol = std::snprintf(message_.data(), message_.size(), format_, args ...);
-			_ASSERTE(kontrol > 1);
-			the_great_decoupler(level_, message_.data());
-		}
-	} // ns
+	 extern "C" void syslog_critical(const char * format_, ...);
 
-	template<typename ... A>
-	inline void syslog_emergency(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_emerg, format_, args ...);
-	}
+	 extern "C" void syslog_error(const char * format_, ...);
 
-	template<typename ... A>
-	inline void syslog_alert(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_alert, format_, args ...);
-	}
+	 extern "C" void syslog_warning(const char * format_, ...);
 
-	template<typename ... A>
-	inline void syslog_critical(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_crit, format_, args ...);
-	}
+	 extern "C" void syslog_notice(const char * format_, ...);
 
-	template<typename ... A>
-	inline void syslog_error(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_err, format_, args ...);
-	}
+	 extern "C" void syslog_info(const char * format_, ...);
 
-	template<typename ... A>
-	inline void syslog_warning(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_warning, format_, args ...);
-	}
-
-	template<typename ... A>
-	inline void syslog_notice (const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_notice, format_, args ...);
-	}
-
-	template<typename ... A>
-	inline void syslog_info(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_info, format_, args ...);
-	}
-
-	template<typename ... A>
-	inline void syslog_debug(const char * format_, A ... args)
-	{
-		DBJ_AUTO_LOCK;
-		syslog_call(syslog_level::log_debug, format_, args ...);
-	}
+	 extern "C" void syslog_debug(const char * format_, ...);
 
 } // dbj::log
 

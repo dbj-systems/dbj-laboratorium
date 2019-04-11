@@ -3,7 +3,7 @@
 ### syslog standard C++ API 
 
 [![syslogwatcher](./media/syslogwatcher.com.jpg)](https://syslogwatcher.com "syslogwatcher.com")
-We recomend the "Syslogwatcher". Click on the image for the download.
+We recomend the "Syslogwatcher". Click on the image for the download. Please also note it can copy to the local log file, too.
 
 > The project we started from is Copyright (c) 2008 Secure Endpoints Inc.
 
@@ -44,9 +44,32 @@ Next step is optional. But this is how you control the logging.
 // some will truncate it to len 128
 syslog_open(module_basename_, syslog_open_options::log_perror );
 ``` 
+Using `syslog_open_options::log_perror` is the switch that will alo log to the local 
+log file. Local log file, default position is:
 
+	folder -- %programdata%\\dbj\\module_base_name\%basename%.log
 
-Please make sure you have read once the RFC's 3164 and 5424 . (Links are at the top of the doc.)
+Where basename is
+
+	module_base_name + ".log"
+
+Ditto. If you are running the application example.exe, built with dbj++log, the local log file will be:
+
+    c:\\programdata\\dbj\\example\example.log
+
+Where your machine current %programdata% is defined by windows to be `c:\\programdata\\`
+
+in the next release, the "dbj" subfolder of program data will be user definable, through the config ini file. Stay tuned.
+
+`syslog_open_options::log_perror` is optional since almost all modern syslog servers offer the ability to also store the local log file.
+Like the one "Syslog Watcher" we are using. 
+
+This is most useful in larger(r) multinode installations where syslog repetitors or relaying servers are established as local syslog servers, but are passing
+the messages to one or more central  syslog servers, in the data center or in the cloud.
+
+### What are the sylog features?
+
+Please make sure you have read once the RFC's 3164 and [5424](https://tools.ietf.org/html/rfc5424) . (Links are at the top of the doc.)
 
 The dbj++log behaviour is standard, as described on  numerous pages on the web.
 `syslog.h` header in here is 99% standard and you are free to browse through it to understand all the options.
