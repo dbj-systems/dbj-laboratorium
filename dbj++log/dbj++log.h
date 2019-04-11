@@ -1,4 +1,5 @@
 #pragma once
+#include "dbj_gpl_license.h"
 /*
 (c) 2019 by dbj.systems, author: dbj@dbj.org, Licence GPLv3
 

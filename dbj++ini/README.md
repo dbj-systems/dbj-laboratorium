@@ -15,7 +15,7 @@ Also please visit that project page to understand all the other various features
 The purpose of this project is modern C++ interface. It is resilient and fast.
 `std::string` use is minimal, and will be completetely removed in the next release.
 
-Future release will be also built with C++exceptions mechanism removed.
+Future release will be also built with C++exceptions removed.
 
 ### The API
 
@@ -42,15 +42,17 @@ int main()
 		, (reader.get_bool("user", "active", true) ? "true" : "false")
 	);
 ```
-Return type of the `get()` and `get_string()` methods is 
+Return type of the `get()` and `get_string()` methods is `smart_buffer`.
+which is actually a shared pointer.
 ```cpp
 using smart_buffer = std::shared_ptr<char>;
 ```
-To avoid `std::string` we use `std::shared_ptr<char>`. 
-`std::string` is not to be used as char buffer, rather it is to be used for 
+To avoid `std::string` we use `std::shared_ptr<char>`. Why?
+`std::string` is not to be used as a simple char buffer, rather it is to be used for 
 large(r) text processing in the context of the C++ code.
 We also deliberately do not introduce some elaborate wrapper 
-to figure on the API, so that users are aware what is used and are already familliar with the `std::shared_ptr`.
+to figure as yet another 'special type' on this API, 
+so that users are easily made aware what is used.
 
 We also handle the "ini file lists". As the original project did.
 

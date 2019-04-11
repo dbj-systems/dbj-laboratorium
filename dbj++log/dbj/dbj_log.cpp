@@ -4,9 +4,9 @@
 #include <ctime>
 #include <chrono>
 #include <array>
-#include "dbj_util.h"
 #include <dbj++/core/dbj++core.h>
-#include <dbj++/err/dbj_stderr_log.h>
+#include "dbj_util.h"
+#include "dbj_local_log.h"
 
 //using namespace std;
 //using namespace std::chrono;
@@ -33,7 +33,7 @@ void dbj_write_to_local_log(
 		priority_name_, timestamp_rfc3164 ,
 		local_hostname, syslog_ident, syslog_procid_str, the_message));
 
-	::dbj::err::async_log_write<char>(datagramm);
+	::dbj::log::async_log_write<char>(datagramm);
 	// above requires write buffer and mechanism that will empty the buffer on exit
 }
 

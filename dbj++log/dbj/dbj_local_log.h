@@ -1,6 +1,16 @@
 #pragma once
-#include "../win/dbj_win_inc.h"
-#include "../win/dbj_win32.h"
+/*
+include windows only from one place
+and do it according to ancient windows lore
+*/
+#ifndef _INC_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#define STRICT
+#define NOSERVICE
+#define NOMINMAX
+#include <windows.h>
+#endif
+#include <dbj++/win/dbj_win32.h>
 #include <io.h>
 //#include <string>
 //#include <memory>
@@ -12,13 +22,10 @@
 #include <dbj++/util/dbj++util.h>
 
 /*-----------------------------------------------------------------*/
-extern "C" inline void dbj_on_exit_flush_stderr(void)
-{
-	fflush(stderr);
-}
+
 /*-----------------------------------------------------------------*/
 
-namespace dbj::err {
+namespace dbj::log {
 
 	using namespace ::std;
 	using smart_buffer = ::dbj::buf::yanb;
@@ -177,8 +184,8 @@ namespace dbj::err {
 			)
 			{
 				auto initor = [&]() {
-					::dbj::err::log_file_descriptor lfd_
-						= ::dbj::err::log_file();
+					::dbj::log::log_file_descriptor lfd_
+						= ::dbj::log::log_file();
 
 					::dbj::util::assure_folder(lfd_);
 
@@ -193,9 +200,6 @@ namespace dbj::err {
 
 	inline inner::log_file const & log_file_instance()
 	{
-		static auto dumsy = [&]() {
-			return atexit(dbj_on_exit_flush_stderr);
-		}();
 		return inner::log_file::instance();
 	}
 
@@ -285,7 +289,7 @@ namespace dbj::err {
 	}
 
 
-} // dbj::err
+} // dbj::log
 
 #include "../dbj_gpl_license.h"
 
