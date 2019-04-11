@@ -5,5 +5,6 @@
 #include <dbj++/core/dbj++core.h>
 #include <dbj++/console/dbj++con.h>
 #include <dbj++/util/dbj++util.h>
+#include <dbj++/testfwork/dbj_testing_interface.h>
 
 #endif //PCH_H

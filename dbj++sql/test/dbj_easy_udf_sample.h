@@ -1,6 +1,17 @@
 #pragma once
-
 #include "../dbj++sql.h"
+// her we use our own syslog client 
+// as we assume this library is linked to 
+// some GUI app ...
+// so there is no console
+#ifndef DBJ_SYSLOG
+#define DBJ_SYSLOG (1==1)
+#endif
+#include <dbj++log/dbj++log.h>
+
+// NOTE: this is a bit unusual for syslog but
+// we are testing dbj++log, too ..
+// we use local syslog server called "Syslog Watcher" 
 
 /*
  SQL user defined functions aka UDF
@@ -112,7 +123,7 @@ namespace dbj_easy_udfs_sample {
 		/* this is deliberately verbose code */
 		dbj::buf::yanb word = col(0);
 		int len_ = col(1);
-		::wprintf(L"\n\t[%3zu]\tword: %32S,\t%S: %12d",
+		DBJ_LOG_INF("\n\t[%3zu]\tword: %32s,\t%s: %12d",
 			row_id, word.data(), col.name(1), len_);
 		// make sure to return always this
 		return SQLITE_OK;
@@ -128,7 +139,7 @@ namespace dbj_easy_udfs_sample {
 		string_view query_ = QRY_WITH_UDF
 	) noexcept
 	{
-		::wprintf(L"\n\nthe query:\t%S\nthe result:\n\n", query_.data());
+		DBJ_LOG_INF("\n\nthe query:\t%s\nthe result:\n\n", query_.data());
 		// assure the database presence
 		// return error_code on error
 		error_code ec;

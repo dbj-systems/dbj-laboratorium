@@ -1,9 +1,10 @@
 #include "pch.h"
 
+#define DBJ_SYSLOG (1==1)
+#include <dbj++log/dbj++log.h>
+
 #include <dbj++sql/test/core_tests.h>
 #include <dbj++sql/test/dbj_easy_udf_sample.h>
-
-
 
 void test_dbj_sql_lite_udf()
 {
@@ -12,13 +13,15 @@ void test_dbj_sql_lite_udf()
 	namespace d = dbj_easy_udfs_sample;
 	using ::dbj::console::print;
 
-	auto test = [&](auto fun_) {
-		syslog_debug ("Measurement start, %s", DBJ_ERR_PROMPT("test_dbj_sql_lite_udf()"));
+	auto test = [&](auto fun_) 
+	{
+		DBJ_LOG_INF("Measurement start, %s", DBJ_ERR_PROMPT("test_dbj_sql_lite_udf()"));
 		std::string rezult = fun_();
-		syslog_debug(
+		DBJ_LOG_INF(
 			"Measurement end, result: %s", DBJ_ERR_PROMPT(rezult.data())
 		);
 	};
+
 	test([&] {  return k::miliseconds_measure([&] {
 		DBJ_LOG_STD_ERR(d::test_udf(),"dbj_easy_udfs_sample::test_udf() has failed");
 	}); });
@@ -50,8 +53,6 @@ int example_callback(
 	double DBJ_MAYBE(real_) = row_(0);
 	return SQLITE_OK;
 }
-
-
 
 void test_dbj_sql_lite()
 {

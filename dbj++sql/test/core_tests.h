@@ -1,6 +1,12 @@
 ﻿#pragma once
-
 #include "../dbj++sql.h"
+// her we use our own syslog client 
+// as we assume this library is linked to 
+// some GUI app ...
+#ifndef DBJ_SYSLOG
+#define DBJ_SYSLOG (1==1)
+#endif
+#include <dbj++log/dbj++log.h>
 
 namespace dbj_db_test_
 {
@@ -79,7 +85,7 @@ int sample_callback(
 	// get the string value of the second column
 	dbj::buf::yanb   name_ = cell(1);
 	// print what we got
-	::wprintf(L"\n\t %zu \t %S = %d \t %S = %S",
+	DBJ_LOG_INF("\n\t %zu \t %s = %d \t %s = %s",
 		row_id, cell.name(0), id_, cell.name(1), name_.data());
 	return SQLITE_OK;
 	// otherwise sqlite3 will stop the 
@@ -92,10 +98,10 @@ int universal_callback(
 )
 {
 	auto print_cell = [&](int j_) {
-		::wprintf(L"%10S: %S,", cell.name(j_), ((dbj::buf::yanb)cell(j_)).data() );
+		DBJ_LOG_INF("%10s: %s,", cell.name(j_), ((dbj::buf::yanb)cell(j_)).data() );
 	};
 
-	::wprintf(L"\n\t%zu", row_id);
+	DBJ_LOG_INF("\n\t%zu", row_id);
 	for (int k = 0; k < cell.column_count(); k++)
 		print_cell(k);
 	return SQLITE_OK;
@@ -113,11 +119,11 @@ noexcept
 	const sql::database & db = demo_db(err_);
 	if (err_) return err_;
 
-	::wprintf(L"\nmeta data for columns of the table 'demo_table'\n");
+	DBJ_LOG_INF("\nmeta data for columns of the table 'demo_table'\n");
 	err_.clear();
 	err_ = sql::table_info(db, "demo_table", universal_callback);
 	if (err_)
-	::wprintf(L"\n\nstd::error_code domain:%S, id:%d, message:%S ", err_.category().name(), err_.value(), err_.message().c_str());
+		DBJ_LOG_INF("\n\nstd::error_code domain:%s, id:%d, message:%s ", err_.category().name(), err_.value(), err_.message().c_str());
 
 	return err_;
 }
@@ -131,7 +137,7 @@ noexcept
 		// it is already logged
 		return err_;
 	}
-	::wprintf(L"\nexecute: 'SELECT Id, Name FROM demo_table'\n");
+	DBJ_LOG_INF("\nexecute: 'SELECT Id, Name FROM demo_table'\n");
 	err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
 	return err_;
 }

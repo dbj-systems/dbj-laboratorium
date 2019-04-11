@@ -149,7 +149,7 @@ namespace dbj::log {
 } // dbj::log
 
 // macros are bad but still very effective for decoupling
-#ifdef DBJ_SYSLOG
+#if defined(DBJ_SYSLOG)
 
 // this is for std::error_code
 #define DBJ_LOG_STD_ERR(err,msg_if_err) \
@@ -164,15 +164,15 @@ do { if (err) ::dbj::log::syslog_error( "%s, %s", err.message().c_str(), DBJ_ERR
 #define DBJ_LOG_INF(...) ::dbj::log::syslog_info( __VA_ARGS__ ) 
 #define DBJ_LOG_NTC(...) ::dbj::log::syslog_notice( __VA_ARGS__ ) 
 #else
-#define DBJ_LOG_ERR(...) 
-#define DBJ_LOG_CRT(...) 
-#define DBJ_LOG_LRT(...) 
-#define DBJ_LOG_WRG(...) 
-#define DBJ_LOG_MCY(...) 
-#define DBJ_LOG_DBG(...) 
-#define DBJ_LOG_INF(...) 
-#define DBJ_LOG_NTC(...)
-#define DBJ_LOG_STD_ERR(err,msg_if_err) 
+#define DBJ_LOG_ERR __noop
+#define DBJ_LOG_CRT __noop
+#define DBJ_LOG_LRT __noop
+#define DBJ_LOG_WRG __noop
+#define DBJ_LOG_MCY __noop
+#define DBJ_LOG_DBG __noop
+#define DBJ_LOG_INF __noop
+#define DBJ_LOG_NTC __noop
+#define DBJ_LOG_STD_ERR __noop
 #endif
 
 #ifdef DBJ_LOG_TESTING

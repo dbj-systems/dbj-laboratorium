@@ -1,7 +1,8 @@
 #include "pch.h"
-#include <dbj++/testfwork/dbj_testing_interface.h>
-#include <dbj++/numeric/dbj_numeric.h>
+
+#define DBJ_SYSLOG (1==1)
 #include <dbj++log/dbj++log.h>
+
 #ifdef DBJ_LOG_TESTING
 static void log_sampler();
 #endif
@@ -15,9 +16,11 @@ extern void test_dbj_sql_lite_udf();
 extern void test_dbj_sql_lite();
 
 // have to do it here so that caller can use it before main ...
+// this is an "self executing" lambda
 static auto log_init = []() 
 {
 	// namespace galimatias
+	// almost like cppwinrt ;)
 	using dbj::buf::yanb;
 	using ::dbj::core::trace;
 	using namespace ::dbj::win32;
@@ -25,10 +28,12 @@ static auto log_init = []()
 
 	yanb basename_ = module_basename();
 	syslog_init();
+	// syslog_open_options::log_perror
+	// makes use of local log file
 	syslog_open(
-		"dbjsqluser", syslog_open_options::log_perror
+		"dbjsqluser" /*, syslog_open_options::log_perror*/
 	);
-	syslog_info("syslog connection opened");
+	DBJ_LOG_INF("syslog connection opened from %s", basename_.data() );
 	trace("\ndbj++log is initialized");
 	return true;
 }();

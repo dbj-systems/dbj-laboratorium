@@ -362,13 +362,27 @@ void vsyslog( int pri, const char * message_ )
 		stm.wYear, stm.wMonth, stm.wDay, stm.wHour, stm.wMinute, stm.wSecond, stm.wMilliseconds,
 		local_hostname, syslog_ident, syslog_procid_str);
 */
-	/* dbj comment: this does not clean them all, just the first if found */
-    p = strchr( datagramm, '\n' );
-	if (p)
-		*p = ' '; /* 0; dbj replaced 0 with space */
-    p = strchr( datagramm, '\r' );
-	if (p)
-		*p = ' '; /* 0;  dbj replaced 0 with space */
+	/* dbj comment: this does clean them all into spaces */
+	while (p = strchr(datagramm, '\n')) {
+		if (p)
+			*p = ' '; /* 0; dbj replaced 0 with space */
+	}
+	while (p = strchr(datagramm, '\t')) {
+		if (p)
+			*p = ' '; /* 0; dbj replaced 0 with space */
+	}
+	while (p = strchr(datagramm, '\r')) {
+		if (p)
+			*p = ' '; /* 0; dbj replaced 0 with space */
+	}
+	while (p = strchr(datagramm, '\v')) {
+		if (p)
+			*p = ' '; /* 0; dbj replaced 0 with space */
+	}
+	while (p = strchr(datagramm, '\f')) {
+		if (p)
+			*p = ' '; /* 0; dbj replaced 0 with space */
+	}
 
     sendto( syslog_socket, datagramm, (int)strlen(datagramm), 0, (SOCKADDR*) &syslog_hostaddr, sizeof(SOCKADDR_IN) );
 
