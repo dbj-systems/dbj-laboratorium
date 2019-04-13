@@ -14,7 +14,7 @@
 #include "./util/dbj++util.h"
 #include "./console/dbj++con.h"
 #include "./testfwork/dbj_testing_interface.h"
-#include "./numeric/dbj_numeric.h"
+#include "./num/dbj_numeric.h"
 #include "./win/dbj++win.h"
 
 #pragma warning( pop )

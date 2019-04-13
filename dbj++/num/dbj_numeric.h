@@ -83,10 +83,10 @@ namespace dbj::num {
 	INT_TYPE_ random_from_to(INT_TYPE_ min, INT_TYPE_ max)
 	{
 		static_assert(::dbj::is_any_of_v<INT_TYPE_,
-		short, int, long, long long, unsigned short, unsigned int,
-		unsigned long, unsigned long long>,
-		"\n\nInvalid template argument for " __FUNCSIG__ ": N4659 29.6.1.1 [rand.req.genl]/1e requires one of " 
-		"short, int, long, long long, unsigned short, unsigned int, unsigned long, or unsigned long long\n\n"); 
+			short, int, long, long long, unsigned short, unsigned int,
+			unsigned long, unsigned long long>,
+			"\n\nInvalid template argument for " __FUNCSIG__ ": N4659 29.6.1.1 [rand.req.genl]/1e requires one of "
+			"short, int, long, long long, unsigned short, unsigned int, unsigned long, or unsigned long long\n\n");
 
 		std::random_device seed;
 		std::mt19937 rng(seed());
@@ -100,7 +100,7 @@ namespace dbj::num {
 		static auto initor = []() {
 			std::srand((unsigned)std::time(nullptr)); return 0;
 		}();
-		return ::abs( int( min_val + std::rand() / ((RAND_MAX + 1u) / max_val) ) );
+		return ::abs(int(min_val + std::rand() / ((RAND_MAX + 1u) / max_val)));
 	};
 
 	// reverse the 32 bit integer
@@ -124,6 +124,56 @@ namespace dbj::num {
 			rev = rev * 10 + pop;
 		}
 		return rev;
+	}
+
+	/*
+	the "clever" factorial is just a lookup,
+	since for 32bit int overflow happens for 13!
+
+	fact values source: http://www.tsm-resources.com/alists/fact.html
+
+	reminder:
+	#define INT32_MAX        2147483647i32
+	#define INT64_MAX        9223372036854775807i64
+	*/
+	extern "C" constexpr
+		std::int32_t const &
+		fact32(std::int32_t const & i) {
+		static const std::int32_t factorials[]{ 1, 1, 2, 6, 24, 120, 720,
+				5040, 40320, 362880, 3628800, 39916800, 479001600 };
+		if (i < 0U || i> 12U) {
+			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
+			return std::int32_t(std::errc::result_out_of_range);
+		}
+		return factorials[i];
+	}
+
+	extern "C" constexpr
+		std::int64_t const &
+		fact64(std::int64_t const & i) {
+		static const  std::int64_t factorials[]
+		{		1, 
+				1, 
+				2, 
+				6, 
+				24, 
+				120, 
+				720,
+				5040, 40320, 362880, 3628800, 39916800, 479001600, 
+				6227020800, /*13!*/
+				87178291200,
+				1307674368000,
+				20922789888000,
+				355687428096000,
+				6402373705728000,
+				121645100408832000,
+				2432902008176640000 /*20!*/
+		};
+		if (i < 0U || i> 20U) {
+			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
+			return std::int64_t(std::errc::result_out_of_range);
+		}
+		return factorials[i];
 	}
 
 } // dbj::num

@@ -38,7 +38,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_exception.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_p1095.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_status_code.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)numeric\dbj_numeric.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_interface.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_any_optional_tests.h" />
