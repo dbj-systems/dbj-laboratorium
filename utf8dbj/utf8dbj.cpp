@@ -55,6 +55,9 @@ static auto show_the_font() {
 	const wchar_t * not_ = (font_is_tt_ ? L"" : L"NOT");
 	::wprintf(L"\n\n\tCurrent font name is '%s', this is %s true type font.\n\n",
 		font_name.c_str(), not_);
+
+	DBJ_LOG_INF("Current font name is '%S', this is %S true type font.",
+		font_name.c_str(), not_);
 }
 
 

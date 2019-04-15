@@ -32,12 +32,18 @@ Everything is in the namespace
 ```cpp
 using namespace ::dbj::log;
 ```
-Currently the user needs to initialise the logging .
+Just go ahead and use it. To proceed reading about the "normal" API usage [please click here](#features).
+
+Repeat: The user does not need to initialise the logging.
+Following is a description for advanced users wishing to change this behaviour.
+
+Please find `__dbj_log_init__` at the bottom of the header file. This is the initalization sequence:
 
 ```cpp
 // targeting the local syslog server, if one is found
 	syslog_init();
 
+// otherwise please provide the remote syslog server address
 // targeting the syslog server on the LAN
 //	init_syslog("192.168.0.202");
 ```
@@ -45,13 +51,16 @@ Currently the user needs to initialise the logging .
 Next step is optional. But this is how you control the logging.
 
 ```cpp
+syslog_open(module_basename_, syslog_open_options::log_perror );
 // careful! max len of the tag is 128
 // some syslog servers will move the tag to the message if tag len > 128
 // some will truncate it to len 128
-syslog_open(module_basename_, syslog_open_options::log_perror );
 ``` 
+
+**Local log file**
+
 Using `syslog_open_options::log_perror` is the switch that will alo log to the local 
-log file. Local log file, default position is:
+log file. Local log file, location is:
 
 	folder -- %programdata%\\dbj\\module_base_name\%basename%.log
 
@@ -72,6 +81,8 @@ Like the one "Syslog Watcher" we are using.
 
 This is most useful in larger(r) multinode installations where syslog repetitors or relaying servers are established as local syslog servers, but are passing
 the messages to one or more central  syslog servers, in the data center or in the cloud.
+
+<span id="features">
 
 ### What are the actual syslog features?
 

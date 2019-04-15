@@ -202,8 +202,8 @@ inline BOOL WINAPI __dbj_log_console_handler(DWORD signal) {
 		using namespace ::dbj::log;
 
 		yanb basename_{ module_basename() };
-		DBJ_LOG_INF("CTRL+C event -- syslog connection closed from %s", basename_.data());
-		trace("CTRL+C event -- syslog connection closed from %s", basename_.data());
+		DBJ_LOG_INF("CTRL+C event -- from %s", basename_.data());
+		trace("CTRL+C event -- from %s", basename_.data());
 	}
 	return TRUE;
 }
