@@ -16,12 +16,18 @@ We recomend the "Syslogwatcher". Click on the image for the download. Please als
 Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is foollowed. Plan is to develop a support for the newer one: 
 [RFC5424](https://tools.ietf.org/html/rfc5424).
 
-### The API
+### Usage and the API
 
 You need a single header to be on the path:
 ```cpp
 #include <dbj++log.h>
 ```
+
+**dbj++log does not need to be started by you**
+
+Startup is encapsulated in the dbj++log. It simply get's initialized. 
+It also instals the console CTRL+C even handler.
+
 Everything is in the namespace
 ```cpp
 using namespace ::dbj::log;
@@ -67,7 +73,7 @@ Like the one "Syslog Watcher" we are using.
 This is most useful in larger(r) multinode installations where syslog repetitors or relaying servers are established as local syslog servers, but are passing
 the messages to one or more central  syslog servers, in the data center or in the cloud.
 
-### What are the sylog features?
+### What are the actual syslog features?
 
 Please make sure you have read once the RFC's 3164 and [5424](https://tools.ietf.org/html/rfc5424) . (Links are at the top of the doc.)
 
@@ -75,12 +81,12 @@ The dbj++log behaviour is standard, as described on  numerous pages on the web.
 `syslog.h` header in here is 99% standard and you are free to browse through it to understand all the options.
 
 Also, dbj++log doesn't interfere if you try to redirect 
-cout/cerr/clog 
-to somewhere else. The decision is up to you, the library user. 
-In case you are developing GUI app, make 
+cout/cerr/clog to somewhere else. The decision is up to you, the library user. 
+
+In case you want a console and you are developing GUI app, make 
 sure you've check out the [example code here](https://gist.github.com/kingseva/a918ec66079a9475f19642ec31276a21).
 
-there is also a `dbj_log_test.h` where we have a simple testing functions, from where you might start, using the syslog(), with added C++ functionality.
+There is also a `dbj_log_test.h` where we have a simple testing functions, from where you might start, using the syslog(), with added C++ functionality.
 
 #### Decouple the logging from your code
 
@@ -118,6 +124,7 @@ if (err)
    DBJ_LOG_STD_ERR(err,__FILE__) ;
 ```
 Above logs an syslog error, the std::error_code message, and user defined prompt with it.
+
 #### Async behaviour and Multi Threading
 
 This is all asynchronous as much as windows sockets are asynchronous.
