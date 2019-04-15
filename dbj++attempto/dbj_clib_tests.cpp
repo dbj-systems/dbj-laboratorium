@@ -1,5 +1,6 @@
 #include "pch.h"
 #define TEST_DBJ_DYNAMIC
+#define DBJ_STRING_TEST
 #include "../dbj++clib/dbjclib.h"
 // #include "../dbj_en_dictionary/dbj_en_dictionary.h"
 
@@ -7,7 +8,6 @@ using namespace ::std::string_view_literals;
 
 DBJ_TEST_UNIT(dbj_string_c_lib)
 {
-	using namespace dbj::clib;
 #ifdef TEST_DBJ_DYNAMIC
 	char buf_here[BUFSIZ]{0};
 	dbj_string_list_test( & buf_here);
@@ -25,7 +25,6 @@ DBJ_TEST_UNIT(dbj_string_c_lib)
 extern "C" inline  
 void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, bool verbose)
 {
-	using namespace dbj::clib;
 
 	dbj_sll_node * head_ = dbj_sll_make_head();
 
@@ -62,8 +61,6 @@ void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, boo
 
 DBJ_TEST_UNIT(dbj_c_lib_sll)
 {
-	using namespace dbj::clib;
-
 	auto test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
@@ -79,17 +76,15 @@ DBJ_TEST_UNIT(dbj_c_lib_sll)
 
 DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 {
-	using namespace dbj::clib;
-
 	auto dbj_strndup_test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
 			{
 				using auto_char_arr = std::unique_ptr<char>;
-				auto_char_arr to_be_freed_1{ dbj::clib::dbj_strdup("Mamma mia!?") };
-				auto_char_arr to_be_freed_2{ dbj::clib::dbj_strndup(to_be_freed_1.get(), 5) };
+				auto_char_arr to_be_freed_1{  dbj_strdup("Mamma mia!?") };
+				auto_char_arr to_be_freed_2{  dbj_strndup(to_be_freed_1.get(), 5) };
 				auto_char_arr to_be_freed_3{
-					dbj::clib::dbj_str_shorten
+					 dbj_str_shorten
 					  ("Abra Ka dabra", " ")
 				};
 			}
@@ -108,28 +103,28 @@ DBJ_TEST_UNIT(dbj_string_trim)
 	dbj_string_trim_test();
 }
 
-#define DBJ_ERR(n) ::dbj::clib::dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
+#ifdef DBJ_CLIB_ERR_CONCEPT
+
+#define DBJ_ERR(n) dbj_error_service.create(__LINE__, __FILE__, n, nullptr)
 
 DBJ_TEST_UNIT(dbj_err_system)
 {
-	// reaching to C code
-	using namespace ::dbj::clib;
-
 	auto test = [](unsigned int err_num_) {
-		using error_descriptor = ::dbj::clib::error_descriptor;
+		using error_descriptor = error_descriptor;
 		auto * err_desc_0 = DBJ_ERR(err_num_);
 
-		_ASSERTE(::dbj::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
-		::dbj::clib::dbj_error_service.release(&err_desc_0);
-		_ASSERTE(false == ::dbj::clib::dbj_error_service.is_valid_descriptor(err_desc_0));
+		_ASSERTE(dbj_error_service.is_valid_descriptor(err_desc_0));
+		dbj_error_service.release(&err_desc_0);
+		_ASSERTE(false == dbj_error_service.is_valid_descriptor(err_desc_0));
 	};
 
-	test(::dbj::clib::dbj_error_code::DBJ_EC_BAD_ERR_CODE);
-	test(::dbj::clib::dbj_error_code::DBJ_EC_BAD_STD_ERR_CODE);
-	test(::dbj::clib::dbj_error_code::DBJ_EC_DBJ_LAST_ERROR);
-	test(::dbj::clib::dbj_error_code::DBJ_EC_INDEX_TOO_LARGE);
-	test(::dbj::clib::dbj_error_code::DBJ_EC_INDEX_TOO_SMALL);
-	test(::dbj::clib::dbj_error_code::DBJ_EC_INVALID_ARGUMENT);
+	test(dbj_error_code::DBJ_EC_BAD_ERR_CODE);
+	test(dbj_error_code::DBJ_EC_BAD_STD_ERR_CODE);
+	test(dbj_error_code::DBJ_EC_DBJ_LAST_ERROR);
+	test(dbj_error_code::DBJ_EC_INDEX_TOO_LARGE);
+	test(dbj_error_code::DBJ_EC_INDEX_TOO_SMALL);
+	test(dbj_error_code::DBJ_EC_INVALID_ARGUMENT);
 
 	auto DBJ_MAYBE(dummy) = true;
 }
+#endif // DBJ_CLIB_ERR_CONCEPT

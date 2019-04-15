@@ -32,13 +32,8 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #pragma clang system_header
 #endif /* __clang__ */
 
-/*
-Note: while inside c++ all is in the dbj::clib namespace
-*/
 #ifdef __cplusplus
-namespace dbj {
-	namespace clib {
-		extern "C" {
+extern "C" {
 #endif
 
 			typedef struct dbj_sll_node dbj_sll_node;
@@ -86,9 +81,7 @@ namespace dbj {
 #endif 
 
 #ifdef __cplusplus
-		} // extern "C"
-	} // namespace clib 
-}  // namespace dbj
+} /*extern "C"*/
 #endif
 
 #endif // ! DBJ_SLL

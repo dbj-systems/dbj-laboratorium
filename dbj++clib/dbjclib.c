@@ -1,44 +1,25 @@
 // the actual dbj++clib low level stuff
 
 #include "dbjclib.h"
-
-
-/*
-strdup and strndup are defined in POSIX compliant systems as :
-
-char *strdup(const char *str);
-char *strndup(const char *str, size_t len);
-*/
-char * dbj_strdup(const char *s) {
-	char *d = malloc(strlen(s) + 1);   // Space for length plus nul
-	if (d == NULL) {
-		errno = ENOMEM;
-		return NULL;
-	}         // No memory
-	strcpy(d, s);                        // Copy the characters
-	return d;                            // Return the new string
-}
+#include <stdarg.h>
 
 /*
-The strndup() function copies at most len characters from the string str 
-always null terminating the copied string.
+last arg *must* be NULL
 */
-char * dbj_strndup(const char *s, size_t n)
+void free_free_set_them_free(void * vp, ...)
 {
-	char *result = 0 ;
-	size_t len = strlen(s);
-
-	if (n < len)
-		len = n;
-
-	result = (char *)malloc(len + 1);
-	if (result == NULL) {
-		errno = ENOMEM;
-		return NULL;
-	}  // No memory
-
-	result[len] = '\0';
-	return (char *)memcpy(result, s, len);
+	const size_t max_args = 255; size_t arg_count = 0;
+	va_list marker;
+	va_start(marker, vp); /* Initialize variable arguments. */
+	while (vp != NULL)
+	{
+		free(vp);
+		vp = NULL;
+		vp = va_arg(marker, void*);
+		/* feeble attempt to make it safer  */
+		if (++arg_count == max_args) break;
+	}
+	va_end(marker);   /* Reset variable argument list. */
 }
 
 // remove chars given in the string arg

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <crtdbg.h>
-#include <vector>
-#include <thread>
-
 /*
 include dbj_crt.h before this
 
@@ -11,8 +7,15 @@ include dbj_crt.h before this
 #include <algorithm>
 #include <thread>
 #include <chrono>
-#include <map>
 */
+
+#include <dbj++/console/dbj++con.h>
+
+#include <crtdbg.h>
+#include <vector>
+#include <thread>
+#include <map>
+
 
 /// <summary>
 /// The Command Line encapsulation aka TCL-ENC

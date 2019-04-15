@@ -26,22 +26,21 @@
 #define ST(x) ST_1(x)
 #define TU(x) printf("\n",ST(x));
 
-// first a good decades old VERIFY macro
-namespace dbj {
-	[[noreturn]]
-	inline void terror
-	(const char * msg_, const char * file_, const int line_)
-	{
-		assert(msg_);
-		assert(file_);
-		assert(line_);
-		::fwprintf(stderr, L"\n\ndbj++ ERROR:%S\n%S (%d)", msg_, file_, line_);
-		exit(EXIT_FAILURE);
-	}
-
-#define DBJ_VERIFY_(x, file, line ) if (false == (x) ) ::dbj::terror( #x ", failed", file, line )
-
-#define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
-} // dbj
+//// first a good decades old VERIFY macro
+//namespace dbj {
+//	[[noreturn]]
+//	inline void terror
+//	(const char * msg_, const char * file_, const int line_)
+//	{
+//		assert(msg_);
+//		assert(file_);
+//		assert(line_);
+//		::fwprintf(stderr, L"\n\ndbj++ ERROR:%S\n%S (%d)", msg_, file_, line_);
+//		exit(EXIT_FAILURE);
+//	}
+//
+//#define DBJ_VERIFY_(x, file, line ) if (false == (x) ) ::dbj::terror( #x ", failed", file, line )
+//#define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
+//} // dbj
 
 #endif //PCH_H

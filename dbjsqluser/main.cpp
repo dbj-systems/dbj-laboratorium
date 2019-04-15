@@ -15,28 +15,6 @@ static void ini_sampler();
 extern void test_dbj_sql_lite_udf();
 extern void test_dbj_sql_lite();
 
-// have to do it here so that caller can use it before main ...
-// this is an "self executing" lambda
-static auto log_init = []() 
-{
-	// namespace galimatias
-	// almost like cppwinrt ;)
-	using dbj::buf::yanb;
-	using ::dbj::core::trace;
-	using namespace ::dbj::win32;
-	using namespace ::dbj::log;
-
-	yanb basename_{ module_basename() };
-	syslog_init();
-	// syslog_open_options::log_perror
-	// makes use of local log file
-	syslog_open(
-		basename_.data() /*, syslog_open_options::log_perror*/
-	);
-	trace("syslog connection opened from %s", basename_.data() );
-	return true;
-}();
-
 // int wmain( int argc, wchar_t * argv [], wchar_t * envp )
 int main( int argc, char * argv [])
 {

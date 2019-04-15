@@ -1,4 +1,6 @@
 #include "../dbjclib.h"
+#include "dbj_error.h"
+#include "dbj_error_codes.h"
 
 #define location_descriptor_cache_size error_descriptor_buffer_size
 

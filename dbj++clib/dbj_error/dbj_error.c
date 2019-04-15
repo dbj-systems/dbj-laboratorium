@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "../dbjclib.h"
+#include "dbj_error.h"
+#include "dbj_error_codes.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>

@@ -9,6 +9,8 @@ Please see the LICENSE for the GPLv3 info
 NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
 */
 
+#include <dbj++/core/dbj++core.h>
+#include <dbj++/win/dbj++win.h>
 #include <array>
 #include <system_error>
 
@@ -189,3 +191,47 @@ do { if (err) ::dbj::log::syslog_error( "%s, %s", err.message().c_str(), DBJ_ERR
 #include "test/dbj_log_test.h"
 #endif
 
+// handle the CTRL+C exit
+inline BOOL WINAPI __dbj_log_console_handler(DWORD signal) {
+
+	if (signal == CTRL_C_EVENT) {
+		// namespace galimatias, almost like cppwinrt ;)
+		using dbj::buf::yanb;
+		using ::dbj::core::trace;
+		using namespace ::dbj::win32;
+		using namespace ::dbj::log;
+
+		yanb basename_{ module_basename() };
+		DBJ_LOG_INF("CTRL+C event -- syslog connection closed from %s", basename_.data());
+		trace("CTRL+C event -- syslog connection closed from %s", basename_.data());
+	}
+	return TRUE;
+}
+
+// have to do it here so that caller can use it before main ...
+// this is an "self executing" lambda
+// this happens only once, for each process
+inline auto __dbj_log_init__ = []()
+{
+	// namespace galimatias, almost like cppwinrt ;)
+	using dbj::buf::yanb;
+	using ::dbj::core::trace;
+	using namespace ::dbj::win32;
+	using namespace ::dbj::log;
+
+	yanb basename_{ module_basename() };
+	syslog_init();
+	// syslog_open_options::log_perror
+	// makes use of local log file
+	syslog_open(
+		basename_.data() /*, syslog_open_options::log_perror*/
+	);
+	trace("syslog connection opened from %s", basename_.data());
+
+	if (!SetConsoleCtrlHandler(__dbj_log_console_handler, TRUE)) {
+		trace("\nERROR: Could not set console exit handler");
+		perror("\nERROR: Could not set console exit handler");
+	}
+
+	return true;
+}();

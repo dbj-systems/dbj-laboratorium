@@ -23,7 +23,7 @@ Sub-range is two pointers to the *same* buffer
 Concept 2: minimize the use of the string.h
 
 */
-#include "dbjclib.h"
+// #include "dbjclib.h"
 #ifdef __clang__
 /*
 http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-headers
@@ -32,15 +32,20 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #endif /* __clang__ */
 
 static const size_t		DBJ_NPOS = (size_t)-1;
-static const size_t		DBJ_MAX_STRING_LENGTH = 65536;
+static const size_t		DBJ_MAX_STRING_LENGTH = 0xFFFF;
 
 
 typedef struct dbj_string {
+	 /*if true, free the front ptr
+	 before freeing the struct*/
 	bool   full_free;
 	char * front;
 	char * back;
 } dbj_string;
 
+/*
+allocate the new structure
+*/
 static dbj_string * dbj_string_null()
 {
 	dbj_string * pair_ = (dbj_string *)malloc(sizeof(dbj_string));
@@ -48,6 +53,11 @@ static dbj_string * dbj_string_null()
 	pair_->front = 0; pair_->back = 0; pair_->full_free = false; return pair_;
 }
 
+/*
+return true if front and back are not NULL
+and are not equal
+and size is in the allowe boundaries
+*/
 static bool dbj_valid_string(const dbj_string * str)
 {
 	if (!str) return false;
@@ -63,6 +73,7 @@ static void dbj_string_free(dbj_string * str)
 	_ASSERTE(str);
 	if (str->full_free) free((void*)str->front);
 	free(str);
+	str = 0;
 }
 
 static const size_t dbj_string_len(const dbj_string * str_)
@@ -73,10 +84,10 @@ static const size_t dbj_string_len(const dbj_string * str_)
 }
 
 /*
-make from const char *
+effectively make a view from const char *
 */
 static dbj_string *
-dbj_string_make(const char * string_)
+dbj_string_make_view(const char * string_)
 {
 	const size_t slen = strlen(string_);
 	_ASSERTE(DBJ_MAX_STRING_LENGTH > slen);
@@ -99,7 +110,7 @@ static dbj_string * dbj_string_alloc(size_t count)
 	_ASSERTE(DBJ_MAX_STRING_LENGTH > count);
 	char * payload = (char*)calloc(count + 1, 1);
 	_ASSERTE(payload);
-	dbj_string * rez = dbj_string_make(payload);
+	dbj_string * rez = dbj_string_make_view(payload);
 	// since we made it with the empty string 
 	// the back is pointing to the front 
 	// so we have to re-adjust it!
@@ -136,7 +147,7 @@ static dbj_string * dbj_string_append(
 compare the contents of two strings,
 return true if equal
 */
-static bool dbj_string_compare(
+inline bool dbj_string_compare(
 	const dbj_string * left_,
 	const dbj_string * right_
 )
@@ -160,7 +171,7 @@ static bool dbj_string_compare(
 take sub range as requested
 free the string struct eventually but not the front pointer
 */
-static dbj_string * dbj_string_from(const char * str, size_t from_, size_t to_)
+inline dbj_string * dbj_string_from(const char * str, size_t from_, size_t to_)
 {
 	from_ -= 1;
 	// to_ -= 1; we do not move the 'to' left since the concept is 
@@ -180,7 +191,7 @@ is CONTENT of sub inside the CONTENT of str ?
 return the sub-range as dbj_string with pointers to the same buffer
 or NULL , with errno set to the the error
 */
-static dbj_string *  dbj_to_subrange(dbj_string * str_, dbj_string * sub_)
+inline dbj_string *  dbj_to_subrange(dbj_string * str_, dbj_string * sub_)
 {
 	_ASSERTE(str_ && sub_);
 	_ASSERTE(dbj_string_len(str_) > 0);
@@ -225,7 +236,7 @@ static dbj_string *  dbj_to_subrange(dbj_string * str_, dbj_string * sub_)
 	is pointer p pointing inside the string range?
 	return DBJ_NPOS if not found
 */
-static const size_t dbj_p_is_in_range(const char * p_, dbj_string * str_) {
+inline const size_t dbj_p_is_in_range(const char * p_, dbj_string * str_) {
 
 	/* walk along the source */
 	char * char_p = (char *)p_;
@@ -240,7 +251,7 @@ static const size_t dbj_p_is_in_range(const char * p_, dbj_string * str_) {
 	the string content
 	return the location or DBJ_NPOS if not found
 */
-static const size_t dbj_c_is_in_range(const char c_, dbj_string * str_)
+inline const size_t dbj_c_is_in_range(const char c_, dbj_string * str_)
 {
 	/* walk along the source */
 	for (char * walker = str_->front; *walker != *str_->back; ++walker)
@@ -253,7 +264,7 @@ static const size_t dbj_c_is_in_range(const char c_, dbj_string * str_)
 /*
 return append left and right of a sub_range
 */
-static dbj_string * dbj_remove_substring
+inline dbj_string * dbj_remove_substring
 (dbj_string * range, dbj_string * sub_range)
 {
 	// the big sanity check first
@@ -276,7 +287,8 @@ static dbj_string * dbj_remove_substring
 	return rez;
 }
 
-static void dbj_string_test()
+#ifdef DBJ_STRING_TEST
+inline void dbj_string_test()
 {
 	// specimen starts from 1
 	// thus sub(5,7) is '567'
@@ -288,7 +300,7 @@ static void dbj_string_test()
 		dbj_string_compare(dbj_string_from("12456", 3, 5), dbj_string_from("45612", 1, 3))
 	);
 
-	dbj_string * o2z = dbj_string_make("1234567890");
+	dbj_string * o2z = dbj_string_make_view("1234567890");
 	// this yields DBJ_NPOS since "3" is different memory chunk 
 	_ASSERTE( DBJ_NPOS == dbj_p_is_in_range("3", o2z));
 	// this yields 2
@@ -312,4 +324,5 @@ static void dbj_string_test()
 	dbj_string_free(sub);
 	dbj_string_free(rez);
 }
+#endif // DBJ_STRING_TEST
 

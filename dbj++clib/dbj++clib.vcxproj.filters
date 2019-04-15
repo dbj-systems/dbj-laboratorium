@@ -20,6 +20,10 @@
     <ClInclude Include="dbj_sll\dbj_sll.h">
       <Filter>dbj_sll</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_error\dbj_error.h" />
+    <ClInclude Include="dbj_error\dbj_error_codes.h" />
+    <ClInclude Include="dbj_string\dbj_string.h" />
+    <ClInclude Include="dbj_string\dbj_trim.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />

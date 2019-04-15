@@ -61,7 +61,7 @@ char * dbj_strdup(const char *s) {
 
 /* for the DBJ SLL key making */
 /* the djb2 from: http://www.cse.yorku.ca/~oz/hash.html */
-unsigned long dbj_hash(unsigned char *str)
+static unsigned long dbj_hash(unsigned char *str)
 {
 	unsigned long hash = 5381;
 	int c;

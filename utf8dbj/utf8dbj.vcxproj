@@ -72,15 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\GitHub\dbj-systems\dbj-laboratorium;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -155,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dbj_c_lib_test.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +175,9 @@
     <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dbj++clib\dbj++clib.vcxproj">
+      <Project>{fb3f59bf-e33a-473b-a1f2-7e90510b13a6}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
       <Project>{79fd905f-2eff-424a-b7f7-0ad870bc6847}</Project>
     </ProjectReference>

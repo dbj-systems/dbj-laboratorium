@@ -1,4 +1,5 @@
 #include "../dbjclib.h"
+#include "dbj_error_codes.h"
 
 static const char * dbj_error_messages_[DBJ_EC_DBJ_LAST_ERROR] =
 {

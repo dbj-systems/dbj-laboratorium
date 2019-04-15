@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "pch.h"
+#define DBJ_SYSLOG
+#include <dbj++log/dbj++log.h>
+
+#ifdef DBJ_C_LIB_TEST
+#include "dbj_c_lib_test.h"
+#endif
 
 using namespace std;
 using namespace std::string_view_literals;
@@ -34,16 +40,40 @@ static auto console_font_info()
     );
 }
 
+static auto try_the_font() {
+//
+// кошка 日本
+	constexpr auto specimen =
+		L"\x043a\x043e\x0448\x043a\x0430 \x65e5\x672c\x56fd";
+
+	// should display: кошка 日本
+	::wprintf(L"\n\n\tspecimen:\t%s\n\n", specimen);
+}
+
+static auto show_the_font() {
+	auto[font_name, font_is_tt_] = console_font_info();
+	const wchar_t * not_ = (font_is_tt_ ? L"" : L"NOT");
+	::wprintf(L"\n\n\tCurrent font name is '%s', this is %s true type font.\n\n",
+		font_name.c_str(), not_);
+}
+
 
 int main()
 {
+	DBJ_LOG_INF("%s started", "dbj++utf8 (c) by dbj.systems (" __DATE__ ")" );
+
+	SetConsoleTitleW(THIS_APP_TITLE);
 	/*
 	 To change the code page of the console from your program
 	 https://docs.microsoft.com/en-us/windows/console/setconsoleoutputcp
 	 */
 	DBJ_VERIFY( 0 != SetConsoleOutputCP(CP_UTF8));
+	DBJ_VERIFY(_setmode(_fileno(stdout), _O_U8TEXT) != -1);
 
-	SetConsoleTitleW(THIS_APP_TITLE);
+#ifdef DBJ_C_LIB_TEST
+	dbj_test::dbj_c_lib();
+#endif
+
 	// Win10 PRO 
 	::system("@cls");
 	::system("@echo off");
@@ -53,32 +83,31 @@ int main()
 	::system("@echo (c) (" __DATE__ ") by dbj@dbj.org version:[" __DATE__ "][" __TIME__ "]");
 	::system("@echo.");
 	//::system("@echo This app now will do: chcp 65001");
+	// start this app
+
 	::system("@chcp 65001");
 	// ::system("@chcp");
 	::system("@echo.");
 	::system("@echo If specimen bellow is not readable, please change the console");
 	::system("@echo font to the one that will make the specimen fully readable");
 	::system("@echo Repeat untill you guessed the right font");
-	// start this app
-	//
-	// кошка 日本
-	constexpr auto specimen =
-		L"\x043a\x043e\x0448\x043a\x0430 \x65e5\x672c\x56fd";
 
-	DBJ_VERIFY(_setmode(_fileno(stdout), _O_U8TEXT) != -1);
-	// should display: кошка 日本
-	::wprintf(L"\n\n\tspecimen:\t%s\n\n", specimen);
-
-	auto [font_name, font_is_tt_ ] = console_font_info();
-	const wchar_t * not_ = (font_is_tt_ ? L"" : L"NOT");
-	::wprintf(L"\n\n\tCurrent font name is '%s', this is %s true type font.\n\n", 
-		font_name.c_str(), not_);
-
-	::system("@echo.");
-	::system("@echo If you see the specimen fully and clearly, you have found the right font");
-	::system("@echo Each time you need to display UTF-8 text properly in the console on this desktop");
-	::system("@echo You will have to use this font and execute 'chcp 65001', before that.");
-	::system("@echo.");
-	::system("@pause");
+	int nextchar = 0;
+	 do {
+		 show_the_font();
+		try_the_font();
+		::system("@echo.");
+		::system("@echo If you see the specimen fully and clearly, you have found the right font");
+		::system("@echo Each time you need to display UTF-8 text properly in the console on this desktop");
+		::system("@echo You will have to use this font and execute 'chcp 65001', before that.");
+		::system("@echo.");
+		::system("@echo hit ENTER to refresh the output");
+		::system("@echo hit CTRL+C for exit");
+		::system("@echo.");
+		// ::system("@pause");
+		_flushall(); nextchar = getc(stdin);
+		::system("@cls");
+	} while (nextchar != EOF);
+	DBJ_LOG_INF("%s OK FINISH", "dbj++utf8 (c) by dbj.systems (" __DATE__ ")");
 	return 1;
 }

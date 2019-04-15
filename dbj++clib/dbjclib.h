@@ -34,6 +34,12 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #pragma clang system_header
 #endif /* __clang__ */
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
+
 #if defined (_MSC_VER)
 #define PLATFORM "Windows"
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -64,8 +70,7 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #endif
 
 /* use this to remove unused code */
-/* this verion does not evaluate the expression */
-// #define DBJ_REMOVE(expr) typedef char __static_assert_t[sizeof(expr) != 0]
+/* this verion does not evaluate the expression at runtime or compile time even */
 #define DBJ_REMOVE(expr) (void)(sizeof(expr))
 
 #	if ! defined(_MSC_EXTENSIONS)
@@ -81,12 +86,12 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 Note: while inside c++ all is in the dbj::clib namespace
 */
 #ifdef __cplusplus
-namespace dbj { namespace clib {
 	extern "C" {
 #endif
 
-/*
+#ifndef uchar_t
 typedef unsigned char	uchar_t;
+#endif  uchar_t
 
 #ifndef size_t
 #ifdef _WIN64
@@ -95,26 +100,63 @@ typedef unsigned char	uchar_t;
 		typedef unsigned int	size_t;
 #endif
 #endif
-*/
+
 /*
-strdup and strndup are defined in POSIX compliant systems as :
-char *strdup(const char *str);
-char *strndup(const char *str, size_t len);
+NOTE: must place NULL as the last arg!
+	  max args is 255
 */
-		char * dbj_strdup(const char *s);
-/*
-The strndup() function copies at most len characters from the string str
-always null terminating the copied string.
-*/
-		char * dbj_strndup(const char *s, size_t n);
+		void free_free_set_them_free(void * vp, ...);
+
+#define DBJ_MULTI_FREE(...) free_free_set_them_free((void *)__VA_ARGS__, NULL)
+		/*
+		strdup and strndup are defined in POSIX compliant systems as :
+
+		char *strdup(const char *str);
+		char *strndup(const char *str, size_t len);
+		*/
+		inline char * dbj_strdup(const char *s) 
+		{
+			_ASSERTE(s);
+			size_t destination_size = strlen(s);
+			char *d = (char *)malloc(destination_size + 1);   // Space for length plus nul
+			if (d == NULL) {
+				errno = ENOMEM;
+				return NULL;
+			}         // No memory
+			strcpy_s(d, destination_size, s);                        // Copy the characters
+			return d;                            // Return the new string
+		}
+		/*
+		The strndup() function copies at most len characters from the string str
+		always null terminating the copied string.
+		*/
+		inline char * dbj_strndup(const char *s, size_t n)
+		{
+			char *result = 0;
+			size_t len = strlen(s);
+
+			if (n < len) len = n;
+
+			result = (char *)malloc(len + 1);
+			if (result == NULL) {
+				errno = ENOMEM;
+				return NULL;
+			}  // No memory
+
+			result[len] = '\0';
+			return (char *)memcpy(result, s, len);
+		}
 // remove chars given in the string arg
 // return the new string
 // user has to free() eventually
 // both arguments must be zero limited
 		char * dbj_str_shorten(const char * str_, const char * chars_to_remove_);
 
+#ifdef DBJ_CLIB_ERR_CONCEPT
 #include "./dbj_error/dbj_error_codes.h"
 #include "./dbj_error/dbj_error.h"
+#endif /*DBJ_CLIB_ERR_CONCEPT*/
+
 #include "./dbj_string/dbj_trim.h"
 #include "./dbj_string/dbj_string.h"
 // #include "./dbj_sll/dbj_sll.h" 
@@ -124,8 +166,9 @@ always null terminating the copied string.
 
 #ifdef __cplusplus
 	} // extern "C"
-} // eof namespace clib 
-} // eof namespace dbj 
 #endif
 
 #endif // ! DBJ_CLIB_PRESENT
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
