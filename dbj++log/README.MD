@@ -123,7 +123,11 @@ decouple a bit more.
 So, please use these macros. They are active if DBJ_SYSLOG is defined before 
 including dbj++log.h
 
-Alternatively one can avoid the macros. dbj++log.h is quite simple to understand how to do that.
+Alternatively one can avoid the macros. 
+dbj++log.h is quite simple in order to understand how to do that.
+
+In case you do not want to use dbj++log any more just place these macros (non functional versions)
+in one of your header files.
 
 #### std::error_code 
 
@@ -136,13 +140,19 @@ if (err)
 ```
 Above logs an syslog error, the std::error_code message, and user defined prompt with it.
 
+In case you are wondering what is std::error_code, it is in standard C++ since years ago.
+You do not need to fully implement your own error category.
+Using [`std::errc`](https://en.cppreference.com/w/cpp/error/errc) , is quite sufficient in most situations.
+
 #### Async behaviour and Multi Threading
 
-This is all asynchronous as much as windows sockets are asynchronous.
+This API is all asynchronous as much as windows sockets are asynchronous.
 But all the impotrtant functions in here are capable of sequential working, 
 in the presence of multiple threads.
 
-#### WARNING: Messages are composed following the RFC3164
+This API is resilient in presence of mutliple threads.
+
+##### WARNING: dbj++log SysLog Messages are composed following the RFC3164
 
 Make sure you syslog server can understand them. Which is the case with almost all of them. 
 This is simply because there are milions of devices in use (nad will be for a long time to come) who are emitting 
