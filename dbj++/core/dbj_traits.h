@@ -638,5 +638,73 @@ namespace dbj {
 } // eof dbj
 #pragma endregion
 
+namespace dbj {
+/*
+// $ g++ prog.cc -Wall -Wextra -std=c++17 "-Wno-unused-parameter"
+#include <iostream>
+#include <cstdlib>
+#include <optional>
+#include <vector>
+#include <functional>
+
+using namespace std ;
+
+	template<typename T>
+	using ORW = optional< reference_wrapper<T> >;
+
+// this is apparently about solving the TPOIASI:
+// https://www.fluentcpp.com/2019/02/12/the-terrible-problem-of-incrementing-a-smart-iterator/
+//
+// solution might be here:
+// https://www.fluentcpp.com/2019/04/16/an-alternative-design-to-iterators-and-ranges-using-stdoptional/
+// original author could not devise a next to return references since std::optional
+// can not take references as of C++17
+//
+// but with dbj ORW<T> this is solvable
+template <typename InputIt, typename Sentinel>
+struct InputRange
+{
+	InputIt  current;
+	Sentinel end;
+	using value_type = typename std::iterator_traits<InputIt>::value_type;
+
+	// dbj: here we copy the optional which contains a wrapper to T
+	// and a wrapper to T is contains a pointer to T
+	// thus we do not copy the T
+	ORW<value_type> next() {
+		if (current != end)
+			return *current++;
+		else
+			return std::nullopt;
+	}
+};
+
+int main()
+{
+	using IV = std::vector<int> ;
+	using IVIR = InputRange<IV::iterator, IV::iterator >;
+
+	IV numbers = { 1, 2, 3, 4, 5 };
+
+	IVIR inr_{numbers.begin(), numbers.end()} ;
+
+	// notice how C++ hides a lot of boilerplate bellow
+	// "*value" returns reference to T, not T
+	// and calling "operator <<" on that resolves to
+	// T& which is then calling operator on std::reference_wrapper
+	// that finaly returns reference to *T, held inside it
+	// phew!
+	cout << "\n\n{" ;
+	 while (const auto value = inr_.next())
+		cout << " " << (*value) << "" ;
+	cout << "}\n\n" ;
+}
+
+*/
+// 2019 GPLv3 by dbj@dbj.org
+	template<typename T>
+	using ORW = optional< reference_wrapper<T> >;
+}
+
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
