@@ -5,17 +5,17 @@ LINUX type name demangling has to be done like this
 
 #include <cxxabi.h>
 
-template < typemame T> 
+template < typemame T>
 std::string demangle () {
 int error{0};
-std::unique_ptr<char> 
-     name = 
+std::unique_ptr<char>
+	 name =
 	   std::make_unique( abi::__cxa_demangle(typeid(T).name(), 0, 0, &error) );
 
 if (!error)        return { name.get() };
 if (error == -1)   return { "memory allocation failed" };
 if (error == -2)   return { "not a valid mangled name" };
-     return { "bad argument" };
+	 return { "bad argument" };
 }
 
 */
@@ -30,7 +30,7 @@ if (error == -2)   return { "not a valid mangled name" };
 #include <string>
 
 /*
- typeid() returns the outcome of  
+ typeid() returns the outcome of
  highly specific implementation
  we can not do anything meaningfull with it
  but these two simple macros
@@ -55,7 +55,7 @@ namespace dbj {
 	// _Is_any_of_v from <type_traits>
 	template<class _Ty,
 		class... _Types>
-		inline constexpr bool is_any_of_v 
+		inline constexpr bool is_any_of_v
 		= std::disjunction_v<std::is_same<_Ty, _Types>...>;
 
 
@@ -63,12 +63,12 @@ namespace dbj {
 	currently MSVC compiler 2019-07-02 wrongly allows c++
 	type casting from "anything" to function pointer
 	so the bellow will not work untill that is fixed
-	
+
 	using FP = void (*)(int) ;
-		template <FP fun> call_fp ( int ) { } 
+		template <FP fun> call_fp ( int ) { }
 	// should not compile but it does
 	call_fp< FP(42) >( 0 );
-	
+
 	*/
 #ifdef DBJ_MSVC_FIXED_FP_CASTING_FROM_ANYTHING
 
@@ -98,7 +98,7 @@ namespace dbj {
 		for that in here
 		*/
 		template<FP  fun_candidate_, typename ...A>
-		static constexpr bool is_callable (A...args)	
+		static constexpr bool is_callable(A...args)
 		{
 			// static_assert does not work here
 			// example
@@ -115,7 +115,7 @@ namespace dbj {
 
 		/*applicator generic */
 		template<typename ...A>
-		static auto applicator (FP  callback, A... args)
+		static auto applicator(FP  callback, A... args)
 			-> decltype(callback(args...))
 		{
 			return callback(args...);
@@ -126,7 +126,7 @@ namespace dbj {
 	template< class T >
 	struct ok_to_be_smart : std::integral_constant<
 		bool,
-		! std::is_class_v<T>  && ! std::is_union_v<T>  &&
+		!std::is_class_v<T> && !std::is_union_v<T>  &&
 		std::is_trivial_v<T>  && std::is_move_constructible_v<T>
 	> {};
 
@@ -140,10 +140,10 @@ namespace dbj {
 	note 2: std::move () is the only way out for copying unique_ptr, moving works
 	note 3: consider std::reference_wrapper<> to make unique_ptr as argument possible
 	*/
-	template<typename T_ , std::enable_if_t< ok_to_be_smart_v<T_>, int> = 0	>
+	template<typename T_, std::enable_if_t< ok_to_be_smart_v<T_>, int> = 0	>
 	using unique_arr = std::unique_ptr<T_[]>;
 
-	template<typename T_> 
+	template<typename T_>
 	inline unique_arr<T_> make_unique_arr(size_t N_) {
 		return std::make_unique<T_[]>(N_);
 	}
@@ -152,74 +152,74 @@ namespace dbj {
 	it keeps the count of array
 	*/
 	template<typename T_>
-	using smart_pair =	std::pair < size_t, ::dbj::unique_arr<T_> >;
+	using smart_pair = std::pair < size_t, ::dbj::unique_arr<T_> >;
 
 	template<typename T_>
 	inline smart_pair<T_> make_smart_pair(size_t N_) {
-		return std::make_pair( N_, std::make_unique<T_[]>(N_)) ;
+		return std::make_pair(N_, std::make_unique<T_[]>(N_));
 	}
 
 	/************************************************************************************/
 	namespace tt {
 
-  // usefull and important aliases
-  // these make type traits more palatable
+		// usefull and important aliases
+		// these make type traits more palatable
 
-    /************************************************************************************/
-	/* constraint: both types must be fundamental */
-	template<typename T1, typename T2>
-	struct is_fundamental_pair {
-		
-		using type_1 = std::remove_cv_t <T1>;
-		using type_2 = std::remove_cv_t <T2>;
+		  /************************************************************************************/
+		  /* constraint: both types must be fundamental */
+		template<typename T1, typename T2>
+		struct is_fundamental_pair {
 
-		constexpr static const bool value{
-			std::is_fundamental_v<type_1> == std::is_fundamental_v<type_2>
+			using type_1 = std::remove_cv_t <T1>;
+			using type_2 = std::remove_cv_t <T2>;
+
+			constexpr static const bool value{
+				std::is_fundamental_v<type_1> == std::is_fundamental_v<type_2>
+			};
 		};
-	};
 
-	template<typename T1, typename T2>
-	constexpr inline bool is_fundamental_pair_v = is_fundamental_pair<T1, T2>::value;
+		template<typename T1, typename T2>
+		constexpr inline bool is_fundamental_pair_v = is_fundamental_pair<T1, T2>::value;
 
-	template< class T1, class T2 >
-	struct fundamental_twins final
-		: std::bool_constant< 
-		is_fundamental_pair_v<T1, T2> && std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>
-		> 
-	{	
-		using decay_1 = std::decay_t<T1>;
-		using decay_2 = std::decay_t<T2>;
-	};
-
-	template<typename T1, typename T2>
-	inline constexpr bool
-		same_fundamental_types(T1&&, T2&&)
-	{
-		return fundamental_twins<T1, T2>{}();
-	}
-	/************************************************************************************/
-	
-	template<typename T>
-	struct is_pointer_pointer final {
-		enum : bool {
-			value =
-			std::is_pointer_v<T> &&
-			std::is_pointer_v< typename std::remove_pointer_t<T> >
+		template< class T1, class T2 >
+		struct fundamental_twins final
+			: std::bool_constant<
+			is_fundamental_pair_v<T1, T2> && std::is_same_v<std::decay_t<T1>, std::decay_t<T2>>
+			>
+		{
+			using decay_1 = std::decay_t<T1>;
+			using decay_2 = std::decay_t<T2>;
 		};
-	};
 
-	template<typename T>
-	constexpr auto is_pointer_pointer_v = is_pointer_pointer<T>::value;
+		template<typename T1, typename T2>
+		inline constexpr bool
+			same_fundamental_types(T1&&, T2&&)
+		{
+			return fundamental_twins<T1, T2>{}();
+		}
+		/************************************************************************************/
 
-	// to check the value
-	inline auto is_p2p = [](auto arg) constexpr -> bool {
-		using arg_type = decltype(arg);
-		return is_pointer_pointer_v< arg_type >;
-	};
+		template<typename T>
+		struct is_pointer_pointer final {
+			enum : bool {
+				value =
+				std::is_pointer_v<T> &&
+				std::is_pointer_v< typename std::remove_pointer_t<T> >
+			};
+		};
 
-	/************************************************************************************/
+		template<typename T>
+		constexpr auto is_pointer_pointer_v = is_pointer_pointer<T>::value;
 
-	template <typename T> struct remove_all_ptr { typedef T type; };
+		// to check the value
+		inline auto is_p2p = [](auto arg) constexpr -> bool {
+			using arg_type = decltype(arg);
+			return is_pointer_pointer_v< arg_type >;
+		};
+
+		/************************************************************************************/
+
+		template <typename T> struct remove_all_ptr { typedef T type; };
 
 		template <typename T> struct remove_all_ptr<T*> {
 			using type = typename remove_all_ptr<std::remove_cv_t<T>>::type;
@@ -243,76 +243,80 @@ namespace dbj {
 		using to_base_t =
 			remove_all_ptr_t< std::remove_all_extents_t< remove_cvref_t < T > > >;
 
-/************************************************************************************/
-/* this can not be made to act at the compile time */
-	template <class T1, class T2>
-	inline bool same_typeid = typeid(T1).hash_code() == typeid(T2).hash_code();
-/************************************************************************************/
-/*
-are two type-id's equal, for the two values provided ?
-*/
+		/************************************************************************************/
+		/* this can not be made to act at the compile time */
+		template <class T1, class T2>
+		inline bool same_typeid = typeid(T1).hash_code() == typeid(T2).hash_code();
+		/************************************************************************************/
+		/*
+		are two type-id's equal, for the two values provided ?
+		*/
 
-inline auto equal_types 
-	= [](auto & a, auto & b) 
-		constexpr -> bool
-{
-using namespace std;
-return is_same_v< remove_cvref_t<decltype(a)>, remove_cvref_t<decltype(b)> >;
-};
-/************************************************************************************/
-// remove const-ness and/or volatility before comparing
-// do not remove anything else
-template<typename T1, typename T2>
-	constexpr inline bool remove_cv_compare_types 
-		= std::is_same_v< std::remove_cv_t<T1>, std::remove_cv_t<T2>  >;
-/************************************************************************************/
-/* see dbj_util tests for usage example */
+		inline auto equal_types
+			= [](auto & a, auto & b)
+			constexpr -> bool
+		{
+			using namespace std;
+			return is_same_v< remove_cvref_t<decltype(a)>, remove_cvref_t<decltype(b)> >;
+		};
+		/************************************************************************************/
+		// remove const-ness and/or volatility before comparing
+		// do not remove anything else
+		template<typename T1, typename T2>
+		constexpr inline bool remove_cv_compare_types
+			= std::is_same_v< std::remove_cv_t<T1>, std::remove_cv_t<T2>  >;
+		/************************************************************************************/
+		/* see dbj_util tests for usage example */
 
 #pragma region is pointer
-	template <typename T> inline constexpr const bool pointer(T const &) noexcept { return false; }
-	template <typename T> inline constexpr const bool pointer(T const *)  noexcept { return true; }
+		template <typename T> inline constexpr const bool pointer(T const &) noexcept { return false; }
+		template <typename T> inline constexpr const bool pointer(T const *)  noexcept { return true; }
 
-	// #define CRAZY_ALGORITHMS
+		// #define CRAZY_ALGORITHMS
 #ifdef CRAZY_ALGORITHMS
-	template<typename T>
-	inline const bool is_ptr_(const T &) {
+		template<typename T>
+		inline const bool is_ptr_(const T &) {
 
-		const char * name_ = dbj::tt::name_<T>();
-		char * first = (char*)name_;
-		while (0x0 != first++) {
-			if (*first == '*') return true;
+			const char * name_ = dbj::tt::name_<T>();
+			char * first = (char*)name_;
+			while (0x0 != first++) {
+				if (*first == '*') return true;
+			}
+			return false;
 		}
-		return false;
-	}
 #endif
 #pragma endregion 
 
-// vs std::is_array works on values not types
-// proof: https://godbolt.org/g/8skXRF
+		// vs std::is_array works on values not types
+		// proof: https://godbolt.org/g/8skXRF
 
-/* is object an instance of native array */
-template< typename T, size_t N>
-inline constexpr bool is_array_(
-	const T(&specimen[[maybe_unused]])[N]
-)	{	return true;	}
+		/* is object an instance of native array */
+		template< typename T, size_t N>
+		inline constexpr bool is_array_(
+			const T(&specimen[[maybe_unused]])[N]
+		) {
+			return true;
+		}
 
-/* is object an pointer to native array */
-template< typename T, size_t N>	
-inline constexpr bool is_array_(
-	const T(*specimen[[maybe_unused]])[N]
-)	{	return true; }
+		/* is object an pointer to native array */
+		template< typename T, size_t N>
+		inline constexpr bool is_array_(
+			const T(*specimen[[maybe_unused]])[N]
+		) {
+			return true;
+		}
 
-/************************************************************************************/
+		/************************************************************************************/
 
-	template<typename T>
-	struct actual_type final {
-		using unqualified	= std::remove_cv_t< T >;
-		using not_ptr		= std::remove_pointer_t< T > ;
-		using decayed		= std::decay_t< T >;
-		using base          = to_base_t<T>;
-	};
+		template<typename T>
+		struct actual_type final {
+			using unqualified = std::remove_cv_t< T >;
+			using not_ptr = std::remove_pointer_t< T >;
+			using decayed = std::decay_t< T >;
+			using base = to_base_t<T>;
+		};
 
-/************************************************************************************/
+		/************************************************************************************/
 
 		template< typename T>
 		struct instrument final
@@ -323,13 +327,13 @@ inline constexpr bool is_array_(
 			struct descriptor final
 			{
 				using type = TT;
-				constexpr   static inline const bool	is_pointer 
+				constexpr   static inline const bool	is_pointer
 					= std::is_pointer_v<TT>;
-				constexpr 	static inline const bool	is_array 
+				constexpr 	static inline const bool	is_array
 					= std::is_array_v<TT>;
-				constexpr 	static inline const size_t  number_of_dimension 
+				constexpr 	static inline const size_t  number_of_dimension
 					= std::rank_v<TT>;
-				constexpr 	static inline const size_t  first_extent 
+				constexpr 	static inline const size_t  first_extent
 					= std::extent_v<TT>;
 
 				const std::string to_string() const noexcept
@@ -347,22 +351,22 @@ inline constexpr bool is_array_(
 				}
 			};
 
-			using def_type 
+			using def_type
 				= descriptor<T>;
-			using actual_type 
+			using actual_type
 				= descriptor<std::remove_cv_t< std::remove_pointer_t<T> >>;
-			using under_type 
+			using under_type
 				= descriptor<typename std::remove_all_extents<T>::type>;
 
 			const std::string to_string(void) noexcept
 			{
 				return
-					std::string{ "\ndefault type" } + def_type{}.to_string() +
-					"\nactual type"		+ actual_type{}.to_string() +
-					"\nunderlying type" + under_type{}.to_string() ;
+					std::string{ "\ndefault type" } +def_type{}.to_string() +
+					"\nactual type" + actual_type{}.to_string() +
+					"\nunderlying type" + under_type{}.to_string();
 			}
 		};
-/************************************************************************************/
+		/************************************************************************************/
 #pragma region TUPLE MANIPULATORS
 		template<typename T1, typename T2>
 		struct tuple_concat;
@@ -445,7 +449,7 @@ namespace dbj {
 	template<> struct is_char32<char32_t> : std::true_type {	};
 
 	template<typename T> inline constexpr bool  is_char32_v = is_char32<T>::value;
-/************************************************************************************/
+	/************************************************************************************/
 	template<typename T, typename base_t = dbj::tt::to_base_t<T> >
 	struct is_wide_narrow_char :
 		std::integral_constant
@@ -458,8 +462,8 @@ namespace dbj {
 	template<typename T >
 	inline constexpr bool  is_wide_narrow_char_v = is_wide_narrow_char<T>::value;
 
-/************************************************************************************/
-	// and one for all
+	/************************************************************************************/
+		// and one for all
 	template<typename T, typename base_t = dbj::tt::to_base_t<T> >
 	struct is_std_char :
 		std::integral_constant
@@ -472,9 +476,9 @@ namespace dbj {
 
 	template<typename T >
 	inline constexpr bool  is_std_char_v = is_std_char<T>::value;
-/************************************************************************************/
+	/************************************************************************************/
 
-	// is T, a standard string
+		// is T, a standard string
 	template< class T >
 	struct is_std_string : integral_constant<bool,
 		is_same<T, string    >::value ||
@@ -502,19 +506,19 @@ namespace dbj {
 	std::enable_if<> tamed with template aliases
 	insipred with https://codereview.stackexchange.com/questions/71946/use-of-macros-to-aid-visual-parsing-of-sfinae-template-metaprogramming
 	NOTE: C++17 onwards is required
-	
+
 	*/
 namespace dbj {
-		/*DT  stands for Decay Type
-		we usualy decay the types here before using them
-		see http://en.cppreference.com/w/cpp/types/decay
-		*/
-		template< typename T>
-		using DT = std::decay_t<T>; // since C++14
-									/*EIF stands for enable if*/
-		template< bool pred >
-		using EIF = typename std::enable_if_t< pred, int >;
-	
+	/*DT  stands for Decay Type
+	we usualy decay the types here before using them
+	see http://en.cppreference.com/w/cpp/types/decay
+	*/
+	template< typename T>
+	using DT = std::decay_t<T>; // since C++14
+								/*EIF stands for enable if*/
+	template< bool pred >
+	using EIF = typename std::enable_if_t< pred, int >;
+
 	/* we define constexpr dbj::is_ function for every std::is_ */
 	template< typename T>
 	constexpr bool is_object() { return std::is_object_v< DT<T>>; }
@@ -541,7 +545,7 @@ namespace dbj {
 
 #pragma region type traits + generic lambdas
 
-namespace dbj 
+namespace dbj
 {
 	using char_star = std::remove_cv_t< decltype("X") >;
 	using wchar_star = std::remove_cv_t< decltype(L"X") >;
@@ -579,11 +583,11 @@ namespace dbj {
 		template <typename T>
 		struct is_range<T
 			, std::void_t
-			  <
-			    decltype(std::declval<T>().begin()),
-			    decltype(std::declval<T>().end())
-			  >
-		> final : std::true_type {};
+			<
+			decltype(std::declval<T>().begin()),
+			decltype(std::declval<T>().end())
+			>
+		> final : std::true_type{};
 
 		/*-----------------------------------------------------------*/
 		/*
@@ -632,79 +636,113 @@ namespace dbj {
 	//using is_bool_t = std::is_same<no_const_decayed<T>, bool>::type ;
 
 	template <typename T>
-	constexpr inline bool is_bool_v 
-		= std::is_same_v< no_const_decayed<T> >, bool>;
+	constexpr inline bool is_bool_v
+		= std::is_same_v< no_const_decayed<T> >, bool > ;
 
 } // eof dbj
 #pragma endregion
 
 namespace dbj {
-/*
-// $ g++ prog.cc -Wall -Wextra -std=c++17 "-Wno-unused-parameter"
-#include <iostream>
-#include <cstdlib>
-#include <optional>
-#include <vector>
-#include <functional>
+	/*
+	// $ g++ prog.cc -Wall -Wextra -std=c++17 "-Wno-unused-parameter"
+	#include <iostream>
+	#include <cstdlib>
+	#include <optional>
+	#include <vector>
+	#include <functional>
 
-using namespace std ;
+	using namespace std ;
 
-	template<typename T>
-	using ORW = optional< reference_wrapper<T> >;
+		template<typename T>
+		using ORW = optional< reference_wrapper<T> >;
 
-// this is apparently about solving the TPOIASI:
-// https://www.fluentcpp.com/2019/02/12/the-terrible-problem-of-incrementing-a-smart-iterator/
-//
-// solution might be here:
-// https://www.fluentcpp.com/2019/04/16/an-alternative-design-to-iterators-and-ranges-using-stdoptional/
-// original author could not devise a next to return references since std::optional
-// can not take references as of C++17
-//
-// but with dbj ORW<T> this is solvable
-template <typename InputIt, typename Sentinel>
-struct InputRange
-{
-	InputIt  current;
-	Sentinel end;
-	using value_type = typename std::iterator_traits<InputIt>::value_type;
+	// this is apparently about solving the TPOIASI:
+	// https://www.fluentcpp.com/2019/02/12/the-terrible-problem-of-incrementing-a-smart-iterator/
+	//
+	// solution might be here:
+	// https://www.fluentcpp.com/2019/04/16/an-alternative-design-to-iterators-and-ranges-using-stdoptional/
+	// original author could not devise a next to return references since std::optional
+	// can not take references as of C++17
+	//
+	// but with dbj ORW<T> this is solvable
 
-	// dbj: here we copy the optional which contains a wrapper to T
-	// and a wrapper to T is contains a pointer to T
-	// thus we do not copy the T
-	ORW<value_type> next() {
-		if (current != end)
-			return *current++;
-		else
-			return std::nullopt;
+	template <typename InputIt, typename Sentinel>
+	struct InputRange
+	{
+		InputIt  current;
+		Sentinel end;
+		using value_type = typename std::iterator_traits<InputIt>::value_type;
+
+		// dbj: here we copy the optional which contains a wrapper to T
+		// and a wrapper to T is contains a pointer to T
+		// thus we do not copy the T
+		ORW<value_type> next() {
+			if (current != end)
+			// dbj: the core of the trick
+			// increment and value in one operation
+				return *current++;
+			else
+				return std::nullopt;
+		}
+	};
+
+	int main()
+	{
+		using IV = std::vector<int> ;
+		using IVIR = InputRange<IV::iterator, IV::iterator >;
+
+		IV numbers = { 1, 2, 3, 4, 5 };
+		IVIR inr_{numbers.begin(), numbers.end()} ;
+
+		// notice how compiler hides a lot of boilerplate bellow
+		// (*value) returns reference to T, not T
+		// and calling "operator <<" on that resolves to
+		// T& which is then calling operator on std::reference_wrapper
+		// that finaly returns reference to *T, held inside it
+		// phew!
+		cout << "\n\n{" ;
+		 while (const auto value = inr_.next())
+			cout << " " << (*value) << "" ;
+		cout << "}\n\n" ;
 	}
-};
 
-int main()
-{
-	using IV = std::vector<int> ;
-	using IVIR = InputRange<IV::iterator, IV::iterator >;
-
-	IV numbers = { 1, 2, 3, 4, 5 };
-
-	IVIR inr_{numbers.begin(), numbers.end()} ;
-
-	// notice how C++ hides a lot of boilerplate bellow
-	// "*value" returns reference to T, not T
-	// and calling "operator <<" on that resolves to
-	// T& which is then calling operator on std::reference_wrapper
-	// that finaly returns reference to *T, held inside it
-	// phew!
-	cout << "\n\n{" ;
-	 while (const auto value = inr_.next())
-		cout << " " << (*value) << "" ;
-	cout << "}\n\n" ;
-}
-
-*/
-// 2019 GPLv3 by dbj@dbj.org
+	*/
+	// 2019 GPLv3 by dbj@dbj.org
 	template<typename T>
 	using ORW = optional< reference_wrapper<T> >;
 }
+
+/*
+https://www.fluentcpp.com/2018/04/06/strong-types-by-struct/
+Strong type is a struct with a single member called 'v'.
+Benefit is one can not mix them, as e.g. typedef's of different meaning
+can be mixed, as normaly they can ....
+Also "opaque types" are not going to happen in C++, ditto ...
+*/
+
+#define DBJ_STRONG(N,T) struct N final { T v; }
+
+/*
+	// measurement units
+	STRONG(Kg, double);
+	STRONG(Mm, double);
+
+	// attributes of a specimen
+	STRONG(Height, Mm ) ;
+	STRONG(Weight, Kg ) ;
+
+	constexpr struct VeryStrongDuck final {
+		mutable Height h;
+		mutable Weight w;
+	} duffy { {4.2},{430.23} } ;
+
+	// duffy is immutable, but
+	// duffy has gained in weight
+
+	duffy.h = {4.52};
+
+	https://cppx.godbolt.org/z/rWW5zI
+*/
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
