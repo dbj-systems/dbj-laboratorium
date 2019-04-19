@@ -86,47 +86,54 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 Note: while inside c++ all is in the dbj::clib namespace
 */
 #ifdef __cplusplus
-	extern "C" {
+extern "C" {
 #endif
 
 #ifndef uchar_t
-typedef unsigned char	uchar_t;
+	typedef unsigned char	uchar_t;
 #endif  uchar_t
 
 #ifndef size_t
 #ifdef _WIN64
-		typedef unsigned __int64 size_t;
+	typedef unsigned __int64 size_t;
 #else
-		typedef unsigned int	size_t;
+	typedef unsigned int	size_t;
 #endif
 #endif
 
-/*
-NOTE: must place NULL as the last arg!
-	  max args is 255
-*/
-		void free_free_set_them_free(void * vp, ...);
+	/*
+	NOTE: must place NULL as the last arg!
+		  max args is 255
+	*/
+	void free_free_set_them_free(void * vp, ...);
 
 #define DBJ_MULTI_FREE(...) free_free_set_them_free((void *)__VA_ARGS__, NULL)
-		/*
-		strdup and strndup are defined in POSIX compliant systems as :
 
-		char *strdup(const char *str);
-		char *strndup(const char *str, size_t len);
-		*/
-		char * dbj_strdup(const char *s);
-	
-		/*
-		The strndup() function copies at most len characters from the string str
-		always null terminating the copied string.
-		*/
-		inline char * dbj_strndup(const char *s, size_t n);
-	
-// remove chars given in the string arg
-// return the new string
-// user has to free() eventually
-// both arguments must be zero limited
-		char * dbj_str_shorten(const char * str_, const char * chars_to_remove_);
+	/*
+	Destination size can be less than strlen of destination ...
+	source_ must be zero limited
+	*/
+	char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * source_);
+
+	/*
+	strdup and strndup are defined in POSIX compliant systems as :
+
+	char *strdup(const char *str);
+	char *strndup(const char *str, size_t len);
+	*/
+	char * dbj_strdup(const char *s);
+
+	/*
+	The strndup() function copies at most len characters from the string str
+	always null terminating the copied string.
+	*/
+	inline char * dbj_strndup(const char *s, size_t n);
+
+	// remove chars given in the string arg
+	// return the new string
+	// user has to free() eventually
+	// both arguments must be zero limited
+	char * dbj_str_remove(const char * str_, const char * chars_to_remove_);
 
 #ifdef DBJ_CLIB_ERR_CONCEPT
 #include "./dbj_error/dbj_error_codes.h"
@@ -135,13 +142,13 @@ NOTE: must place NULL as the last arg!
 
 #include "./dbj_string/dbj_trim.h"
 #include "./dbj_string/dbj_string.h"
-// #include "./dbj_sll/dbj_sll.h" 
+	// #include "./dbj_sll/dbj_sll.h" 
 #include "./dbj_string_list/dbj_string_list.h"
 
-		extern const unsigned long dbj_random_kiss();
+	extern const unsigned long dbj_random_kiss();
 
 #ifdef __cplusplus
-	} // extern "C"
+} // extern "C"
 #endif
 
 #endif // ! DBJ_CLIB_PRESENT

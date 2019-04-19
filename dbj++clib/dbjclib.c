@@ -6,7 +6,8 @@
 /*
 Destination size can be less than strlen of destination ...
 */
-static char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * source_) {
+char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * source_) 
+{
 
 	// source_ must be zero limited
 	// or simply zero-ed
@@ -90,13 +91,13 @@ void free_free_set_them_free(void * vp, ...)
 // return the new string
 // user has to free() eventually
 // both arguments must be zero limited
-char * dbj_str_shorten ( const char * str_, const char * chars_to_remove_ )
+char * dbj_str_remove( const char * str_, const char * chars_to_remove_ )
 {
 	assert(strchr(str_, 0));
 	assert(strchr(chars_to_remove_, 0));
 
 	size_t str_size = strlen(str_);
-	// VLA 
+	// VLA actually ;)
 	char * vla_buff_ = calloc(str_size, 1 );
 	char * vla_buff_first = & vla_buff_[0] ;
 	char * vla_buff_last  = & vla_buff_[str_size - 1] ;

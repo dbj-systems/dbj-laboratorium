@@ -79,21 +79,24 @@ extern "C" {
 	/// </summary>
 	inline bool dbj_ordinal_string_compareA(const char * str1, const char * str2, unsigned char ignore_case) {
 
-		if (ignore_case) {
-			char * cp1 = dbj_lowerize_stringA(str1);
-			char * cp2 = dbj_lowerize_stringA(str2);
-			int rez = dbj_ordinal_compareA(
-				cp1, cp1 + strlen(cp1), cp2, cp2 + strlen(cp2)
-			);
-			free(cp1);
-			free(cp2);
-			return (rez == 0);
+	  // much faster, does not transform input strings first
+		typedef int(*char_trans)(int);
+
+		char_trans transformer;
+
+		if (ignore_case)
+			transformer = dbj::str::tolower;
+		else
+			transformer = dbj::str::just_copy_char;
+
+		size_t index_ = 0;
+		while ( str1[index_] && str2[index_])
+		{
+			if (transformer(str1[index_]) != transformer(str2[index_]))
+				return false;
+			++index_;
 		}
-		else {
-			return 0 == dbj_ordinal_compareA(
-				str1, str1 + strlen(str1), str2, str2 + strlen(str2)
-			);
-		}
+		return true;
 	}
 
 	/// <summary>
@@ -101,21 +104,23 @@ extern "C" {
 	/// </summary>
 	inline bool dbj_ordinal_string_compareW(const wchar_t * str1, const wchar_t * str2, unsigned char ignore_case) {
 
-		if (ignore_case) {
-			wchar_t * cp1 = dbj_lowerize_stringW(str1);
-			wchar_t * cp2 = dbj_lowerize_stringW(str2);
-			int rez = dbj_ordinal_compareW(
-				cp1, cp1 + wcslen(cp1), cp2, cp2 + wcslen(cp2)
-			);
-			free(cp1);
-			free(cp2);
-			return (0 == rez);
+		typedef wint_t(*char_trans)(wint_t);
+
+		char_trans transformer;
+
+		if (ignore_case)
+			transformer = towlower;
+		else
+			transformer = dbj::str::just_copy_wchar;
+
+		size_t index_ = 0;
+		while (str1[index_] && str2[index_])
+		{
+			if (transformer(str1[index_]) != transformer(str2[index_]))
+				return false;
+			++index_;
 		}
-		else {
-			return 0 == dbj_ordinal_compareW(
-				str1, str1 + wcslen(str1), str2, str2 + wcslen(str2)
-			);
-		}
+		return true;
 	}
 
 

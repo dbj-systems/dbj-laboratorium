@@ -87,7 +87,7 @@ DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 		auto_char_arr to_be_freed_2{  dbj_strndup(to_be_freed_1.get(), 5) };
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_2.get(), "Mamma", true));
 
-		auto_char_arr to_be_freed_3{ dbj_str_shorten("Abra Ka dabra", " ")	};
+		auto_char_arr to_be_freed_3{ dbj_str_remove("Abra Ka dabra", " ")	};
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_3.get(), "AbraKadabra", true));
 		}
 	};

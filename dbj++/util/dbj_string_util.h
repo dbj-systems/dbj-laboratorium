@@ -112,6 +112,20 @@ namespace dbj::str {
 			if (!::dbj::str::isalpha(c)) return c;
 			return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
 		}
+		// 
+		inline int tolower_ignore_case(int c)
+		{
+			if (c >= 'A' && c <= 'Z')
+				return c - 'A';
+			if (c >= 'a' && c <= 'z')
+				return c;
+
+			return c; // not alpha
+		}
+
+		inline int     just_copy_char(int c) { return c; }
+
+		inline wint_t     just_copy_wchar(wint_t c) { return c; }
 	}
 #pragma endregion 
 
