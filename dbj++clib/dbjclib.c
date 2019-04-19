@@ -4,6 +4,70 @@
 #include <stdarg.h>
 
 /*
+Destination size can be less than strlen of destination ...
+*/
+static char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * source_) {
+
+	// source_ must be zero limited
+	// or simply zero-ed
+	size_t index_ = 0;
+	while ((destination_[index_] = source_[index_]) != 0 )
+	{
+		if ((++index_) > destination_size) {
+			perror(__FILE__);
+			perror("dbj_strcpy_s() problem: destination_size too small?");
+			errno = EINVAL;
+			return NULL;
+		}
+	}
+
+	return destination_;
+}
+
+/*---------------------------------------------------------------------*/
+char * dbj_strdup(const char *source_)
+{
+	_ASSERTE(source_);
+#ifdef _DEBUG
+	const char * eos_found = strchr(source_, (char)0);
+#ifdef _MSC_VER
+	_ASSERT_AND_INVOKE_WATSON(eos_found);
+#endif
+	if (!eos_found) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+#endif // _DEBUG
+
+	size_t destination_size = strlen(source_);
+	char *destination_  = (char *)malloc(destination_size + 1);   // Space for length plus nul
+	if (destination_  == NULL) {
+		errno = ENOMEM;
+		return NULL;
+	}  
+
+	destination_[destination_size] = '\0';
+	return (char *)memcpy(destination_, source_, destination_size);
+}
+
+char * dbj_strndup(const char *s, size_t n)
+{
+	char *result = 0;
+	size_t len = strlen(s);
+
+	if (n < len) len = n;
+
+	result = (char *)malloc(len + 1);
+	if (result == NULL) {
+		errno = ENOMEM;
+		return NULL;
+	}  // No memory
+
+	result[len] = '\0';
+	return (char *)memcpy(result, s, len);
+}
+/*
 last arg *must* be NULL
 */
 void free_free_set_them_free(void * vp, ...)

@@ -76,18 +76,19 @@ DBJ_TEST_UNIT(dbj_c_lib_sll)
 
 DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 {
+	using auto_char_arr = std::unique_ptr<char>;
+
 	auto dbj_strndup_test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
-			{
-				using auto_char_arr = std::unique_ptr<char>;
-				auto_char_arr to_be_freed_1{  dbj_strdup("Mamma mia!?") };
-				auto_char_arr to_be_freed_2{  dbj_strndup(to_be_freed_1.get(), 5) };
-				auto_char_arr to_be_freed_3{
-					 dbj_str_shorten
-					  ("Abra Ka dabra", " ")
-				};
-			}
+		auto_char_arr to_be_freed_1{  dbj_strdup("Mamma mia!?") };
+		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_1.get(), "Mamma mia!?", true));
+
+		auto_char_arr to_be_freed_2{  dbj_strndup(to_be_freed_1.get(), 5) };
+		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_2.get(), "Mamma", true));
+
+		auto_char_arr to_be_freed_3{ dbj_str_shorten("Abra Ka dabra", " ")	};
+		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_3.get(), "AbraKadabra", true));
 		}
 	};
 

@@ -77,7 +77,7 @@ extern "C" {
 	/// <summary>
 	/// ordinal comparison of two ascii null terminated strings
 	/// </summary>
-	inline int dbj_ordinal_string_compareA(const char * str1, const char * str2, unsigned char ignore_case) {
+	inline bool dbj_ordinal_string_compareA(const char * str1, const char * str2, unsigned char ignore_case) {
 
 		if (ignore_case) {
 			char * cp1 = dbj_lowerize_stringA(str1);
@@ -87,10 +87,10 @@ extern "C" {
 			);
 			free(cp1);
 			free(cp2);
-			return rez;
+			return (rez == 0);
 		}
 		else {
-			return dbj_ordinal_compareA(
+			return 0 == dbj_ordinal_compareA(
 				str1, str1 + strlen(str1), str2, str2 + strlen(str2)
 			);
 		}
@@ -99,7 +99,7 @@ extern "C" {
 	/// <summary>
 	/// ordinal comparions of two unicode null terminated strings
 	/// </summary>
-	inline int dbj_ordinal_string_compareW(const wchar_t * str1, const wchar_t * str2, unsigned char ignore_case) {
+	inline bool dbj_ordinal_string_compareW(const wchar_t * str1, const wchar_t * str2, unsigned char ignore_case) {
 
 		if (ignore_case) {
 			wchar_t * cp1 = dbj_lowerize_stringW(str1);
@@ -109,10 +109,10 @@ extern "C" {
 			);
 			free(cp1);
 			free(cp2);
-			return rez;
+			return (0 == rez);
 		}
 		else {
-			return dbj_ordinal_compareW(
+			return 0 == dbj_ordinal_compareW(
 				str1, str1 + wcslen(str1), str2, str2 + wcslen(str2)
 			);
 		}

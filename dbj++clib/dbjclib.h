@@ -114,38 +114,14 @@ NOTE: must place NULL as the last arg!
 		char *strdup(const char *str);
 		char *strndup(const char *str, size_t len);
 		*/
-		inline char * dbj_strdup(const char *s) 
-		{
-			_ASSERTE(s);
-			size_t destination_size = strlen(s);
-			char *d = (char *)malloc(destination_size + 1);   // Space for length plus nul
-			if (d == NULL) {
-				errno = ENOMEM;
-				return NULL;
-			}         // No memory
-			strcpy_s(d, destination_size, s);                        // Copy the characters
-			return d;                            // Return the new string
-		}
+		char * dbj_strdup(const char *s);
+	
 		/*
 		The strndup() function copies at most len characters from the string str
 		always null terminating the copied string.
 		*/
-		inline char * dbj_strndup(const char *s, size_t n)
-		{
-			char *result = 0;
-			size_t len = strlen(s);
-
-			if (n < len) len = n;
-
-			result = (char *)malloc(len + 1);
-			if (result == NULL) {
-				errno = ENOMEM;
-				return NULL;
-			}  // No memory
-
-			result[len] = '\0';
-			return (char *)memcpy(result, s, len);
-		}
+		inline char * dbj_strndup(const char *s, size_t n);
+	
 // remove chars given in the string arg
 // return the new string
 // user has to free() eventually

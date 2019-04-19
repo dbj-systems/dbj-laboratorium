@@ -28,6 +28,7 @@ if (error == -2)   return { "not a valid mangled name" };
 #include <array>
 #include <vector>
 #include <string>
+#include <optional>
 
 /*
  typeid() returns the outcome of
@@ -709,7 +710,7 @@ namespace dbj {
 	*/
 	// 2019 GPLv3 by dbj@dbj.org
 	template<typename T>
-	using ORW = optional< reference_wrapper<T> >;
+	using ORW = std::optional< std::reference_wrapper<T> >;
 }
 
 /*
