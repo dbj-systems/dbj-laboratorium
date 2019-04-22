@@ -45,6 +45,9 @@
     <ClInclude Include="utilities\dbj_lambda_matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_ref_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

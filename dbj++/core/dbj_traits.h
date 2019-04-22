@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <optional>
 // license is at eof
 /*
 LINUX type name demangling has to be done like this

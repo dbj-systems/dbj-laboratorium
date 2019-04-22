@@ -1,8 +1,10 @@
 #include "pch.h"
 #include <assert.h>
 #include <memory>
-
 #include <dbj++clib/dbjclib.h>
+#include <functional>
+#include <optional>
+#include "dbj_ref_node.h"
 
 using namespace ::std;
 
