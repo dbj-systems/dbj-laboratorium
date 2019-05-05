@@ -28,11 +28,11 @@ char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * s
 /*---------------------------------------------------------------------*/
 char * dbj_strdup(const char *source_)
 {
-	_ASSERTE(source_);
+	DBJ_ASSERT(source_);
 #ifdef _DEBUG
 	const char * eos_found = strchr(source_, (char)0);
 #ifdef _MSC_VER
-	_ASSERT_AND_INVOKE_WATSON(eos_found);
+	DBJ_ASSERT(eos_found);
 #endif
 	if (!eos_found) {
 		errno = EINVAL;

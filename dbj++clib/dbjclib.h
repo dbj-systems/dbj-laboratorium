@@ -51,13 +51,16 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #endif
 
 
-#if defined( __clang__ ) && ! defined( __cplusplus )
+#if ! defined( __cplusplus )
+
+/*
 # if !defined(__STDC_VERSION__) ||  (__STDC_VERSION__ < 199901L)
 #error    Your compiler is not conforming to C99
 #error    this requires the macro __STDC_VERSION__ to be set to the
 #error    indicated value (or larger).
 #error    NOTE: For C11, __STDC_VERSION__ == 201112L
 #endif
+*/
 
 #define FREE(p) do{  if (p) free((void *)p); p = 0;}while(0)
 
