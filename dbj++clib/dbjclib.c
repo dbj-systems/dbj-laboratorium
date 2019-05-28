@@ -8,7 +8,6 @@ Destination size can be less than strlen of destination ...
 */
 char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * source_) 
 {
-
 	// source_ must be zero limited
 	// or simply zero-ed
 	size_t index_ = 0;
@@ -21,8 +20,7 @@ char * dbj_strcpy_s(char * destination_, size_t destination_size, char const * s
 			return NULL;
 		}
 	}
-
-	return destination_;
+		return destination_;
 }
 
 /*---------------------------------------------------------------------*/
@@ -98,7 +96,7 @@ char * dbj_str_remove( const char * str_, const char * chars_to_remove_ )
 
 	size_t str_size = strlen(str_);
 	// VLA actually ;)
-	char * vla_buff_ = calloc(str_size, 1 );
+	char * vla_buff_ = calloc(str_size, 1 ); assert( vla_buff_ );
 	char * vla_buff_first = & vla_buff_[0] ;
 	char * vla_buff_last  = & vla_buff_[str_size - 1] ;
 	char * buff_p = vla_buff_first;
