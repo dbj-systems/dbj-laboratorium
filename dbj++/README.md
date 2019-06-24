@@ -2,7 +2,7 @@
 ## A Modern & Standard C++
 
 ### Various working and usable Proofs Of Concepts (POC)
-### And Foundation Mechanisms (FM)
+### and Foundation Mechanisms (FM)
 #### Unless stated otherwise.
 
 <hr/>
