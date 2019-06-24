@@ -2,10 +2,11 @@
 ## A Modern & Standard C++ lib 
 
 ### Various working and usable Proofs Of Concepts (POC)
+### And Foundation Mechanisms (FM)
 #### Unless stated otherwise.
 
 <hr/>
-Copyright 2017,2018 by dbj@dbj.org
+Copyright 2017,2018,2019 by dbj@dbj.org
 
 Licensed under the GNU GPL License, Version 3.0 (the "License");
 you may not use this file except in compliance with the License.
