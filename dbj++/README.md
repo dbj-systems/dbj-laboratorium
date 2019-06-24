@@ -1,5 +1,5 @@
 # dbjplusplus
-## A Modern & Standard C++ lib 
+## A Modern & Standard C++
 
 ### Various working and usable Proofs Of Concepts (POC)
 ### And Foundation Mechanisms (FM)
