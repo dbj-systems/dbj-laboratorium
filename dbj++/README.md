@@ -5,6 +5,11 @@
 ### and Foundation Mechanisms (FM)
 #### Unless stated otherwise.
 
+For opinionated but simple and feasible concepts, architecture and code one might do worse than visiting
+
+https://dbj.org
+https://dbj.systems
+
 <hr/>
 Copyright 2017,2018,2019 by dbj@dbj.org
 
