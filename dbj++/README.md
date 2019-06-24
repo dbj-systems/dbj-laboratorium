@@ -22,5 +22,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 <hr/>
-<img src="media/dbjsystems.jpg" style="width:64px;height:64px;" />
-<img src="media/dbjlogo.png" style="width:64px;height:64px;" />
+<img src="media/dbjsystems.jpg" width="64px" style="width:64px;height:64px;float:left; display:inline;" />
+<img src="media/dbjlogo.png" width="64px" style="width:64px;height:64px;float:left; display:inline;" />
