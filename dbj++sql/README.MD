@@ -3,6 +3,15 @@
 
 Yet Another API (YAPI)
 
+This is part of the dbj++ suite of utilities. It depends on the. For easy no struggle results, check out the whole
+dbj-laboratorium of which this is one project.
+
+There are thing in there which are very important. Like using syslog, windows client and server, and a such. Or proper usage of std::system_error etc.
+
+Time is short and documentation is surely comming. Please stay tuned. 
+
+For immediate professional help please do mail me at: dbj@dbj.org
+
 #### C++17 SQLITE(3) for the rest of us
 
 (2019Q1, standard C++ is C++17)
