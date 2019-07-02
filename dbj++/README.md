@@ -1,11 +1,17 @@
 # dbjplusplus
-## A Modern & Standard C++ lib 
+## A Modern & Standard C++
 
 ### Various working and usable Proofs Of Concepts (POC)
-#### Unless stated otherwise.
+### and Foundation Mechanisms (FM)
+##### Unless stated otherwise.
+
+For opinionated but simple and feasible concepts, architecture and code one might do worse than visit
+
+### https://dbj.org
+### https://dbj.systems
 
 <hr/>
-Copyright 2017,2018 by dbj@dbj.org
+Copyright 2017,2018,2019 by dbj@dbj.org
 
 Licensed under the GNU GPL License, Version 3.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,5 +27,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 <hr/>
-<img src="media/dbjsystems.jpg" style="width:64px;height:64px;" />
-<img src="media/dbjlogo.png" style="width:64px;height:64px;" />
+<img src="media/dbjsystems.jpg" width="64px" style="width:64px;height:64px;float:left; display:inline;" />
+<img src="media/dbjlogo.png" width="64px" style="width:64px;height:64px;float:left; display:inline;" />
