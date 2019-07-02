@@ -48,6 +48,15 @@
     <ClInclude Include="dbj_ref_node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_console_color\dbj_color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_console_color\scrutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="object_store\dbj_object_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -69,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dbj_clib_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dbj_console_color\scrutil.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

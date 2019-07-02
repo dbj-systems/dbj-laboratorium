@@ -2,7 +2,7 @@
 # Ideas
 ### To be incorporated into the dbj++
 
-ATTEMPTO is Latin for TEST
+##### ATTEMPTO is Latin for Attempt
 
 Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.16.X
 

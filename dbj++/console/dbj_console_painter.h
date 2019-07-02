@@ -16,12 +16,13 @@ namespace dbj::console {
 namespace inner {
 				/* modification of catch.h console colour mechanism */
 				enum class Colour : unsigned {
-					None = 0,		White,	Red,	Green,		Blue,	Cyan,	Yellow,		Grey,
+					None = 0,		White = 1,	Red =2,	Green = 3, Blue =4 , Cyan = 5,
+					Yellow = 6,		Grey = 7,
 					Bright = 0x10,
 
-					BrightRed = Bright | Red,	BrightGreen = Bright | Green,
-					BrightBlue = Bright | Blue,	LightGrey = Bright | Grey,
-					BrightWhite = Bright | White,
+					BrightRed   = Bright  | Red,	BrightGreen = Bright | Green,
+					BrightBlue  =  Bright | Cyan  /*Blue*/,	LightGrey = Bright | Grey,
+					BrightWhite = Bright  | White,
 
 				};
 				/* stop the colour to text attempts*/

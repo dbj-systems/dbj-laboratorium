@@ -1,5 +1,13 @@
 #pragma once
 
+/*
+there ary many ways better than this one
+to include/exclude tests at compile time 
+or even run time
+
+but ... this works
+*/
+
 // dbj++ tests
 // are not included in dbj++.h
 // for using this include it after dbj++.h
@@ -19,7 +27,7 @@
 // #define dbj_string_util_test   
 // #define dbj_string_tests   
 #define dbj_static_matrix_test 
-// #define dbj_any_optional_tests
+#define dbj_any_optional_tests
 
 
 #ifdef dbj_buffer_testing

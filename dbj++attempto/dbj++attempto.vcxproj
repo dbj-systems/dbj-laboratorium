@@ -170,13 +170,26 @@
     <ClInclude Include="algorithms\dbj_vector_element_to_index.h" />
     <ClInclude Include="algorithms\lambda_runtime_retval_test.h" />
     <ClInclude Include="dbj++attempto.h" />
+    <ClInclude Include="dbj_console_color\dbj_color.h" />
+    <ClInclude Include="dbj_console_color\scrutil.h" />
     <ClInclude Include="dbj_ref_node.h" />
+    <ClInclude Include="object_store\dbj_object_store.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="string_literals_with_universal_character_names.h" />
     <ClInclude Include="utilities\dbj_lambda_matrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dbj_clib_tests.cpp" />
+    <ClCompile Include="dbj_console_color\scrutil.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="dbj_web_syndication.cpp" />
     <ClCompile Include="few_more_nuggets.cpp" />
