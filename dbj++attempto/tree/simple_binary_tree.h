@@ -20,6 +20,18 @@ struct tree_node_t final
 
 	tree_node_t(value_type const &x) noexcept : val(x) {}
 
+	// self erasing structure?
+	~tree_node_t() {
+		if (left != nullptr) {
+			delete left;
+			left = nullptr;
+		}
+		if (right != nullptr) {
+			delete right;
+			right = nullptr;
+		}
+	}
+
 	// append new node
 	// smaller data on the left
 	// usage :
@@ -74,16 +86,16 @@ struct tree_node_t final
 			tree_pretty_print<as_string_>(node->left, prefix + (isLeft ? "    " : "│   "), true);
 		}
 	}
-};
+}; // tree node
 
-int test(int argc, char **argv)
+DBJ_TEST_UNIT ( simple_tree_test_very_elegant_printing_algo )
 {
+	system("chcp 65001"); // utf-8 codepage!
 
-	system("chcp 65001");
 	constexpr static auto word_length = 7U;
 	constexpr static auto words_count = 9U;
 
-	auto test = [&](dbj::num::kind word_kind, string_view prompt) {
+	auto test_lambda = [&](kind word_kind, string_view prompt) {
 		auto stocp = [](string const &s_) { return s_; };
 		using bst = tree_node_t<string>;
 		bst *root = new bst("root");
@@ -93,23 +105,21 @@ int test(int argc, char **argv)
 		for (int k = 1; k < words_count; k++)
 		{
 			root->append(string(
-				dbj::num::random_word(word_, word_kind).data()));
+				random_word(word_, word_kind).data()));
 			word_.fill(0);
 		}
 		printf("\n%s\n\n", prompt.data());
 		bst::tree_pretty_print<stocp>(root);
 	}; // test
 
-#define DRIVER(x) test(x, #x)
+#define DRIVER(x) test_lambda(x, #x)
 	// also does the start-up
-	DRIVER(dbj::num::kind::alpha);
-	DRIVER(dbj::num::kind::alpha_vowels);
-	DRIVER(dbj::num::kind::alpha_vowels_digits);
-	DRIVER(dbj::num::kind::digits);
-	DRIVER(dbj::num::kind::vowels);
+	DRIVER(kind::alpha);
+	DRIVER(kind::alpha_vowels);
+	DRIVER(kind::alpha_vowels_digits);
+	DRIVER(kind::digits);
+	DRIVER(kind::vowels);
 #undef DRIVER
-
-	return 0;
 }
 
 } // namespace dbj_tree_research

@@ -57,6 +57,12 @@
     <ClInclude Include="object_store\dbj_object_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tree\dbj_random_word.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tree\simple_binary_tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
