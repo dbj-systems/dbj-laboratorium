@@ -341,6 +341,53 @@ namespace dbj::kalends {
 		return measure<F, dbj::kalends::Seconds>(fun_to_test);
 	};
 
+	/*
+	A little testing aid.
+	We keep it in here so that for example testing framework does not 
+	depend on the whole of this 
+	*/
+	template< typename dbj_kalends_time_resolution_type >
+	struct dbj_test_loop final
+	{
+		using type = dbj_test_loop;
+		using resolution_type = dbj_kalends_time_resolution_type;
+
+		std::string_view exit_prompt_{ "Done in %s"sv };
+		uint64_t max_iterations_{ uint64_t(BUFSIZ) };
+
+		/*
+		Test Call Back (TCB) must return bool.
+		On false loop is stopped and false is returned.
+		Measurement is always taken and printed to console
+		*/
+		template<typename TCB >
+		bool operator () (TCB test_callback_)
+		{
+			bool retval_ = true;
+			auto test = [&]() {
+				for (uint8_t k = 0; k < max_iterations_; k++)
+				{
+					if (!test_callback_()) {
+						retval_ = false;
+						break;
+					}
+				}
+			};
+
+			auto rez_ = dbj::kalends::measure< TCB, resolution_type>(test_callback_);
+
+			dbj::fmt::print(exit_prompt_, rez_);
+			// false : loop was cut short
+			// true: it was not
+			return retval_;
+		}
+	};
+
+	inline constexpr auto test_loop_nanosecs = dbj_test_loop<dbj::kalends::Nanoseconds>();
+	inline constexpr auto test_loop_millisecs = dbj_test_loop<dbj::kalends::MilliSeconds>();
+	inline constexpr auto test_loop_microsecs = dbj_test_loop<dbj::kalends::Microseconds>();
+	inline constexpr auto test_loop_secs = dbj_test_loop<dbj::kalends::Seconds >();
+
 } // dbj::kalends
 
 /* inclusion of this file defines the kind of a licence used */

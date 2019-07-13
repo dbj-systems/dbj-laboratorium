@@ -1,3 +1,4 @@
+#pragma once
 /*
 Copyright 2017,2018 by dbj@dbj.org
 
@@ -14,12 +15,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/*
+   before commenting from your point of view please read
+  https://matt.sh/howto-c
+*/
 
-#pragma once
 
 #ifndef DBJ_CLIB_PRESENT
 #define DBJ_CLIB_PRESENT
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,28 +46,28 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 
 
 #if defined (_MSC_VER)
-#define PLATFORM "Windows"
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
+	#define PLATFORM "Windows"
+	#ifndef _CRT_SECURE_NO_WARNINGS
+		#define _CRT_SECURE_NO_WARNINGS
+	#endif
 // we do the above since we use MSVC UCRT *from* the clang c code
 #elif defined (__linux)
-#define PLATFORM "Linux"
+	#define PLATFORM "Linux"
+#else
+	#error Unknown platform?
 #endif
 
 
 #if ! defined( __cplusplus )
 
-/*
-# if !defined(__STDC_VERSION__) ||  (__STDC_VERSION__ < 199901L)
-#error    Your compiler is not conforming to C99
-#error    this requires the macro __STDC_VERSION__ to be set to the
-#error    indicated value (or larger).
-#error    NOTE: For C11, __STDC_VERSION__ == 201112L
+#ifndef _MSC_VER
+	# if !defined(__STDC_VERSION__) ||  (__STDC_VERSION__ < 199901L)
+	#error    Your compiler is not conforming to C99
+	#error    this requires the macro __STDC_VERSION__ to be set to the
+	#error    indicated value (or larger).
+	#error    NOTE: For C11, __STDC_VERSION__ == 201112L
+	#endif
 #endif
-*/
-
-#define FREE(p) do{  if (p) free((void *)p); p = 0;}while(0)
 
 #ifdef _MSC_VER
 #include <crtdbg.h>
@@ -81,7 +86,7 @@ http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-in-system-he
 #	endif
 
 #if !defined( _WIN32 ) && !defined(_WIN64)
-#error Need _WIN32 or _WIN64
+	#error Need _WIN32 or _WIN64
 #endif
 
 #endif
@@ -93,16 +98,17 @@ extern "C" {
 #endif
 
 #ifndef uchar_t
-	typedef unsigned char	uchar_t;
+	typedef uint8_t 	uchar_t;
 #endif  uchar_t
 
 #ifndef size_t
-#ifdef _WIN64
-	typedef unsigned __int64 size_t;
-#else
-	typedef unsigned int	size_t;
+	typedef uint_fast64_t  size_t;
 #endif
-#endif
+
+
+#define DBJ_MALLOC(N) calloc(1,N)
+
+#define DBJ_FREE(p) do{  if (p) free((void *)p); p = 0;}while(0)
 
 	/*
 	NOTE: must place NULL as the last arg!
@@ -130,7 +136,7 @@ extern "C" {
 	The strndup() function copies at most len characters from the string str
 	always null terminating the copied string.
 	*/
-	inline char * dbj_strndup(const char *s, size_t n);
+	char * dbj_strndup(const char *s, size_t n);
 
 	// remove chars given in the string arg
 	// return the new string

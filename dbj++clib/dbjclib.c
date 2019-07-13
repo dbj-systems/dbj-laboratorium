@@ -40,14 +40,15 @@ char * dbj_strdup(const char *source_)
 #endif // _DEBUG
 
 	size_t destination_size = strlen(source_);
-	char *destination_  = (char *)malloc(destination_size + 1);   // Space for length plus nul
+	// Space for length plus null
+	uchar_t *destination_  = (uchar_t *)DBJ_MALLOC(destination_size + 1);
 	if (destination_  == NULL) {
 		errno = ENOMEM;
 		return NULL;
 	}  
 
 	destination_[destination_size] = '\0';
-	return (char *)memcpy(destination_, source_, destination_size);
+	return (uchar_t *)memcpy(destination_, source_, destination_size);
 }
 
 char * dbj_strndup(const char *s, size_t n)
@@ -57,7 +58,7 @@ char * dbj_strndup(const char *s, size_t n)
 
 	if (n < len) len = n;
 
-	result = (char *)malloc(len + 1);
+	result = (char *)DBJ_MALLOC(len + 1);
 	if (result == NULL) {
 		errno = ENOMEM;
 		return NULL;
@@ -85,7 +86,7 @@ void free_free_set_them_free(void * vp, ...)
 	va_end(marker);   /* Reset variable argument list. */
 }
 
-// remove chars given in the string arg
+// remove *all* chars given in the string arg
 // return the new string
 // user has to free() eventually
 // both arguments must be zero limited
@@ -96,7 +97,7 @@ char * dbj_str_remove( const char * str_, const char * chars_to_remove_ )
 
 	size_t str_size = strlen(str_);
 	// VLA actually ;)
-	char * vla_buff_ = calloc(str_size, 1 ); assert( vla_buff_ );
+	char * vla_buff_ = calloc(str_size, sizeof(char) ); assert( vla_buff_ );
 	char * vla_buff_first = & vla_buff_[0] ;
 	char * vla_buff_last  = & vla_buff_[str_size - 1] ;
 	char * buff_p = vla_buff_first;

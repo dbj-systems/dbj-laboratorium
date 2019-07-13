@@ -1,7 +1,11 @@
 #include "pch.h"
 #define TEST_DBJ_DYNAMIC
 #define DBJ_STRING_TEST
+
+namespace dbj::clib {
 #include "../dbj++clib/dbjclib.h"
+}
+
 // #include "../dbj_en_dictionary/dbj_en_dictionary.h"
 
 using namespace ::std::string_view_literals;
@@ -10,17 +14,17 @@ DBJ_TEST_UNIT(dbj_string_c_lib)
 {
 #ifdef TEST_DBJ_DYNAMIC
 	char buf_here[BUFSIZ]{0};
-	dbj_string_list_test( & buf_here);
+	dbj::clib::dbj_string_list_test( & buf_here);
 	::dbj::console::prinf("%s", buf_here);
 #endif
-	dbj_string_test();
+	dbj::clib::dbj_string_test();
 }
 #undef TEST_DBJ_DYNAMIC
 
 #define DBJ_SLL_TESTING
-#include "../dbj++clib/dbj_sll/dbj_sll.h"
 
 #ifdef DBJ_SLL_TESTING
+#include "../dbj++clib/dbj_sll/dbj_sll.h"
 
 extern "C" inline  
 void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, bool verbose)
@@ -59,18 +63,20 @@ void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, boo
 
 
 
+
 DBJ_TEST_UNIT(dbj_c_lib_sll)
 {
-	auto test = []() {
-		for (int k = 0; k < BUFSIZ; k++)
+	auto test_loop =  dbj::kalends::test_loop_millisecs ;
+	test_loop.exit_prompt_ = "\ndbj clib SLL test finished in %s "sv;
+
+	bool loop_broken_ = test_loop(
+		[ & ]()
 		{
 			test_dbj_sll_local("1234567812345678", BUFSIZ, false);
+			return true;
 		}
-	};
-
-	dbj::fmt::print("\ndbj clib SLL test finished in %s "sv,
-		::dbj::kalends::miliseconds_measure(test)
 	);
+
 }
 #undef DBJ_SLL_TESTING
 
@@ -81,13 +87,15 @@ DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 	auto dbj_strndup_test = []() {
 		for (int k = 0; k < BUFSIZ; k++)
 		{
-		auto_char_arr to_be_freed_1{  dbj_strdup("Mamma mia!?") };
+			auto_char_arr to_be_freed_1{
+			dbj::clib::dbj_strdup("Mamma mia!?")
+		};
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_1.get(), "Mamma mia!?", true));
 
-		auto_char_arr to_be_freed_2{  dbj_strndup(to_be_freed_1.get(), 5) };
+		auto_char_arr to_be_freed_2{ dbj::clib::dbj_strndup(to_be_freed_1.get(), 5) };
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_2.get(), "Mamma", true));
 
-		auto_char_arr to_be_freed_3{ dbj_str_remove("Abra Ka dabra", " ")	};
+		auto_char_arr to_be_freed_3{ dbj::clib::dbj_str_remove("Abra Ka dabra", " ")	};
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_3.get(), "AbraKadabra", true));
 		}
 	};

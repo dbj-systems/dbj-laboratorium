@@ -15,9 +15,9 @@ static const dbj_string_list_value_type * dbj_string_list_sentinel_
 dbj_string_list_type dbj_string_list_new()
 {
 	dbj_string_list_type empty_ = 0;
-	empty_ = (dbj_string_list_type)malloc(sizeof(empty_));
+	empty_ = (dbj_string_list_type)DBJ_MALLOC(sizeof(empty_));
 	assert(empty_);
-	assert(*empty_);
+
 	*empty_ = (char*)dbj_string_list_sentinel_;
 
 	return empty_;

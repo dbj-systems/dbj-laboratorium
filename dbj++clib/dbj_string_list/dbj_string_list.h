@@ -18,11 +18,16 @@ instead we compute the size
 					 [ char * ] ----------> "KA"
 					 [ char * ] ----------> "DABRA"
 					 [ char * ] ----------> SENTINEL
+  size == 3
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifndef DBJ_MALLOC
+	#define DBJ_MALLOC(N) calloc(1,N)
+#endif
 
 #ifdef __cplucplus
 extern "C" {
