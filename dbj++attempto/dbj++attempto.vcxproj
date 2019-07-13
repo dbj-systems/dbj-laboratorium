@@ -172,6 +172,7 @@
     <ClInclude Include="dbj++attempto.h" />
     <ClInclude Include="dbj_console_color\dbj_color.h" />
     <ClInclude Include="dbj_console_color\scrutil.h" />
+    <ClInclude Include="dbj_discovered_msvc_bugs.h" />
     <ClInclude Include="dbj_ref_node.h" />
     <ClInclude Include="object_store\dbj_object_store.h" />
     <ClInclude Include="pch.h" />

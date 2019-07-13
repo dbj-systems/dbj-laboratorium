@@ -1,6 +1,7 @@
 #pragma once
 
-namespace dbj {
+namespace dbj::samples {
+
 template<typename INVOCABLE >
 struct apply_helper final
 {
@@ -42,7 +43,6 @@ auto operator () (std::array<T, N> array_ ) {
 	auto make_applicator (F invocable_) {
 		return apply_helper<F>{invocable_};
 	};
-} // dbj
 
 /* recursive generic lambda solution */
 auto summa = [](auto first, auto ... second) {
@@ -58,7 +58,7 @@ auto summa = [](auto first, auto ... second) {
 
 DBJ_TEST_UNIT(dbj_aplikator_testing)
 {
-		auto sumator = dbj::make_applicator(summa);
+		auto sumator = make_applicator(summa);
 
 		// pair arg
 		TU(sumator(std::pair(1, 2)));
@@ -93,4 +93,7 @@ DBJ_TEST_UNIT(dbj_aplikator_testing)
 			)));
 		}
 }
+
+} // dbj::samples
+
 #undef TU

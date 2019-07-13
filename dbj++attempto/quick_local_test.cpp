@@ -8,7 +8,7 @@
 
 using namespace ::std;
 
-namespace palindromes_research {
+namespace dbj::samples::palindromes_research {
 	extern "C" inline bool petar_pal(const char* str)
 	{
 		char* a = (char*)str,
@@ -63,7 +63,7 @@ namespace palindromes_research {
 	}
 } // palindromes_research
 
-namespace bulk_free {
+namespace dbj::samples::bulk_free {
 
 	DBJ_TEST_UNIT(bulk_free)
 	{ 
@@ -106,7 +106,7 @@ namespace bulk_free {
 }
 
 
-namespace dbj {
+namespace dbj::samples {
 	template<class T, T v>
 	struct integral_constant 
 	{
@@ -148,27 +148,13 @@ using zero_int_type = dbj::integral_constant<int, 0>;
 auto succ = [] (auto N) {
 	return dbj::integral_constant<int, decltype(N)::value + 1 >{};
 };
-
-		auto zero = dbj::int_c<0> ;
-
-		auto three = dbj::int_c<1> +dbj::int_c<2>;
-
-/*
-		auto one = succ(zero);
-		auto two = succ(one);
-		auto three = succ(two);
-
-		auto z_ = zero() ;
-		auto o_ = one() ;
-		auto t_ = two() ;
-		auto h_ = three() ;
-		system("pause");
-*/
+		auto zero = dbj::samples::int_c<0> ;
+		auto three = dbj::samples::int_c<1> +dbj::samples::int_c<2>;
 	}
 }
 
 
-namespace init {
+namespace dbj::samples::init {
 
 	inline constexpr unsigned iid(unsigned arg_) { return arg_; }
 
@@ -213,7 +199,7 @@ namespace init {
 
 } // init
 
-namespace {
+namespace dbj::samples::inner {
 
 	template<unsigned K>
 	using ascii_ordinal = ::dbj::inside_t<unsigned, K, 0, 127>;

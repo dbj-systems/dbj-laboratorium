@@ -3,7 +3,7 @@
 
 #pragma region LAMBDA LISP
 
-namespace dbj_samples {
+namespace dbj::samples {
 	/*
 	The key abstraction : list lambda
 	*/
@@ -75,8 +75,6 @@ namespace dbj_samples {
 			}
 			);
 		};
-} // list 
-} // dbj_samples
 
 DBJ_TEST_UNIT(_dbj_lambda_lists_) {
 
@@ -111,4 +109,7 @@ DBJ_TEST_UNIT(_dbj_lambda_lists_) {
 		 std::make_pair("Pair of ", " strings ")
 	 );
 }
+		} // list 
+} // dbj_samples
+
 #pragma endregion 

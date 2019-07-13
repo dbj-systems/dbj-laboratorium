@@ -63,6 +63,9 @@
     <ClInclude Include="tree\simple_binary_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_discovered_msvc_bugs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
