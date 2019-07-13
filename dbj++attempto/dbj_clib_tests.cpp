@@ -32,7 +32,12 @@ void test_dbj_sll_local (const char * what_to_append, size_t how_many_times, boo
 
 	dbj_sll_node * head_ = dbj_sll_make_head();
 
-	while (1 < how_many_times--) dbj_sll_append(head_, what_to_append);
+	auto test_loop = dbj::kalends::test_loop_millisecs;
+	test_loop.max_iterations_ = how_many_times;
+
+	bool DBJ_MAYBE( loop_broken ) = test_loop(
+		[&]() -> bool { dbj_sll_append(head_, what_to_append); return true; }
+	);
 
 	if (verbose) {
 		printf("\nDBJ SLL dump");
@@ -69,7 +74,7 @@ DBJ_TEST_UNIT(dbj_c_lib_sll)
 	auto test_loop =  dbj::kalends::test_loop_millisecs ;
 	test_loop.exit_prompt_ = "\ndbj clib SLL test finished in %s "sv;
 
-	bool loop_broken_ = test_loop(
+	bool DBJ_MAYBE(loop_broken_) = test_loop(
 		[ & ]()
 		{
 			test_dbj_sll_local("1234567812345678", BUFSIZ, false);
@@ -98,11 +103,17 @@ DBJ_TEST_UNIT(dbj_c_lib_strndup_test)
 		auto_char_arr to_be_freed_3{ dbj::clib::dbj_str_remove("Abra Ka dabra", " ")	};
 		_ASSERTE(dbj::dbj_ordinal_string_compareA(to_be_freed_3.get(), "AbraKadabra", true));
 		}
+
+		return true;
 	};
 
-	dbj::fmt::print("\ndbj clib dbj strndup test finished in %s"sv,
-	::dbj::kalends::miliseconds_measure(dbj_strndup_test)
-		) ;
+	auto test_loop = dbj::kalends::test_loop_millisecs;
+	test_loop.exit_prompt_ = "\ndbj clib dbj strndup test finished in %s"sv;
+	test_loop.max_iterations_ = 1;
+
+	bool DBJ_MAYBE(loop_broken_) = test_loop(
+		dbj_strndup_test
+	);
 }
 
 // 'hidden' inside dbj++clib
