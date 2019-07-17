@@ -33,11 +33,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_err.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_error_code.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_exception.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_p1095.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_status_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_err.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_error_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\dbj_error_type.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_exception.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_p1095.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_status_code.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_interface.h" />
@@ -84,6 +85,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)cpp.hint" />
+    <None Include="$(MSBuildThisFileDirectory)err\dbj_error_type.md" />
+    <None Include="$(MSBuildThisFileDirectory)err\readme.md" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
   </ItemGroup>

@@ -9,7 +9,8 @@
 
 #include "./core/dbj++core.h"
 //
-#include "./err/dbj_err.h"
+// DEPRECATED -> #include "./err/dbj_err.h"
+#include "./err/dbj_error_type.h"
 //
 #include "./util/dbj++util.h"
 #include "./console/dbj++con.h"

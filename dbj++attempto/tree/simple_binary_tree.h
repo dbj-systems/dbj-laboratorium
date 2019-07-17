@@ -66,7 +66,7 @@ struct tree_node_t final
 	template argument is function pointer of a function
 	that transforms T to string
 	*/
-	template <string (*as_string_)(value_type const &)>
+	template <string (*as_string_)(value_type /*const &*/)>
 	static void tree_pretty_print(
 		type *node, string prefix = "", bool isLeft = true)
 	{
@@ -79,7 +79,7 @@ struct tree_node_t final
 			tree_pretty_print<as_string_>(node->right, prefix + (isLeft ? "│   " : "    "), false);
 		}
 
-		printf("%s", (prefix + (isLeft ? "└── " : "┌── ") + as_string_(node->val) + "\n").c_str());
+		dbj::fmt::print("%s", (prefix + (isLeft ? "└── " : "┌── ") + as_string_(node->val) + "\n").c_str());
 
 		if (node->left)
 		{
@@ -90,13 +90,23 @@ struct tree_node_t final
 
 DBJ_TEST_UNIT ( simple_tree_test_very_elegant_printing_algo )
 {
-	system("chcp 65001"); // utf-8 codepage!
+	if (0 != system(NULL)) {
+		if (-1 == system("chcp 65001"))// utf-8 codepage! 
+		{
+			switch (errno) {
+case E2BIG : perror("The argument list(which is system - dependent) is too big"); break ;
+case ENOENT	: perror("The command interpreter cannot be found."); break ;
+case ENOEXEC : perror("The command - interpreter file cannot be executed because the format is not valid."); break ;
+case ENOMEM	: perror("Not enough memory is available to execute command; or available memory has been corrupted; or a non - valid block exists, which indicates that the process that's making the call was not allocated correctly."); break ;
+			}
+		}
+	}
 
 	constexpr static auto word_length = 7U;
 	constexpr static auto words_count = 9U;
 
-	auto test_lambda = [&](kind word_kind, string_view prompt) {
-		auto stocp = [](string const &s_) { return s_; };
+	auto test_lambda = [&](kind word_kind, string prompt) {
+		auto stocp = [](string /*const & */ s_) { return s_; };
 		using bst = tree_node_t<string>;
 		bst *root = new bst("root");
 
@@ -108,11 +118,13 @@ DBJ_TEST_UNIT ( simple_tree_test_very_elegant_printing_algo )
 				random_word(word_, word_kind).data()));
 			word_.fill(0);
 		}
-		printf("\n%s\n\n", prompt.data());
+
+		dbj::fmt::print("\n%s\n\n", prompt.c_str());
+		
 		bst::tree_pretty_print<stocp>(root);
 	}; // test
 
-#define DRIVER(x) test_lambda(x, #x)
+#define DRIVER(x) test_lambda(x, _CRT_STRINGIZE(x) )
 	// also does the start-up
 	DRIVER(kind::alpha);
 	DRIVER(kind::alpha_vowels);

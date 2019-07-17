@@ -66,6 +66,9 @@
     <ClInclude Include="dbj_discovered_msvc_bugs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_errc_discussions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
