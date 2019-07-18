@@ -9,7 +9,8 @@ to the dbj_errc
 
 <hr/>
 
-**Zero-overhead deterministic exceptions: Throwing values**
+**Zero-overhead deterministic exceptions: Throwing values**
+
 document no: P0709 
 
 - [R0](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0709r0.pdf) 

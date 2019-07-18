@@ -23,7 +23,9 @@ namespace dbj::errc
 		we do not use string as char buffer
 		as that is wastefull and slower
 		*/
-		using buffer_type = std::unique_ptr<char[]>;
+		using buffer_type = std::shared_ptr<char>;
+
+		inline char const* to_string(buffer_type buf) { return buf.get();  }
 
 		template<typename ... Args, size_t max_arguments = 255>
 		inline auto
@@ -36,7 +38,7 @@ namespace dbj::errc
 			size_t size = 1 + std::snprintf(nullptr, 0, format_, args...);
 			assert(size > 0);
 			// 2: use it at runtime
-			auto buf = std::make_unique<char[]>(size + 1);
+			auto buf = buffer_type( new char[size + 1]);
 			// 
 			size = std::snprintf(buf.get(), size, format_, args...);
 			assert(size > 0);
@@ -52,7 +54,7 @@ namespace dbj::errc
 
 
 	struct location_type {
-		using line_number_type = uint8_t;
+		using line_number_type = std::uint_fast32_t ;
 		using file_name_type = typename inner::buffer_type ;
 
 		line_number_type line{};
@@ -61,35 +63,73 @@ namespace dbj::errc
 		// note the optional return type
 		static optional<location_type> opt(
 			line_number_type & line_,
-			file_name_type  && file_)
+			file_name_type   & file_)
 		{
-			return location_type{ line_, std::move(file_) };
+			return location_type{ line_, file_ };
 		}
 
 		static inner::buffer_type json( optional<location_type> & oploc_ ) {
-
 			if (!oploc_) return {}; // on nullopt return nullptr to char
-			location_type & loc_ = *oploc_;
-
+				location_type & loc_ = *oploc_;
 			return inner::format(
 				R"( "location" : { "line" : "%d", "file" : "%s"} )", loc_.line, loc_.file.get() 
 			);
 		}
 	};
 
-	struct error_type 
+	struct error_type final
 	{
-		using id_type = uint8_t;
+		using id_type = std::int32_t ;
 		using message_type = inner::buffer_type;
 
 		id_type			id;
 		message_type	msg;
 		optional<location_type> location = nullopt;
 
+		error_type(
+			id_type id_, message_type msg_, optional<location_type> location_
+		) : id(id_),
+			msg(msg_),
+			location(location_)
+		{}
+
+		error_type(const error_type& other_) :
+			id (other_.id),
+			msg (other_.msg),
+			location (other_.location)
+			{
+		}
+
+		// Simple move assignment operator
+		error_type& operator=(const error_type & other) {
+			id = other.id ;
+			msg = other.msg ;
+			location = other.location ;
+			return *this;
+		}
+
+		// Simple move constructor
+		error_type(error_type&& arg) : 
+			id(std::move(arg.id)),
+			msg(std::move(arg.msg)),
+			location(std::move(arg.location))
+		{}
+
+		// Simple move assignment operator
+		error_type& operator=(error_type&& other) {
+			id = std::move(other.id);
+			msg = std::move(other.msg);
+			location = std::move(other.location);
+			return *this;
+		}
+
+	
+
 		template<typename ... A>
 		static error_type make( id_type id_, char const * msg_fmt_, A ... args_ ) 
 		{
-			return error_type{ id_, inner::format(msg_fmt_, args_...) , { nullopt } };
+			error_type err{ id_, {inner::format(msg_fmt_, args_...)} , {nullopt} };
+			return err;
 		}
 
 		/*
@@ -104,7 +144,7 @@ namespace dbj::errc
 			assert(file_path_name_);
 			// location already exist?
 			assert( error_.location == nullopt );
-			error_.location = location_type::opt(line_num_, inner::format(file_path_name_));
+			error_.location = location_type{ line_num_, inner::format(file_path_name_) };
 			return error_;
 		}
 
