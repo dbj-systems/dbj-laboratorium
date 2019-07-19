@@ -169,6 +169,7 @@
     <ClInclude Include="algorithms\dbj_uuid_hash.h" />
     <ClInclude Include="algorithms\dbj_vector_element_to_index.h" />
     <ClInclude Include="algorithms\lambda_runtime_retval_test.h" />
+    <ClInclude Include="compile_time_shenanigans.h" />
     <ClInclude Include="dbj++attempto.h" />
     <ClInclude Include="dbj_console_color\dbj_color.h" />
     <ClInclude Include="dbj_console_color\scrutil.h" />

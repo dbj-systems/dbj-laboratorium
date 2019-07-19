@@ -69,6 +69,9 @@
     <ClInclude Include="dbj_errc_discussions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="compile_time_shenanigans.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

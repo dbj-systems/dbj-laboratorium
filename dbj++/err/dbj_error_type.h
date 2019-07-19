@@ -54,16 +54,21 @@ namespace dbj::errc
 
 
 	struct location_type {
-		using line_number_type = std::uint_fast32_t ;
+		using line_number_type = std::uint32_t ;
 		using file_name_type = typename inner::buffer_type ;
 
 		line_number_type line{};
 		file_name_type   file{};
 
+		location_type(line_number_type line_, const char * file_) 
+			: line(line_), 
+			  file( inner::format("%s", file_ ))
+		{ }
+
 		// note the optional return type
 		static optional<location_type> opt(
 			line_number_type & line_,
-			file_name_type   & file_)
+			const char * file_)
 		{
 			return location_type{ line_, file_ };
 		}
@@ -133,18 +138,18 @@ namespace dbj::errc
 		}
 
 		/*
-		by 'locate' we mean add location to it
+		by 'locate' we mean add location to the error 
 		*/
-		template<typename ... A>
-		static error_type& locate(error_type & error_, 
-			location_type::line_number_type line_num_ ,
-			char const * file_path_name_
+		static error_type& locate(
+			error_type & error_, 
+			std::uint32_t line_num_ ,
+			const char	* file_path_name_
 		) 
 		{
 			assert(file_path_name_);
 			// location already exist?
 			assert( error_.location == nullopt );
-			error_.location = location_type{ line_num_, inner::format(file_path_name_) };
+			error_.location = location_type( line_num_, file_path_name_ );
 			return error_;
 		}
 
