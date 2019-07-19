@@ -100,14 +100,32 @@ namespace dbj::samples {
 
 	using namespace std::literals;
 
+	namespace buffer {
+		template<size_t N >
+		constexpr auto buffer(const char(&sl_)[N])
+		{
+			std::array<char, N + 1 > buffer_{ { 0 } };
+
+			size_t k = 0;
+			for (auto chr : sl_) {
+				buffer_[k++] = chr;
+			}
+
+			return buffer_;
+		}
+
+	} // ns buffer 
+
 	DBJ_TEST_UNIT(compile_time_shenanigans)
 	{
-		constexpr auto sview = "Hola Lola!"sv;
-		constexpr auto len = get_strLen( sview.data() ) ;
-		constexpr str_literal_type str{ "Wot?!" };
-		constexpr auto length_ = str.length();
+		constexpr auto				sview = "Hola Lola!"sv;
+		constexpr auto				len = get_strLen( sview.data() ) ;
+		constexpr str_literal_type	str{ "Wot?!" };
+		constexpr auto				length_ = str.length();
 
-		constexpr std::array<char, len > buffer{ { 0 } };
+		constexpr auto buffer_1 = buffer::buffer("Hola Lola!");
+		constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
+
 		
 		dbj::fmt::print("\n%d\n", len);
 	}
