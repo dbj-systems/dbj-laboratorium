@@ -144,7 +144,7 @@ namespace dbj::errc
 		}
 
 		template<typename ... A>
-		static error_type make(id_type id_, char const* msg_fmt_, A ... args_)
+		static constexpr error_type make(id_type id_, char const* msg_fmt_, A ... args_)
 		{
 			error_type err{ id_, {inner::format(msg_fmt_, args_...)} , {nullopt} };
 			return err;

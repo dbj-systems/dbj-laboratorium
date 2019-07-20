@@ -1,27 +1,120 @@
 #pragma once
 #include "pch.h"
 
-/*
-from string literal make compile time char buffer inside std::array
+// id and string
+class idstring_type final {
+	const long id_;
+	std::string_view str_;
+public:
+	using reference = std::reference_wrapper<idstring_type>;
 
-constexpr auto buffer_1 = inner::char_buff("Hola Lola!");
-constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
-*/
-template<size_t N >
-constexpr auto char_buff(const char(&sl_)[N])
-{
-	std::array<char, N + 1 > buffer_{ { 0 } };
-	size_t k = 0;
-	for (auto chr : sl_) { buffer_[k++] = chr; }
-	return buffer_;
-}
+	idstring_type() = delete;
 
-#define DBJ_LITERAL(T_)           \
-string_literal_carier ([](){      \
-auto buffer_ = char_buff(T_) ;    \
-return buffer_;                   \  
-})
+	constexpr idstring_type(const long a_id_, const char* string_literal)
+		: id_(a_id_), str_(string_literal)
+	{}
 
+	// the only allowed way to construct
+	template<size_t N>
+	constexpr idstring_type(const long a_id_, const char (& string_literal)[N])
+		: id_(a_id_), str_(string_literal)
+	{}
+
+	constexpr long id() const { return id_;  };
+	constexpr std::string_view str() const { return str_; };
+};
+
+struct pragmatic_error_type {
+	const idstring_type id_and_message;
+	const idstring_type line_and_file;
+};
+
+//#define IDSTRING_TYPE( ID_, SL_)										\
+//			struct final : idstring_type {			\
+//				 long id() const { return ID_; }				\
+//				 std::string_view str() const { return SL_; }	\
+//			}
+
+//#define IDSTRING_TYPE( ID_, SL_)								\
+//			[]() constexpr {									\
+//			constexpr struct  : idstring_type {					\
+//                 using base_type = idstring_type;				\
+//				 long id() const { return ID_; }				\
+//				 std::string_view str() const { return SL_; }	\
+//			} ids_{};											\
+//			return ids_ ;										\
+//		}
+
+namespace r_and_d {
+
+	DBJ_TEST_UNIT(id_string_type)
+	{
+		using dbj::fmt::print;
+		// making
+		#define EXP_(x) x
+		#define EXP(x) EXP_(x)
+		#define DBJ_LINE []() constexpr { return EXP(__LINE__); }()
+
+		constexpr auto ids_1 = idstring_type([]() constexpr { return __LINE__; }(), __FILE__) ;
+		constexpr auto ids_2 = idstring_type( 42, "Hola Lola!") ;
+		// moving
+		auto mover = [](auto ids_arg_) constexpr { return ids_arg_;  };
+		constexpr auto ids_3 = mover(ids_1);
+
+		// printing
+		auto printer = [](const idstring_type ids) {
+			print("\n\n idstring type\t%s\n\n{ \nid:\t%d,\n\nstr:\t'%s'\n}\n\n", typeid(ids).name(), ids.id(), ids.str());
+		};
+
+		printer(ids_1);
+		printer(ids_2);
+		printer(ids_3);
+
+#undef IDSTRING_TYPE
+#undef EXP_
+#undef EXP
+#undef DBJ_LINE
+	}
+
+	DBJ_TEST_UNIT(compile_time_sv_carier)
+	{
+		using dbj::fmt::print;
+		using namespace std::literals;
+
+#define sv_carrier(L_) [] () constexpr { constexpr auto sview = DBJ_CONCAT(L_,sv); return sview; }
+
+		// but this also works
+		constexpr auto carrier = sv_carrier("Hola Loyola!");
+		print("\n\n%s", carrier().data());
+
+#undef sv_carrier
+	}
+	/*
+	from string literal make compile time char buffer inside std::array
+
+	constexpr auto buffer_1 = inner::char_buff("Hola Lola!");
+	constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
+	*/
+	template<size_t N >
+	constexpr auto char_buff(const char(&sl_)[N])
+	{
+		std::array<char, N + 1 > buffer_{ { 0 } };
+		size_t k = 0;
+		for (auto chr : sl_) { buffer_[k++] = chr; }
+		return buffer_;
+	}
+
+	DBJ_TEST_UNIT(constexpr_charr_array_carier)
+	{
+#define buf_carrier(L_) [] () constexpr { constexpr auto char_arr = char_buff(L_); return char_arr; }
+
+		constexpr auto chr_arr_buf = buf_carrier("Hola Ignacio!");
+		using dbj::fmt::print;
+		print("\n\n%s", chr_arr_buf().data());
+
+#undef buf_carrier
+	}
+} // r+and+d
 namespace dbj::samples {
 
 	using namespace dbj::errc;
@@ -33,9 +126,9 @@ namespace dbj::samples {
 			static_cast<error_type::id_type>(std::errc::argument_list_too_long),
 			"Argument list too long"
 		);
-		print("\nno location\n\nerror json format: %s", error_type::json(err).get());
+		print("\nno location\n\nerror json format: %s", * error_type::json(err) );
 		error_type::locate(err, __LINE__, __FILE__);
-		print("\n\nwith location\n\nerror json format: %s", error_type::json(err).get());
+		print("\n\nwith location\n\nerror json format: %s", * error_type::json(err) );
 	}
 
 	/*
