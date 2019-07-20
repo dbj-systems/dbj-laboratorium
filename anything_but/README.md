@@ -22,10 +22,9 @@ thus, just a curiosity for you:
 ```
 
 Or you take the above so seriously you actually do not use C++ on mission critical projects?
-Or perhaps, inside some medical equipment your company delivers.. 
+Or perhaps, inside some medical device, firmware your company delivers.. 
 
-You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious 
-matter for you.
+Or perhaps, you might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious matter for you.
 
 ```cpp
    // implicit conversion of int to char
@@ -33,19 +32,16 @@ matter for you.
    // implicit conversion of double to float
    float F = 3.7;
 ```
-Not because you happen to be "unreasonable", but because yuo need
- to deliver code where implicit conversions are simply not allowed. 
-Just like for example exceptions, in many real-time projects are not allowed. They simply do not exist over there. Simply switched off.
+Not because you happen to be "unreasonable", but because yuo need to deliver code where implicit conversions are simply not allowed. 
+Just like for example exceptions, in many real-time projects are not allowed. Them exceptions simply do not exist over there. Simply switched off.
 
 And very likely, you have turned to the "[official sources](https://docs.microsoft.com/en-us/cpp/cpp/type-conversions-and-type-safety-modern-cpp?view=vs-2017)" just to come back dissapointed.
 
-One options is to plan for usual extended test/debug/test/debug, cycles ad infinitum, of course.
+One options is to plan for usual but extended: test/debug/test/debug, cycles. Ad infinitum, of course.
 
 ### The suggestion
 
-Before you discard (with the heavy heart) C++ for mission 
-critical projects, completely, we might suggest you look into this ridiculously tiny single header?
-Here is some code to tickle your fancy.
+Before you discard (with the heavy heart) C++ for mission critical projects completely, we might suggest you look into this ridiculously tiny single header? Here is some code to tickle your fancy.
 
 ```cpp
 // let's assume your code must not accidentaly mix
