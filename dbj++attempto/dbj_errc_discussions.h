@@ -1,6 +1,27 @@
 #pragma once
 #include "pch.h"
 
+/*
+from string literal make compile time char buffer inside std::array
+
+constexpr auto buffer_1 = inner::char_buff("Hola Lola!");
+constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
+*/
+template<size_t N >
+constexpr auto char_buff(const char(&sl_)[N])
+{
+	std::array<char, N + 1 > buffer_{ { 0 } };
+	size_t k = 0;
+	for (auto chr : sl_) { buffer_[k++] = chr; }
+	return buffer_;
+}
+
+#define DBJ_LITERAL(T_)           \
+string_literal_carier ([](){      \
+auto buffer_ = char_buff(T_) ;    \
+return buffer_;                   \  
+})
+
 namespace dbj::samples {
 
 	using namespace dbj::errc;
@@ -72,7 +93,9 @@ namespace dbj::samples {
 		return error_return(not_integer_division, __LINE__, __FILE__);
 
 		return value_return( i / j );
-	}	DBJ_TEST_UNIT(dbj_errc_check_the_errc_maleability)
+	}
+
+	DBJ_TEST_UNIT(dbj_errc_check_the_errc_maleability)
 	{
 		using dbj::fmt::print ;
 

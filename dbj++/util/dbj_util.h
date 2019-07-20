@@ -194,9 +194,9 @@ namespace dbj {
 		/*
 		does not compile *if* 'range' has no begind and no end
 		*/
-		inline auto dbj_range_count = [](auto && range) constexpr->size_t
+		inline decltype(auto) dbj_range_count = [](auto && range) 
 		{
-			static_assert(::dbj::is_range_v< decltype(range) >)
+			static_assert(::dbj::is_range_v< decltype(range) >);
 				return std::distance(std::begin(range), std::end(range));
 		};
 

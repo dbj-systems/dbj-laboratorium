@@ -170,6 +170,7 @@
     <ClInclude Include="algorithms\dbj_vector_element_to_index.h" />
     <ClInclude Include="algorithms\lambda_runtime_retval_test.h" />
     <ClInclude Include="compile_time_shenanigans.h" />
+    <ClInclude Include="constexpr-format-master\constexpr_format.h" />
     <ClInclude Include="dbj++attempto.h" />
     <ClInclude Include="dbj_console_color\dbj_color.h" />
     <ClInclude Include="dbj_console_color\scrutil.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="utilities\dbj_lambda_matrix.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="constexpr-format-master\constexpr_format_test.h" />
     <ClCompile Include="dbj_clib_tests.cpp" />
     <ClCompile Include="dbj_console_color\scrutil.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
