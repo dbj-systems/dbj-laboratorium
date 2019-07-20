@@ -4,27 +4,9 @@
 
 ## Motivation
 
-Probably you indulge into recreational C++ and the following is 
-thus, just a curiosity for you:
+Probably you indulge into recreational C++ and "implicit type conversions" are just "normal thing to do". Or you take them so seriously you actually do not use C++ on mission critical projects, just because of "implicit type conversions" ? Perhaps your company delivers  firmware to be used inside some medical device. Flight control software, core component? 
 
-```cpp
-    // these are MSVC typedef's
-#ifndef _MSC_VER
-    typedef unsigned char uint8_t;
-    typedef signed char   int8_t;
-#endif
- // CLANG/GNUC/G++/MSVC/UCRT default behaviour 
- // is : no warnings whatsoever here
- // assing signed to unsigned char
-    uint8_t uc = int8_t('s');
- // assigned unsigned to signed char
-    int8_t sc =  uc;
-```
-
-Or you take the above so seriously you actually do not use C++ on mission critical projects?
-Or perhaps, inside some medical device, firmware your company delivers.. 
-
-Or perhaps, you might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious matter for you.
+You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is very serious matter for you.
 
 ```cpp
    // implicit conversion of int to char
