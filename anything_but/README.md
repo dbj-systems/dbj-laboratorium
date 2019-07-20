@@ -4,28 +4,9 @@
 
 ## Motivation
 
-Probably you indulge into recreational C++ and the following is 
-thus, just a curiosity for you:
+Probably you indulge into recreational C++ and "implicit type conversions" are just "normal thing to do". Or you take them so seriously you actually do not use C++ on mission critical projects, just because of "implicit type conversions" ? Perhaps your company delivers  firmware to be used inside some medical device. Flight control software, core component? 
 
-```cpp
-    // these are MSVC typedef's
-#ifndef _MSC_VER
-    typedef unsigned char uint8_t;
-    typedef signed char   int8_t;
-#endif
- // CLANG/GNUC/G++/MSVC/UCRT default behaviour 
- // is : no warnings whatsoever here
- // assing signed to unsigned char
-    uint8_t uc = int8_t('s');
- // assigned unsigned to signed char
-    int8_t sc =  uc;
-```
-
-Or you take the above so seriously you actually do not use C++ on mission critical projects?
-Or perhaps, inside some medical equipment your company delivers.. 
-
-You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is a very serious 
-matter for you.
+You might take the C++ [implicit conversions](https://en.cppreference.com/w/cpp/language/implicit_conversion) so seriously that "even" the following is very serious matter for you.
 
 ```cpp
    // implicit conversion of int to char
@@ -33,19 +14,16 @@ matter for you.
    // implicit conversion of double to float
    float F = 3.7;
 ```
-Not because you happen to be "unreasonable", but because yuo need
- to deliver code where implicit conversions are simply not allowed. 
-Just like for example exceptions, in many real-time projects are not allowed. They simply do not exist over there. Simply switched off.
+Not because you happen to be "unreasonable", but because yuo need to deliver code where implicit conversions are simply not allowed. 
+Just like for example exceptions, in many real-time projects are not allowed. Them exceptions simply do not exist over there. Simply switched off.
 
 And very likely, you have turned to the "[official sources](https://docs.microsoft.com/en-us/cpp/cpp/type-conversions-and-type-safety-modern-cpp?view=vs-2017)" just to come back dissapointed.
 
-One options is to plan for usual extended test/debug/test/debug, cycles ad infinitum, of course.
+One options is to plan for usual but extended: test/debug/test/debug, cycles. Ad infinitum, of course.
 
 ### The suggestion
 
-Before you discard (with the heavy heart) C++ for mission 
-critical projects, completely, we might suggest you look into this ridiculously tiny single header?
-Here is some code to tickle your fancy.
+Before you discard (with the heavy heart) C++ for mission critical projects completely, we might suggest you look into this ridiculously tiny single header? Here is some code to tickle your fancy.
 
 ```cpp
 // let's assume your code must not accidentaly mix
