@@ -1,33 +1,11 @@
 #pragma once
 #include "pch.h"
 
-// id and string
-class idstring_type final {
-	const long id_;
-	std::string_view str_;
-public:
-	using reference = std::reference_wrapper<idstring_type>;
 
-	idstring_type() = delete;
-
-	constexpr idstring_type(const long a_id_, const char* string_literal)
-		: id_(a_id_), str_(string_literal)
-	{}
-
-	// the only allowed way to construct
-	template<size_t N>
-	constexpr idstring_type(const long a_id_, const char (& string_literal)[N])
-		: id_(a_id_), str_(string_literal)
-	{}
-
-	constexpr long id() const { return id_;  };
-	constexpr std::string_view str() const { return str_; };
-};
-
-struct pragmatic_error_type {
-	const idstring_type id_and_message;
-	const idstring_type line_and_file;
-};
+//struct pragmatic_error_type {
+//	const idstring_type id_and_message;
+//	const idstring_type line_and_file;
+//};
 
 //#define IDSTRING_TYPE( ID_, SL_)										\
 //			struct final : idstring_type {			\
@@ -51,19 +29,15 @@ namespace r_and_d {
 	{
 		using dbj::fmt::print;
 		// making
-		#define EXP_(x) x
-		#define EXP(x) EXP_(x)
-		#define DBJ_LINE []() constexpr { return EXP(__LINE__); }()
-
-		constexpr auto ids_1 = idstring_type([]() constexpr { return __LINE__; }(), __FILE__) ;
-		constexpr auto ids_2 = idstring_type( 42, "Hola Lola!") ;
+		DBJ_CONSTEXPR_ID_MESSAGE auto ids_1 = dbj::errc::dbj_id_and_message_type_test_();
+		constexpr auto ids_2 = dbj::errc::idmessage_type( 42, "Hola Lola!") ;
 		// moving
 		auto mover = [](auto ids_arg_) constexpr { return ids_arg_;  };
-		constexpr auto ids_3 = mover(ids_1);
+		DBJ_CONSTEXPR_ID_MESSAGE auto ids_3 = mover(ids_1);
 
 		// printing
-		auto printer = [](const idstring_type ids) {
-			print("\n\n idstring type\t%s\n\n{ \nid:\t%d,\n\nstr:\t'%s'\n}\n\n", typeid(ids).name(), ids.id(), ids.str());
+		auto printer = [](dbj::errc::idmessage_type ids) {
+			print("\n\n idstring type\t%s\n\n{ \nid:\t%d,\n\nstr:\t'%s'\n}\n\n", typeid(ids).name(), ids.id(), ids.message());
 		};
 
 		printer(ids_1);

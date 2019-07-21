@@ -12,6 +12,8 @@ DBJ ERRC error type
 #include <array>
 #include <memory>
 
+#include "dbj_id_and_message.h"
+
 namespace dbj::errc
 {
 	using namespace std;
