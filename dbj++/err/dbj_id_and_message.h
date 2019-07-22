@@ -21,13 +21,19 @@ namespace dbj::errc
 
 		constexpr idmessage_type( id_type a_id_, const char* string_literal)
 			: id_(a_id_), str_(string_literal)
-		{}
+		{
+			DBJ_ASSERT(string_literal);
+		}
 
 		//
 		template<size_t N>
 		constexpr idmessage_type( id_type a_id_, const char(&string_literal)[N])
 			: id_(a_id_), str_(string_literal)
 		{}
+
+		// dissalow references to temporaries
+		template<size_t N>
+		constexpr idmessage_type(id_type a_id_, char(&& string_literal)[N]) = delete;
 
 		constexpr id_type id() const { return id_; };
 		constexpr message_type message() const { return str_; };

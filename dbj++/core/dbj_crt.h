@@ -54,9 +54,22 @@ inline const auto & MAX = [](const auto & a, const auto & b)
 // #error Be sure you have #define NOMINMAX placed before including windows.h !
 // #endif
 
+#ifdef _MSC_VER
+#define DBJ_ASSERT(x) _ASSERTE(x)
+#define DBJ_VERIFY(x) _ASSERT_AND_INVOKE_WATSON(x)
+#else
+#define DBJ_ASSERT(x) assert(x)
+#define DBJ_VERIFY(x) do{ if(!(x) { perror(_DBJ_STRINGIZE_(x)); exit(0);} }while(0)
+#endif
 
+#ifdef _MSC_VER
+// __LINE__ is not contexp in MSVC because of "edit and continue" feature of VStudio
+// apparently not a bug but a feature ...
 // https://developercommunity.visualstudio.com/content/problem/195665/-line-cannot-be-used-as-an-argument-for-constexpr.html
 #define _DBJ_CONSTEXPR_LINE long(_DBJ_CONCATENATE(__LINE__,U)) 
+#else
+#define _DBJ_CONSTEXPR_LINE __LINE__
+#endif
 
 /*
 from vcruntime.h
@@ -273,9 +286,9 @@ namespace dbj {
 
 	} // nano
 
-// decades old VERIFY macro
-#define DBJ_VERIFY_(x, file, line ) if (false == (x) ) ::dbj::nano::terror( "  " #x " , failed at", file, line )
-#define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
+// decades old VERIFY macro, in a new clothing
+#define DBJ_TERROR_IMPL_(x, file, line ) if (false == (x) ) ::dbj::nano::terror( "  " #x " , failed at", file, line )
+#define DBJ_TERROR(x) DBJ_TERROR_IMPL_(x,__FILE__,__LINE__)
 
 
 	/* 512 happpens to be the POSIX BUFSIZ */

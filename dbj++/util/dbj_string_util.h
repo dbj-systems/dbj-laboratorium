@@ -617,6 +617,8 @@ namespace dbj::str {
 #ifndef _MSC_VER
 					return { arg.begin(), arg.end() };
 #else
+					// char32_t currently generates a lot of warnings 
+					// for MSVC, as of 2019=07-22
 					return return_type( arg.begin(), arg.end() );
 #endif
 				}
