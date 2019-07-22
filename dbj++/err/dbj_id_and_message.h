@@ -14,7 +14,7 @@ namespace dbj::errc
 	class idmessage_type final {
 	public:
 		using id_type = long;
-		using message_type = std::string_view;
+		using message_type = std::string_view ;
 		using reference = std::reference_wrapper<idmessage_type>;
 
 		idmessage_type() = delete;
@@ -36,10 +36,13 @@ namespace dbj::errc
 		constexpr idmessage_type(id_type a_id_, char(&& string_literal)[N]) = delete;
 
 		constexpr id_type id() const { return id_; };
-		constexpr message_type message() const { return str_; };
+		constexpr message_type message() const { return str_.data(); };
+		constexpr message_type::value_type const * data() const { return str_.data(); };
 	private:
 		const id_type id_;
-		message_type str_;
+		// note: we do not return string_view 
+		// we just use if as container of string literals
+		const message_type str_;
 	};
 
 } // dbj::errc

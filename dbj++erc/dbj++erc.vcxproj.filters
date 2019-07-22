@@ -21,6 +21,9 @@
     <ClInclude Include="snippets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_simple_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
