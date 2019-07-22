@@ -100,9 +100,9 @@ namespace dbj::samples {
 			static_cast<error_type::id_type>(std::errc::argument_list_too_long),
 			"Argument list too long"
 		);
-		print("\nno location\n\nerror json format: %s", * error_type::json(err) );
+		print("\nno location\n\nerror json format: %s", error_type::json(err).get() );
 		error_type::locate(err, __LINE__, __FILE__);
-		print("\n\nwith location\n\nerror json format: %s", * error_type::json(err) );
+		print("\n\nwith location\n\nerror json format: %s", error_type::json(err).get() );
 	}
 
 	/*

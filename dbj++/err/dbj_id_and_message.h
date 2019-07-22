@@ -36,8 +36,21 @@ namespace dbj::errc
 		message_type str_;
 	};
 
-	inline constexpr idmessage_type dbj_id_and_message_type_test_ () {
+	inline constexpr idmessage_type dbj_id_and_message_type_test_ () 
+	{
+		// mistery bug?
+		constexpr auto LINE = _DBJ_CONSTEXPR_LINE;
+		// constexpr long LINE = __LINE__;
 
+		constexpr auto FILE = __FILE__;
+		constexpr auto MSCVER = _MSC_VER;
+		constexpr auto MSCFULLVER = _MSC_FULL_VER;
+		constexpr auto MSCBUILD = _MSC_BUILD;
+
+		static_assert((bool)noexcept(MSCBUILD, LINE, MSCFULLVER, MSCVER,FILE), "");
+
+#undef _DBJ_CONCATENATE
+			   
 #ifdef _MSC_VER
 		DBJ_CONSTEXPR_ID_MESSAGE auto ids_1 = idmessage_type(__LINE__, __FILE__);
 #else

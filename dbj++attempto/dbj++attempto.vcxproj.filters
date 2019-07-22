@@ -75,6 +75,9 @@
     <ClInclude Include="constexpr-format-master\constexpr_format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="constexpr-format-master\constexpr_format_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -100,9 +103,6 @@
     </ClCompile>
     <ClCompile Include="dbj_console_color\scrutil.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="constexpr-format-master\constexpr_format_test.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

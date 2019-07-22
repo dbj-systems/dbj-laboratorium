@@ -55,7 +55,26 @@ inline const auto & MAX = [](const auto & a, const auto & b)
 // #endif
 
 
+// https://developercommunity.visualstudio.com/content/problem/195665/-line-cannot-be-used-as-an-argument-for-constexpr.html
+#define _DBJ_CONSTEXPR_LINE long(_DBJ_CONCATENATE(__LINE__,U)) 
+
+/*
+from vcruntime.h
+*/
+#define _DBJ_STRINGIZE(x) _DBJ_STRINGIZE_(x)
+#define _DBJ_STRINGIZE_(x) #x
+
+#define _DBJ_WIDE(s) _DBJ_WIDE_(s)
+#define _DBJ_WIDE_(s) L ## s
+
+#define _DBJ_CONCATENATE(a_, b_) _DBJ_CONCATENATE_IMPL_(a_, b_)
+#define _DBJ_CONCATENATE_IMPL_(a_, b_) a_##b_
+
+#define _DBJ_EXPAND(s) _DBJ_EXPAND_IMPL_(s)
+#define _DBJ_EXPAND_IMPL_(s) s
+
 // NOTE: do not have a space after a macro name and before the '(' !!
+#if 0
 #ifndef DBJ_STRINGIFY	
 #define DBJ_STRINGIFY_(s) #s
 #define DBJ_STRINGIFY(s) DBJ_STRINGIFY_(s)
@@ -66,7 +85,7 @@ inline const auto & MAX = [](const auto & a, const auto & b)
 #define DBJ_EXP_(s) #s
 #define DBJ_EXP(s) DBJ_EXP_(s)
 #endif
-
+#endif
 /*
 this is for variables only
 example
@@ -89,11 +108,13 @@ https://godbolt.org/z/jGC98L
 */
 #define DBJ_NOUSE(...) static_assert( (noexcept(__VA_ARGS__),true) );
 
+#if 0
 // https://www.boost.org/doc/libs/1_35_0/boost/preprocessor/stringize.hpp
 #    define BOOST_PP_STRINGIZE(text) BOOST_PP_STRINGIZE_A((text))
 #    define BOOST_PP_STRINGIZE_A(arg) BOOST_PP_STRINGIZE_I arg
 #    define BOOST_PP_STRINGIZE_I(text) #text
 //
+#endif
 
 #ifndef DBJ_COMPANY	
 

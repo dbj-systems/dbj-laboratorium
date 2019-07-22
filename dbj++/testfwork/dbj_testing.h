@@ -194,6 +194,8 @@ namespace dbj {
 
 #define DBJ_TEST_SPACE_OPEN(x) namespace _dbj_testing_namespace_ {  
 #define DBJ_TEST_SPACE_CLOSE }
+
+
 /*
 remember: anonymous namespace variableas are static by default
 that is they are "internal linkage"
@@ -213,6 +215,9 @@ DBJ_TEST_CASE_IMPL ( description , DBJ_CONCAT( __dbj_test_unit__, x ) )
 #define DBJ_TEST_UNIT(x) DBJ_TEST_CASE( ::dbj::core::fileline(__FILE__, __LINE__).data() , x )
 
 #endif
+
+#define DBJ_CONCAT_IMPL( x, y ) x##y
+#define DBJ_CONCAT( x, y ) DBJ_CONCAT_IMPL( x, y )
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
