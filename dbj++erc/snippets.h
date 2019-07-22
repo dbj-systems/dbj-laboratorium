@@ -7,36 +7,44 @@
 //	const idstring_type line_and_file;
 //};
 
-//#define IDSTRING_TYPE( ID_, SL_)										\
-//			struct final : idstring_type {			\
-//				 long id() const { return ID_; }				\
-//				 std::string_view str() const { return SL_; }	\
-//			}
-
-//#define IDSTRING_TYPE( ID_, SL_)								\
-//			[]() constexpr {									\
-//			constexpr struct  : idstring_type {					\
-//                 using base_type = idstring_type;				\
-//				 long id() const { return ID_; }				\
-//				 std::string_view str() const { return SL_; }	\
-//			} ids_{};											\
-//			return ids_ ;										\
-//		}
-
 namespace r_and_d {
+
+	using namespace dbj::errc;
+
+	inline constexpr idmessage_type dbj_id_and_message_type_test_()
+	{
+#ifdef MSVC_LINE_IS_NOT_CONTEXPR
+		// mistery bug is not a mistery
+		constexpr auto LINE = _DBJ_CONSTEXPR_LINE;
+		// constexpr long LINE = __LINE__;
+
+		constexpr auto FILE = __FILE__;
+		constexpr auto MSCVER = _MSC_VER;
+		constexpr auto MSCFULLVER = _MSC_FULL_VER;
+		constexpr auto MSCBUILD = _MSC_BUILD;
+
+		static_assert((bool)noexcept(MSCBUILD, LINE, MSCFULLVER, MSCVER, FILE), "");
+#endif // MSVC_LINE_IS_NOT_CONTEXPR
+
+		constexpr auto ids_1 = idmessage_type(_DBJ_CONSTEXPR_LINE, __FILE__);
+		constexpr auto id = ids_1.id();
+		constexpr auto str = ids_1.message();
+
+		return ids_1;
+	}
 
 	DBJ_TEST_UNIT(id_string_type)
 	{
 		using dbj::fmt::print;
 		// making
-		DBJ_CONSTEXPR_ID_MESSAGE auto ids_1 = dbj::errc::dbj_id_and_message_type_test_();
-		constexpr auto ids_2 = dbj::errc::idmessage_type(42, "Hola Lola!");
+		constexpr auto ids_1 = dbj_id_and_message_type_test_();
+		constexpr auto ids_2 = idmessage_type(42, "Hola Lola!");
 		// moving
 		auto mover = [](auto ids_arg_) constexpr { return ids_arg_;  };
-		DBJ_CONSTEXPR_ID_MESSAGE auto ids_3 = mover(ids_1);
+		constexpr auto ids_3 = mover(ids_1);
 
 		// printing
-		auto printer = [](dbj::errc::idmessage_type ids) {
+		auto printer = [](idmessage_type ids) {
 			print("\n\n idstring type\t%s\n\n{ \nid:\t%d,\n\nstr:\t'%s'\n}\n\n", typeid(ids).name(), ids.id(), ids.message());
 		};
 
