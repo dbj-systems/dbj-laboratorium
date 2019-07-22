@@ -21,7 +21,7 @@
 // dbj++ 'bans' std iostreams
 // #include <iostream>
 #undef DBJ_WMAIN_USED
-#include <dbj++.h>
+#include "../dbj++/dbj++.h"
 
 #ifdef STD
 #error "STD already defined"

@@ -9,7 +9,7 @@ include dbj_crt.h before this
 #include <chrono>
 */
 
-#include <dbj++/console/dbj++con.h>
+#include "../console/dbj++con.h"
 
 #include <crtdbg.h>
 #include <vector>

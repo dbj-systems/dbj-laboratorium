@@ -1,203 +1,172 @@
+#pragma once
 #include "pch.h"
-// #include "./error_handling/dbj_err.h"
 
-//to be renamed to dbj::erc
-namespace dbj_erc {
 
-	using ::dbj::console::print;
-	using namespace ::dbj::err;
+//struct pragmatic_error_type {
+//	const idstring_type id_and_message;
+//	const idstring_type line_and_file;
+//};
 
-	// here we return "system ok" 
-	[[nodiscard]]
-	inline auto very_complex_operation()
-		noexcept
+//#define IDSTRING_TYPE( ID_, SL_)										\
+//			struct final : idstring_type {			\
+//				 long id() const { return ID_; }				\
+//				 std::string_view str() const { return SL_; }	\
+//			}
+
+//#define IDSTRING_TYPE( ID_, SL_)								\
+//			[]() constexpr {									\
+//			constexpr struct  : idstring_type {					\
+//                 using base_type = idstring_type;				\
+//				 long id() const { return ID_; }				\
+//				 std::string_view str() const { return SL_; }	\
+//			} ids_{};											\
+//			return ids_ ;										\
+//		}
+
+namespace r_and_d {
+
+	DBJ_TEST_UNIT(id_string_type)
 	{
-		std::error_code ec = DBJ_TEST_ATOM(
-			// std::make_error_code(std::errc::address_family_not_supported)
-			std::make_error_code(std::errc::invalid_argument)
-		);
+		using dbj::fmt::print;
+		// making
+		DBJ_CONSTEXPR_ID_MESSAGE auto ids_1 = dbj::errc::dbj_id_and_message_type_test_();
+		constexpr auto ids_2 = dbj::errc::idmessage_type(42, "Hola Lola!");
+		// moving
+		auto mover = [](auto ids_arg_) constexpr { return ids_arg_;  };
+		DBJ_CONSTEXPR_ID_MESSAGE auto ids_3 = mover(ids_1);
 
-		std::error_condition en = DBJ_TEST_ATOM(
-			ec.default_error_condition()
-		);
-
-		return std::pair{ dbj_universal_ok , 42 };
-	}
-
-		// here we return specific dbj ok
-		[[nodiscard]]
-		inline auto very_complex_dbj_operation
-		(bool whatever = true )
-			noexcept
-		{
-			if ( whatever )
-				return std::make_pair(dbj_universal_ok, 13);
-			// else
-			return std::make_pair(
-				make_error_code(
-					dbj_err_code::bad_argument),
-				-1);
-		}
-
-
-		inline void dbj_error_system_by_the_book ()
-		{
-			if (auto[e, v] = very_complex_operation(); e == dbj_universal_ok) {
-				print("\n\nSYSTEM OK, return value is: ", v);
-			}
-
-			if (auto[e, v] = very_complex_dbj_operation()
-				; e == dbj_universal_ok)
-			{
-				print("\n\nDBJ OK, return value is: ", v);
-			}
-			else {
-				print("\n\ndbj NOT OK, return status is ", e.message(),
-					", return value is: ", v);
-			}
-
-			[[nodiscard]]
-			auto server_side_handler = []
-			(std::error_code& ec)
-				noexcept
-			{
-				ec = dbj_err_code::bad_argument;
-			};
-
-			std::error_code ec;
-			server_side_handler(ec);
-			if (ec == dbj_err_code::bad_argument)
-			{
-				DBJ_TEST_ATOM(ec.message());
-				DBJ_TEST_ATOM(ec.value());
-
-				auto cond = ec.default_error_condition();
-				DBJ_TEST_ATOM(cond.message());
-				DBJ_TEST_ATOM(cond.value());
-			}
-
-		}
-
-	inline void win32_system_specific_errors()
-	{
-		auto print_last_win32_error = []() {
-			print("\n\nWIN32 Error:\n",
-				last_win_ec(),
-				"\n");
+		// printing
+		auto printer = [](dbj::errc::idmessage_type ids) {
+			print("\n\n idstring type\t%s\n\n{ \nid:\t%d,\n\nstr:\t'%s'\n}\n\n", typeid(ids).name(), ids.id(), ids.message());
 		};
 
-		try {
-			std::string f;
-			auto mandatory_retval = f.at(13);
-		}
-		catch (const std::exception & e) {
-			DBJ_TEST_ATOM(e);
-		}
+		printer(ids_1);
+		printer(ids_2);
+		printer(ids_3);
 
-		char lpBuffer[64]{};
-		// provoke system error
-		DWORD DBJ_MAYBE(rv) = GetEnvironmentVariable(
-			LPCTSTR("whatever_non_existent_env_var"),
-			LPTSTR(lpBuffer),
-			DWORD(64)
-		);
-		print_last_win32_error();
+#undef IDSTRING_TYPE
+#undef EXP_
+#undef EXP
+#undef DBJ_LINE
 	}
 
-	inline void why_not() 
+	DBJ_TEST_UNIT(compile_time_sv_carier)
 	{
-		try {
-			std::error_code ecodes[]{ 
-				// condition to code
-				std::make_error_code(std::errc::not_enough_memory) ,
-				// simple assignment makes the error code
-				dbj_status_code::info,
-				dbj_status_code::ok };
+		using dbj::fmt::print;
+		using namespace std::literals;
 
-			// test is_dbj_err
-			DBJ_TEST_ATOM( is_dbj_err(ecodes[0]));
-			DBJ_TEST_ATOM( is_dbj_err(ecodes[1]));
-			DBJ_TEST_ATOM( is_dbj_err(ecodes[2]));
-			// just throw the bastard :)
-			throw ecodes[1];
-		}
-		catch ( std::error_code ec ) 
-		{
-			// all the usual tests 
-			if (ec == std::errc::not_enough_memory) 
-				print("\nApparently there is no enough memory?");
-			else
-			if (ec == dbj_status_code::ok)
-				print("\nSome dbj++ api sent ok signal");
-			else
-			if (ec == dbj_status_code::info)
-				print("\nSome dbj++ api sent info signal");
-			// and so on
-			DBJ_TEST_ATOM(ec);
-		} catch (std::error_condition ecn) {
-			DBJ_TEST_ATOM(ecn);
-		}
+#define sv_carrier(L_) [] () constexpr { constexpr auto sview = DBJ_CONCAT(L_,sv); return sview; }
+
+		// but this also works
+		constexpr auto carrier = sv_carrier("Hola Loyola!");
+		print("\n\n%s", carrier().data());
+
+#undef sv_carrier
 	}
-		// the usage of P1095 described features
-		// used here
-		[[nodiscard]]
-		inline dbj_erc_retval safe_divide(int i, int j)
-			// effectively declare the return type 
-			dbj_fails(int, std::error_code)
-		{
-			// note: failure/success making has to conform to
-			// the fails declaration, or  the code
-			// won't compile
-			if ( (j == 0)
-			   ||(i == INT_MIN && j == -1)
-			   ||(i % j != 0) )
-				return failure(0, std::errc::invalid_argument);
-			else
-#if 0
-			   // INFO RETURN
-  			   return failure((int)(i / j), dbj_status_code::info);
-#endif
-			return succes(i / j);
-		}
-
-	inline void p1095_tests() {
-		if (auto[v, e] = ::dbj_erc::safe_divide(4, 2); e) {
-			DBJ_TEST_ATOM(v);
-			DBJ_TEST_ATOM(e);
-		}
-	}
-
-} // dbj_erc
-
-namespace detail {
 	/*
-	return array reference to the
-	native array inside std::array
+	from string literal make compile time char buffer inside std::array
+
+	constexpr auto buffer_1 = inner::char_buff("Hola Lola!");
+	constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
 	*/
-	template<typename T, size_t N,
-		typename ARR = std::array<T, N>, /* std::array */
-		typename ART = T[N],    /* the native array */
-		typename ARF = ART & ,  /* reference to it */
-		typename ARP = ART * >  /* pointer   to it */
-		constexpr inline
-		ARF
-		internal_array_reference(const std::array<T, N> & arr)
+	template<size_t N >
+	constexpr auto char_buff(const char(&sl_)[N])
 	{
-		return *(ARP)
-			const_cast<typename ARR::pointer>
-			(arr.data());
+		std::array<char, N + 1 > buffer_{ { 0 } };
+		size_t k = 0;
+		for (auto chr : sl_) { buffer_[k++] = chr; }
+		return buffer_;
 	}
-};
 
-// use of DBJ TESTING FWK is "moved out"
-// so the users can easily opt out
-// and call directly or whatever
-DBJ_TEST_UNIT(one)
-{
-	using namespace ::dbj_erc;
-		p1095_tests();
-		why_not();
-		dbj_error_system_by_the_book();
-		win32_system_specific_errors();
-}
+	DBJ_TEST_UNIT(constexpr_charr_array_carier)
+	{
+#define buf_carrier(L_) [] () constexpr { constexpr auto char_arr = char_buff(L_); return char_arr; }
 
+		constexpr auto chr_arr_buf = buf_carrier("Hola Ignacio!");
+		using dbj::fmt::print;
+		print("\n\n%s", chr_arr_buf().data());
+
+#undef buf_carrier
+	}
+} // r+and+d
+namespace dbj::samples {
+
+	using namespace dbj::errc;
+
+	DBJ_TEST_UNIT(dbj_errc_check_the_error_type_maleability)
+	{
+		using namespace dbj::fmt;
+		error_type err = error_type::make(
+			static_cast<error_type::id_type>(std::errc::argument_list_too_long),
+			"Argument list too long"
+		);
+		print("\nno location\n\nerror json format: %s", error_type::json(err).get());
+		error_type::locate(err, __LINE__, __FILE__);
+		print("\n\nwith location\n\nerror json format: %s", error_type::json(err).get());
+	}
+
+	/*
+	create return type for testing in here
+	*/
+	using my_errc_type =
+		dbj::errc::error_concept< std::int64_t, dbj::errc::error_type >;
+	/*
+	create error instances for testing in here
+	in reality users will have them in namespaces
+
+	notice how these predefined instances have no location in them
+
+	notice we start id's from 1001
+	this is to try and not clash with POSIX std::errc
+	*/
+	inline error_type divide_by_zero =
+		error_type::make(1001, "Divide by Zero");
+
+	inline error_type integer_divide_overflows =
+		error_type::make(1002, "Integer Divide Overflows");
+
+	inline error_type not_integer_division =
+		error_type::make(1002, "Non Integer Division");
+
+
+	auto error_return = [](auto E_, long L_, const char* F_) {
+		return my_errc_type::make_err(
+			error_type::locate(E_, L_, (const char*)F_)
+		);
+	};
+
+	auto value_return = [](auto val_) {
+		return my_errc_type::make_val(val_);
+	};
+
+	/*
+	canonical example from
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0709r0.pdf
+	page 21 onwards
+	*/
+	inline my_errc_type::return_type
+		safe_divide(
+			my_errc_type::value_type i,
+			my_errc_type::value_type j
+		)
+	{
+		if (j == 0)
+			return error_return(divide_by_zero, __LINE__, __FILE__);
+
+		if (i == INT_MIN && j == -1)
+			return error_return(integer_divide_overflows, __LINE__, __FILE__);
+
+		if (i % j != 0)
+			return error_return(not_integer_division, __LINE__, __FILE__);
+
+		return value_return(i / j);
+	}
+
+	DBJ_TEST_UNIT(dbj_errc_check_the_errc_maleability)
+	{
+		using dbj::fmt::print;
+
+		auto [v, e] = safe_divide(8, 2);
+	}
+
+} // dbj::samples

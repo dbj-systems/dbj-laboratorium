@@ -282,10 +282,10 @@ namespace dbj {
 			return static_cast<return_type const &>(anything);
 		};
 
-		// #define DBJ_TEST_ATOM(x) dbj::testing::test_lambada( DBJ_EXPAND(x), [&] { return (x);}() ) 
-#define DBJ_TEST_ATOM(x) ::dbj::testing::test_lambada( _DBJ_EXPAND(x), (x) ) 
+// 
+#define DBJ_TEST_ATOM(x) ::dbj::testing::test_lambada( _DBJ_STRINGIZE(x), (x) ) 
 // same as above but does not show type
-#define DBJ_ATOM_TEST(x) ::dbj::testing::test_lambada( _DBJ_EXPAND(x), (x), false ) 
+#define DBJ_ATOM_TEST(x) ::dbj::testing::test_lambada( _DBJ_STRINGIZE(x), (x), false ) 
 
 #define DBJ_ATOM_FLIP [[maybe_unused]] ::dbj::testing::flip_atom_show_true_rezult \
    flip_atom_show_true_rezult_instance{} 

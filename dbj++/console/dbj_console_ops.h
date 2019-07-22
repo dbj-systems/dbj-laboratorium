@@ -1,4 +1,9 @@
 #pragma once
+
+// for out-putting std::path and friends
+#include <filesystem>
+#include <string>
+
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
 
@@ -7,8 +12,6 @@
 #include "../core/dbj_buffer.h"
 #include "dbj_console.h"
 
-// for out-putting std::path and friends
-#include <filesystem>
 
 // #define DBJ_TYPE_INSTRUMENTS
 
@@ -323,11 +326,14 @@ with reference or pointer type argument.
 	{
 		DBJ_TYPE_REPORT_FUNCSIG; if (!str.empty()) PRN.wchar_to_console(dbj::range_to_wstring(str).c_str());
 	}
+
+	// DBJ: char32_t is a problem for the latest CL as of 2019-07-22
+#ifndef _MSC_VER
 	template<> inline void out< std::u32string_view >(std::u32string_view  str)
 	{
 		DBJ_TYPE_REPORT_FUNCSIG; if (!str.empty()) PRN.wchar_to_console(dbj::range_to_wstring(str).c_str());
 	}
-
+#endif
 
 	// fundamental types ********************************************************************************
 	template<> inline void out<nullptr_t>(nullptr_t) { DBJ_TYPE_REPORT_FUNCSIG; PRN.printf("null"); }

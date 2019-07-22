@@ -612,9 +612,13 @@ namespace dbj::str {
 					static_assert (
 						// arg must have this typedef
 						dbj::is_std_char_v< T::value_type >,
-						"can not transform ranges not made out of standard char types"
+						"can not transform ranges **not** made out of standard char types"
 						);
+#ifndef _MSC_VER
 					return { arg.begin(), arg.end() };
+#else
+					return return_type( arg.begin(), arg.end() );
+#endif
 				}
 				else {
 					using actual_type
