@@ -159,7 +159,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dbj_error_type.h" />
     <ClInclude Include="dbj_simple_error.h" />
+    <ClInclude Include="r_and_d.h" />
     <ClInclude Include="snippets.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

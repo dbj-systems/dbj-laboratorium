@@ -19,7 +19,7 @@ namespace r_and_d {
 			constexpr auto here2 = err_43;
 			constexpr auto here3 = err_44;
 
-			auto [err_id,err_msg,opt_err_loc,opt_err_file] = sT::flat(here3);
+			auto [err_id,err_msg,opt_err_loc,opt_err_file] = flat(here3);
 
 		}
 
@@ -67,56 +67,6 @@ namespace r_and_d {
 		printer(ids_3);
 	}
 
-	DBJ_TEST_UNIT(compile_time_sv_carier)
-	{
-		using dbj::fmt::print;
-		using namespace std::literals;
-
-#define sv_carrier(L_) [] () constexpr { constexpr auto sview = DBJ_CONCAT(L_,sv); return sview; }
-
-		// but this also works
-		constexpr auto carrier = sv_carrier("Hola Loyola!");
-		print("\n\n%s", carrier().data());
-
-#undef sv_carrier
-	}
-
-	// Convert array into std::array
-	template<size_t N, std::size_t... I>
-	inline constexpr decltype(auto) 
-		charr_to_stdarr (const char (&charr)[N], std::index_sequence<I...>)
-	{
-		return std::array<char, N>{ { charr[I]...} };
-	}
-
-	/*
-	from string literal make compile time char buffer inside std::array
-
-	constexpr auto buffer_1 = inner::char_buff("Hola Lola!");
-	constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
-	*/
-	template<size_t N, typename Indices = std::make_index_sequence<N> >
-	constexpr decltype(auto)
-		char_buff(const char(&sl_)[N])
-	{
-		//std::array<char, N + 1 > buffer_{ { 0 } };
-		//size_t k = 0;
-		//for (auto chr : sl_) { buffer_[k++] = chr; }
-		//return buffer_;
-
-		return charr_to_stdarr(sl_, Indices{} );
-	}
-
-	DBJ_TEST_UNIT(constexpr_charr_array_carier)
-	{
-#define buf_carrier(L_) [] () constexpr { constexpr auto char_arr = char_buff(L_); return char_arr; }
-
-		constexpr auto chr_arr_buf = char_buff("Hola Ignacio!");
-		using dbj::fmt::print;
-		print("\n\n%s", chr_arr_buf.data());
-
-#undef buf_carrier
-	}
 } // r+and+d
 namespace dbj::samples {
 
@@ -171,45 +121,44 @@ namespace dbj::samples {
 		return my_errc_type::make_val(val_);
 	};
 
+#define _DBJ_ERR(E_) error_return(E_, _DBJ_CONSTEXPR_LINE, __FILE__)
+
 	/*
 	canonical example from
 	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0709r0.pdf
 	page 21 onwards
 	*/
 	inline auto
-		safe_divide = [](auto i, auto j)
+		safe_divide = [](int8_t i, int8_t j)
+		noexcept -> my_errc_type::return_type
 	{
 		if (j == 0)
-			return error_return(posix::divide_by_zero, _DBJ_CONSTEXPR_LINE, __FILE__);
+			return _DBJ_ERR(posix::divide_by_zero);
 
 		if (i == INT_MIN && j == -1)
-			return error_return(posix::integer_divide_overflows, _DBJ_CONSTEXPR_LINE, __FILE__);
+			return _DBJ_ERR(posix::integer_divide_overflows);
 
 		if (i % j != 0)
-			return error_return(posix::not_integer_division, _DBJ_CONSTEXPR_LINE, __FILE__);
+			return _DBJ_ERR(posix::not_integer_division);
 
-		return value_return((i / j));
+		// return value_return((i / j));
+		return { (i / j) , nullopt };
 	};
 
 	DBJ_TEST_UNIT(dbj_errc_check_the_errc_maleability)
 	{
 		using dbj::fmt::print;
 
-		auto analyzer = []
-		(
-			my_errc_type::value_type divider,
-			my_errc_type::value_type divisor
-		) 
+		auto analyzer = [](	auto divider,	auto divisor) 
 		{
 			auto [v, e] = safe_divide(divider, divisor);
 			
-			if(e)
-			{
-				auto [e_id, e_msg, loc_, loc_msg ] = (*e).flat(*e);
+			if(e) {
+				auto [e_id, e_msg, loc_, loc_msg ] = flat(*e);
 				print("\n\nError:\n\tid:%d\n\tmessag: %s\n\tline:%d\n\tfile: %s\n\n"
 					, e_id, e_msg, loc_, loc_msg);
 			}
-			// always check the value
+			// check the value
 			if (v)
 				print("\n\nValue returned: %d\n\n", int(*v));
 		};

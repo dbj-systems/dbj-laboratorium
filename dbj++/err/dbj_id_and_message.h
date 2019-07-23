@@ -4,12 +4,6 @@
 
 namespace dbj::errc
 {
-#ifdef _MSC_VER
-	#define DBJ_CONSTEXPR_ID_MESSAGE
-#else
-	#define DBJ_CONSTEXPR_ID_MESSAGE constexpr
-#endif
-
 	// id and message
 	class idmessage_type final {
 	public:

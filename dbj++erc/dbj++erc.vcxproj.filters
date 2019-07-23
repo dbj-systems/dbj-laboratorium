@@ -24,6 +24,12 @@
     <ClInclude Include="dbj_simple_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="r_and_d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_error_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

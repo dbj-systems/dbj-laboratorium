@@ -6,6 +6,7 @@
 
 #include <optional>
 #include <utility>
+#include "dbj_id_and_message.h"
 
 namespace dbj::errc {
 

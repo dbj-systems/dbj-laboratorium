@@ -2,7 +2,9 @@
 //
 
 #include "pch.h"
-// local, to be moved to dbj++when done
+
+#include "dbj_error_type.h"
+#include "r_and_d.h"
 #include "snippets.h"
 
 /// <summary>
