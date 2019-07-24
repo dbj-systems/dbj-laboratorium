@@ -45,10 +45,8 @@ extern "C" {
 
 		following is fine
 		*/
-		error_struct err1 = { id_arg, msg_arg_ptr , 
-			(line_arg == not_file_line ? not_file_line : DBJ_LINE_U),
-			(line_arg == not_file_line ? 0 : file_arg_ptr)
-		};
+		error_struct err1 = 
+		{ id_arg, msg_arg_ptr , line_arg , file_arg_ptr };
 
 		return err1;
 	}
