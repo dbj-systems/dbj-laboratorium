@@ -143,9 +143,29 @@ hash define `DBJ_NOTHING_BUT_STREAMS`, before including this API
 // std::ostream support
 #define DBJ_NOTHING_BUT_STREAMS
 #include <dbj_nothing_but.h>
+
 ```
+
+### Other work, libraries and efforts
+
+I know of no other so simple C++ code achieveing the same goal.
+Of course there are other very clever people that have done similliar things like,I have attempted here.
+
+- Boost [Safe Numerics](https://github.com/boostorg/safe_numerics/tree/develop/include/boost/safe_numerics) (Robert Ramey, 2012)
+    - Part of Boost suite, thus (very) intertwined with the rest of Boost.
+- Dani Le Blanc (Microsoft) [SafeInt](https://github.com/dcleblanc/SafeInt)
+    - Used by MSFT teams, for Office, Windows etc.
+    - This is decades old, but still has only 8 forks on the GitHub?
+    - One can safely assume, there has to be internal C version for Windows code itself.
+
+Above are two probably most mature C++ lib's. 
+
+They primarily exist to asure safe arythemtics on "numbers", not to provide type safe handler like NothingBut<T> does.
+None of them is built to stop accidental implicit conversion in C++.
+
 ### License
-This is open source software. It id distributed under the GPLv3 License, Version 1.0.
+This is open source software. It id distributed under the
+ Apache License,Version 2.0, January 2004, http://www.apache.org/licenses/.
 Please respect the copiryght.
 ### Contact
 Please report issues or [questions here](https://github.com/dbj-systems/dbj-laboratorium/issues).
