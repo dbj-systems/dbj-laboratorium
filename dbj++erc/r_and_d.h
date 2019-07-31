@@ -29,9 +29,9 @@ extern "C" {
 	*/
 	constexpr error_struct test_c_compliant_error_struct(
 		cu_long_type id_arg,
-		const char* msg_arg_ptr,
+		const char msg_arg_ptr[1],
 		cu_long_type line_arg,
-		const char* file_arg_ptr
+		const char file_arg_ptr[1]
 	) {
 		assert(msg_arg_ptr != 0);
 		/*
@@ -164,7 +164,7 @@ namespace r_and_d {
 		using dbj::fmt::print;
 		using namespace std::literals;
 
-#define sv_carrier(L_) [] () constexpr { constexpr auto sview = DBJ_CONCAT(L_,sv); return sview; }
+#define sv_carrier(L_) [] () constexpr { constexpr auto sview = _DBJ_CONCATENATE(L_,sv); return sview; }
 
 		// but this also works
 		constexpr auto carrier = sv_carrier("Hola Loyola!");

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../core/dbj_traits.h"
 #include <stdint.h>
 #include <random>
@@ -103,12 +104,13 @@ namespace dbj::num {
 		return ::abs(int(min_val + std::rand() / ((RAND_MAX + 1u) / max_val)));
 	};
 
+	inline constexpr std::int32_t INT_MAX_OVER_10 = INT_MAX / 10;
+	inline constexpr std::int32_t INT_MIN_OVER_10 = INT_MIN / 10;
+
 	// reverse the 32 bit integer
 	// not my code, just optimized this https://leetcode.com/articles/reverse-integer/
 	extern "C" constexpr std::int32_t reverse(std::int32_t x) noexcept
 	{
-		static const std::int32_t INT_MAX_OVER_10 = INT_MAX / 10;
-		static const std::int32_t INT_MIN_OVER_10 = INT_MIN / 10;
 
 		std::int32_t rev = 0;
 		while (x != 0) {
@@ -136,44 +138,48 @@ namespace dbj::num {
 	#define INT32_MAX        2147483647i32
 	#define INT64_MAX        9223372036854775807i64
 	*/
+
+	constexpr std::int32_t factorials32[]{ 1, 1, 2, 6, 24, 120, 720,
+			5040, 40320, 362880, 3628800, 39916800, 479001600 };
+
 	extern "C" constexpr
 		std::int32_t const &
 		fact32(std::int32_t const & i) {
-		static const std::int32_t factorials[]{ 1, 1, 2, 6, 24, 120, 720,
-				5040, 40320, 362880, 3628800, 39916800, 479001600 };
 		if (i < 0U || i> 12U) {
 			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
 			return std::int32_t(std::errc::result_out_of_range);
 		}
-		return factorials[i];
+		return factorials32[i];
 	}
 
+	constexpr  std::int64_t factorials64[]
+	{ 1,
+			1,
+			2,
+			6,
+			24,
+			120,
+			720,
+			5040, 40320, 362880, 3628800, 39916800, 479001600,
+			6227020800, /*13!*/
+			87178291200,
+			1307674368000,
+			20922789888000,
+			355687428096000,
+			6402373705728000,
+			121645100408832000,
+			2432902008176640000 /*20!*/
+	};
 	extern "C" constexpr
 		std::int64_t const &
 		fact64(std::int64_t const & i) {
-		static const  std::int64_t factorials[]
-		{		1, 
-				1, 
-				2, 
-				6, 
-				24, 
-				120, 
-				720,
-				5040, 40320, 362880, 3628800, 39916800, 479001600, 
-				6227020800, /*13!*/
-				87178291200,
-				1307674368000,
-				20922789888000,
-				355687428096000,
-				6402373705728000,
-				121645100408832000,
-				2432902008176640000 /*20!*/
-		};
+
 		if (i < 0U || i> 20U) {
 			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
+			// POSIX
 			return std::int64_t(std::errc::result_out_of_range);
 		}
-		return factorials[i];
+		return factorials64[i];
 	}
 
 } // dbj::num

@@ -73,7 +73,7 @@ struct SS {	const char * chars = SL; }; \
 			compile_time::string_builder < SS > ::produce \
 		>::result{} };
 
-#define DBJ_CTS(V, SL ) DBJ_CTS_IMP( V, SL, DBJ_CONCAT( the_struct_, __COUNTER__) )
+#define DBJ_CTS(V, SL ) DBJ_CTS_IMP( V, SL, _DBJ_CONCATENATE( the_struct_, __COUNTER__) )
 
 	using namespace std::string_view_literals;
 

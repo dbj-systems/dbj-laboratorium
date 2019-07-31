@@ -204,20 +204,20 @@ thus bellow we name the namespace, to avoid that 'phenomenon'
 #define DBJ_TEST_CASE_IMPL(description, name ) \
 void name(); \
 namespace __dbj_register__namespace_  { \
-  inline auto DBJ_CONCAT( dbj_test_unit_function_ , __COUNTER__ ) \
+  inline auto _DBJ_CONCATENATE( dbj_test_unit_function_ , __COUNTER__ ) \
            = ::dbj::testing::internal::adder_instance()( description, name ); \
 } \
 inline void name() 
 
 #define DBJ_TEST_CASE( description, x ) \
-DBJ_TEST_CASE_IMPL ( description , DBJ_CONCAT( __dbj_test_unit__, x ) )
+DBJ_TEST_CASE_IMPL ( description , _DBJ_CONCATENATE( __dbj_test_unit__, x ) )
 
 #define DBJ_TEST_UNIT(x) DBJ_TEST_CASE( ::dbj::core::fileline(__FILE__, __LINE__).data() , x )
 
 #endif
 
-#define DBJ_CONCAT_IMPL( x, y ) x##y
-#define DBJ_CONCAT( x, y ) DBJ_CONCAT_IMPL( x, y )
+// #define DBJ_CONCAT_IMPL( x, y ) x##y
+// #define DBJ_CONCAT( x, y ) DBJ_CONCAT_IMPL( x, y )
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"

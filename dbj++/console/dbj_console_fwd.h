@@ -16,8 +16,8 @@
 
 #if !defined(_CONSOLE)
 #pragma message ( "#############################################################" )
-#pragma message ( DBJ_CONCAT( "File: ", __FILE__) )
-#pragma message ( DBJ_CONCAT( "Line: ",  DBJ_EXPAND(__LINE__)))
+#pragma message ( _DBJ_CONCATENATE( "File: ", __FILE__) )
+#pragma message ( _DBJ_CONCATENATE( "Line: ",  _DBJ_STRINGIZE(__LINE__)))
 #pragma message ("This is probably not a console app?")
 #pragma message ( "#############################################################" )
 #endif
