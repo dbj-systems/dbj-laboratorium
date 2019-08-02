@@ -1,82 +1,152 @@
 #pragma once
 #include "pch.h"
 
+#ifndef DBJ_LINE_U
+#ifdef _MSC_VER
+#define DBJ_LINE_U (cu_long)( _DBJ_CONCATENATE( __LINE__, U ) ) 
+#else
+#define DBJ_LINE_U (cu_long)( __LINE__ ) 
+#endif
+#endif
+
 extern "C" {
 
-	typedef const unsigned long cu_long_type ;
+#define MYCONSTEXPR constexpr 
+	// #define MYCONSTEXPR  
+
+	typedef struct MYID {
+		unsigned long v_;
+		const char* s_1;
+		const char* s_2;
+		// having a pointer in a struct, provokes
+		// warning C4190:  'new_id' has C-linkage specified, but returns UDT 'ID' which is incompatible with C
+		// *only* when returning struct from a constexpr function
+	} MYID;
+
+	inline constexpr MYID new_id(
+		unsigned long seed_,
+		const char* s_arg_1,
+		const char* s_arg_2
+	) {
+		const MYID id_{ 1000UL + seed_, 0, 0 };
+		return id_;
+	}
+} // eof "C"
+
+constexpr MYID my_id_1 = new_id(__COUNTER__, 0, 0);
+constexpr MYID my_id_2 = new_id(__COUNTER__, 0, 0);
+// c++17
+// Microsoft (R) C/C++ Optimizing Compiler Version 19.22.27905 for x86
+DBJ_TEST_UNIT(constexpr_from_c)
+{
+	// warning C4190:  'new_id' has C-linkage specified, but returns UDT 'ID' which is incompatible with C
+	constexpr auto id = my_id_1 ;
+	constexpr auto id_v = my_id_2.v_ ;
+}
+
+#undef MYCONSTEXPR
+
+extern "C" {
+	/*
+	since make_error is constexpr to use it with
+	constexpr result it is very difficult to
+	pass anything but string litterals (as
+	const char *)  at compile time
+	*/
+
+	typedef const unsigned long cu_long;
 	// C compliant error_struct
-	typedef struct error_struct_ 
+	// aka POD in C++
+	typedef struct error_struct
 	{
-		cu_long_type		err_id;
-		const char *		err_msg;
-		cu_long_type		file_line;
-		const char *		file_path;
-	} error_struct ;
+		cu_long				err_id;
+		const char* err_msg;
+		cu_long				file_line;
+		const char* file_path;
+	} error_struct;
 
-	static cu_long_type not_file_line = (cu_long_type)(-1);
+	// better 0 than casting -1 "special value" to unsigned long
+	// it is very small chance the file line 0 will ever be
+	// the location of the error
+	static cu_long not_file_line = (cu_long)(0);
 
-#define DBJ_LINE_U (cu_long_type)( _DBJ_CONCATENATE( __LINE__, U ) ) 
+
 
 	/*
 	to return a struct is a legal C, but
-	as of 2019JUL23, MSVC throws a warning here
-	    warning C4190:  
-		'test_c_compliant_error_struct' has C-linkage specified, 
+	as of 2019JUL31, MSVC throws a warning here
+		warning C4190:
+		'make_error' has C-linkage specified,
 		but returns UDT 'error_struct_' which is incompatible with C
-        message :  see declaration of 'error_struct_'
+		message :  see declaration of 'error_struct_'
 
-		as of 2019JUL23, MSVC allows 'constexpr' keyowrd as here
+		as of 2019JUL23, MSVC allows 'constexpr' keyword as here
 	*/
-	constexpr error_struct test_c_compliant_error_struct(
-		cu_long_type id_arg,
-		const char msg_arg_ptr[1],
-		cu_long_type line_arg,
-		const char file_arg_ptr[1]
+	inline constexpr error_struct make_error(
+		cu_long id_arg,
+		const char msg_arg_ptr[BUFSIZ],
+		cu_long line_arg,
+		const char file_arg_ptr[BUFSIZ]
 	) {
 		assert(msg_arg_ptr != 0);
+
+#ifndef _MSC_VER 
 		/*
-		as of 2019JUL23 
-		for MSVC this requires /std:c++latest
-
-		error_struct err1 = { 
-			.err_id = 43, .err_msg = "Wrong meaning", 
-			.file_line = DBJ_LINE_U, .file_path = __FILE__
+		as of 2019JUL23
+		MSVC here requires /std:c++latest
+		*/		return {
+			.err_id = 43,.err_msg = "Wrong meaning",
+			.file_line = DBJ_LINE_U,.file_path = __FILE__
 		};
-
-		following is fine
-		*/
-		error_struct err1 = 
+#else
+		/*		following is fine		*/
+		return
 		{ id_arg, msg_arg_ptr , line_arg , file_arg_ptr };
-
-		return err1;
+#endif
 	}
 
 } // C code
 
-DBJ_TEST_UNIT(c_error_struct)
-{
 	// this is MSVC /std:c++17 code
 	// as of 2019JUL23
 	// when following through debugger in VS2019 
-	// test_c_compliant_error_struct() return value appear to be
+	// make_error() return value appear to be
 	// error_struct &
-	constexpr error_struct err1 =  /* with no location */
-		test_c_compliant_error_struct
-			(43, "Wrong meaning", not_file_line, 0);
+constexpr error_struct err1 =  /* with no location */
+make_error(43, "Wrong meaning", not_file_line, 0);
 
-	constexpr error_struct err2 = /* with location included*/
-		test_c_compliant_error_struct
-			(42, "Anbiguous meaning", DBJ_LINE_U, __FILE__);
+constexpr error_struct err2 = /* with location included*/
+make_error(42, "Ambiguous meaning", DBJ_LINE_U, __FILE__);
+
+DBJ_TEST_UNIT(c_error_struct)
+{
+	auto see_it = [](auto err_)
+	{
+		auto id = err_.err_id;
+		auto msg = err_.err_msg;
+		auto line = err_.file_line;
+		auto path = err_.file_path;
+	};
+
+	see_it(err1);
+	see_it(err2);
+
+	// try cheating and provoking a memory leak
+	// can do
+	// auto leaky = make_error(43, (new char[BUFSIZ]), not_file_line, 0);
+	// no can do
+	// constexpr auto leaky = make_error(43, (new char[BUFSIZ]), not_file_line, 0);
 }
 
 namespace experimental {
 
-	constexpr size_t length(const char* str)
-	{
-		return *str ? 1 + length(str + 1) : 0;
-	}
+	//constexpr size_t string_literal_length(const char str[1])
+	//{
+	//	return *str ? 1 + string_literal_length(str + 1) : 0;
+	//}
 	// and the test
-	constexpr std::array<char, length("Hola Lola Loyola!") > my_simple_buffer{ { 0 } };
+	constexpr std::array<char, dbj::str::string_literal_length("Hola Lola Loyola!") >
+		my_simple_buffer{ { 0 } };
 
 	//https://en.cppreference.com/w/cpp/experimental/to_array
 	namespace detail {
@@ -95,7 +165,7 @@ namespace experimental {
 	}
 } // experimental
 
-namespace array_capsule 
+namespace array_capsule
 {
 	template <typename>	struct CString;
 
@@ -104,10 +174,10 @@ namespace array_capsule
 	{
 		std::array<char, N> const data;
 
-		CString(std::array<char, N> const & arg_arr_) : data(arg_arr_) {}
+		CString(std::array<char, N> const& arg_arr_) : data(arg_arr_) {}
 
 		template<size_t N>
-		CString(const char (&arg_arr_)[N]) : data(experimental::to_array(arg_arr_)) {}
+		CString(const char(&arg_arr_)[N]) : data(experimental::to_array(arg_arr_)) {}
 	};
 
 	// deduction guide 1
@@ -116,10 +186,10 @@ namespace array_capsule
 
 	// deduction guide 2
 	template <std::size_t N>
-	CString(const char (&literal_)[N]) -> CString<std::array<char, N>>;
+	CString(const char(&literal_)[N])->CString<std::array<char, N>>;
 
 
-	DBJ_TEST_UNIT( use_deduction_guides )
+	DBJ_TEST_UNIT(use_deduction_guides)
 	{
 		auto Meme = CString(experimental::to_array("Hola Lola!"));
 		auto wot = CString("Hola Lola!");
@@ -140,7 +210,7 @@ namespace strong {
 	struct id_msg_type final {
 		mutable Id id;
 		mutable Msg data;
-	} ;
+	};
 
 	using errType = id_msg_type;
 	using locType = id_msg_type;
@@ -150,9 +220,9 @@ namespace strong {
 		locType loc;
 	};
 
-	constexpr errorType e1{ 42, "Hola Lola!"};
-	constexpr errorType e2{ 43, "Hola Loyola!"};
-	constexpr errorType e3{ 44, "Hola Ignacio!"};
+	constexpr errorType e1{ 42, "Hola Lola!" };
+	constexpr errorType e2{ 43, "Hola Loyola!" };
+	constexpr errorType e3{ 44, "Hola Ignacio!" };
 
 
 #undef STRONG
