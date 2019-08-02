@@ -23,6 +23,21 @@ namespace dbj::str {
 #pragma region low level
 
 	extern "C" {
+		/*
+		compile time const *and* C
+		be advised C++ versions are better 
+		and "C" constepxr is very last C2x standard which is 
+		very surprising formn MSVC
+		*/
+		inline constexpr size_t string_literal_length(const char str[1])
+		{
+			return *str ? 1 + string_literal_length(str + 1) : 0;
+		}
+
+	/* and the test of the above
+	constexpr std::array<char, string_literal_length("Hola Lola Loyola!") >
+		my_simple_buffer{ { 0 } }
+    */
 
 	inline void reverse(char * str, size_t N)
 	{
@@ -82,38 +97,42 @@ namespace dbj::str {
 		return str;
 	}
 
-		// locale unaware, for char 0 - char 127
-		inline bool isalpha(int c)
+		// locale unaware, use only for for char 0 - char 127
+		inline constexpr bool isalpha(int c)
 		{
 			return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 		}
 
-		inline bool iswhitespace(int c)
+		inline constexpr bool iswhitespace(int c)
 		{
 			// dbj note: what is with \b (aka BELL) escape code?
 			return c == '\t' || c == '\r' || c == '\v' || c == '\n' || c == '\f';
 		}
 
-		inline bool isspace(int c)
+		inline constexpr bool isspace(int c)
 		{
 			return c == 32;
 		}
 
-		inline bool ispunct(int c)
+		// if this is C code then
+		// Microsoft (R) C/C++ Optimizing Compiler Version 19.22.27905 for x86
+		// is ok with using inline on global constants in C too
+		inline const char* dbj_punct_chars_ = ".;!?...";
+
+		inline constexpr bool ispunct(int c)
 		{
-			static const char *punct = ".;!?...";
-			return strchr(punct, c) == NULL ? false : true;
+			return strchr(dbj_punct_chars_, c) == NULL ? false : true;
 			// can make this shorter
 		}
 
 		// locale unaware, for ASCII char 0 - char 127
-		inline int tolower(int c)
+		inline constexpr int tolower(int c)
 		{
 			if (!::dbj::str::isalpha(c)) return c;
 			return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
 		}
 		// 
-		inline int tolower_ignore_case(int c)
+		inline constexpr int tolower_ignore_case(int c)
 		{
 			if (c >= 'A' && c <= 'Z')
 				return c - 'A';
@@ -123,9 +142,9 @@ namespace dbj::str {
 			return c; // not alpha
 		}
 
-		inline int     just_copy_char(int c) { return c; }
+		inline constexpr int     just_copy_char(int c) { return c; }
 
-		inline wint_t     just_copy_wchar(wint_t c) { return c; }
+		inline constexpr wint_t     just_copy_wchar(wint_t c) { return c; }
 	}
 #pragma endregion 
 
@@ -168,6 +187,7 @@ namespace dbj::str {
 		return dbj::MIN(N, maxlen) - 1;
 	}
 
+	// stop pointer to array shennanigans
 	template<typename T, size_t N>
 	inline size_t strnlen(
 		const T(*carr)[N],	const size_t & maxlen
@@ -175,6 +195,7 @@ namespace dbj::str {
 
 	/*
 	strlen for C++ native char array reference
+	of course this requires zero terminated strings
 	*/
 	template<typename T, size_t N>
 	constexpr inline size_t strlen(	const T(&carr)[N]	)
@@ -184,34 +205,39 @@ namespace dbj::str {
 		return N - 1;
 	}
 
+	// stop pointer to array shennanigans
 	template<typename T, size_t N>
 	inline size_t strlen(const T(*carr)[N]) = delete;
 
 
-	/*
-	Pointer (to character arrays) support
-	note: iosfwd include file contains char_traits we need
+/*
+Pointer character support
 
-	2018 JUL 19  We would not repeat here what UCRT already has done
-	namely char and wchar_t versions
-	std lib defines strlen for char * and wchr_t *
-	*/
-#ifdef _MSC_VER
-	constexpr inline size_t strlen(const wchar_t  * cp) { return std::char_traits<wchar_t>::length(cp); }
-	constexpr inline size_t strlen(const char     * cp) { return std::char_traits<char>::length(cp); }
-	constexpr inline size_t strlen(const char16_t * cp) { return std::char_traits<char16_t>::length(cp); }
-	constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<char32_t>::length(cp); }
-#else
+2018 JUL 19  We would not repeat here what UCRT already has done
+namely char and wchar_t versions
+std lib defines strlen for char * and wchar_t *, only
+
+constexpr inline size_t strlen(const wchar_t  * cp) { return std::char_traits<wchar_t>::length(cp); }
+constexpr inline size_t strlen(const char     * cp) { return std::char_traits<char>::length(cp); }
+constexpr inline size_t strlen(const char16_t * cp) { return std::char_traits<char16_t>::length(cp); }
+constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<char32_t>::length(cp); }
+
+
+*/
 	// https://godbolt.org/z/L_uhKR
-	// apparently not ok for MSVC
+	// this was apparently not ok for MSVC
+	// but now (2019AUG02) it is
 	template<typename C>
-	inline size_t strlen(const C * cp) 
+	inline constexpr size_t strlen(const C * cp) 
 	{ 
 		return std::char_traits<C>::length(cp); 
 	}
-#endif
 
-#ifdef _MSC_VER
+
+#if 0 // ifdef _MSC_VER
+
+	// it seems as of 2019AUG02 this is no longer necessary
+	// strnlen on char pointers
 	
 	template<typename C >
 	struct strnlen_provider final
@@ -252,6 +278,8 @@ namespace dbj::str {
 		return char32_strnlen(const_cast<strnlen_provider<char32_t>::ptr_t>(cp), maxlen);
 	}
 #else
+	// this was non MSVC version only
+	// now it is not
 	template<typename T>
 	inline size_t strnlen(const T * cp, const size_t & maxlen) {
 		size_t cpl = std::char_traits<T>::length(cp);
@@ -259,6 +287,7 @@ namespace dbj::str {
 	}
 
 #endif
+	/////////////////////////////////////////////////////////////////////////////////
 	// constexpr string
 	// dbj: big note! this class does not own anything, 
 	// just points to
@@ -318,7 +347,9 @@ namespace dbj::str {
 			countlower(s, n + 1, c);
 	}
 
-
+	////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
 	constexpr std::size_t buffer_optimal_size{ 0xFF };
 
 	/*
@@ -352,8 +383,10 @@ namespace dbj::str {
 	}
 
 	/*
-	basically I recomend do not use std::string, but for text manipulation(s)
-	std::vector<char> use even less, it is crazy slow for simple char buffer-ing
+	Basically I recomend do not use std::string, and for text manipulation(s)
+	std::vector<char> do use even less, it is crazy slow
+	
+	For simple char buffer-ing
 	my preffered buffer type is std::array<>
 	2019-02-11 dbj.org
 	*/
@@ -363,17 +396,27 @@ namespace dbj::str {
 	inline constexpr buffer_type optimal_buffer(void)	{ return buffer_type{ {char(0)} }; }
 	inline constexpr wbuffer_type optimal_wbuffer(void) {	return wbuffer_type{ {wchar_t(0)} };	}
 
+	////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	// inline auto loc = std::locale("");
+	// facet of user's preferred locale
+
+	template<typename input_char_type, typename output_char_type >
+	inline const std::ctype<input_char_type >& 
+		facet_of_user_preferred_locale_
+		= std::use_facet<std::ctype<output_char_type>>(std::locale(""));
+
 	/*
 	-------------------------------------------------------------
-	need to return std::string since the length is unknown
-	at compile time
+	locale friendly lowerize in place
 	*/
 	template <
 		typename CT,
 		typename char_type = std::decay_t<CT>,
 		typename return_type = char_type 
 	>
-		inline
+		inline constexpr
 		// alow only char and wchar_t 
 		std::enable_if_t< dbj::is_char_v<char_type> || dbj::is_wchar_v<char_type>, char_type *  >
 		lowerize(
@@ -389,13 +432,9 @@ namespace dbj::str {
 		assert(N > 0 );
 		assert(N < npos );
 #endif
-		static auto loc = std::locale("");
-		// facet of user's preferred locale
-		static const std::ctype<CT >	& facet_ 
-			= std::use_facet<std::ctype<char_type>>(loc);
 
 		auto the_end_[[maybe_unused]] 
-			= facet_.tolower( from_,  last_);
+			= facet_of_user_preferred_locale_<CT, return_type>.tolower( from_,  last_);
 		return from_;
 	}
 	/*-------------------------------------------------------------
@@ -405,21 +444,30 @@ namespace dbj::str {
 	inline std::basic_string< CT >
 	lowerize(std::basic_string_view<CT> view_) = delete;
 
-	/*-------------------------------------------------------------*/
-	template <
-		typename CT, std::size_t N, typename string_type = std::array<CT,N>
-	>
+	/*
+	-------------------------------------------------------------
+	native arrays ... e.g. string literals
+	accepting 'only' char and wchar_t
+	lowerize in place
+	*/
+	template <	typename CT, std::size_t N	>
 		constexpr inline
-		// only char wchar_t
-		std::enable_if_t< dbj::is_char_v<CT> || dbj::is_wchar_v<CT>, string_type  >
+		// only char or wchar_t
+		// return std::array
+		std::enable_if_t< dbj::is_char_v<CT> || dbj::is_wchar_v<CT>, std::array<CT, N>  >
 		lowerize(
 			CT(&charr_)[N]
 		)
 	{
-		CT * ptr_to_lowered_ = lowerize(charr_, (charr_ + N));
-		std::array<CT, N> rezult_{ {CT(0)} };
-		std::copy(charr_, (charr_ + N), rezult_.data());
-		return rezult_;
+		return lowerize(charr_, charr_ + (N - 1));
+
+		//array<CT, N> rezult_{ {CT(0)} };
+		//copy(charr_, (charr_ + N), rezult_.data());
+
+		//transform(rezult_.begin(), rezult_.end(), rezult_.begin(),
+		//	[](char c) { return tolower(c); });
+
+		//return rezult_;
 	}
 
 
