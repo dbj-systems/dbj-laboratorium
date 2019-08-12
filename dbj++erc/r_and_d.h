@@ -54,7 +54,11 @@ extern "C" {
 	const char *)  at compile time
 	*/
 
-	typedef const unsigned long cu_long;
+	typedef 
+#ifndef _MSC_VER
+		const 
+#endif
+		unsigned long cu_long;
 	// C compliant error_struct
 	// aka POD in C++
 	typedef struct error_struct
@@ -68,7 +72,7 @@ extern "C" {
 	// better 0 than casting -1 "special value" to unsigned long
 	// it is very small chance the file line 0 will ever be
 	// the location of the error
-	static cu_long not_file_line = (cu_long)(0);
+	constexpr cu_long not_file_line = (cu_long)(0);
 
 
 
