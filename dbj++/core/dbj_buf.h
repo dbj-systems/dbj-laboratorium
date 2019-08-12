@@ -457,8 +457,8 @@ namespace dbj {
 #define TU(x) std::wcout << std::boolalpha << L"\nExpression: '" << (#x) << L"'\n\tResult: '" << (x) << L"'\n"
 #include <iostream>
 
-namespace {
-	inline bool dbj_testing_dbj_unique_ptr_buffer()
+namespace dbj_buf_testing {
+	inline bool unique_ptr_buffer()
 	{
 
 		auto test_1 = [] (auto C, auto specimen) 
@@ -483,8 +483,7 @@ namespace {
 		return true;
 	} // testing_dbj_buffer
 
-	static auto dbj_testing_dbj_buffer_result
-		= dbj_testing_dbj_unique_ptr_buffer();
+	inline auto dbj_testing_dbj_buffer_result = unique_ptr_buffer();
 }
 
 #endif // DBJ_BUFFER_TESTING
