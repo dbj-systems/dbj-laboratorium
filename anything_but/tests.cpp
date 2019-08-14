@@ -16,15 +16,16 @@
    limitations under the License.
 */
 
-// we use C++ streams just in this short testing code
-#define DBJ_NOTHING_BUT_STREAMS
-#include "dbj_nothing_but.h"
 
 #include <array>
 #include <vector>
 #include <iostream>
 #include <cassert>
 #include <type_traits>
+
+// we use C++ streams just in this short testing code
+#define DBJ_NOTHING_BUT_STREAMS
+#include "dbj_nothing_but.h"
 
 /*
  By "testing" in this context we basically mean: "does it or does it not compile"
