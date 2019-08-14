@@ -206,10 +206,11 @@ namespace dbj::console {
 					// can happen before main()
 					// and user can have no terminators set up
 					// so ...
-					std::unique_ptr<char> message_{
+					dbj::chr_buf::narrow_type message_(
 						 ::dbj::win32::get_last_error_message(
 							"dbj console configuration has failed"sv
-						) } ;
+						) 
+					) ;
 					::dbj::core::trace(L"\nERROR %s", message_.get());
 					// throw dbj::exception(message_);
 #pragma warning(push)

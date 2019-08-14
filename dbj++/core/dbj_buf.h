@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef _HAS_CXX17
+#error C++17 please ...
+#endif
+
 // #define DBJ_BUFFER_TESTING
 
 // makes stremaing related operators 
@@ -51,12 +55,14 @@ namespace dbj::chr_buf {
 		using value_type = std::shared_ptr<data_type>;
 		using value_type_ref = std::reference_wrapper<value_type>;
 
-
-
 		type& reset(data_type const* payload_)
 		{
 			core::set_payload(this->data_, payload_);
 			return *this;
+		}
+
+		yanb_tpl( value_type payload_) {
+			core::set_payload(this->data_, payload_.get());
 		}
 
 		yanb_tpl(data_type const* payload_) {
@@ -378,58 +384,6 @@ namespace dbj::chr_buf {
 
 } // dbj::chr_buf
 
-namespace dbj::fmt {
-	inline char const* frm_arg(::dbj::chr_buf::yanb value) noexcept
-	{
-		return value.data();
-	}
-
-	inline wchar_t const* frm_arg(::dbj::chr_buf::yanwb value) noexcept
-	{
-		return value.data();
-	}
-
-	/*  vaguely inspired by
-		https ://stackoverflow.com/a/39972671/10870835
-	*/
-		template<typename ... Args>
-	inline typename ::dbj::chr_buf::yanb
-		to_buff(std::string_view format_, Args /*const &*/ ...args)
-		noexcept
-	{
-		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_.data();
-		// 1: what is the size required
-		size_t size = 1 + std::snprintf(nullptr, 0, fmt, frm_arg(args) ...);
-		assert(size > 0);
-		// 2: use it at runtime
-		auto buf = std::make_unique<char[]>(size + 1);
-		// each arg becomes arg to the frm_arg() overload found
-		size = std::snprintf(buf.get(), size, fmt, frm_arg(args) ...);
-		assert(size > 0);
-
-		return { buf.get() };
-	}
-	// wide version
-	template<typename ... Args>
-	inline typename ::dbj::chr_buf::yanwb
-		to_buff(std::wstring_view format_, Args const& ...args)
-		noexcept
-	{
-		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_.data();
-		// 1: what is the size required
-		size_t size = 1 + std::swprintf(nullptr, 0, fmt, frm_arg(args) ...);
-		assert(size > 0);
-		// 2: use it at runtime
-		auto buf = std::make_unique<wchar_t[]>(size + 1);
-		// each arg becomes arg to the frm_arg() overload found
-		size = std::swprintf(buf.get(), size, fmt, frm_arg(args) ...);
-		assert(size > 0);
-
-		return { buf.get() };
-	}
-}
 
 
 

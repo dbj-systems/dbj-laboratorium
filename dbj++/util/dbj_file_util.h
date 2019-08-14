@@ -64,7 +64,7 @@ namespace dbj::util
 	{
 		std::error_code ec_;
 		// with no suffix too
-		smart_buffer base_name_ = ::dbj::win32::module_basename(NULL);
+		smart_buffer base_name_( ::dbj::win32::module_basename(NULL) );
 
 		smart_buffer programdata(dbj::core::util::program_data_path(ec_));
 		_ASSERTE(!ec_);

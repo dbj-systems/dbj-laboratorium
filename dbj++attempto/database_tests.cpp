@@ -1,11 +1,5 @@
 #include "pch.h"
 
-#define DBJ_SYSLOG (1==1)
-#include <dbj++log/dbj++log.h>
-
-#include <dbj++sql/test/core_tests.h>
-#include <dbj++sql/test/dbj_easy_udf_sample.h>
-
 void test_dbj_sql_lite_udf()
 {
 	using namespace ::dbj::log; 

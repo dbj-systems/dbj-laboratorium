@@ -1,8 +1,5 @@
 #include "pch.h"
 
-#define DBJ_SYSLOG (1==1)
-#include <dbj++log/dbj++log.h>
-
 #ifdef DBJ_LOG_TESTING
 static void log_sampler();
 #endif

@@ -11,11 +11,11 @@
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 
-#include "./util/dbj++util.h"
 #include "./core/dbj++core.h"
+#include "./util/dbj++util.h"
 //
 // DEPRECATED -> #include "./err/dbj_err.h"
-#include "./err/dbj_errc.h"
+//#include "./err/dbj_errc.h"
 //
 #include "./console/dbj++con.h"
 #include "./testfwork/dbj++testing_framework.h"

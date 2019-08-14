@@ -3,6 +3,16 @@
 namespace dbj {
 	namespace fmt {
 
+		template<typename ... Args>
+		inline typename ::dbj::chr_buf::yanb
+			to_buff(std::string_view format_, Args /*const &*/ ...args) noexcept;
+
+		template<typename ... Args>
+		inline typename ::dbj::chr_buf::yanwb
+			to_buff(std::wstring_view format_, Args const& ...args) noexcept;
+
+		//////////////////////////////////////////////////////////////////////
+
 		template<typename T>
 		using rfr = std::reference_wrapper<T>;
 		/*
@@ -10,41 +20,41 @@ namespace dbj {
 		https://msdn.microsoft.com/en-us/magazine/dn913181.aspx
 		*/
 		template <typename T>
-		inline T frm_arg( T value) noexcept
+		inline T frm_arg(T value) noexcept
 		{
-			return value ;
+			return value;
 		}
 		// no pass by value allowed
 		// that means: no temporaries
 		// template <typename T> T & frm_arg( rfr<T> && value) = delete;
-#if 1
+
 #pragma region dbj buffer and friends
 
 		// template <typename T>
-		inline char * frm_arg(  rfr<std::unique_ptr<char[]>> value) noexcept
+		inline char* frm_arg(rfr<std::unique_ptr<char[]>> value) noexcept
 		{
-			return value.get().get() ;
+			return value.get().get();
 		}
 
-		inline wchar_t * frm_arg( rfr< std::unique_ptr<wchar_t[]>> value) noexcept
+		inline wchar_t* frm_arg(rfr< std::unique_ptr<wchar_t[]>> value) noexcept
 		{
-			return value.get().get() ;
+			return value.get().get();
 		}
 
-		inline char * frm_arg(  std::shared_ptr<char> value) noexcept
+		inline char* frm_arg(std::shared_ptr<char> value) noexcept
 		{
-			return value.get() ;
+			return value.get();
 		}
 
-		inline wchar_t * frm_arg( std::shared_ptr<wchar_t> value) noexcept
+		inline wchar_t* frm_arg(std::shared_ptr<wchar_t> value) noexcept
 		{
-			return value.get() ;
+			return value.get();
 		}
 
 
 #pragma endregion 
 
-		inline char const * frm_arg( std::error_code value) noexcept
+		inline char const* frm_arg(std::error_code value) noexcept
 		{
 			if (value.value() == 0)
 				// MSVC STL does have an empty string here ...
@@ -56,32 +66,28 @@ namespace dbj {
 		}
 
 		template <typename T>
-		inline T const * frm_arg( std::basic_string<T> value) noexcept
+		inline T const* frm_arg(std::basic_string<T> value) noexcept
 		{
 			return value.c_str();
 		}
 
 		template <typename T>
-		inline T const * frm_arg( std::basic_string_view<T> value) noexcept
+		inline T const* frm_arg(std::basic_string_view<T> value) noexcept
 		{
 			return value.data();
 		}
-#endif
 		/*
-
-
-/*
-BIG NOTE: if you mistake the formating code probably everything
-on the console and in the app will go *very* wrong, and UCRT
-crash will be spectacular
-*/
-	template<typename ... Args>
-	inline void
-		print(std::string_view format_, Args /*const &*/ ... args)
-		noexcept
-	{
-		std::wprintf(L"%S", fmt::to_buff(format_, args...).data());
-	}
+		BIG NOTE: if you mistake the formating code probably everything
+		on the console and in the app will go *very* wrong, and UCRT
+		crash will be spectacular
+		*/
+		template<typename ... Args>
+		inline void
+			print(std::string_view format_, Args /*const &*/ ... args)
+			noexcept
+		{
+			std::wprintf(L"%S", fmt::to_buff(format_, args...).data());
+		}
 
 	} // fmt
 
@@ -92,7 +98,7 @@ namespace dbj {
 #if 0
 		template <typename ... Args>
 		inline std::wstring printf_to_buffer
-		(wchar_t const * const message, Args ... args) noexcept
+		(wchar_t const* const message, Args ... args) noexcept
 		{
 			auto buf_ = dbj::fmt::to_buff(message, args...);
 			return { buf_.get() };
@@ -100,7 +106,7 @@ namespace dbj {
 
 		template <typename ... Args>
 		inline std::string printf_to_buffer
-		(const char * const message, Args ... args) noexcept
+		(const char* const message, Args ... args) noexcept
 		{
 			auto buf_ = dbj::fmt::to_buff(message, args...);
 			return { buf_.get() };
@@ -108,16 +114,16 @@ namespace dbj {
 #endif
 		// DBJ::TRACE exist in release builds too
 		template <typename ... Args>
-		inline void trace(wchar_t const * const message, Args ... args) noexcept
+		inline void trace(wchar_t const* const message, Args ... args) noexcept
 		{
 			auto buf_ = dbj::fmt::to_buff(message, args...);
-			::OutputDebugStringW(buf_.data()	);
+			::OutputDebugStringW(buf_.data());
 		}
 		template <typename ... Args>
-		inline void trace(const char * const message, Args ... args) noexcept
+		inline void trace(const char* const message, Args ... args) noexcept
 		{
 			auto buf_ = dbj::fmt::to_buff(message, args...);
-			::OutputDebugStringA(buf_.data()	);
+			::OutputDebugStringA(buf_.data());
 		}
 
 
@@ -126,9 +132,9 @@ namespace dbj {
 
 namespace dbj {
 
-	inline void errno_exit(errno_t errno_, const char * file, const int line, void(*ccb_)(void) = nullptr)
+	inline void errno_exit(errno_t errno_, const char* file, const int line, void(*ccb_)(void) = nullptr)
 	{
-		if (errno_t(0) == errno_) 
+		if (errno_t(0) == errno_)
 			return;
 		char err_msg_[BUFSIZ]{ 0 };
 		strerror_s(err_msg_, BUFSIZ, errno_);
@@ -173,7 +179,7 @@ namespace dbj::core {
 	extern "C" {
 
 		/*	transform path to filename,	delimiter is '\\' */
-		inline	typename ::dbj::chr_buf::yanb
+		inline	typename ::dbj::chr_buf::yanb::type
 			filename(std::string_view file_path, const char delimiter_ = '\\')
 			noexcept
 		{
@@ -193,7 +199,7 @@ namespace dbj::core {
 		*/
 		// inline std::string FILELINE(const std::string & file_path,
 		inline
-			typename ::dbj::chr_buf::yanb
+			typename ::dbj::chr_buf::yanb::type
 			fileline(std::string_view file_path,
 				unsigned line_,
 				std::string_view suffix = "")
@@ -208,6 +214,59 @@ namespace dbj::core {
 
 	} // extern "C"
 #pragma warning( pop )
+}
+namespace dbj::fmt {
+	inline char const* frm_arg(::dbj::chr_buf::yanb value) noexcept
+	{
+		return value.data();
+	}
+
+	inline wchar_t const* frm_arg(::dbj::chr_buf::yanwb value) noexcept
+	{
+		return value.data();
+	}
+
+
+	/*  vaguely inspired by
+		https ://stackoverflow.com/a/39972671/10870835
+	*/
+	template<typename ... Args>
+	inline typename ::dbj::chr_buf::yanb
+		to_buff(std::string_view format_, Args /*const &*/ ...args)
+		noexcept
+	{
+		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
+		const auto fmt = format_.data();
+		// 1: what is the size required
+		size_t size = 1 + std::snprintf(nullptr, 0, fmt, frm_arg(args) ...);
+		assert(size > 0);
+		// 2: use it at runtime
+		auto buf = std::make_unique<char[]>(size + 1);
+		// each arg becomes arg to the frm_arg() overload found
+		size = std::snprintf(buf.get(), size, fmt, frm_arg(args) ...);
+		assert(size > 0);
+
+		return { buf.get() };
+	}
+	// wide version
+	template<typename ... Args>
+	inline typename ::dbj::chr_buf::yanwb
+		to_buff(std::wstring_view format_, Args const& ...args)
+		noexcept
+	{
+		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
+		const auto fmt = format_.data();
+		// 1: what is the size required
+		size_t size = 1 + std::swprintf(nullptr, 0, fmt, frm_arg(args) ...);
+		assert(size > 0);
+		// 2: use it at runtime
+		auto buf = std::make_unique<wchar_t[]>(size + 1);
+		// each arg becomes arg to the frm_arg() overload found
+		size = std::swprintf(buf.get(), size, fmt, frm_arg(args) ...);
+		assert(size > 0);
+
+		return { buf.get() };
+	}
 }
 
 #include "../dbj_gpl_license.h"

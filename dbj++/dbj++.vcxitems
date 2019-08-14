@@ -25,7 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_chr_buf_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_core_utils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_utils_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_runtime.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_format.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_insider.h" />

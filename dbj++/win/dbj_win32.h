@@ -179,7 +179,7 @@ string_from_win32_call(win32_api win32_call, unsigned initialSize = 0U)
 	}
 }
 
-inline typename ::dbj::chr_buf::narrow module_basename(HINSTANCE h_instance = NULL ) {
+inline typename ::dbj::chr_buf::narrow_type module_basename(HINSTANCE h_instance = NULL ) {
 
 	std::string module_path
 		= string_from_win32_call<char>([h_instance](char* buffer, int size)
@@ -189,9 +189,9 @@ inline typename ::dbj::chr_buf::narrow module_basename(HINSTANCE h_instance = NU
 
 	_ASSERTE(module_path.empty() == false);
 
-	typename ::dbj::chr_buf::narrow buffer_;
+	typename ::dbj::chr_buf::narrow_type buffer_;
 
-	::dbj::chr_buf::set_payload( buffer_, ::dbj::basename(module_path.data()) );
+	::dbj::chr_buf::core::set_payload( buffer_, ::dbj::basename(module_path.data()) );
 
 	return buffer_;
 }

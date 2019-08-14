@@ -13,7 +13,7 @@ namespace dbj {
 			using namespace  ::std::literals::string_view_literals;
 			namespace h = ::std::chrono;
 
-			using buf_type = ::dbj::chr_buf::narrow;
+			using buf_type = typename ::dbj::chr_buf::narrow_type ;
 
 			// this is *very* tricky to get right
 			template<typename T>
