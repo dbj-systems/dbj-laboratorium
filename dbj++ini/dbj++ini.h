@@ -19,6 +19,8 @@
 #include <string>
 #include <memory>
 #include <string_view>
+#include <array>
+#include <cassert>
 
 #include <dbj++/core/dbj++core.h>
 #include <dbj++/util/dbj++util.h>

@@ -6,10 +6,12 @@ By hiding local includes here, I decouple user from them too ...
 */
 
 #include <cstdio>
-//#include <crtdbg.h>
-//#include <windows.h>
+#include <cassert>
+#include <array>
+#include <map>
 
 #include <dbj++/core/dbj++core.h>
+#include <dbj++/console/dbj++con.h>
 #include <dbj++/win/dbj++win.h>
 #include "dbj++log.h"
 #include "syslog/syslog.h"
@@ -35,55 +37,7 @@ namespace dbj::log {
 			openlog((char*)(tag_ == nullptr ? NULL : tag_), opt_1, opt_2);
 		}
 
-		template<typename ... T>  void  syslog_emergency(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_emerg, format_, args...);
-		}
 
-		template<typename ... T>  void  syslog_alert(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_alert, format_, args...);
-		}
-
-		template<typename ... T>  void  syslog_critical(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_crit, format_, args...);
-		}
-
-		template<typename ... T>  void  syslog_error(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_err, format_, args...);
-		}
-
-
-		template<typename ... T>  void  syslog_warning(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_warning, format_, args...);
-		}
-
-
-		template<typename ... T>  void  syslog_notice(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_notice, format_, args...);
-		}
-
-		template<typename ... T>  void  syslog_info(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_info, format_, args...);
-		}
-
-		template<typename ... T>  void  syslog_debug(const char* format_, T ... args)
-		{
-			DBJ_AUTO_LOCK;
-			inner::syslog_call(syslog_level::log_debug, format_, args...);
-		}
 
 } // dbj::log
 

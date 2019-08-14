@@ -4,14 +4,19 @@
 #include <ctime>
 #include <chrono>
 #include <array>
-// this is not  recommended: one should include the whole of the dbj++core not parts of it
-#include <dbj++/core/dbj_synchro.h>
+#include <mutex>
 #include "dbj_util.h"
 #include "dbj_local_log.h"
 
-//using namespace std;
-//using namespace std::chrono;
-//using namespace std::literals::string_view_literals;
+struct lock_unlock final {
+
+	mutable std::mutex mux_;
+
+	lock_unlock() noexcept { mux_.lock(); }
+	~lock_unlock() { mux_.unlock(); }
+};
+
+#define DBJ_VERIFY(x) _ASSERT_AND_INVOKE_WATSON(x)
 
 void dbj_write_to_local_log(
 	char * priority_name_ ,
@@ -21,7 +26,7 @@ void dbj_write_to_local_log(
 	char * syslog_procid_str,
 	const char * the_message )
 {
-	::dbj::sync::lock_unlock locker_;
+	lock_unlock locker_;
 
 	DBJ_VERIFY(priority_name_ && timestamp_rfc3164 && local_hostname 
 		&& syslog_ident && syslog_procid_str && the_message);

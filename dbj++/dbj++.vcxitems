@@ -82,7 +82,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj++win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_app_env.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_com.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_main.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_main.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_uuid.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_win32.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_win_inc.h" />

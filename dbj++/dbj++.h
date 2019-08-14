@@ -22,6 +22,8 @@
 #include "./num/dbj_numeric.h"
 #include "./win/dbj++win.h"
 
+#include "dbj_main.h"
+
 #pragma warning( pop )
 
 #if 0

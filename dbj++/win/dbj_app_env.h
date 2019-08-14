@@ -1,22 +1,5 @@
 #pragma once
 
-/*
-include dbj_runtime.h before this
-
-#include <string>
-#include <algorithm>
-#include <thread>
-#include <chrono>
-*/
-
-#include "../console/dbj++con.h"
-
-#include <crtdbg.h>
-#include <vector>
-#include <thread>
-#include <map>
-
-
 /// <summary>
 /// The Command Line encapsulation aka TCL-ENC
 /// by dbj.org

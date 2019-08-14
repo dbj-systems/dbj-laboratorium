@@ -122,10 +122,9 @@ namespace dbj::log {
 				(void)SetLastError(0);
 				// 2: try the fprintf
 
-				DBJ_FPRINTF(log_file_,"DBJ++ log file | %s | %s\n", file_path_.data(),
-					::dbj::core::util::make_time_stamp(
-						ec_,::dbj::core::util::TIME_STAMP_FULL_MASK).data()
-					); 
+				auto time_stamp = ::dbj::core::util::make_time_stamp(ec_, ::dbj::core::util::TIME_STAMP_FULL_MASK);
+
+				DBJ_FPRINTF(log_file_,"DBJ++ log file | %s | %s\n", this->file_path_.data() , time_stamp.get() ); 
 
 				if (ec_) {
 					DBJ_FPRINTF(log_file_, "std error in local log file constructor: %s", ec_.message().c_str() );
@@ -267,7 +266,7 @@ namespace dbj::log {
 
 	template<typename CHR>
 	inline void async_log_write(
-		::dbj::chr_buf::yanb_t<CHR> message
+		::dbj::chr_buf::yanb_tpl<CHR> message
 	) noexcept
 	{
 		async_log_write(std::basic_string_view<CHR>{ message.data() });

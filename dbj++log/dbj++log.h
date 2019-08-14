@@ -3,7 +3,7 @@
 /*
 (c) 2019 by dbj.systems, author: dbj@dbj.org, Licence GPLv3
 
-Please see the README.MD for base documentation 
+Please see the README.MD for base documentation
 Please see the LICENSE for the GPLv3 info
 
 NOTE: syslog() is UNIX affair, and is blisfully unaware of wchar_t
@@ -21,8 +21,8 @@ namespace dbj::log {
 
 	constexpr inline const auto syslog_dgram_size = 1024U;
 
-	extern "C" inline void syslog_init(const char * = nullptr 
-	/* syslog_server_ip_and_port if none give local syslog server will be targeted */
+	extern "C" inline void syslog_init(const char* = nullptr
+		/* syslog_server_ip_and_port if none give local syslog server will be targeted */
 	);
 
 	/*
@@ -58,7 +58,7 @@ namespace dbj::log {
 
 	/* open is optional */
 	extern "C" inline void syslog_open(
-		const char * /*tag*/ = nullptr,
+		const char* /*tag*/ = nullptr,
 		syslog_open_options = syslog_open_options::_null_,
 		syslog_open_facilities = syslog_open_facilities::log_user
 	);
@@ -75,52 +75,95 @@ namespace dbj::log {
 		log_debug = 7	 /* debug-level messages */
 	};
 
-	namespace inner {
-		// dbj added
-		extern "C" int is_syslog_initialized();
-		/* send the log message  by the priority given */
-		extern "C" void vsyslog(int, const char *);
+	// dbj added
+	extern "C" int is_syslog_initialized();
+	/* send the log message  by the priority given */
+	extern "C" void vsyslog(int, const char*);
 
+	namespace detail {
+		
 		template<typename ... T>
-		inline void syslog_call(syslog_level level_, const char * format_, T ... args)
-		{
-			static auto check_once_is_syslog_initialized
-				= []() -> bool {
-				if (!is_syslog_initialized()) {
-					syslog_init(); // looking for local server
-					::OutputDebugStringA(
-						"\n\n" __FILE__ "\n\n"
-						"dbj++ found not to be initialized on first use and then initialized for a localhost syslog server"
-						"\n\n"
-					);
-				}
-				return true;
-			}();
-			// this static is locking, no mutex necessary
-			static std::array<char, syslog_dgram_size> message_{ { 0 } };
-			message_.fill(0); // zero the buffer
-			auto kontrol = std::snprintf(message_.data(), message_.size(), format_, args...);
-			_ASSERTE(kontrol > 1);
-			vsyslog((int)level_, message_.data());
-		}
+	inline void syslog_call( syslog_level level_, const char* format_, T ... args)
+	{
+		static auto check_once_is_syslog_initialized
+			= []() -> bool {
+			if (!is_syslog_initialized()) {
+				syslog_init(); // looking for local server
+				::OutputDebugStringA(
+					"\n\n" __FILE__ "\n\n"
+					"dbj++ found not to be initialized on first use and then initialized for a localhost syslog server"
+					"\n\n"
+				);
+			}
+			return true;
+		}();
+		// this static is locking, no mutex necessary
+		static std::array<char, syslog_dgram_size> message_{ { 0 } };
+		message_.fill(0); // zero the buffer
+		auto kontrol = std::snprintf(message_.data(), message_.size(), format_, args...);
+		_ASSERTE(kontrol > 1);
+		vsyslog((int)level_, message_.data());
+	}
 
-	} // inner
 
-	template<typename ... T> inline void  syslog_emergency(const char* format_, T ... args);
+	struct lock_unlock final {
 
-	template<typename ... T> inline void  syslog_alert(const char* format_, T ... args);
+		mutable std::mutex mux_;
 
-	template<typename ... T> inline void  syslog_critical(const char* format_, T ... args);
+		lock_unlock() noexcept { mux_.lock(); }
+		~lock_unlock() { mux_.unlock(); }
+	};
+}
 
-	template<typename ... T> inline void  syslog_error(const char* format_, T ... args);
+template<typename ... T>  void  syslog_emergency(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_emerg, format_, args...);
+}
 
-	template<typename ... T> inline void  syslog_warning(const char* format_, T ... args);
+template<typename ... T>  void  syslog_alert(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_alert, format_, args...);
+}
 
-	template<typename ... T> inline void  syslog_notice(const char* format_, T ... args);
+template<typename ... T>  void  syslog_critical(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_crit, format_, args...);
+}
 
-	template<typename ... T> inline void  syslog_info(const char* format_, T ... args);
+template<typename ... T>  void  syslog_error(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_err, format_, args...);
+}
 
-	template<typename ... T> inline void  syslog_debug(const char* format_, T ... args);
+
+template<typename ... T>  void  syslog_warning(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_warning, format_, args...);
+}
+
+
+template<typename ... T>  void  syslog_notice(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_notice, format_, args...);
+}
+
+template<typename ... T>  void  syslog_info(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_info, format_, args...);
+}
+
+template<typename ... T>  void  syslog_debug(const char* format_, T ... args)
+{
+	detail::lock_unlock padlock;
+	detail::syslog_call(syslog_level::log_debug, format_, args...);
+}
 
 } // dbj::log
 
