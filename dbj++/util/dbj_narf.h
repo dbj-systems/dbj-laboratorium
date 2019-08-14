@@ -1,7 +1,7 @@
 #pragma once
 /*
 used through dbj++.h
-thus dbj_crt.h is included before this
+thus dbj_runtime.h is included before this
 */
 
 #include <array>

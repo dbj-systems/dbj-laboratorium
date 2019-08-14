@@ -1,20 +1,24 @@
 #pragma once
 
+#ifdef DBJ_INCLUDE_STD_
+#include <system_error>
+#include <memory>
+#endif
+
 /* inclusion of this file defines the kind of a licence used */
 #include "dbj_gpl_license.h"
-#include "./win/dbj_win_inc.h"
 
 #pragma warning( push )
 #pragma warning( disable : 4244 )
 
+#include "./util/dbj++util.h"
 #include "./core/dbj++core.h"
 //
 // DEPRECATED -> #include "./err/dbj_err.h"
 #include "./err/dbj_errc.h"
 //
-#include "./util/dbj++util.h"
 #include "./console/dbj++con.h"
-#include "./testfwork/dbj_testing_interface.h"
+#include "./testfwork/dbj++testing_framework.h"
 #include "./num/dbj_numeric.h"
 #include "./win/dbj++win.h"
 

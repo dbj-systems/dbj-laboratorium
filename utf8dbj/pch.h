@@ -11,20 +11,30 @@
 #include <vector>
 #include <string>
 #include <string_view>
+#include <chrono>
 #include <assert.h>
 #include <math.h>
 #include <fcntl.h>  
 #include <io.h> 
 #include <stdio.h> 
 #include <wchar.h> 
+
 #ifndef _HAS_CXX17
 #	error C++17 please ...
 #endif
-#	define UNREF(...) (void)noexcept(__VA_ARGS__)
-#define ST_2(x) #x
-#define ST_1(x) ST_2(x)
-#define ST(x) ST_1(x)
-#define TU(x) printf("\n",ST(x));
+
+#include <dbj++/core/dbj++core.h>
+#include <dbj++log/dbj++log.h>
+
+
+//#	define UNREF(...) (void)noexcept(__VA_ARGS__)
+//
+//#ifndef TU
+//	#define ST_2(x) #x
+//	#define ST_1(x) ST_2(x)
+//	#define ST(x) ST_1(x)
+//	#define TU(x) printf("\n",ST(x));
+//#endif
 
 //// first a good decades old VERIFY macro
 //namespace dbj {

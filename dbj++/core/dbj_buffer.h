@@ -2,9 +2,7 @@
 
 // #define DBJ_BUFFER_TESTING
 
-#include "../dbj_gpl_license.h"
-#include "dbj_insider.h"
-#include "dbj_buf.h"
+
 
 #include <system_error>
 #include <cassert>
@@ -16,6 +14,11 @@
 #include <cstring>
 #include <vector>
 
+#include "../dbj_gpl_license.h"
+
+
+#if DBJ_COMFY_BUFFER
+
 namespace dbj {
 	namespace buf {
 		/*
@@ -23,7 +26,7 @@ namespace dbj {
 
 	2019 FEB	dbj@dbj.org
 
-	dbj::buf is for fast-and-dangerous code and bellow is a bit more
+	dbj::chr_buf is for fast-and-dangerous code and bellow is a bit more
 	comfortable api for	dynamic	char buffer.
 	Slower than naked dbj::fmt::yanb_t<T> but still approx 2x to 3x faster vs vector<char>
 
@@ -34,19 +37,21 @@ namespace dbj {
 	For *normal* buffer sizes (posix BUFSIZ or multiplies of it)
 	using this type has a lot in favour.
 */
-		struct buffer final 
-{
-			using smart_buf = typename ::dbj::buf::smart_buf<char>;
-			// yanb_t<CHAR>; aka
-			using storage_t = typename yanb_t<CHAR>::type;
-			using type = buffer;
-			using reference_type = type & ;
-			// this is the std::share_ptr<char>
-			using pointer = typename smart_buf::pointer ;
+		using smart_buf_char_t = typename smart_buf<char>;
 
-			using value_type = typename smart_buf::value_type ;
-			using iterator = value_type * ;
-			using citerator = value_type const * ;
+		struct buffer final
+		{
+			using smart_buf_t = smart_buf_char_t ;
+			// yanb_t<CHAR>; aka
+			using storage_t = yanb ;
+			using type = buffer;
+			using reference_type = type &;
+			// this is the std::share_ptr<char>
+			using pointer = typename smart_buf_t::pointer;
+
+			using value_type = typename smart_buf_t::value_type;
+			using iterator = value_type *;
+			using citerator = value_type const*;
 		private:
 			// the data is here
 			storage_t data_{}; // size == 0
@@ -59,14 +64,14 @@ namespace dbj {
 			bool valid() const noexcept { return this->data_.operator bool(); }
 
 			// allocated but empty yields true
-			bool empty() const noexcept  {
+			bool empty() const noexcept {
 				return (valid() && this->data_[0] != '\0');
 			}
 
-			iterator data() noexcept { return data_.data();	}
-			citerator data() const noexcept { return data_.data();	}
+			iterator data() noexcept { return data_.data(); }
+			citerator data() const noexcept { return data_.data(); }
 
-			size_t const size() const noexcept { return this->view.size();	}
+			size_t const size() const noexcept { return this->view.size(); }
 			size_t size() noexcept { return view.size(); }
 
 			// default 
@@ -75,17 +80,17 @@ namespace dbj {
 			// sized but empty buffer
 			explicit buffer(inside_1_and_max new_size) noexcept
 			{
-				data_.reset( ::dbj::buf::smart_buf<char>::make( new_size) );
+				data_.reset(::dbj::chr_buf::smart_buf<char>::make(new_size));
 				view = data_.data(); // dangerous?
 			}
 
 			// copy
-			buffer(const buffer & another_) noexcept
+			buffer(const buffer& another_) noexcept
 			{
 				this->assign(another_);
 			}
 
-			buffer & operator = (const buffer & another_) noexcept
+			buffer& operator = (const buffer& another_) noexcept
 			{
 				if (&another_ != this) {
 					this->assign(another_);
@@ -94,12 +99,12 @@ namespace dbj {
 			}
 			// NOTE! it was found manualy implemented
 			// move as in here, speeds up the moving by min 200%
-			buffer(buffer && another_) noexcept {
-				std::swap( this->data_ , another_.data_);
-				std::swap( this->view  , another_.view );
+			buffer(buffer&& another_) noexcept {
+				std::swap(this->data_, another_.data_);
+				std::swap(this->view, another_.view);
 			}
 
-			buffer & operator = ( buffer && another_) noexcept {
+			buffer& operator = (buffer&& another_) noexcept {
 				if (&another_ != this) {
 					std::swap(this->data_, another_.data_);
 					std::swap(this->view, another_.view);
@@ -117,13 +122,13 @@ namespace dbj {
 				assign(charr, charr + N);
 			}
 
-			void assign(const buffer & another_) noexcept
+			void assign(const buffer& another_) noexcept
 			{
 				this->data_ = another_.data_;
-				this->view  = another_.view;
+				this->view = another_.view;
 			}
 
-			void assign(char const * from_, char const * to_) noexcept
+			void assign(char const* from_, char const* to_) noexcept
 			{
 				assert(from_ && to_);
 				std::string sv_(from_, to_); // normalize ?
@@ -131,24 +136,24 @@ namespace dbj {
 				this->view = this->data_.data();
 			}
 
-			void assign(char const * from_ ) noexcept
+			void assign(char const* from_) noexcept
 			{
-				assert(from_ );
-				this->data_.reset( from_ );
+				assert(from_);
+				this->data_.reset(from_);
 				this->view = this->data_.data();
 			}
 
 			// notice the usage of the dbj::insider definition
 			// as  argument type
-			char const & operator [] (inside_1_and_max idx_) const
+			char const& operator [] (inside_1_and_max idx_) const
 			{
-				return view.at(idx_) ;
+				return view.at(idx_);
 			}
 
 			// to be removed
 			[[deprecated]]
-			value_type ** const address() const noexcept {
-				value_type * p = (value_type*)std::addressof(data_[0]);
+			value_type** const address() const noexcept {
+				value_type* p = (value_type*)std::addressof(data_[0]);
 				return std::addressof(p);
 			}
 
@@ -157,19 +162,19 @@ namespace dbj {
 			citerator begin() const noexcept { return data_.data(); }
 			citerator end()   const noexcept { return data_.data() + view.size(); }
 
-			value_type & front() noexcept { assert(valid()); return data_[0]; }
-			value_type & back()  noexcept { assert(valid()); return data_[view.size() - 1]; }
+			value_type& front() noexcept { assert(valid()); return data_[0]; }
+			value_type& back()  noexcept { assert(valid()); return data_[view.size() - 1]; }
 
-			buffer const & fill(char val_) noexcept
+			buffer const& fill(char val_) noexcept
 			{
 				// I do allow for default ctor which leaves the instance 
 				// in the invalid state, but I do not allow to use it
 				// this all complicates the usage
-				assert( this->valid());
+				assert(this->valid());
 				// always send the size_
 				// data_[0] == '\0' is the state of 
 				// alocated but empty buffer
-				smart_buf::fill( data_, val_, view.size());
+				smart_buf::fill(data_, val_, view.size());
 				return *this;
 			}
 
@@ -195,14 +200,14 @@ namespace dbj {
 
 			//  assignments are used to make "from" certain types
 			friend void assign(reference_type target_,
-				char const * from_, char const * to_)
+				char const* from_, char const* to_)
 			{
 				target_.assign(from_, to_);
 			}
 
 			friend void assign(reference_type target_, std::string str_)
 			{
-				target_.assign( str_.c_str());
+				target_.assign(str_.c_str());
 			}
 
 			friend void assign(reference_type target_, dbj::string_view strvw_)
@@ -228,7 +233,7 @@ namespace dbj {
 				);
 			}
 #ifdef DBJ_BUFFERS_IOSTREAMS
-			friend std::ostream & operator << (std::ostream & os, buffer const & cb_)
+			friend std::ostream& operator << (std::ostream& os, buffer const& cb_)
 			{
 				return os << cb_.data_.data();
 			}
@@ -249,10 +254,10 @@ namespace dbj {
 			*/
 			friend wide_copy_result wide_copy(reference_type source_) noexcept
 			{
-				auto const & source_size_ = source_.view.size();
-				auto & source_pointer_ = source_.data_;
+				auto const& source_size_ = source_.view.size();
+				auto& source_pointer_ = source_.data_;
 
-				std::unique_ptr<wchar_t[]> wp = 
+				std::unique_ptr<wchar_t[]> wp =
 					std::make_unique<wchar_t[]>(source_size_ + 1);
 
 				size_t rezult_size;
@@ -275,33 +280,40 @@ namespace dbj {
 	} // buf
 } // dbj
 
+namespace dbj::fmt {
+	inline char const* frm_arg(::dbj::chr_buf::buffer::type value) noexcept
+	{
+		return value.data();
+	}
+}
+
 
 #ifdef DBJ_BUFFER_TESTING
-#define TU(x) std::wcout << std::boolalpha << L"\nExpression: '" << (#x) << L"'\n\tResult: '" << (x) << L"'\n"
+// #define DBJ_TUNIT(x) std::wcout << std::boolalpha << L"\nExpression: '" << (#x) << L"'\n\tResult: '" << (x) << L"'\n"
 #include <iostream>
 namespace {
 	inline bool dbj_testing_dbj_comfy_buffer()
 	{
-		using namespace ::dbj::buf;
+		using namespace ::dbj::chr_buf;
 		// 1
 		{
-			TU(buffer(BUFSIZ));
+			DBJ_TUNIT(buffer(BUFSIZ));
 
-			TU(buffer("string literall"));
+			DBJ_TUNIT(buffer("string literall"));
 
 			buffer bf(BUFSIZ);
 			assign(bf, std::string("std::string"));
-			TU(bf);
+			DBJ_TUNIT(bf);
 			assign(bf, dbj::string_view("std::stringview"));
-			TU(bf);
+			DBJ_TUNIT(bf);
 		}
 		// 2
 		{
 			buffer		 buff_1 = buffer(0xF);
-			TU(buff_1.fill('*'));
-			TU(buff_1);
+			DBJ_TUNIT(buff_1.fill('*'));
+			DBJ_TUNIT(buff_1);
 			buffer		 buff_2 = buff_1;
-			TU(buff_1 == buff_2);
+			DBJ_TUNIT(buff_1 == buff_2);
 		}
 		return true;
 	} // testing_dbj_buffer
@@ -311,5 +323,5 @@ namespace {
 }
 
 #endif // DBJ_BUFFER_TESTING
-#undef TU
-#undef DBJ_BUFFER_TESTING
+
+#endif

@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-include dbj_crt.h before this
+include dbj_runtime.h before this
 
 #include <string>
 #include <algorithm>

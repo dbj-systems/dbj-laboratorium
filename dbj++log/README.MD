@@ -13,7 +13,7 @@ We recomend the "Syslogwatcher". Click on the image for the download. Please als
 > Use at your own risk.
 
 
-Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is foollowed. Plan is to develop a support for the newer one: 
+Currently [RFC3164](https://tools.ietf.org/html/rfc3164) is followed. Plan is to develop a support for the newer one: 
 [RFC5424](https://tools.ietf.org/html/rfc5424).
 
 ### Usage and the API

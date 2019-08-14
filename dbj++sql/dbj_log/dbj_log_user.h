@@ -31,7 +31,7 @@ namespace dbj::db::err {
 	)
 		noexcept
 	{
-		::dbj::buf::yanb buffer_
+		::dbj::chr_buf::yanb buffer_
 			= ::dbj::fmt::to_buff("%s %s", ec.message().c_str(), log_message);
 
 		if (::dbj::db::err::is_sql_not_err(ec))

@@ -11,14 +11,7 @@
 // #include <map>
 // #include <algorithm>
 
-#include <cassert>
-#include <string_view>
-#include <charconv>
-#include <system_error>
-#include <array>
 
-#include "dbj_synchro.h"
-#include "dbj_traits.h"
 
 
 #if (!defined(UNICODE)) || (! defined(_UNICODE))
@@ -70,6 +63,12 @@ inline const auto & MAX = [](const auto & a, const auto & b)
 #else
 #define _DBJ_CONSTEXPR_LINE __LINE__
 #endif
+
+// for iostreams related functionality
+// although, why don't we just declare we do no use
+// iostreams at all?
+// dbj 2019-08-13
+// #define DBJ_USES_STREAMS
 
 /*
 from vcruntime.h
@@ -362,6 +361,20 @@ namespace dbj {
 	  inline constexpr size_t 
 		countof(T const (&)[N]) { 
 		  return N; 
+	  }
+
+	  inline char* basename(
+		  char* full_path,
+		  bool remove_suffix = true,
+		  char delimiter = '\\')
+	  {
+		  assert(full_path && (full_path[0] != char(0)));
+		  char* base_ = strrchr(full_path, delimiter);
+		  base_ = (base_ == NULL ? full_path : base_);
+		  if (remove_suffix == false) return base_;
+		  char* dot_pos = strchr(base_, '.');
+		  if (dot_pos)* dot_pos = char(0);
+		  return base_ + 1;
 	  }
 
 } // dbj

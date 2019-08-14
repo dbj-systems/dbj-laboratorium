@@ -2,7 +2,9 @@
 #ifndef DBJ_WIN_INC
 #define DBJ_WIN_INC
 
-#include "dbj_win_inc.h"
+// dbj++core is reqwuired to be included before
+// anything else
+// --> #include "dbj_win_inc.h"
 #include "dbj_app_env.h"
 #include "dbj_com.h"
 #include "dbj_uuid.h"

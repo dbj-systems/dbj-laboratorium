@@ -4,7 +4,8 @@
 #include <ctime>
 #include <chrono>
 #include <array>
-#include <dbj++/core/dbj++core.h>
+// this is not  recommended: one should include the whole of the dbj++core not parts of it
+#include <dbj++/core/dbj_synchro.h>
 #include "dbj_util.h"
 #include "dbj_local_log.h"
 

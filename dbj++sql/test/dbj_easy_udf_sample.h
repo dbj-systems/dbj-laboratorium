@@ -88,7 +88,7 @@ namespace dbj_easy_udfs_sample {
 
 			first and only argument is a string
 		*/
-		dbj::buf::yanb word_ = args_(0);
+		dbj::chr_buf::yanb word_ = args_(0);
 		int result = is_pal(word_.data());
 		/*
 		as per sql statement requirements we need to reurn an int
@@ -107,7 +107,7 @@ namespace dbj_easy_udfs_sample {
 		// do not throw from the UDF
 		noexcept
 	{
-		dbj::buf::yanb word_ = args_(0);
+		dbj::chr_buf::yanb word_ = args_(0);
 		int result = (int)(word_.size());
 		result_(result);
 	}
@@ -121,7 +121,7 @@ namespace dbj_easy_udfs_sample {
 	)
 	{
 		/* this is deliberately verbose code */
-		dbj::buf::yanb word = col(0);
+		dbj::chr_buf::yanb word = col(0);
 		int len_ = col(1);
 		DBJ_LOG_INF("\n\t[%3zu]\tword: %32s,\t%s: %12d",
 			row_id, word.data(), col.name(1), len_);

@@ -7,6 +7,11 @@
 #include "r_and_d.h"
 #include "snippets.h"
 
+
+#ifdef DBJ_C_LIB_TEST
+#include "dbj_c_lib_test.h"
+#endif
+
 /// <summary>
 /// just execute all the registered tests
 /// in no particular order

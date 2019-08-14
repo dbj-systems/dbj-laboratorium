@@ -209,7 +209,7 @@ namespace dbj::db {
 			   for pitfalls see here
 			   https://docs.microsoft.com/en-us/windows/desktop/api/stringapiset/nf-stringapiset-widechartomultibyte
 			*/
-			operator dbj::buf::yanb () const noexcept  {
+			operator dbj::chr_buf::yanb () const noexcept  {
 				const unsigned char *name = sqlite::sqlite3_column_text(statement_, col_index_);
 				const size_t  sze_ = sqlite::sqlite3_column_bytes(statement_, col_index_);
 				_ASSERTE(name);
@@ -454,8 +454,8 @@ no error is SQLITE_DONE or SQLITE_OK
 			}
 			// NOTE: we do not use std::string. It is slow and big, but 
 			// good at what it is mean for and that is not to be a char buffer
-			// dbj::buf::yanb == yet another buffer
-			operator dbj::buf::yanb () const noexcept
+			// dbj::chr_buf::yanb == yet another buffer
+			operator dbj::chr_buf::yanb () const noexcept
 			{
 				if (sqlite::sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) {
 				}

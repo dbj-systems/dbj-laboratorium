@@ -30,6 +30,9 @@
     <ClInclude Include="dbj_error_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_c_lib_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

@@ -18,7 +18,6 @@
 #include <map>
 #include <string>
 #include <memory>
-// string_view requires C++17
 #include <string_view>
 
 #include <dbj++/core/dbj++core.h>
@@ -42,8 +41,8 @@ namespace dbj::ini
 	// to keep them strings
 	struct ini_reader;
 
-	// NOTE: to avoid std::string we use ::dbj::buf::yanb
-	using smart_buffer = ::dbj::buf::yanb;
+	// NOTE: to avoid std::string we use ::dbj::chr_buf::yanb
+	using smart_buffer = typename ::dbj::chr_buf::yanb::type ;
 
 	/*
 	   ini file descriptor

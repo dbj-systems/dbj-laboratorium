@@ -1,7 +1,5 @@
 #pragma once
 
-#include "dbj_buffer.h"
-
 namespace dbj {
 	namespace fmt {
 
@@ -43,20 +41,6 @@ namespace dbj {
 			return value.get() ;
 		}
 
-		inline char const * frm_arg( ::dbj::buf::buffer::type value) noexcept
-		{
-			return value.data() ;
-		}
-
-		inline char const * frm_arg( ::dbj::buf::yanb::type value ) noexcept
-		{
-			return value.data() ;
-		}
-
-		inline wchar_t const * frm_arg( ::dbj::buf::yanwb::type value) noexcept
-		{
-			return value.data() ;
-		}
 
 #pragma endregion 
 
@@ -84,46 +68,7 @@ namespace dbj {
 		}
 #endif
 		/*
-		vaguely inspired by
-		https://stackoverflow.com/a/39972671/10870835
-		*/
-		template<typename ... Args>
-		inline dbj::buf::yanb
-			to_buff(std::string_view format_, Args /*const &*/ ...args)
-			noexcept
-		{
-			static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-			const auto fmt = format_.data();
-			// 1: what is the size required
-			size_t size = 1 + std::snprintf(nullptr, 0, fmt, frm_arg( args ) ...);
-			assert(size > 0);
-			// 2: use it at runtime
-			auto buf = std::make_unique<char[]>(size + 1);
-			// each arg becomes arg to the frm_arg() overload found
-			size = std::snprintf(buf.get(), size, fmt, frm_arg( args ) ...);
-			assert(size > 0);
 
-			return {buf.get()};
-		}
-		// wide version
-		template<typename ... Args>
-		inline dbj::buf::yanwb
-			to_buff(std::wstring_view format_, Args const & ...args)
-			noexcept
-		{
-			static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-			const auto fmt = format_.data();
-			// 1: what is the size required
-			size_t size = 1 + std::swprintf(nullptr, 0, fmt, frm_arg(args) ...);
-			assert(size > 0);
-			// 2: use it at runtime
-			auto buf = std::make_unique<wchar_t[]>(size + 1);
-			// each arg becomes arg to the frm_arg() overload found
-			size = std::swprintf(buf.get(), size, fmt, frm_arg(args) ...);
-			assert(size > 0);
-
-			return { buf.get() };
-		}
 
 /*
 BIG NOTE: if you mistake the formating code probably everything
@@ -175,49 +120,7 @@ namespace dbj {
 			::OutputDebugStringA(buf_.data()	);
 		}
 
-#pragma warning( push )
-#pragma warning( disable: 4190 )
 
-		using smart_buf_type = typename dbj::buf::buff_type;
-
-		extern "C" {
-
-			/*	transform path to filename,	delimiter is '\\' */
-			inline	dbj::buf::yanb
-				filename(std::string_view file_path, const char delimiter_ = '\\')
-				noexcept
-			{
-				_ASSERTE(!file_path.empty());
-				size_t pos = file_path.find_last_of(delimiter_);
-				return 
-					dbj::fmt::to_buff("%s",
-					(std::string_view::npos != pos
-						? file_path.substr(pos, file_path.size()) 
-						: file_path )
-				);
-			}
-
-			/*
-			usual usage :
-			DBJ::FILELINE( __FILE__, __LINE__, "some text") ;
-			*/
-			// inline std::string FILELINE(const std::string & file_path,
-			inline 
-				dbj::buf::yanb
-				fileline (std::string_view file_path,
-				          unsigned line_,
-				          std::string_view suffix = "")
-			{
-				_ASSERTE(!file_path.empty());
-
-				return 
-					dbj::fmt::to_buff(
-						"%s(%u)%s", filename(file_path), line_, (suffix.empty() ? "" : suffix.data())
-					);
-			}
-
-		} // extern "C"
-#pragma warning( pop )
 	} //core
 } // dbj
 
@@ -260,7 +163,51 @@ if (e_ < 0) ::dbj::errno_exit( errno, __FILE__, __LINE__ ); \
 
 }
 
+namespace dbj::core {
+
+#pragma warning( push )
+#pragma warning( disable: 4190 )
+
+	// using smart_buf_type = typename dbj::chr_buf::buff_type;
+
+	extern "C" {
+
+		/*	transform path to filename,	delimiter is '\\' */
+		inline	typename ::dbj::chr_buf::yanb
+			filename(std::string_view file_path, const char delimiter_ = '\\')
+			noexcept
+		{
+			_ASSERTE(!file_path.empty());
+			size_t pos = file_path.find_last_of(delimiter_);
+			return
+				dbj::fmt::to_buff("%s",
+				(std::string_view::npos != pos
+					? file_path.substr(pos, file_path.size())
+					: file_path)
+				);
+		}
+
+		/*
+		usual usage :
+		DBJ::FILELINE( __FILE__, __LINE__, "some text") ;
+		*/
+		// inline std::string FILELINE(const std::string & file_path,
+		inline
+			typename ::dbj::chr_buf::yanb
+			fileline(std::string_view file_path,
+				unsigned line_,
+				std::string_view suffix = "")
+		{
+			_ASSERTE(!file_path.empty());
+
+			return
+				dbj::fmt::to_buff(
+					"%s(%u)%s", filename(file_path), line_, (suffix.empty() ? "" : suffix.data())
+				);
+		}
+
+	} // extern "C"
+#pragma warning( pop )
+}
 
 #include "../dbj_gpl_license.h"
-
-#pragma comment( user, DBJ_BUILD_STAMP ) 

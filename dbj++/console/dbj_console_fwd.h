@@ -5,9 +5,9 @@
 #include "../dbj_gpl_license.h"
 
 #include "dbj_commander.h"
-#include "../core/dbj_crt.h"
+#include "../core/dbj_runtime.h"
 #include "../core/dbj_traits.h"
-#include "../win/dbj_win_inc.h"
+#include "../core/dbj_win_inc.h"
 #include "../util/dbj_string_util.h"
 
 #ifndef  UNICODE

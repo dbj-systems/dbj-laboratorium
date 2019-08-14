@@ -1,68 +1,26 @@
 #pragma once
 //
-#include <system_error>
-#include "dbj_win_inc.h"
-#include "../util/dbj_defval.h"
-//
-#include "../core/dbj++core.h"
+// util required --> #include "../util/dbj_defval.h"
+
+/*
+core always required
+
+#include "../core/dbj_win_inc.h"
+#include "../core/dbj_format.h"
+#include "../core/dbj_buf.h"
+*/
 
 namespace dbj {
 	namespace win32 {
 
 		inline bool is_windows_10()
 		{
-			if (!IsWindows10OrGreater())
+			if (! ::IsWindows10OrGreater())
 			{
 				::dbj::core::trace(L"\n\nYou need at least Windows 10 %s\n\n", L"Version Not Supported");
 				return false;
 			}
 			return true;
-		}
-
-		inline int last_win32_error() noexcept
-		{
-			struct last final
-			{
-				last() noexcept : error_(::GetLastError()) {}
-				~last() { ::SetLastError(0); }
-				int operator() () const noexcept { return error_; }
-			private:
-				mutable int error_{};
-			};
-
-			int last_error_ = (last{})();
-			return last_error_;
-		};
-
-// return instance of std::system_error
-// which for MSVC STL delivers win32 last error message
-// by calling what() on it
-		inline auto system_error_instance()
-			->  std::system_error
-		{
-			using namespace std;
-		return system_error(error_code(last_win32_error(), system_category()));
-		}
-
-		// Returns the last Win32 error message
-		// with optional prefix
-		inline ::dbj::buf::yanb 
-		get_last_error_message(
-			std::string_view prompt = std::string_view{}
-		)
-		{
-			//Get the error 
-			auto syserr = system_error_instance();
-			const char * sys_err_msg = syserr.what();
-
-			if (!prompt.empty()) 
-			{
-				//use std::string only and if needed
-				std::string str_(prompt); str_.append(sys_err_msg);
-				return { str_.c_str() };
-			}
-
-			return { sys_err_msg };
 		}
 
 		// no pointer please, use ""sv literals instead
@@ -192,31 +150,6 @@ inline auto geo_info = [](PWSTR location) {
 	}; // geo_info
 #endif // DBJ_GEO_INFO
 
-/*
-Bellow is WIN32 API, adjusted for standard C++ use
-dbj::win32::string_compare()
-locale sensitive so to be used for "UI string comparisons",
-ui sorting, and a such
-retval is standard -1,0,1 triplet
-*/
-inline int string_compare(LPCTSTR str1, LPCTSTR str2, unsigned char ignore_case)
-{
-	int rez = CompareStringEx(
-		LOCALE_NAME_USER_DEFAULT,
-		ignore_case == 1 ? LINGUISTIC_IGNORECASE : NORM_LINGUISTIC_CASING,
-		str1,
-		-1,
-		str2,
-		-1,
-		NULL, NULL, 0
-	);
-	switch (rez) {
-	case CSTR_LESS_THAN: rez = -1; break;
-	case CSTR_EQUAL: rez = 0; break;
-	case CSTR_GREATER_THAN: rez = 1; break;
-	}
-	return rez;
-}
 
 /*
 https://stackoverflow.com/a/54491532/10870835
@@ -246,21 +179,7 @@ string_from_win32_call(win32_api win32_call, unsigned initialSize = 0U)
 	}
 }
 
-inline char * basename(
-	char * full_path,
-	bool remove_suffix = true,
-	char delimiter = '\\')
-{
-	assert(full_path && (full_path[0] != char(0)));
-	char * base_ = strrchr(full_path, delimiter);
-	base_ = (base_ == NULL ? full_path : base_);
-	if (remove_suffix == false) return base_;
-	char * dot_pos = strchr(base_, '.');
-	if (dot_pos) *dot_pos = char(0);
-	return base_ + 1;
-}
-
-inline dbj::buf::yanb module_basename(HINSTANCE h_instance = NULL ) {
+inline typename ::dbj::chr_buf::narrow module_basename(HINSTANCE h_instance = NULL ) {
 
 	std::string module_path
 		= string_from_win32_call<char>([h_instance](char* buffer, int size)
@@ -270,7 +189,11 @@ inline dbj::buf::yanb module_basename(HINSTANCE h_instance = NULL ) {
 
 	_ASSERTE(module_path.empty() == false);
 
-	return { basename(module_path.data()) };
+	typename ::dbj::chr_buf::narrow buffer_;
+
+	::dbj::chr_buf::set_payload( buffer_, ::dbj::basename(module_path.data()) );
+
+	return buffer_;
 }
 
 } // win32

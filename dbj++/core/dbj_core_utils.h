@@ -1,18 +1,21 @@
 #pragma once
 
-#include "dbj_buf.h"
-
-#include <string>
-#include <string_view>
-#include <system_error>
-#include <chrono>
+#ifndef _HAS_CXX17
+	#error C++17 please ...
+#endif
 
 namespace dbj {
 	// the first time dbj::core namespace was introduced was here
 	namespace core {
 		namespace util {
 
-			// this is *very* tricky to het right
+			// no can do, intelisense goes berserk  --> using namespace::std ;
+			using namespace  ::std::literals::string_view_literals;
+			namespace h = ::std::chrono;
+
+			using buf_type = ::dbj::chr_buf::narrow;
+
+			// this is *very* tricky to get right
 			template<typename T>
 			constexpr T midpoint(T a, T b) noexcept 
 			{
@@ -28,12 +31,6 @@ namespace dbj {
 				return int(U(a) + (U(b) - U(a)) / 2);
 			}
 
-			using buf_type = ::dbj::buf::buff_type;
-
-			// no can do, intelisense goes berserk  --> using namespace::std ;
-			using namespace  ::std::literals::string_view_literals;
-			namespace h = ::std::chrono;
-
 			constexpr inline char const * TIME_STAMP_FULL_MASK
 				= "%Y-%m-%d %H:%M:%S";
 
@@ -43,7 +40,7 @@ namespace dbj {
 			// time stamp size is max 22 + '\0'
 			// updates the ref to std::error_code argument accordingly
 			[[nodiscard]]
-			inline typename dbj::buf::yanb
+			inline buf_type
 				make_time_stamp(
 					std::error_code & ec_,
 					char const * timestamp_mask_ = TIME_STAMP_SIMPLE_MASK
@@ -72,13 +69,17 @@ namespace dbj {
 				const auto strlen_buf = std::strlen(buf);
 				(void)::sprintf_s(buf + strlen_buf, buf_len - strlen_buf, ".%03d", millis);
 
-				return { buffer_.data() };
+				buf_type smart_ptr_buffer;
+
+				dbj::chr_buf::core::set_payload(smart_ptr_buffer , buffer_.data() );
+
+				return smart_ptr_buffer;
 				// ec_ stays clear
 			};
 
 			/*	caller must check std::error_code ref arg	*/
 			[[nodiscard]] inline 
-				dbj::buf::yanb 
+				buf_type
 				dbj_get_envvar(std::string_view varname_, std::error_code & ec_) noexcept
 			{
 				_ASSERTE(!varname_.empty());
@@ -90,12 +91,16 @@ namespace dbj {
 				{
 					ec_ = std::error_code(::GetLastError(), std::system_category());
 				}
-				return { bar.data() };
+
+				buf_type smart_ptr_buffer;
+					dbj::chr_buf::core::set_payload(smart_ptr_buffer, bar.data());
+
+				return smart_ptr_buffer;
 			}
 
 			/*	caller must check the ec_	*/
-			[[nodiscard]] inline dbj::buf::yanb
-				program_data_path( std::error_code & ec_ ) noexcept
+			[[nodiscard]] inline auto
+				program_data_path( std::error_code & ec_ ) noexcept -> buf_type
 			{
 					return dbj_get_envvar("ProgramData", ec_ );
 			}

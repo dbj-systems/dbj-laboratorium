@@ -87,7 +87,7 @@ namespace dbj::sample {
 	{
 		/*
 		this is much slower than implementation bellow
-		return ::dbj::buf::smart( std::string_view( itoa_lukas(value, base) ) );
+		return ::dbj::chr_buf::smart( std::string_view( itoa_lukas(value, base) ) );
 		*/
 
 		constexpr auto kMaxDigits = 35U;

@@ -83,7 +83,7 @@ int sample_callback(
 	// get the int value of the first column
 	int   id_ = cell(0);
 	// get the string value of the second column
-	dbj::buf::yanb   name_ = cell(1);
+	dbj::chr_buf::yanb   name_ = cell(1);
 	// print what we got
 	DBJ_LOG_INF("\n\t %zu \t %s = %d \t %s = %s",
 		row_id, cell.name(0), id_, cell.name(1), name_.data());
@@ -98,7 +98,7 @@ int universal_callback(
 )
 {
 	auto print_cell = [&](int j_) {
-		DBJ_LOG_INF("%10s: %s,", cell.name(j_), ((dbj::buf::yanb)cell(j_)).data() );
+		DBJ_LOG_INF("%10s: %s,", cell.name(j_), ((dbj::chr_buf::yanb)cell(j_)).data() );
 	};
 
 	DBJ_LOG_INF("\n\t%zu", row_id);

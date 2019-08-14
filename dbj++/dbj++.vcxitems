@@ -23,13 +23,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buf.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_chr_buf_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_core_utils.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_crt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_runtime.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_format.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_insider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_synchro.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_traits.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_win32_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
@@ -41,8 +43,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_p1095.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)err\deprecated\dbj_status_code.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_interface.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj++testing_framework.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_framework_core.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)testfwork\dbj_testing_framework_interface.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_any_optional_tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_ap_env_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_array_testing.h" />
@@ -82,7 +85,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_main.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_uuid.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_win32.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)win\dbj_win_inc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_win_inc.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)cpp.hint" />

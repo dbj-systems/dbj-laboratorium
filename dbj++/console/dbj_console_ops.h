@@ -525,21 +525,22 @@ with reference or pointer type argument.
 
 #pragma endregion 
 
-	inline void out(::dbj::buf::buffer const & cb_)
+#if DBJ_COMFY_BUFFER
+	inline void out(::dbj::chr_buf::buffer const & cb_)
 	{
-		PRN.printf(
+		::dbj::console::PRN.printf(
 			L"{ size: %d, data: '%s' }", cb_.size(), cb_.data()
 		);
 	}
-
-	inline void out(::dbj::buf::yanb const & cb_)
+#endif
+	inline void out(::dbj::chr_buf::yanb const & cb_)
 	{
-		PRN.printf(	L"%S", cb_.data() );
+		::dbj::console::PRN.printf(	L"%S", cb_.data() );
 	}
 
-	inline void out(::dbj::buf::yanwb const & cb_)
+	inline void out(::dbj::chr_buf::yanwb const & cb_)
 	{
-		PRN.printf(	L"%s", cb_.data() );
+		::dbj::console::PRN.printf(	L"%s", cb_.data() );
 	}
 
 #pragma region error codes and options

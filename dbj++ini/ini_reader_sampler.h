@@ -5,7 +5,7 @@
 #include "dbj++ini.h"
 
 // argv[0] must be the valid ini file full path
-int test_dbj_ini_reader( int argc, dbj::buf::yanb argv[])
+int test_dbj_ini_reader( int argc, dbj::chr_buf::yanb argv[])
 {
 	using namespace std ;
 	using namespace dbj::ini ;

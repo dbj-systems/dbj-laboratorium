@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dbj_testing.h"
-#include "../console/dbj_console.h"
+
+// #include "../console/dbj_console.h"
 // #include "../dbj_console_painter.h"
 
 /*
@@ -161,12 +161,13 @@ namespace dbj {
 			};
 
 			prefix(argv[0]);
+
 			for (auto & tunode_ : internal::tuset_instance())
 			{
 				unit_prefix( tunode_.description.data() );
 				try {
 					white_line(" ");
-					internal::unit_execute( tunode_.TU );
+					internal::unit_execute( tunode_.tu_type);
 					white_line(" ");
 				}
 				catch (const std::error_code ec_) {
@@ -282,6 +283,8 @@ namespace dbj {
 			return static_cast<return_type const &>(anything);
 		};
 
+
+#define DBJ_TUNIT(x) ::dbj::console::print( "\n\nExpression: '", _DBJ_STRINGIZE(x) , "'\n\tResult: '" , (x) , "'\n")
 // 
 #define DBJ_TEST_ATOM(x) ::dbj::testing::test_lambada( _DBJ_STRINGIZE(x), (x) ) 
 // same as above but does not show type

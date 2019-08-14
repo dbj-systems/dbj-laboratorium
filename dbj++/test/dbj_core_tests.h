@@ -3,7 +3,7 @@
 
 #ifdef DBJ_CONSOLE_SYTEM
 void out(
-	::dbj::buf::char_buffer const & cb_
+	::dbj::chr_buf::char_buffer const & cb_
 )
 {
 	using namespace ::dbj::console;
@@ -48,12 +48,14 @@ DBJ_TEST_UNIT(core_format_utils)
 	print("\nprogramdata path\n\t%s", 
 		u::program_data_path(ec_));
 
-	print("\nchar_buffer\n\t%s",::dbj::buf::buffer("hello!"));
+#if DBJ_COMFY_BUFFER
+	print("\nchar_buffer\n\t%s",::dbj::chr_buf::buffer("hello!"));
+#endif
 }
 
 DBJ_TEST_UNIT(core_utils)
 {
-	using namespace ::dbj::buf;
+	using namespace ::dbj::chr_buf;
 	using namespace ::std::string_view_literals;
 
 	{
@@ -77,7 +79,9 @@ DBJ_TEST_UNIT(core_utils)
 
 	// programdata path
 	DBJ_T_BUF("%s", u::program_data_path(ec_));
-	DBJ_T_BUF( "%s", ::dbj::buf::buffer("hello!"));
+#if DBJ_COMFY_BUFFER
+	DBJ_T_BUF( "%s", ::dbj::chr_buf::buffer("hello!"));
+#endif
 	DBJ_T_BUF("%s", ec_);
 }
 

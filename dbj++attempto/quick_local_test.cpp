@@ -212,7 +212,7 @@ namespace dbj::samples::inner {
 	// as 'creation policy'
 	bool is_ascii(const char * arg_) 
 	{ 
-		::dbj::buf::yanb str(arg_);
+		::dbj::chr_buf::yanb str(arg_);
 		size_t N = str.size();
 		for (size_t k = 0; k < N; k++) {
 			ascii_ordinal_t  ord = int(arg_[k]);

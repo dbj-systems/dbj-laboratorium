@@ -6,11 +6,9 @@
 Please see the README.MD for base documentation 
 Please see the LICENSE for the GPLv3 info
 
-NOTE: syslog() is UNIX and is blisfully unaware of wchar_t
+NOTE: syslog() is UNIX affair, and is blisfully unaware of wchar_t
 */
 
-#include <dbj++/core/dbj++core.h>
-#include <dbj++/win/dbj++win.h>
 #include <array>
 #include <system_error>
 
@@ -92,7 +90,7 @@ namespace dbj::log {
 					syslog_init(); // looking for local server
 					::OutputDebugStringA(
 						"\n\n" __FILE__ "\n\n"
-						"dbj++;pg found not to be initialized on first use and then initialized for a localhost syslog server"
+						"dbj++ found not to be initialized on first use and then initialized for a localhost syslog server"
 						"\n\n"
 					);
 				}
@@ -108,55 +106,21 @@ namespace dbj::log {
 
 	} // inner
 
-	template<typename ... T> inline void  syslog_emergency(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_emerg, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_emergency(const char* format_, T ... args);
 
-	template<typename ... T> inline void  syslog_alert(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_alert, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_alert(const char* format_, T ... args);
 
-	template<typename ... T> inline void  syslog_critical(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_crit, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_critical(const char* format_, T ... args);
 
-	template<typename ... T> inline void  syslog_error(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_err, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_error(const char* format_, T ... args);
 
+	template<typename ... T> inline void  syslog_warning(const char* format_, T ... args);
 
-	template<typename ... T> inline void  syslog_warning(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_warning, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_notice(const char* format_, T ... args);
 
+	template<typename ... T> inline void  syslog_info(const char* format_, T ... args);
 
-	template<typename ... T> inline void  syslog_notice(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_notice, format_, args...);
-	}
-
-	template<typename ... T> inline void  syslog_info(const char * format_, T ... args)
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_info, format_, args... );
-	}
-
-	 template<typename ... T> inline void  syslog_debug(const char * format_, T ... args )
-	{
-		DBJ_AUTO_LOCK;
-		inner::syslog_call(syslog_level::log_debug, format_, args...);
-	}
+	template<typename ... T> inline void  syslog_debug(const char* format_, T ... args);
 
 } // dbj::log
 
@@ -191,47 +155,6 @@ do { if (err) ::dbj::log::syslog_error( "%s, %s", err.message().c_str(), DBJ_ERR
 #include "test/dbj_log_test.h"
 #endif
 
-// handle the CTRL+C exit
-inline BOOL WINAPI __dbj_log_console_handler(DWORD signal) {
 
-	if (signal == CTRL_C_EVENT) {
-		// namespace galimatias, almost like cppwinrt ;)
-		using dbj::buf::yanb;
-		using ::dbj::core::trace;
-		using namespace ::dbj::win32;
-		using namespace ::dbj::log;
 
-		yanb basename_{ module_basename() };
-		DBJ_LOG_INF("CTRL+C event -- from %s", basename_.data());
-		trace("CTRL+C event -- from %s", basename_.data());
-	}
-	return TRUE;
-}
 
-// have to do it here so that caller can use it before main ...
-// this is an "self executing" lambda
-// this happens only once, for each process
-inline auto __dbj_log_init__ = []()
-{
-	// namespace galimatias, almost like cppwinrt ;)
-	using dbj::buf::yanb;
-	using ::dbj::core::trace;
-	using namespace ::dbj::win32;
-	using namespace ::dbj::log;
-
-	yanb basename_{ module_basename() };
-	syslog_init();
-	// syslog_open_options::log_perror
-	// makes use of local log file
-	syslog_open(
-		basename_.data() /*, syslog_open_options::log_perror*/
-	);
-	trace("syslog connection opened from %s", basename_.data());
-
-	if (!SetConsoleCtrlHandler(__dbj_log_console_handler, TRUE)) {
-		trace("\nERROR: Could not set console exit handler");
-		perror("\nERROR: Could not set console exit handler");
-	}
-
-	return true;
-}();

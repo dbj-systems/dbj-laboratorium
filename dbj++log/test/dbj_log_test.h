@@ -1,8 +1,8 @@
 #include <string.h>
-#include <dbj++/core/dbj_crt.h>
+#include <dbj++/core/dbj_runtime.h>
 #include "../dbj++log.h"
 
-inline char * basename( char * full_path ) {
+extern "C"  inline char * basename( char * full_path ) {
 	char *p = full_path, *pp = 0;
 	while ((p = strchr(p + 1, '\\'))) {
 		pp = p;

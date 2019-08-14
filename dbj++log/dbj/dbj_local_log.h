@@ -3,14 +3,6 @@
 include windows only from one place
 and do it according to ancient windows lore
 */
-#ifndef _INC_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#define NOSERVICE
-#define NOMINMAX
-#include <windows.h>
-#endif
-#include <dbj++/win/dbj_win32.h>
 #include <io.h>
 //#include <string>
 //#include <memory>
@@ -20,6 +12,7 @@ and do it according to ancient windows lore
 #include <filesystem>
 #include <dbj++/core/dbj++core.h>
 #include <dbj++/util/dbj++util.h>
+#include <dbj++/win/dbj_win32.h>
 
 /*-----------------------------------------------------------------*/
 
@@ -28,7 +21,7 @@ and do it according to ancient windows lore
 namespace dbj::log {
 
 	using namespace ::std;
-	using smart_buffer = ::dbj::buf::yanb;
+	using smart_buffer = ::dbj::chr_buf::yanb;
 	using namespace ::std::string_view_literals;
 	namespace fs = ::std::filesystem;
 
@@ -60,7 +53,7 @@ namespace dbj::log {
 
 		class log_file final {
 
-			::dbj::buf::yanb	file_path_{};
+			::dbj::chr_buf::yanb	file_path_{};
 			int		old_std_err{};
 			mutable FILE	*log_file_{};
 			mutable bool opened = false;
@@ -86,7 +79,7 @@ namespace dbj::log {
 				this->opened = false;
 			}
 
-			log_file(::dbj::buf::yanb file_path_param)
+			log_file(::dbj::chr_buf::yanb file_path_param)
 				: file_path_(file_path_param)
 			{
 				bool new_created
@@ -274,18 +267,18 @@ namespace dbj::log {
 
 	template<typename CHR>
 	inline void async_log_write(
-		::dbj::buf::yanb_t<CHR> message
+		::dbj::chr_buf::yanb_t<CHR> message
 	) noexcept
 	{
 		async_log_write(std::basic_string_view<CHR>{ message.data() });
 	}
 
-	template<typename C, size_t N>
+	template<typename CHR, size_t N>
 	inline void async_log_write(
-		const C(&message)[N]
+		const CHR(&message)[N]
 	) noexcept
 	{
-		async_log_write(std::basic_string_view<C>{ message });
+		async_log_write(std::basic_string_view<CHR>{ message });
 	}
 
 

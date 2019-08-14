@@ -159,7 +159,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dbj_c_lib_test.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

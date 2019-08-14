@@ -28,15 +28,15 @@ int main( int argc, char * argv [])
 
 static void ini_sampler()
 {
-	auto test_ini = [](dbj::buf::yanb folder_)
-		-> dbj::buf::yanb
+	auto test_ini = [](dbj::chr_buf::yanb folder_)
+		-> dbj::chr_buf::yanb
 	{
 		std::string rv(folder_);
 		return (rv.append("\\test.ini")).data();
 	};
 
 	dbj::ini::ini_file_descriptor ifd = dbj::ini::ini_file();
-	dbj::buf::yanb my_data[] = { test_ini(ifd.folder) };
+	dbj::chr_buf::yanb my_data[] = { test_ini(ifd.folder) };
 	test_dbj_ini_reader(1, my_data);
 }
 #endif // DBJ_INI_READER_TESTING
@@ -45,7 +45,7 @@ static void ini_sampler()
 static void log_sampler()
 {
 	// namespace galimatias
-	using dbj::buf::yanb;
+	using dbj::chr_buf::yanb;
 	using namespace ::dbj::win32;
 	using namespace ::dbj::log;
 

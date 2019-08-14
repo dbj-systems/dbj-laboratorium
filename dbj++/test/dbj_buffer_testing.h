@@ -3,14 +3,48 @@
 #define DBJ_LIGHT_BUFFER_TESTING
 #ifdef DBJ_LIGHT_BUFFER_TESTING
 
-#include "../console/dbj_console_ops.h"
+// #include "../console/dbj_console_ops.h"
 
 #include "../test/zAllocator.h"
+
+#pragma region some probably deprecated testing 
+
+namespace dbj_buf_testing {
+
+	namespace buf = ::dbj::chr_buf;
+
+	inline bool unique_ptr_buffer()
+	{
+		auto test_1 = [](auto C_, auto specimen)
+		{
+
+			using T = ::std::decay_t< decltype(C_) >;
+			DBJ_TUNIT(buf::helper<T>::make(BUFSIZ));
+			DBJ_TUNIT(buf::helper<T>::make(specimen));
+			DBJ_TUNIT(buf::helper<T>::make(std::basic_string<T>(specimen)));
+			DBJ_TUNIT(buf::helper<T>::make(std::basic_string_view<T>(specimen)));
+
+			auto buf_ = buf::helper<T>::make(BUFSIZ);
+			DBJ_TUNIT(buf::helper<T>::fill(buf_, C_));
+
+			auto sec_ = buf::helper<T>::make(buf_);
+			DBJ_TUNIT(sec_ == buf_);
+
+		};
+		test_1('*', "narrow string");
+		test_1(L'*', L"wide string");
+		return true;
+	} // testing_dbj_buffer
+
+	inline const auto dbj_testing_dbj_buffer_result = unique_ptr_buffer();
+}
+
+#pragma endregion
 
 
 DBJ_TEST_SPACE_OPEN(dbj_buffer)
 
-using namespace ::dbj::buf;
+using namespace ::dbj::chr_buf;
 
 auto alphabet = [&]( buffer::reference_type cbr ) {
 	char k = 65; // 'A'
@@ -92,7 +126,7 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 namespace inner {
 
 	//deliberately not constexpr
-	inline auto const & buffer_size = ::dbj::buf::max_length ;
+	inline auto const & buffer_size = ::dbj::chr_buf::max_length ;
 	inline auto const & max_iterations = 1000;
 
 	inline std::unique_ptr<char[]> naked_unique_ptr(size_t count_) {
@@ -132,7 +166,7 @@ namespace inner {
 	*/
 	auto measure = [] (
 		auto fp ,
-		::dbj::buf::inside_1_and_max buffer_count,
+		::dbj::chr_buf::inside_1_and_max buffer_count,
 		size_t max_iteration = max_iterations )
 	{
 		auto start_ = std::chrono::system_clock::now();

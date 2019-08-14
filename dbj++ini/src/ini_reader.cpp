@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <set>
 #include "ini.h"
 #include "../dbj++ini.h"
 
@@ -20,15 +21,17 @@ namespace dbj::ini {
 
 	using hash_key_type = long;
 
-	static hash_key_type djb2_hash(unsigned char *str)
-	{
-		unsigned long hash = 5381;
-		int c;
+	extern "C" {
+		static constexpr hash_key_type djb2_hash(unsigned char* str)
+		{
+			unsigned long hash = 5381;
+			int c = 0;
 
-		while (c = *str++)
-			hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+			while (c = *str++)
+				hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
-		return hash;
+			return hash;
+		}
 	}
 
 	// dbj

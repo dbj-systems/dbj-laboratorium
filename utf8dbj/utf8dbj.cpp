@@ -14,16 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "pch.h"
-#define DBJ_SYSLOG
-#include <dbj++log/dbj++log.h>
 
-#ifdef DBJ_C_LIB_TEST
-#include "dbj_c_lib_test.h"
-#endif
+#define DBJ_SYSLOG
 
 using namespace std;
 using namespace std::string_view_literals;
-
 
 	// return font name and true/false 
 	// depending on is it true type or not

@@ -1,7 +1,7 @@
 #pragma once
-#include "../core/dbj++core.h"
-#include "../win/dbj_win32.h"
 #include <filesystem>
+// core always required --> #include "../core/dbj++core.h"
+#include "../win/dbj_win32.h"
 /*
 things in here are mainly for helping managing 
 local ini files, log files and a sutch.
@@ -22,7 +22,7 @@ namespace dbj::util
 	namespace fs = ::std::filesystem;
 
 	// note: yanb ('yet another buffer')) is char oriented
-	using smart_buffer = ::dbj::buf::yanb;
+	using smart_buffer = typename ::dbj::chr_buf::yanb::type ;
 
 	// NOTE: WIN32 STL filesystem is wchar_t "oriented"
 	// so we have to jump through more hoops
@@ -38,7 +38,7 @@ namespace dbj::util
 	*/
 	struct file_descriptor 
 	{
-		using buff_t = ::dbj::buf::yanb;
+		using buff_t = ::dbj::chr_buf::yanb;
 		virtual const char * suffix() const noexcept = 0;
 		buff_t folder;
 		buff_t basename;
