@@ -1,4 +1,6 @@
 #pragma once
+#ifdef DBJ_C_LIB_TEST
+
 #define DBJ_STRING_TEST
 #include <dbj++clib/dbjclib.h>
 
@@ -27,3 +29,5 @@ namespace dbj_test {
 		dbj_string_test();
 	}
 } // dbj_test
+
+#endif

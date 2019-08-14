@@ -4,9 +4,7 @@
 // Licence Appache 2.0
 // https://github.com/DBJDBJ/dbj_error_concept
 
-#include <optional>
-#include <utility>
-#include "dbj_id_and_message.h"
+
 
 namespace dbj::errc {
 

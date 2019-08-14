@@ -191,7 +191,7 @@ inline typename ::dbj::chr_buf::narrow_type module_basename(HINSTANCE h_instance
 
 	typename ::dbj::chr_buf::narrow_type buffer_;
 
-	::dbj::chr_buf::core::set_payload( buffer_, ::dbj::basename(module_path.data()) );
+	::dbj::chr_buf::core::assign( buffer_, ::dbj::basename(module_path.data()) );
 
 	return buffer_;
 }

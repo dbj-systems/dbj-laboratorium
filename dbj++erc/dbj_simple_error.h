@@ -2,13 +2,14 @@
 
 #include "pch.h"
 
-namespace dbj::errc {
-	struct simple_error_type {
+namespace dbj::errc  {
+	struct simple_error_type 
+	{
 		const idmessage_type id_and_message;
 		optional<idmessage_type> line_and_file;
 
 		// make with no location
-		static constexpr simple_error_type
+		static simple_error_type
 			make(
 				idmessage_type::id_type id_,
 				const char* msg_
@@ -18,7 +19,7 @@ namespace dbj::errc {
 		}
 
 		// with optional location
-		static constexpr simple_error_type
+		static simple_error_type
 			make(
 				idmessage_type::id_type id_,
 				const char* msg_,
@@ -30,7 +31,7 @@ namespace dbj::errc {
 		}
 
 		// add location to error instance
-		static constexpr simple_error_type
+		static simple_error_type
 			locate(
 				simple_error_type err_,
 				idmessage_type::id_type loc_id_,
@@ -46,12 +47,12 @@ namespace dbj::errc {
 
 		// return all the data in a flat structure 
 		// for easy consuming in a structured binding declaration
-		friend constexpr decltype(auto) flat(simple_error_type err_);
+		friend decltype(auto) flat(simple_error_type err_);
 	}; // simple_error_type
 
 	// return all the data in a flat structure 
 // for easy consuming in a structured binding declaration
-	constexpr decltype(auto)
+	 decltype(auto)
 		flat(simple_error_type err_)
 	{
 		if (err_.line_and_file) {

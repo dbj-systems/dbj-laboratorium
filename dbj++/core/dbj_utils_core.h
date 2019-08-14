@@ -71,7 +71,7 @@ namespace dbj {
 
 				buf_type smart_ptr_buffer;
 
-				dbj::chr_buf::core::set_payload(smart_ptr_buffer , buffer_.data() );
+				dbj::chr_buf::core::assign(smart_ptr_buffer , buffer_.data() );
 
 				return smart_ptr_buffer;
 				// ec_ stays clear
@@ -93,7 +93,7 @@ namespace dbj {
 				}
 
 				buf_type smart_ptr_buffer;
-					dbj::chr_buf::core::set_payload(smart_ptr_buffer, bar.data());
+					dbj::chr_buf::core::assign(smart_ptr_buffer, bar.data());
 
 				return smart_ptr_buffer;
 			}

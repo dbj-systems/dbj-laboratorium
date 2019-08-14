@@ -17,6 +17,15 @@
 #include <cstdlib>
 #include <numeric>
 #include <vector>
+#include <array>
+#include <cassert>
+
+#include <cstdint>
+#include <cstdio>
+#include <optional>
+#include <cassert>
+#include <string_view>
+#include <memory>
 
 // dbj++ 'bans' std iostreams
 // #include <iostream>

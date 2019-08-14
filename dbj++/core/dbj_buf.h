@@ -57,16 +57,16 @@ namespace dbj::chr_buf {
 
 		type& reset(data_type const* payload_)
 		{
-			core::set_payload(this->data_, payload_);
+			core::assign(this->data_, payload_);
 			return *this;
 		}
 
 		yanb_tpl( value_type payload_) {
-			core::set_payload(this->data_, payload_.get());
+			core::assign(this->data_, payload_.get());
 		}
 
 		yanb_tpl(data_type const* payload_) {
-			core::set_payload(this->data_, payload_);
+			core::assign(this->data_, payload_);
 		}
 
 		size_t size() noexcept { return core::length(this->data_); }

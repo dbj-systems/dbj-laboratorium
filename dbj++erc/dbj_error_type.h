@@ -4,14 +4,6 @@ DBJ ERRC error type
 (c) 2019 by dbj@dbj.org
 */
 
-#include <cstdint>
-#include <cstdio>
-#include <optional>
-#include <cassert>
-#include <string_view>
-#include <array>
-#include <memory>
-
 #include "pch.h"
 
 namespace dbj::errc

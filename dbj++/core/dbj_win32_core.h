@@ -44,10 +44,10 @@ namespace dbj::win32 {
 			//use std::string only and if needed
 			std::string str_(prompt); str_.append(sys_err_msg);
 
-			dbj::chr_buf::core::set_payload(buffer_, str_.c_str());
+			dbj::chr_buf::core::assign(buffer_, str_.c_str());
 		}
 		else {
-			dbj::chr_buf::core::set_payload(buffer_, sys_err_msg);
+			dbj::chr_buf::core::assign(buffer_, sys_err_msg);
 
 		}
 		return  buffer_;
