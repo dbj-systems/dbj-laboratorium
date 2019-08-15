@@ -52,11 +52,11 @@ namespace dbj::chr_buf {
 		static_assert( std::is_same_v<char, T> || std::is_same_v<wchar_t, T> , "\n\n" __FILE__ "\n\nyanb_tpl requires char or wchar_t only\n\n" );
 
 		using type = yanb_tpl;
-		using data_type = T;
-		using value_type = std::shared_ptr<data_type>;
+		using char_type = T;
+		using value_type = std::shared_ptr<char_type[]>;
 		using value_type_ref = std::reference_wrapper<value_type>;
 
-		type& reset(data_type const* payload_)
+		type& reset(char_type const* payload_)
 		{
 			core::assign(this->data_, payload_);
 			return *this;
@@ -66,18 +66,18 @@ namespace dbj::chr_buf {
 			core::assign(this->data_, payload_.get());
 		}
 
-		yanb_tpl(data_type const* payload_) {
+		yanb_tpl(char_type const* payload_) {
 			core::assign(this->data_, payload_);
 		}
 
 		size_t size() noexcept { return core::length(this->data_); }
 		size_t size() const noexcept { return core::length(this->data_); }
 
-		data_type* data() noexcept { return this->data_.get(); }
-		data_type const* data() const noexcept { return this->data_.get(); }
+		char_type* data() noexcept { return this->data_.get(); }
+		char_type const* data() const noexcept { return this->data_.get(); }
 
-		operator data_type* () noexcept { return this->data_.get(); }
-		operator data_type const* () const noexcept { return this->data_.get(); }
+		operator char_type* () noexcept { return this->data_.get(); }
+		operator char_type const* () const noexcept { return this->data_.get(); }
 
 		operator bool() noexcept { return data_.operator bool(); }
 		operator bool() const noexcept { return data_.operator bool(); }
@@ -87,6 +87,16 @@ namespace dbj::chr_buf {
 		yanb_tpl& operator = (yanb_tpl const&) = default;
 		yanb_tpl(yanb_tpl&&) = default;
 		yanb_tpl& operator = (yanb_tpl&&) = default;
+
+		// assign smart ptr
+		//yanb_tpl (value_type const & another_smart_ptr ) {
+		//	this->data_ = another_smart_ptr;
+		//}
+
+		yanb_tpl & assign ( value_type const & another_smart_ptr ) {
+			this->data_ = another_smart_ptr;
+			return *this;
+		}
 
 	private:
 		value_type data_{};
@@ -108,9 +118,9 @@ namespace dbj::chr_buf {
 		The wide version is trivial if you understand this one.
 		*/
 		friend  std::ostream&
-			operator << (std::ostream& os, yanb_tpl<data_type> const& bufy_)
+			operator << (std::ostream& os, yanb_tpl<char_type> const& bufy_)
 		{
-			if constexpr (std::is_same_v<wchar_t, data_type>) {
+			if constexpr (std::is_same_v<wchar_t, char_type>) {
 				/*
 				This is just casting internaly and thus works only
 				for the ASCI subset.
@@ -140,7 +150,7 @@ namespace dbj::chr_buf {
 	template< typename CHAR	>
 		struct yanb_helper final
 	{
-		static_assert(std::is_same_v<char, T> || std::is_same_v<wchar_t, T>, "\n\n" __FILE__ "\n\nhelper requires char or wchar_t only\n\n");
+		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__ "\n\nhelper requires char or wchar_t only\n\n");
 
 		using type = yanb_helper;
 		using value_type = CHAR;
@@ -283,39 +293,39 @@ namespace dbj::chr_buf {
 	binary comparisons
 	*/
 
-	template<typename CHAR, typename BT = yanb_helper<CHAR>  >
+	template<typename CHAR >
 	inline bool operator == (
-		const typename BT::ref_type left_,	const typename BT::ref_type right_
+		const yanb_tpl<CHAR> & left_,	const yanb_tpl<CHAR> & right_
 		)
 		noexcept
 	{
-		const size_t left_size = BT::length(left_);
-		const size_t right_size = BT::length(right_);
+		const auto left_size = left_.size();
+		const auto right_size = left_.size();
 
 		if (left_size != right_size)
 			return false;
 
 		return std::equal(
-			left_.get(), left_.get() + left_size,
-			right_.get(), right_.get() + right_size
+			left_.data() , left_.data() + left_size,
+			right_.data(), right_.data() + right_size
 		);
 	}	
 	
-	template<typename CHAR, typename BT = yanb_helper<CHAR>  >
+	template<typename CHAR >
 	inline bool operator < (
-		const typename BT::ref_type left_,	const typename BT::ref_type right_
+		const yanb_tpl<CHAR> & left_,	const yanb_tpl<CHAR> & right_
 		)
 		noexcept
 	{
-		const size_t left_size = BT::length(left_);
-		const size_t right_size = BT::length(right_);
+		const auto left_size = left_.size();
+		const auto right_size = left_.size();
 
 		if (left_size >= right_size)
 			return false;
 
 		return std::less(
-			left_.get(), left_.get() + left_size,
-			right_.get(), right_.get() + right_size
+			left_.data(), left_.data() + left_size,
+			right_.data(), right_.data() + right_size
 		);
 	}
 	/*----------------------------------------------------------------------------*/

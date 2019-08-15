@@ -4,8 +4,8 @@ namespace dbj::chr_buf {
 	/*
 	everything is based on these two types
 	*/
-	using wide_type =  std::shared_ptr<wchar_t>;
-	using narrow_type =  std::shared_ptr<char>;
+	using wide_type		=  std::shared_ptr<wchar_t[]>;
+	using narrow_type	=  std::shared_ptr<char[]>;
 
 	// it is not very usefull to have buffers of 
 	// unlimited size in programs
@@ -59,17 +59,19 @@ namespace dbj::chr_buf {
 		}
 
 		static size_t length(
-			std::reference_wrapper< narrow_type > storage_ref
+			// std::reference_wrapper< narrow_type > storage_ref
+			narrow_type const & storage_ref
 		) {
 			_ASSERTE(storage_ref.get());
-			return (std::strlen(storage_ref.get().get()));
+			return (std::strlen(storage_ref.get()));
 		}
 
 		static size_t length(
-			std::reference_wrapper< wide_type > storage_ref
+		//	std::reference_wrapper< wide_type > storage_ref
+		        wide_type const & storage_ref
 		) {
 			_ASSERTE(storage_ref.get());
-			return (std::wcslen(storage_ref.get().get()));
+			return (std::wcslen(storage_ref.get()));
 		}
 
 	}; // inner

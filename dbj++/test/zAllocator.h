@@ -22,6 +22,13 @@ dbj@dbj.org 2019 FEB
  * @author David Anderson, david.anderson@aspectsecurity.com
  */
 
+/*
+example:
+	using char_allocator = esapi::zallocator<char>;
+	using zvector = std::vector< char, char_allocator >;
+	using zstring = std::basic_string< char, std::char_traits<char>, char_allocator >;
+*/
+
 #pragma once
 
 // dbj removed -- #include "EsapiCommon.h"

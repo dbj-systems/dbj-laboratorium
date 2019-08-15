@@ -525,7 +525,7 @@ with reference or pointer type argument.
 
 #pragma endregion 
 
-#if DBJ_COMFY_BUFFER
+#ifdef DBJ_COMFY_BUFFER
 	inline void out(::dbj::chr_buf::buffer const & cb_)
 	{
 		::dbj::console::PRN.printf(

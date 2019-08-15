@@ -21,8 +21,7 @@ namespace dbj::util
 {
 	namespace fs = ::std::filesystem;
 
-	// note: yanb ('yet another buffer')) is char oriented
-	using smart_buffer = typename ::dbj::chr_buf::yanb::type ;
+	using smart_buffer = typename ::dbj::chr_buf::yanb ;
 
 	// NOTE: WIN32 STL filesystem is wchar_t "oriented"
 	// so we have to jump through more hoops
@@ -63,21 +62,24 @@ namespace dbj::util
 	inline void make_file_descriptor(file_descriptor & descriptor_)
 	{
 		std::error_code ec_;
-		// with no suffix too
-		smart_buffer base_name_( ::dbj::win32::module_basename(NULL) );
 
-		smart_buffer programdata(dbj::core::util::program_data_path(ec_));
+		// with no suffix too
+		// 	using smart_buffer = typename ::dbj::chr_buf::yanb ;
+		auto base_nme_ = ::dbj::win32::module_basename(NULL) ;
+
+		auto  programdata = dbj::core::util::program_data_path(ec_);
+
 		_ASSERTE(!ec_);
 
-		fs::path folder_ = programdata.data();
+		fs::path folder_ = programdata.get();
 		folder_.concat("\\").concat(dbj::dbj_programdata_subfolder)
-		       .concat("\\").concat(base_name_.data());
+		       .concat("\\").concat(base_nme_.get());
 
 		fs::path full_path_(folder_);
-		full_path_.concat(base_name_.data()).concat(descriptor_.suffix());
+		full_path_.concat(base_nme_.get()).concat(descriptor_.suffix());
 
 		descriptor_.folder = narrow(folder_);
-		descriptor_.basename = base_name_ ;
+		descriptor_.basename.assign( base_nme_ );
 		descriptor_.fullpath = narrow(full_path_);
 	}
 

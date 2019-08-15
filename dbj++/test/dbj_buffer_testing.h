@@ -19,15 +19,15 @@ namespace dbj_buf_testing {
 		{
 
 			using T = ::std::decay_t< decltype(C_) >;
-			DBJ_TUNIT(buf::helper<T>::make(BUFSIZ));
-			DBJ_TUNIT(buf::helper<T>::make(specimen));
-			DBJ_TUNIT(buf::helper<T>::make(std::basic_string<T>(specimen)));
-			DBJ_TUNIT(buf::helper<T>::make(std::basic_string_view<T>(specimen)));
+			DBJ_TUNIT(buf::yanb_helper<T>::make(BUFSIZ));
+			DBJ_TUNIT(buf::yanb_helper<T>::make(specimen));
+			DBJ_TUNIT(buf::yanb_helper<T>::make(std::basic_string<T>(specimen)));
+			DBJ_TUNIT(buf::yanb_helper<T>::make(std::basic_string_view<T>(specimen)));
 
-			auto buf_ = buf::helper<T>::make(BUFSIZ);
-			DBJ_TUNIT(buf::helper<T>::fill(buf_, C_));
+			auto buf_ = buf::yanb_helper<T>::make(BUFSIZ);
+			DBJ_TUNIT(buf::yanb_helper<T>::fill(buf_, C_));
 
-			auto sec_ = buf::helper<T>::make(buf_);
+			auto sec_ = buf::yanb_helper<T>::make(buf_);
 			DBJ_TUNIT(sec_ == buf_);
 
 		};
@@ -91,7 +91,7 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 		show(cbr, [](auto & obj_) { obj_.fill('*'); });
 	};
 
-	DBJ_TEST_ATOM(cb1.address());
+	// deprecated DBJ_TEST_ATOM(cb1.address());
 
 	alphabet(cb1);	sizeshow(cb1);
 	
@@ -129,7 +129,8 @@ namespace inner {
 	inline auto const & buffer_size = ::dbj::chr_buf::max_length ;
 	inline auto const & max_iterations = 1000;
 
-	inline std::unique_ptr<char[]> naked_unique_ptr(size_t count_) {
+	inline std::unique_ptr<char[]> naked_unique_ptr(size_t count_) 
+	{
 			return std::make_unique<char[]>(count_);
 	}
 
@@ -145,20 +146,6 @@ namespace inner {
 		return std::string(size_t(count_), char(0));
 	}
 
-	using char_allocator = esapi::zallocator<char>;
-	using zvector = std::vector< char, char_allocator >;
-	using zstring = std::basic_string< char, std::char_traits<char>, char_allocator >;
-
-	inline zvector 
-		vector_buffer_zallocator(size_t count_) {
-			return zvector(count_);
-	}
-
-	inline zstring
-		string_buffer_zallocator(size_t count_) {
-			return zstring( size_t(count_), char(0) );
-	}
-
 	/*
 	measure the performance of making/destroying three kinds of buffers
 	dbj buf, dbj buffer and vector<char>
@@ -170,8 +157,13 @@ namespace inner {
 		size_t max_iteration = max_iterations )
 	{
 		auto start_ = std::chrono::system_clock::now();
-		for (long i = 0; i < max_iteration; i++) {
+		for (long i = 0; i < max_iteration; i++) 
+		{
+			// create the buffer
+			// then move it on return from fp()
 			auto dumsy = fp(buffer_count);
+			// call the '[]' operator 
+			// and change the char value
 			dumsy[buffer_count - 1] = '?';
 		}
 		auto end_ = std::chrono::system_clock::now();

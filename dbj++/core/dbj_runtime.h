@@ -357,7 +357,7 @@ namespace dbj {
 		  return N; 
 	  }
 
-	  inline char* basename(
+	  inline char* dbj_basename(
 		  char* full_path,
 		  bool remove_suffix = true,
 		  char delimiter = '\\')
