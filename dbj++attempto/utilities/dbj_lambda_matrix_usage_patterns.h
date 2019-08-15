@@ -150,5 +150,81 @@ namespace dbj::samples {
 
 #pragma endregion  LAMBDA MATRIX
 
+#pragma region  compile time insider
+	template<
+		typename T, T L, T H
+	>
+		struct ct_insider
+	{
+		using type = ct_insider;
+
+		template< T X,
+			std::enable_if_t< (X <= H) && (X >= L), int> = 0
+		>
+			static ct_insider make() { return type{ X }; }
+
+		T value{};
+	};
+	/*
+	template< typename T, T X, T L, T H>
+		using checked_t = std::conditional< (X <= H) && (X >= L), T, void>;
+
+	template<size_t X>
+		using inside_10_to_24 = checked_t<size_t, X, 10, 24>;
+		*/
+	template< typename T, T X, T L, T H>
+	using inside_t = std::enable_if_t< (X <= H) && (X >= L), std::integral_constant<T, X> >;
+
+	template<size_t X>
+	using ten_to_24 = inside_t<size_t, X, 10, 24>;
+
+	template<size_t index_, typename I = ten_to_24<index_> >
+	auto indexor()
+	{
+		constexpr I::value_type idx_ = I::value;
+		return ten_to_24<idx_ + 1>();
+	}
+
+	template<typename C, unsigned K>	struct X; // final {};
+
+	template<unsigned K>
+	struct X<char, K> final
+	{
+		using ascii_ordinal = inside_t<unsigned, K, 0, 127>;
+		char value = char(ascii_ordinal::value);
+	};
+
+
+	X<char, 30> a;//here 300 is out of range and I would like to be able to detect that.
+
+	DBJ_TEST_UNIT(compile_time_insider)
+	{
+		ten_to_24<11>::value_type eleven = ten_to_24<11>::value;
+
+		noexcept(eleven);
+		// ten_to_24<9>  nine; // does not compile
+
+		auto xxx = indexor<11>();
+
+		using one_to_nine = ct_insider<size_t, 1, 9>;
+		auto checker = [](one_to_nine) {
+		};
+
+		using s1 = std::integral_constant<size_t, 1>;
+		using s9 = std::integral_constant<size_t, 9>;
+
+		using gt = std::bool_constant< (4 > 9) >;
+		using lt = std::bool_constant< (4 < 9) >;
+
+		// checker( one_to_nine::make<4>() ) ;
+		// error -- checker( one_to_nine::make<14>() );
+
+
+
+
+
+	} // 
+#pragma endregion  compile time insider
+
 
 } // namespace dbj::samples 

@@ -27,29 +27,30 @@ namespace dbj::chr_buf {
 
 		/*
 		Note: static_assert() will not kick-in before instantiation
-		of the template definition. Thus we use SFINAE to stop making
+		of the template definition. Thus we **might* use SFINAE to stop making
 		illegal types, from this template.
 
-		BUT!
+		BUT, if we do this:
 
-		That yanb_tpl<T> template declaration bellow will leave the type defined as:
-		yanb<char> --- creates --> yanb_tpl<char,1>
-		yanb_tpl<char> -- as a type will  not exist! ever.
-		just: yanb_tpl<char,1>
-
-		SO!
-
-		the correct way of using it "upstream" for SFINAE is:
-		yanb_tpl<char>::type
-		*/
-
-	template<
+			template<
 		typename T,
 		std::enable_if_t< std::is_same_v<char, T> || std::is_same_v<wchar_t, T>, bool > = true
-	>
+                 	>
 		struct yanb_tpl final
-		// note: template (tpl) is not a type  ... wink,wink
+	    {    } ;
+
+		The type of the  yanb_tpl template defined will be "poluted". Namely it will be:
+
+		yanb_tpl<char,true> and yanb_tpl<wchar_t, true>
+
+		SO ... we will revert to static_assert as bellow
+		*/
+
+	template< typename T >
+		struct yanb_tpl final
 	{
+		static_assert( std::is_same_v<char, T> || std::is_same_v<wchar_t, T> , "\n\n" __FILE__ "\n\nyanb_tpl requires char or wchar_t only\n\n" );
+
 		using type = yanb_tpl;
 		using data_type = T;
 		using value_type = std::shared_ptr<data_type>;
@@ -128,47 +129,20 @@ namespace dbj::chr_buf {
 	}; // yanb_tpl<T>
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
+    // narrow and wide buffer are defined here
 	using yanb =  yanb_tpl<char>;
 	using yanwb = yanb_tpl<wchar_t>;
 
-#ifdef DBJ_YANB_TESTING
-
-	void test_yanb()
-	{
-		{
-			auto mover = [](yanb bufy) { return bufy; };
-			yanb b1("abra");
-			yanb b2 = b1;
-			DBJ_TEST_ATOM(mover(b2));
-			DBJ_TEST_ATOM(mover("narrow dabra"));
-		}
-		{
-			auto mover = [](yanwb bufy) { return bufy; };
-			yanwb b1(L"abra");
-			DBJ_TEST_ATOM(b1);
-			DBJ_TEST_ATOM(b1.data());
-			yanwb b2 = b1;
-			DBJ_TEST_ATOM(mover(b2));
-			DBJ_TEST_ATOM(mover(L"wide dabra"));
-		}
-	}
-#endif // DBJ_YANB_TESTING
-
 #pragma endregion yanb (yet another buffer)
-
-
 
 	// this is basically just set of helpers
 	// to use the buffer from above
-	template<
-		typename CHAR,
-		std::enable_if_t<
-		std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>
-		, bool > = true
-	>
-		struct helper final
+	template< typename CHAR	>
+		struct yanb_helper final
 	{
-		using type = helper;
+		static_assert(std::is_same_v<char, T> || std::is_same_v<wchar_t, T>, "\n\n" __FILE__ "\n\nhelper requires char or wchar_t only\n\n");
+
+		using type = yanb_helper;
 		using value_type = CHAR;
 
 		using storage_t = yanb_tpl<CHAR>;
@@ -197,7 +171,7 @@ namespace dbj::chr_buf {
 		not the allocated size of the array.
 		As I am using the inside_1_and_max as a return type
 		it will 'kick the bucket' on the length 0!
-		that is the point of using it
+		And that is the point of using it
 		*/
 		static auto length(pointer buf_) noexcept -> inside_1_and_max
 		{
@@ -211,6 +185,8 @@ namespace dbj::chr_buf {
 		}
 
 		// the meta maker ;)
+		// this will cause serious SEGV is first and last are not 
+		// pointing to the same memory block
 		static storage_t make(
 			value_type const* first_, value_type const* last_
 		) noexcept
@@ -300,34 +276,16 @@ namespace dbj::chr_buf {
 			return sp_;
 		}
 
-	}; // helper<CHAR>
-
-	//using buff_type = typename helper<char>::type;
-	//using buff_pointer = typename helper<char>::pointer;
-	//using buff_ref_type = typename helper<char>::ref_type;
-
-	//using wbuff_type = typename helper<wchar_t>::type;
-	//using wbuff_pointer = typename helper<wchar_t>::pointer;
-	//using wbuff_ref_type = typename helper<wchar_t>::ref_type;
-
-
-
-	// do not try this at home. ever.
-	//extern "C"	inline void	secure_reset(void* s, size_t n) noexcept
-	//{
-	//	volatile char* p = (char*)s;
-	//	while (n--)* p++ = 0;
-	//}
+	}; // yanb_helper<CHAR>
 
 
 	/*----------------------------------------------------------------------------
 	binary comparisons
 	*/
 
-	template<typename CHAR, typename BT = helper<CHAR>  >
+	template<typename CHAR, typename BT = yanb_helper<CHAR>  >
 	inline bool operator == (
-		const typename BT::ref_type left_,
-		const typename BT::ref_type right_
+		const typename BT::ref_type left_,	const typename BT::ref_type right_
 		)
 		noexcept
 	{
@@ -341,19 +299,26 @@ namespace dbj::chr_buf {
 			left_.get(), left_.get() + left_size,
 			right_.get(), right_.get() + right_size
 		);
+	}	
+	
+	template<typename CHAR, typename BT = yanb_helper<CHAR>  >
+	inline bool operator < (
+		const typename BT::ref_type left_,	const typename BT::ref_type right_
+		)
+		noexcept
+	{
+		const size_t left_size = BT::length(left_);
+		const size_t right_size = BT::length(right_);
+
+		if (left_size >= right_size)
+			return false;
+
+		return std::less(
+			left_.get(), left_.get() + left_size,
+			right_.get(), right_.get() + right_size
+		);
 	}
-	/*----------------------------------------------------------------------------
-	streaming
-
-	using buff_type = typename helper<char>::type;
-	using buff_pointer = typename helper<char>::pointer;
-	using buff_ref_type = typename helper<char>::ref_type;
-
-	using wbuff_type = typename helper<wchar_t>::type;
-	using wbuff_pointer = typename helper<wchar_t>::pointer;
-	using wbuff_ref_type = typename helper<wchar_t>::ref_type;
-
-	*/
+	/*----------------------------------------------------------------------------*/
 
 #ifdef	DBJ_USES_STREAMS
 

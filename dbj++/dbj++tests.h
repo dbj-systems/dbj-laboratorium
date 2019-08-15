@@ -3,16 +3,14 @@
 /*
 there ary many ways better than this one
 to include/exclude tests at compile time 
-or even run time
-
-but ... this works
+or even run time...but ... this works
 */
 
 // dbj++ tests
 // are not included in dbj++.h
 // for using this include it after dbj++.h
 
-// #define dbj_buffer_testing
+#define dbj_buffer_testing
 // #define dbj_ap_env_test   
 // #define dbj_commander_test   
 // #define dbj_console_test   

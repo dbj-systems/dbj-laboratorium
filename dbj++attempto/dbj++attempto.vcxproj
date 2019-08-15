@@ -174,10 +174,8 @@
     <ClInclude Include="dbj_ref_node.h" />
     <ClInclude Include="object_store\dbj_object_store.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="string_literals_with_universal_character_names.h" />
     <ClInclude Include="tree\dbj_random_word.h" />
     <ClInclude Include="tree\simple_binary_tree.h" />
-    <ClInclude Include="utilities\dbj_lambda_matrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constexpr-format-master\constexpr_format_test.h" />

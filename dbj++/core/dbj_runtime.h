@@ -325,6 +325,14 @@ namespace dbj {
 #endif // DBJ_WIN
 
 	}
+
+	//	 do not try this at home. ever.
+	extern "C"	inline void	secure_reset(void* s, size_t n) noexcept
+	{
+		volatile char* p = (char*)s;
+		while (n--)* p++ = 0;
+	}
+	
 	/*
 	Core algo from http://graphics.stanford.edu/~seander/bithacks.html#CopyIntegerSign
 
