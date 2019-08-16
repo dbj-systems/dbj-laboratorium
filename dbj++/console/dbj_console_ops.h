@@ -1,18 +1,5 @@
 #pragma once
 
-// for out-putting std::path and friends
-#include <filesystem>
-#include <string>
-
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
-
-#include "../core/dbj_traits.h"
-#include "../core/dbj_buf.h"
-#include "../core/dbj_buffer.h"
-#include "dbj_console.h"
-
-
 // #define DBJ_TYPE_INSTRUMENTS
 
 /// <summary>

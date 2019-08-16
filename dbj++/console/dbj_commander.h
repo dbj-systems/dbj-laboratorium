@@ -1,12 +1,6 @@
 #pragma once
-/*
-#include "dbj++.h"
-*/
-#include <map>
-#include <functional>
-#include <initializer_list>
 /* Command pattern mechanism */
-#pragma region "commands"
+#pragma region commands
 namespace dbj {
 	
 	/* 

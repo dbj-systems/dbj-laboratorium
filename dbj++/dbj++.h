@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <optional>
 #include <cassert>
+#include <string>
 #include <string_view>
 #include <memory>
 #endif

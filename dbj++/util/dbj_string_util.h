@@ -10,13 +10,13 @@ IN ASCI locale unaware situations
 #include "../core/dbj_traits.h"
 
 // #include <type_traits>
-#include <locale>
+// #include <locale>
 #ifdef DBJ_USE_STD_STREAMS
 #include <sstream> // wstringstream
 #endif
-#include <memory>  // allocator
-#include <string>
-#include <optional>
+//#include <memory>  // allocator
+//#include <string>
+//#include <optional>
 
 namespace dbj::str {
 

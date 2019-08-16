@@ -1,24 +1,12 @@
 #pragma once
-#include <string_view>
-
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
-
-#include "dbj_commander.h"
-#include "../core/dbj_runtime.h"
-#include "../core/dbj_traits.h"
-#include "../core/dbj_win_inc.h"
-#include "../util/dbj_string_util.h"
-
-#ifndef  UNICODE
-#error __FILE__  requires unicode
-#endif // ! UNICODE
 
 #if !defined(_CONSOLE)
 #pragma message ( "#############################################################" )
 #pragma message ( _DBJ_CONCATENATE( "File: ", __FILE__) )
 #pragma message ( _DBJ_CONCATENATE( "Line: ",  _DBJ_STRINGIZE(__LINE__)))
-#pragma message ("This is probably not a console app?")
+#pragma message ("This is probably not a console app? OR we re building a library")
 #pragma message ( "#############################################################" )
 #endif
 

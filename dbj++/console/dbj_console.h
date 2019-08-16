@@ -1,9 +1,4 @@
 ﻿#pragma once
-#include "../win/dbj_win32.h"
-#include "dbj_console_fwd.h"
-#include "dbj_console_painter.h"
-#include <io.h>
-#include <fcntl.h>
 
 namespace dbj {
 	extern inline bool console_is_initialized() ;

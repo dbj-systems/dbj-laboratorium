@@ -3,14 +3,6 @@
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
 
-#ifndef  UNICODE
-#error dbj++ requires UNICODE
-#endif // ! UNICODE
-
-#include <algorithm>
-#include <variant>
-#include "dbj_commander.h"
-
 namespace dbj::console {
 #pragma region "colors and painter"
 namespace inner {

@@ -1,6 +1,6 @@
 #pragma once
-#include <functional>
-#include <optional>
+//#include <functional>
+//#include <optional>
 // license is at eof
 /*
 LINUX type name demangling has to be done like this
@@ -24,13 +24,13 @@ if (error == -2)   return { "not a valid mangled name" };
 
 #include "dbj_runtime.h"
 
-#include <type_traits>
-#include <utility>
-#include <typeinfo>
-#include <array>
-#include <vector>
-#include <string>
-#include <optional>
+//#include <type_traits>
+//#include <utility>
+//#include <typeinfo>
+//#include <array>
+//#include <vector>
+//#include <string>
+//#include <optional>
 
 /*
  typeid() returns the outcome of
