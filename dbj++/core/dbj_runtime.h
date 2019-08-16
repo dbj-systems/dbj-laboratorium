@@ -1,5 +1,7 @@
 #pragma once
 
+// REMINDER: be sure you do not have a space after a macro name and before the '(' !!
+
 #if (!defined(UNICODE)) || (! defined(_UNICODE))
 #error dbj++ requires UNICODE builds
 #endif
@@ -8,38 +10,49 @@
 #error dbj++ can not be used with  _SCL_SECURE_NO_WARNINGS defined
 #endif
 
+#define DBJ_PP "dbj++"
+
+// safer is slower
+// make us aware
+#define DBJ_SAFER_IS_SLOWER (1==1)
+
+#if DBJ_SAFER_IS_SLOWER
+	#define DBJ_SAFE(x) x
+	#pragma message("\n\ndbj++ safe and slower build\n\n")
+#else
+	#define DBJ_SAFE(x) __noop
+#pragma message("\n\ndbj++ faster and maybe more dangerous build\n\n")
+#endif
+
+#ifdef _MSC_VER
+#define DBJ_ASSERT(x) DBJ_SAFE( _ASSERTE(x) )
+#define DBJ_VERIFY(x) DBJ_SAFE( _ASSERT_AND_INVOKE_WATSON(x) )
+#else
+#define DBJ_ASSERT(x) DBJ_SAFE( assert(x) )
+#define DBJ_VERIFY(x) DBJ_SAFE( do{ if(!(x) { perror(_DBJ_STRINGIZE_(x)); exit(0);} }while(0) )
+#endif
+
 //#ifdef __cpp_coroutines
-//#pragma message ( __FILE__ " -- coroutines available in this build")
+//#pragma message ( __FILE__ " -- dbj++ coroutines available in this build")
 //#else
-//#pragma message (__FILE__ " -- no coroutines in this build ...")
+//#pragma message (__FILE__ " -- dbj++ no coroutines in this build ...")
 //#endif
 
 /* avoid macros as much as possible */
 // #ifdef NOMINMAX
 #ifdef MIN
 #undef MIN
-#pragma message (__FILE__ " -- MIN undefined ...")
+#pragma message (__FILE__ " -- MIN macro is made to be  undefined ...")
 #endif // MIN
 #ifdef MAX
 #undef MAX
-#pragma message (__FILE__ " -- MAX undefined ...")
+#pragma message (__FILE__ " -- MAX macro is made to be  undefined ...")
 #endif // MAX
 
 inline const auto & MIN = [](const auto & a, const auto & b) 
   constexpr -> bool { return (a < b ? a : b); };
 inline const auto & MAX = [](const auto & a, const auto & b) 
   constexpr -> bool { return (a > b ? a : b); };
-// #else
-// #error Be sure you have #define NOMINMAX placed before including windows.h !
-// #endif
-
-#ifdef _MSC_VER
-#define DBJ_ASSERT(x) _ASSERTE(x)
-#define DBJ_VERIFY(x) _ASSERT_AND_INVOKE_WATSON(x)
-#else
-#define DBJ_ASSERT(x) assert(x)
-#define DBJ_VERIFY(x) do{ if(!(x) { perror(_DBJ_STRINGIZE_(x)); exit(0);} }while(0)
-#endif
 
 #ifdef _MSC_VER
 // __LINE__ is not contexp in MSVC because of "edit and continue" feature of VStudio
@@ -71,19 +84,6 @@ from vcruntime.h
 #define _DBJ_EXPAND(s) _DBJ_EXPAND_IMPL_(s)
 #define _DBJ_EXPAND_IMPL_(s) s
 
-// NOTE: do not have a space after a macro name and before the '(' !!
-#if 0
-#ifndef DBJ_STRINGIFY	
-#define DBJ_STRINGIFY_(s) #s
-#define DBJ_STRINGIFY(s) DBJ_STRINGIFY_(s)
-#define DBJ_EXPAND(s) DBJ_STRINGIFY(s)
-#define DBJ_CONCAT_IMPL( x, y ) x##y
-#define DBJ_CONCAT( x, y ) DBJ_CONCAT_IMPL( x, y )
-
-#define DBJ_EXP_(s) #s
-#define DBJ_EXP(s) DBJ_EXP_(s)
-#endif
-#endif
 /*
 this is for variables only
 example
@@ -93,7 +93,7 @@ long var [[maybe_unused]] {42L} ;
 */
 #define DBJ_MAYBE(x) x [[maybe_unused]]
 /* just an unused variable but used expression */
-#define DBJ_USD(x) auto DBJ_CONCAT( unused_ , __COUNTER__ ) [[maybe_unused]] = (x)
+#define DBJ_MAYBE_VAR(x) auto DBJ_CONCAT( unused_ , __COUNTER__ ) [[maybe_unused]] = (x)
 
 
 /*
@@ -371,7 +371,34 @@ namespace dbj {
 		  return base_ + 1;
 	  }
 
-} // dbj
+	// it is not very usefull to have buffers of 
+	// unlimited size in programs
+	// thus we will define the upper limit
+	// it is
+	// in posix terms BUFSIZ * 2 * 64 aka 64KB
+	constexpr std::size_t DBJ_64KB = UINT16_MAX;
+
+	/*
+	only unique_ptr<char[]> is faster than vector of  chars
+	by a margin
+	*/
+	using vector_buffer			=  std::vector<char>;
+	using vector_buffer_wide	=  std::vector<wchar_t>;
+
+	template<typename CHAR>
+	inline std::vector<CHAR> vector_buffer_make(size_t count_)
+	{
+		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__  "\n"  __FUNCSIG__ "\n\tcore requires char or wchar_t only\n\n");
+
+		DBJ_VERIFY( count_ > 0 );
+		DBJ_VERIFY( DBJ_64KB >= count_ );
+		std::vector<CHAR> retval_(count_ + 1);
+		// terminate!
+		retval_[count_] = CHAR(0);
+		return retval_;
+	}
+
+}
 
 
 

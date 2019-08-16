@@ -49,7 +49,7 @@ DBJ_TEST_UNIT(core_format_utils)
 		u::program_data_path(ec_));
 
 #ifdef DBJ_COMFY_BUFFER
-	print("\nchar_buffer\n\t%s",::dbj::chr_buf::buffer("hello!"));
+	print("\nchar_buffer\n\t%s", buffer("hello!"));
 #endif
 }
 
@@ -80,7 +80,7 @@ DBJ_TEST_UNIT(core_utils)
 	// programdata path
 	DBJ_T_BUF("%s", u::program_data_path(ec_));
 #ifdef DBJ_COMFY_BUFFER
-	DBJ_T_BUF( "%s", ::dbj::chr_buf::buffer("hello!"));
+	DBJ_T_BUF( "%s", buffer("hello!"));
 #endif
 	DBJ_T_BUF("%s", ec_);
 }

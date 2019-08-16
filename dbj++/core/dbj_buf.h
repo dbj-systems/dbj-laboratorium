@@ -62,8 +62,30 @@ namespace dbj::chr_buf {
 			return *this;
 		}
 
-		yanb_tpl( value_type payload_) {
-			core::assign(this->data_, payload_.get());
+		yanb_tpl& assign(value_type const& another_smart_ptr) {
+			this->data_ = another_smart_ptr;
+			return *this;
+		}
+
+		yanb_tpl& operator = (value_type const& another_smart_ptr) {
+			this->data_ = another_smart_ptr;
+			return *this;
+		}
+
+
+		yanb_tpl( value_type const & another_smart_ptr) {
+			this->data_ = another_smart_ptr;
+		}
+
+		yanb_tpl (std::size_t sze_)
+			: data_(std::shared_ptr<char_type[]>(new char_type[sze_ + 1]) )
+		{
+			DBJ_VERIFY( sze_ > 0 );
+			DBJ_VERIFY( chr_buf::DBJ_MAX_BUFF_LENGTH >= sze_ );
+
+			// added +1 for String Terminator, now set it
+			constexpr char_type ST = char_type(0);
+			data_[sze_] = ST ;
 		}
 
 		yanb_tpl(char_type const* payload_) {
@@ -88,20 +110,10 @@ namespace dbj::chr_buf {
 		yanb_tpl(yanb_tpl&&) = default;
 		yanb_tpl& operator = (yanb_tpl&&) = default;
 
-		// assign smart ptr
-		//yanb_tpl (value_type const & another_smart_ptr ) {
-		//	this->data_ = another_smart_ptr;
-		//}
-
-		yanb_tpl & assign ( value_type const & another_smart_ptr ) {
-			this->data_ = another_smart_ptr;
-			return *this;
-		}
-
 	private:
 		value_type data_{};
 
-#ifdef DBJ_BUFFERS_IOSTREAMS
+#ifdef DBJ_USES_STREAMS
 
 		/*
 		Careful, a big and recurring gotcha!
@@ -153,22 +165,12 @@ namespace dbj::chr_buf {
 		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__ "\n\nhelper requires char or wchar_t only\n\n");
 
 		using type = yanb_helper;
-		using value_type = CHAR;
+		using char_type = CHAR;
 
 		using storage_t = yanb_tpl<CHAR>;
 
-		using pointer = typename storage_t::value_type;
+		using pointer = typename storage_t::char_type;
 		using ref_type = type &;
-
-		// always use this function to make  
-		// buff of particular size
-		// array is sized & zeroed
-		static storage_t make(inside_1_and_max size_) noexcept {
-			return
-			{
-			(std::make_unique<value_type[]>(size_ + 1)).get()
-			};
-		}
 
 		static constexpr bool empty(	pointer buff_ ) noexcept
 		{
@@ -183,9 +185,9 @@ namespace dbj::chr_buf {
 		it will 'kick the bucket' on the length 0!
 		And that is the point of using it
 		*/
-		static auto length(pointer buf_) noexcept -> inside_1_and_max
+		static auto length(pointer buf_) noexcept -> between_0_and_max
 		{
-			if constexpr (std::is_same_v<wchar_t, value_type>)
+			if constexpr (std::is_same_v<wchar_t, char_type>)
 			{
 				return std::wcslen(buf_.get());
 			}
@@ -198,46 +200,46 @@ namespace dbj::chr_buf {
 		// this will cause serious SEGV is first and last are not 
 		// pointing to the same memory block
 		static storage_t make(
-			value_type const* first_, value_type const* last_
+			char_type const* first_, char_type const* last_
 		) noexcept
 		{
 			_ASSERTE(first_ && last_);
-			std::basic_string_view<value_type> sv_(
+			std::basic_string_view<char_type> sv_(
 				first_, std::distance(first_, last_)
 			);
 			_ASSERTE(sv_.size() > 0);
 			return { sv_.data() };
 		}
 		// here we depend on a zero terminated string
-		static storage_t make(value_type const* first_) noexcept
+		static storage_t make(char_type const* first_) noexcept
 		{
 			_ASSERTE(first_);
 			return { first_ };
 		}
 		/*	from array of char's	*/
 		template<size_t N>
-		static storage_t make(const value_type(&charr)[N]) noexcept
+		static storage_t make(const char_type(&charr)[N]) noexcept
 		{
 			return { charr };
 		}
 		/* from string_view */
-		static  storage_t	make(std::basic_string_view< value_type > sv_) noexcept
+		static  storage_t	make(std::basic_string_view< char_type > sv_) noexcept
 		{
 			return { sv_.data() };
 		}
 		/* from string  */
-		static  storage_t	make(std::basic_string< value_type > sv_)  noexcept
+		static  storage_t	make(std::basic_string< char_type > sv_)  noexcept
 		{
 			return { sv_.c_str() };
 		}
 		/* from vector  */
-		static  storage_t	make(std::vector< value_type > sv_)  noexcept
+		static  storage_t	make(std::vector< char_type > sv_)  noexcept
 		{
 			return { sv_.data() };
 		}
 		/* from array  */
 		template<size_t N>
-		static  storage_t	make(std::array< value_type, N > sv_)  noexcept
+		static  storage_t	make(std::array< char_type, N > sv_)  noexcept
 		{
 			return { sv_.data() };
 		}
@@ -245,32 +247,17 @@ namespace dbj::chr_buf {
 		/* from An Other */
 		static storage_t make(storage_t another_) noexcept
 		{
-			_ASSERTE(true == another_);
-			return { another_.data() };
+			// using bool operator on the shared_ptr
+			DBJ_VERIFY(true == another_);
+			return { another_ };
 		}
 
-		/*
-		NOTE!
-		stringlen on char array filled with 0's returns 0!
-		not the allocated size of the array.
-		if you do not send the size and if it is found to be 0
-		and no fill will be done.
-		*/
-		static  storage_t&
-			fill(
-				storage_t& buff_,
-				value_type val_,
-				size_t N = 0
-			) noexcept
+		static  storage_t&	fill( storage_t& buff_,	char_type val_	) noexcept
 		{
-			_ASSERTE(buff_);
-			if (buff_)
-			{
-				const auto bufsiz_ = buff_.size();
-				N = (N >= 0 ? N : bufsiz_);
-				_ASSERTE(N <= bufsiz_);
-				::std::fill(buff_.data(), buff_.data() + N, val_);
-			}
+			DBJ_VERIFY( true == buff_);
+			const auto bufsiz_ = buff_.size();
+			DBJ_VERIFY( bufsiz_ > 0 );
+				::std::fill(buff_.data(), buff_.data() + bufsiz_, val_);
 			return buff_;
 		}
 
@@ -328,7 +315,11 @@ namespace dbj::chr_buf {
 			right_.data(), right_.data() + right_size
 		);
 	}
+
 	/*----------------------------------------------------------------------------*/
+
+	using narrow_helper_type	= typename yanb_helper<char>;
+	using wide_helper_type		= typename yanb_helper<wchar_t>;
 
 #ifdef	DBJ_USES_STREAMS
 

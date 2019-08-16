@@ -15,8 +15,7 @@
 #define DBJ_COMFY_BUFFER
 #ifdef DBJ_COMFY_BUFFER
 
-namespace dbj {
-	namespace chr_buf {
+namespace dbj::chr_buffer {
 		/*
 	--------------------------------------------------------------------------------
 
@@ -37,17 +36,18 @@ namespace dbj {
 
 		struct buffer final
 		{
-			using smart_buf_t	= narrow_type ;
+			using smart_buf_t	= chr_buf::narrow_type ;
 			// yanb_t<CHAR>; aka
-			using storage_t		= yanb ;
+			using storage_t		= chr_buf::yanb ;
 			using type			= buffer;
 			using reference_type = type &;
 			// this is the std::share_ptr<char>
-			using pointer		=  narrow_type; //  typename smart_buf_t::pointer;
+			using pointer		=  chr_buf::narrow_type; //  typename smart_buf_t::pointer;
 
 			using char_type		= typename smart_buf_t::element_type;
 			using iterator		= char_type *;
 			using citerator		= char_type const*;
+
 		private:
 			// the data is here
 			storage_t data_{}; // size == 0
@@ -71,9 +71,9 @@ namespace dbj {
 			buffer() = default;
 
 			// sized but empty buffer
-			explicit buffer(inside_1_and_max new_size) noexcept
+			buffer( chr_buf::between_0_and_max new_size) noexcept
+				: data_( storage_t(new_size) )
 			{
-				data_.reset(::dbj::chr_buf::yanb_helper<char_type>::make(new_size));
 			}
 
 			// copy
@@ -119,22 +119,27 @@ namespace dbj {
 
 			void assign(char const* from_, char const* to_) noexcept
 			{
-				assert(from_ && to_);
+				DBJ_VERIFY(from_ && to_);
 				std::string sv_(from_, to_); // normalize ?
 				this->data_.reset(sv_.c_str()); // take ownership?
 			}
 
 			void assign(char const* from_) noexcept
 			{
-				assert(from_);
+				DBJ_VERIFY(from_);
 				this->data_.reset(from_);
 			}
 
 			// notice the usage of the dbj::insider definition
 			// as  argument type
-			char_type & operator [] (inside_1_and_max idx_) const
+			char_type & __CRTDECL operator [] (chr_buf::between_0_and_max idx_) const
 			{
 				return const_cast<char_type &>(this->data_[idx_] );
+			}
+
+			char_type & __CRTDECL operator [] (chr_buf::between_0_and_max idx_)
+			{
+				return this->data_[idx_] ;
 			}
 
 			// to be removed
@@ -154,6 +159,7 @@ namespace dbj {
 
 			buffer const& fill(char val_) noexcept
 			{
+				using chr_buf::narrow_helper_type;
 				// I do allow for default ctor which leaves the instance 
 				// in the invalid state, but I do not allow to use it
 				// this all complicates the usage
@@ -161,7 +167,7 @@ namespace dbj {
 				// always send the size_
 				// data_[0] == '\0' is the state of 
 				// alocated but empty buffer
-				yanb_helper<char_type>::fill(data_, val_, data_.size());
+				narrow_helper_type::fill(data_, val_);
 				return *this;
 			}
 
@@ -264,11 +270,10 @@ namespace dbj {
 			//  buffer friends end here
 		}; // buffer
 
-	} // buf
-} // dbj
+} // dbj::chr_buffer
 
 namespace dbj::fmt {
-	inline char const* frm_arg(::dbj::chr_buf::buffer::type value) noexcept
+	inline char const* frm_arg(::dbj::chr_buffer::buffer::type value) noexcept
 	{
 		return value.data();
 	}
