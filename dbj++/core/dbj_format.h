@@ -4,12 +4,13 @@ namespace dbj {
 	namespace fmt {
 
 		template<typename ... Args>
-		inline typename ::dbj::chr_buf::yanb
-			to_buff(std::string_view format_, Args /*const &*/ ...args) noexcept;
+		inline auto to_buff
+		(wchar_t const* format_, Args ... args)	noexcept -> dbj::vector_buffer<wchar_t>::wide;
 
 		template<typename ... Args>
-		inline typename ::dbj::chr_buf::yanwb
-			to_buff(std::wstring_view format_, Args const& ...args) noexcept;
+		inline auto	to_buff
+		(char const* format_, Args ...args) noexcept -> dbj::vector_buffer<char>::narrow;
+
 
 		//////////////////////////////////////////////////////////////////////
 
@@ -27,6 +28,16 @@ namespace dbj {
 		// no pass by value allowed
 		// that means: no temporaries
 		// template <typename T> T & frm_arg( rfr<T> && value) = delete;
+
+		inline char* frm_arg( std::vector<char> const & value) noexcept
+		{
+			return const_cast<char *>( value.data() );
+		}
+
+		inline wchar_t* frm_arg( std::vector<wchar_t> const & value) noexcept
+		{
+			return const_cast<wchar_t *>( value.data() ) ;
+		}
 
 #pragma region dbj buffer and friends
 
@@ -86,7 +97,10 @@ namespace dbj {
 			print(std::string_view format_, Args /*const &*/ ... args)
 			noexcept
 		{
-			std::wprintf(L"%S", fmt::to_buff(format_, args...).data());
+			DBJ_VERIFY( format_.size() > 0  );
+			DBJ_VERIFY( sizeof...(args) > 0  );
+			std::vector<char> buffy = fmt::to_buff(format_.data(), args...);
+			std::wprintf(L"%S",  buffy.data() );
 		}
 
 	} // fmt
@@ -179,7 +193,7 @@ namespace dbj::core {
 	extern "C" {
 
 		/*	transform path to filename,	delimiter is '\\' */
-		inline	typename ::dbj::chr_buf::yanb::type
+		inline	typename ::dbj::vector_buffer<char>::narrow
 			filename(std::string_view file_path, const char delimiter_ = '\\')
 			noexcept
 		{
@@ -199,10 +213,8 @@ namespace dbj::core {
 		*/
 		// inline std::string FILELINE(const std::string & file_path,
 		inline
-			typename ::dbj::chr_buf::yanb::type
-			fileline(std::string_view file_path,
-				unsigned line_,
-				std::string_view suffix = "")
+			::dbj::vector_buffer<char>::narrow  fileline
+			(std::string_view file_path, unsigned line_, std::string_view suffix = "")
 		{
 			_ASSERTE(!file_path.empty());
 
@@ -216,27 +228,39 @@ namespace dbj::core {
 #pragma warning( pop )
 }
 namespace dbj::fmt {
-	inline char const* frm_arg(::dbj::chr_buf::yanb value) noexcept
+	
+	inline char const* frm_arg(::dbj::chr_buf::yanb const & value) noexcept
 	{
 		return value.data();
 	}
 
-	inline wchar_t const* frm_arg(::dbj::chr_buf::yanwb value) noexcept
+	inline wchar_t const* frm_arg(::dbj::chr_buf::yanwb const & value) noexcept
 	{
 		return value.data();
 	}
+
+	//inline char const* frm_arg(::dbj::vector_buffer const & value ) noexcept
+	//{
+	//	return value.data();
+	//}
+
+	//inline wchar_t const* frm_arg(::dbj::vector_buffer_wide cosnt & value) noexcept
+	//{
+	//	return value.data();
+	//}
 
 
 	/*  vaguely inspired by
 		https ://stackoverflow.com/a/39972671/10870835
 	*/
 	template<typename ... Args>
-	inline typename ::dbj::chr_buf::yanb
-		to_buff(std::string_view format_, Args /*const &*/ ...args)
-		noexcept
+	inline auto	to_buff
+	   ( char const * format_, Args ...args)
+		 noexcept -> dbj::vector_buffer<char>::narrow
 	{
+		DBJ_VERIFY( format_ != nullptr );
 		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_.data();
+		const auto fmt = format_ ;
 		// 1: what is the size required
 		size_t size = 1 + std::snprintf(nullptr, 0, fmt, frm_arg(args) ...);
 		assert(size > 0);
@@ -244,18 +268,20 @@ namespace dbj::fmt {
 		auto buf = std::make_unique<char[]>(size + 1);
 		// each arg becomes arg to the frm_arg() overload found
 		size = std::snprintf(buf.get(), size, fmt, frm_arg(args) ...);
-		assert(size > 0);
+		DBJ_VERIFY(size > 0);
 
-		return { buf.get() };
+		return ::dbj::vector_buffer<char>::make( buf );
 	}
 	// wide version
 	template<typename ... Args>
-	inline typename ::dbj::chr_buf::yanwb
-		to_buff(std::wstring_view format_, Args const& ...args)
-		noexcept
+	inline auto to_buff
+	      (wchar_t const * format_, Args ... args)
+		noexcept -> dbj::vector_buffer<wchar_t>::wide
 	{
+		DBJ_VERIFY(format_ != nullptr);
+
 		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_.data();
+		const auto fmt = format_ ;
 		// 1: what is the size required
 		size_t size = 1 + std::swprintf(nullptr, 0, fmt, frm_arg(args) ...);
 		assert(size > 0);
@@ -265,7 +291,7 @@ namespace dbj::fmt {
 		size = std::swprintf(buf.get(), size, fmt, frm_arg(args) ...);
 		assert(size > 0);
 
-		return { buf.get() };
+		return ::dbj::vector_buffer<wchar_t>::make(buf);
 	}
 }
 

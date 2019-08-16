@@ -74,7 +74,7 @@ namespace dbj {
 				narrow_path.data()
 				);
 
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 
 			white_line(buff_.data());
 		}
@@ -85,7 +85,7 @@ namespace dbj {
 				"\n%s\n",
 				::dbj::LINE() , dbj::testing::ALLDN
 			);
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 			white_line(buff_.data());
 			// no needed --> print(CMD::text_color_reset);
 		}
@@ -96,7 +96,7 @@ namespace dbj {
 				"\nBegin test unit %s\n",
 				::dbj::LINE(), name_
 			);
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 			blue_line(buff_.data());
 		}
 
@@ -106,7 +106,7 @@ namespace dbj {
 				"\nEnd test unit %s\n",
 				::dbj::LINE(), name_
 			);
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 			blue_line(buff_.data());
 		}
 
@@ -116,7 +116,7 @@ namespace dbj {
 				"\nRuntime started %s\n",
 				::dbj::LINE(), name_
 			);
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 			white_line(buff_.data());
 		}
 
@@ -126,7 +126,7 @@ namespace dbj {
 				"\nRuntime finished %s\n",
 				::dbj::LINE(), name_
 			);
-			_ASSERTE(buff_);
+			DBJ_VERIFY(buff_.size() > 0);
 			white_line(buff_.data());
 		}
 

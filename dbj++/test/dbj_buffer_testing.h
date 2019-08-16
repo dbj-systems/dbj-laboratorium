@@ -120,9 +120,9 @@ namespace inner {
 		return ::dbj::chr_buf::yanb(count_);
 	}
 
-	//inline buffer dbj_comfy_buffer(size_t count_) {
-	//	return buffer(count_);
-	//}
+	inline auto dbj_vector_buffer(size_t count_) {
+		return  dbj::vector_buffer<char>::make(count_);
+	}
 
 	inline std::string string_buffer(size_t count_) {
 		return std::string (static_cast<size_t>(count_), static_cast<char>(0));
@@ -173,7 +173,7 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 		print(measure(naked_unique_ptr, buf_size_), " miki s. \tunique_ptr<char[]>\n");
 		print(measure(naked_shared_ptr, buf_size_), " miki s. \tshared_ptr<char[]>\n");
 		print(measure(dbj_yanb,			buf_size_), " miki s. \tdbj YANB buffer\n");
-		print(measure(dbj::vector_buffer_make<char>,	buf_size_), " miki s. \tstd::vector\n");
+		print(measure(dbj_vector_buffer,buf_size_), " miki s. \tstd::vector\n");
 		print(measure(string_buffer,	buf_size_), " miki s. \tstd::string\n");
 	};
 

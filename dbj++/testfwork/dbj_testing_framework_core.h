@@ -51,7 +51,7 @@ namespace dbj {
 
 		namespace internal {
 
-			using buffer = typename ::dbj::chr_buf::yanb;
+			using buffer =  ::dbj::vector_buffer<char>::narrow ; //  typename ::dbj::chr_buf::yanb;
 
 			struct TUNODE final 
 			{
@@ -128,15 +128,17 @@ namespace dbj {
 				/// the actiual test unit function registration 
 				/// happens here
 			   inline  auto append
-			   (testunittype tunit_, buffer const & description_)
+			   (testunittype tunit_, const char description_[BUFSIZ])
 				   noexcept -> testunittype
 			   {
+				   // DBJ_VERIFY(description_ != nullptr);
+
 				   auto next_ = next_test_id();
 
 				   buffer  full_desc =
 					   dbj::fmt::to_buff("%s%s",
 						   next_.sid.data(),
-						   description_.data()
+						   description_
 					   );
 	   
 				   /* vs insert(), std::set emplace() returns a rezult */
@@ -144,7 +146,7 @@ namespace dbj {
 						   TUNODE( next_.id, tunit_ , full_desc )
 					   );
 
-				   _ASSERTE(full_desc);
+				   DBJ_VERIFY (full_desc.size() > 0);
 
 				   // NOTE: rez.second is false if no insertion ocured
 				   if (rez.second == false) {

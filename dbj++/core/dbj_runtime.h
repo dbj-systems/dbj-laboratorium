@@ -352,10 +352,7 @@ namespace dbj {
 #define DBJ_ARR_LEN(str) (::dbj::countof(str)) 
 
 	template < typename T, size_t N > 
-	  inline constexpr size_t 
-		countof(T const (&)[N]) { 
-		  return N; 
-	  }
+	inline constexpr size_t countof(T const (&)[N]) { return N; };
 
 	  inline char* dbj_basename(
 		  char* full_path,
@@ -382,25 +379,50 @@ namespace dbj {
 	only unique_ptr<char[]> is faster than vector of  chars
 	by a margin
 	*/
-	using vector_buffer			=  std::vector<char>;
-	using vector_buffer_wide	=  std::vector<wchar_t>;
 
 	template<typename CHAR>
-	inline std::vector<CHAR> vector_buffer_make(size_t count_)
-	{
-		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__  "\n"  __FUNCSIG__ "\n\tcore requires char or wchar_t only\n\n");
+	struct vector_buffer final {
 
-		DBJ_VERIFY( count_ > 0 );
-		DBJ_VERIFY( DBJ_64KB >= count_ );
-		std::vector<CHAR> retval_(count_ + 1);
-		// terminate!
-		retval_[count_] = CHAR(0);
-		return retval_;
-	}
+		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
 
+		using narrow	=  std::vector<char>;
+		using wide		=  std::vector<wchar_t>;
+
+		static
+			std::vector<CHAR> make(size_t count_)
+		{
+			DBJ_VERIFY(count_ > 0);
+			DBJ_VERIFY(DBJ_64KB >= count_);
+			std::vector<CHAR> retval_(count_ + 1);
+			// terminate!
+			retval_[count_] = CHAR(0);
+			return retval_;
+		}
+
+		static
+			std::vector<CHAR> make(std::basic_string_view<CHAR> sview_)
+		{
+			DBJ_VERIFY(sview_.size() > 0);
+			DBJ_VERIFY(DBJ_64KB >= sview_.size());
+			std::vector<CHAR> retval_(sview_.begin(), sview_.end());
+			// terminate!
+			retval_.push_back(CHAR(0));
+			return retval_;
+		}
+
+		static
+			std::vector<CHAR> make(std::unique_ptr<CHAR[]> const& upc_)
+		{
+			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
+		}
+
+		static
+			std::vector<CHAR> _make(std::shared_ptr<CHAR[]> const& upc_)
+		{
+			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
+		}
+	};
 }
-
-
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"
