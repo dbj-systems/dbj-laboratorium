@@ -5,43 +5,36 @@
 
 DBJ_TEST_SPACE_OPEN(dbj_buffer)
 
-using namespace ::dbj::chr_buf;
-using namespace ::dbj::chr_buffer;
-
-#pragma region some yanb helper testing 
 
 DBJ_TEST_UNIT(some_yanb_helper_testing) {
 
-	namespace buf = ::dbj::chr_buf;
-
-	auto test_1 = [](auto C_, auto specimen)
+	auto driver = [](auto C_, auto specimen)
 	{
 		using T = ::std::decay_t< decltype(C_) >;
-		using helper = buf::yanb_helper<T>;
+		using helper = dbj::vector_buffer<T>;
 
-		DBJ_TUNIT(yanb_tpl<T>(BUFSIZ));
+		DBJ_TUNIT(helper::make(BUFSIZ));
 		DBJ_TUNIT(helper::make(specimen));
 		DBJ_TUNIT(helper::make(std::basic_string<T>(specimen)));
 		DBJ_TUNIT(helper::make(std::basic_string_view<T>(specimen)));
 
-		auto buf_ = yanb_tpl<T>(BUFSIZ);
-		DBJ_TUNIT(helper::fill(buf_, C_));
-
-		auto sec_ = helper::make(buf_);
+		auto buf_ = helper::make(BUFSIZ) ;
+		auto sec_ = buf_ ;
 		DBJ_TUNIT(sec_ == buf_);
 
 	};
-	test_1('*', "narrow string");
-	test_1(L'*', L"wide string");
+	driver('*', "narrow string");
+	driver(L'*', L"wide string");
 }
 
-#pragma endregion
 
 DBJ_TEST_UNIT(dbj_light_buffer)
 {
 	const auto bufsiz_ = BUFSIZ;
+	using helper = dbj::vector_buffer<char>;
 
-	auto alphabet = [&](buffer::reference_type cbr) {
+	auto alphabet = [&](helper::narrow & cbr)
+	{
 		char k = 65; // 'A'
 		for (auto& c_ : cbr)
 		{
@@ -55,7 +48,7 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 		while (n--)* p++ = val_;
 	};
 
-	auto sizeshow = [&](buffer::reference_type cbr) noexcept -> void
+	auto sizeshow = [&]( helper::narrow cbr) noexcept -> void
 	{
 		auto show = [](auto&& obj_, auto filler) {
 			filler(obj_);
@@ -66,16 +59,16 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 
 		show(std::vector<char>(BUFSIZ), [](auto& obj_) { std::fill(obj_.begin(), obj_.end(), '\0'); });
 		show(std::string(BUFSIZ, '\0'), [](auto& obj_) { std::fill(obj_.begin(), obj_.end(), '\0'); });
-		show(cbr, [](auto& obj_) { obj_.fill('*'); });
+		show(cbr, [](auto& obj_) {  std::fill(obj_.begin(), obj_.end(), '*'); } );
 	};
 
-	buffer cb1(BUFSIZ);
+	helper::narrow cb1(BUFSIZ);
 
 	alphabet(cb1);	sizeshow(cb1);
 
 	// show the copying
 	{
-		buffer cb2(BUFSIZ);
+		helper::narrow cb2(BUFSIZ);
 		DBJ_ATOM_TEST(cb2); //rezult
 		DBJ_TEST_ATOM(cb1 = cb2); // assignment
 
@@ -86,17 +79,9 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 	}
 	// tranformations to string, wstring and vector
 	{
-		cb1.fill('X'); // assignment
+		auto filler = [](auto& obj_ , char fillchr ) {  std::fill(obj_.begin(), obj_.end(), fillchr); };
+		filler( cb1, 'X'); // assignment
 		DBJ_ATOM_TEST(cb1);
-		DBJ_ATOM_TEST(to_string(cb1));
-		DBJ_ATOM_TEST(to_vector(cb1));
-	}
-
-	{
-		auto [err_code, wsize, smart_wide_charr] = wide_copy(cb1);
-		DBJ_ATOM_TEST(err_code);
-		DBJ_ATOM_TEST(wsize);
-		DBJ_ATOM_TEST(smart_wide_charr);
 	}
 }
 
@@ -116,9 +101,9 @@ namespace inner {
 		return std::shared_ptr<char[]>( new char[count_+1]);
 	}
 
-	inline ::dbj::chr_buf::yanb dbj_yanb(size_t count_) {
-		return ::dbj::chr_buf::yanb(count_);
-	}
+	//inline ::dbj::chr_buf::yanb dbj_yanb(size_t count_) {
+	//	return ::dbj::chr_buf::yanb(count_);
+	//}
 
 	inline auto dbj_vector_buffer(size_t count_) {
 		return  dbj::vector_buffer<char>::make(count_);
@@ -160,7 +145,7 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 
 	auto & print = ::dbj::console::print;
 
-	print("\n\nWill make/destroy on the stack, and measure five types of buffers\n\n");
+	print("\n\nWill make/destroy on the stack, and measure four types of buffers\n\n");
 	/*
 	on this machine I have found, for normal buffer sizes
 	std::vector<char> is considerably slower
@@ -172,7 +157,6 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 		print("\n\nBuffer size:\t\t",	buf_size_, "\nIterations:\t\t",max_iterations,"\n\n");
 		print(measure(naked_unique_ptr, buf_size_), " miki s. \tunique_ptr<char[]>\n");
 		print(measure(naked_shared_ptr, buf_size_), " miki s. \tshared_ptr<char[]>\n");
-		print(measure(dbj_yanb,			buf_size_), " miki s. \tdbj YANB buffer\n");
 		print(measure(dbj_vector_buffer,buf_size_), " miki s. \tstd::vector\n");
 		print(measure(string_buffer,	buf_size_), " miki s. \tstd::string\n");
 	};
