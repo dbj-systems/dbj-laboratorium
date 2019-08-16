@@ -27,13 +27,6 @@ DBJ_TEST_SPACE_CLOSE
 // has to pair the  DBJ_TEST_SPACE_OPEN
 */
 
-#include <set>
-
-#include "../core/dbj_synchro.h"
-#include "../core/dbj_format.h"
-#include "../core/dbj_buf.h"
-#include "../util/dbj_string_util.h"
-
 namespace dbj {
 	namespace testing {
 

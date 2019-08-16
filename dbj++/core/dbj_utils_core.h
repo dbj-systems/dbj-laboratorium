@@ -13,7 +13,8 @@ namespace dbj {
 			using namespace  ::std::literals::string_view_literals;
 			namespace h = ::std::chrono;
 
-			using buf_type = typename ::dbj::chr_buf::narrow_type ;
+			using buf_helper = typename ::dbj::vector_buffer<char> ;
+			using buf_type = typename buf_helper::narrow ;
 
 			// this is *very* tricky to get right
 			template<typename T>
@@ -69,11 +70,8 @@ namespace dbj {
 				const auto strlen_buf = std::strlen(buf);
 				(void)::sprintf_s(buf + strlen_buf, buf_len - strlen_buf, ".%03d", millis);
 
-				buf_type smart_ptr_buffer;
+				return buf_helper::make(buffer_.data());
 
-				dbj::chr_buf::core::assign(smart_ptr_buffer , buffer_.data() );
-
-				return smart_ptr_buffer;
 				// ec_ stays clear
 			};
 
@@ -91,11 +89,7 @@ namespace dbj {
 				{
 					ec_ = std::error_code(::GetLastError(), std::system_category());
 				}
-
-				buf_type smart_ptr_buffer;
-					dbj::chr_buf::core::assign(smart_ptr_buffer, bar.data());
-
-				return smart_ptr_buffer;
+					return buf_helper::make( bar.data() );
 			}
 
 			/*	caller must check the ec_	*/

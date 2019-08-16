@@ -179,7 +179,7 @@ https://stackoverflow.com/a/54491532/10870835
 			}
 		}
 
-		inline ::dbj::chr_buf::narrow_type 
+		inline ::dbj::vector_buffer<char>::narrow 
 			module_basename(HINSTANCE h_instance = NULL) {
 
 			std::string module_path
@@ -194,7 +194,7 @@ https://stackoverflow.com/a/54491532/10870835
 			//::dbj::chr_buf::core::assign(buffer_, ::dbj::basename(module_path.data()));
 			//return buffer_;
 
-			return ::dbj::chr_buf::core::assign( ::dbj::dbj_basename(module_path.data()) );
+			return  ::dbj::vector_buffer<char>::make( ::dbj::dbj_basename(module_path.data()) );
 
 		}
 

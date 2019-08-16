@@ -456,6 +456,18 @@ with reference or pointer type argument.
 			::dbj::console::print("{ value: empty }");
 	}
 
+	inline void out
+	(::std::vector<char> const& vector_charr_buffer_ )
+	{
+		::dbj::console::PRN.printf(L"%S", vector_charr_buffer_.data());
+	}
+
+	inline void out
+	(::std::vector<wchar_t> const& vector_charr_buffer_ )
+	{
+		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
+	}
+
 #pragma region smart pointers 
 
 	/*
@@ -520,15 +532,6 @@ with reference or pointer type argument.
 		);
 	}
 #endif
-	inline void out(::dbj::chr_buf::yanb const & cb_)
-	{
-		::dbj::console::PRN.printf(	L"%S", cb_.data() );
-	}
-
-	inline void out(::dbj::chr_buf::yanwb const & cb_)
-	{
-		::dbj::console::PRN.printf(	L"%s", cb_.data() );
-	}
 
 #pragma region error codes and options
 	// we can not place a friend inside std::error_code, so...

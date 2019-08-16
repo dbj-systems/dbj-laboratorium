@@ -1,7 +1,7 @@
 #pragma once
 
-// does not require any include before
-#include <mutex>
+// does require this include
+// #include <mutex>
 
 // Multi Threaded Build Switch
 #define DBJ_AUTO_LOCK dbj::sync::lock_unlock __dbj_auto_lock__##__COUNTER__ 

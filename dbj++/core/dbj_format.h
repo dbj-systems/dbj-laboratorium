@@ -229,16 +229,6 @@ namespace dbj::core {
 }
 namespace dbj::fmt {
 	
-	inline char const* frm_arg(::dbj::chr_buf::yanb const & value) noexcept
-	{
-		return value.data();
-	}
-
-	inline wchar_t const* frm_arg(::dbj::chr_buf::yanwb const & value) noexcept
-	{
-		return value.data();
-	}
-
 	//inline char const* frm_arg(::dbj::vector_buffer const & value ) noexcept
 	//{
 	//	return value.data();
