@@ -47,18 +47,30 @@ if (error == -2)   return { "not a valid mangled name" };
 
 namespace dbj {
 
-	// usage:   using ascii_ordinal = inside_t<unsigned, K, 0, 127>;
-	// renders really terrible CL error messages when 
-	// doing the job of stopping outside values
+	/* example usage:  
+	    compiles:
+	template<unsigned K>
+	using ascii_ordinal_compile_time = ::dbj::inside_t<unsigned, K, 0, 127>;
+
+	constexpr auto compile_time_ascii_index = ascii_ordinal_compile_time<64>() ;
+	    fails:
+    'std::enable_if_t<false,std::integral_constant<unsigned int,164>>' : Failed to specialize alias template
+	 constexpr auto compile_time__not_ascii_index = ascii_ordinal_compile_time<164>() ;
+	*/
 	template< typename T, T X, T L, T H>
 	using inside_t =
 		::std::enable_if_t< (X <= H) && (X >= L),
 		::std::integral_constant<T, X> >;
 
-	// _Is_any_of_v from <type_traits>
+	/*
+	    static_assert(  dbj::is_any_same_as_first_v<float, float, float> ) ;
+
+	fails, none is same as bool:
+		static_assert(  dbj::is_any_same_as_first_v<bool,  float, float>  );
+	*/
 	template<class _Ty,
 		class... _Types>
-		inline constexpr bool is_any_of_v
+		inline constexpr bool is_any_same_as_first_v
 		= ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
 
 
@@ -139,27 +151,30 @@ namespace dbj {
 
 	/***********************************************************************************
 	smart pointers of arrays are very usefull
-	note 1: always use make_unique
+	note 1: always use make_unique if you can, it is faster than shared_ptr
 	note 2: ::std::move () is the only way out for copying unique_ptr, moving works
 	note 3: consider ::std::reference_wrapper<> to make unique_ptr as argument possible
 	*/
 	template<typename T_, ::std::enable_if_t< ok_to_be_smart_v<T_>, int> = 0	>
-	using unique_arr = ::std::unique_ptr<T_[]>;
+	using unique_ptr_arr = ::std::unique_ptr<T_[]>;
 
 	template<typename T_>
-	inline unique_arr<T_> make_unique_arr(size_t N_) {
-		return ::std::make_unique<T_[]>(N_);
+	inline unique_ptr_arr<T_> 
+		make_unique_ptr_arr(size_t N_) {
+			return ::std::make_unique<T_[]>(N_);
 	}
 	/*
 	smart_pair<T> makes smart pointers of arrays even more usefull
 	it keeps the count of array
+	unique_ptr has no size method if it holds the array
+	like it has [] operator only if it holds the array
 	*/
 	template<typename T_>
-	using smart_pair = ::std::pair < size_t, ::dbj::unique_arr<T_> >;
+	using smart_pair = ::std::pair < size_t, ::dbj::unique_ptr_arr<T_> >;
 
 	template<typename T_>
-	inline smart_pair<T_> make_smart_pair(size_t N_) {
-		return ::std::make_pair(N_, ::std::make_unique<T_[]>(N_));
+	inline smart_pair<T_> make_smart_array_pair(size_t N_) {
+		return ::std::make_pair(N_, make_unique_ptr_arr<T_>(N_) );
 	}
 
 	/************************************************************************************/

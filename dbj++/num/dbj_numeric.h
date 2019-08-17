@@ -83,10 +83,10 @@ namespace dbj::num {
 	template<typename INT_TYPE_>
 	INT_TYPE_ random_from_to(INT_TYPE_ min, INT_TYPE_ max)
 	{
-		static_assert(::dbj::is_any_of_v<INT_TYPE_,
+		static_assert(::dbj::is_any_same_as_first_v<INT_TYPE_,
 			short, int, long, long long, unsigned short, unsigned int,
 			unsigned long, unsigned long long>,
-			"\n\nInvalid template argument for " __FUNCSIG__ ": N4659 29.6.1.1 [rand.req.genl]/1e requires one of "
+			"\n\nInvalid template argument for " __FUNCSIG__ ": requires one of \n"
 			"short, int, long, long long, unsigned short, unsigned int, unsigned long, or unsigned long long\n\n");
 
 		std::random_device seed;

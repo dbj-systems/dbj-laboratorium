@@ -98,7 +98,7 @@ namespace dbj {
 			noexcept
 		{
 			DBJ_VERIFY( format_.size() > 0  );
-			DBJ_VERIFY( sizeof...(args) > 0  );
+			static_assert( sizeof...(args) > 0  );
 			std::vector<char> buffy = fmt::to_buff(format_.data(), args...);
 			std::wprintf(L"%S",  buffy.data() );
 		}
