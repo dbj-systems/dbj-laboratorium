@@ -1,9 +1,10 @@
 #include "pch.h"
-#include <assert.h>
-#include <memory>
+//#include <assert.h>
+//#include <memory>
+#include <string_view>
 #include <dbj++clib/dbjclib.h>
-#include <functional>
-#include <optional>
+//#include <functional>
+//#include <optional>
 #include "dbj_ref_node.h"
 
 using namespace ::std;
@@ -274,4 +275,97 @@ namespace dbj::samples::inner {
 		strinter(stringetor_2, "C");
 		strinter(stringetor_2, "D"); // it stays "C"
 	}
+#pragma region unique_ptr based buffer
+
+	using up_buffer = dbj::unique_ptr<char[]>;
+	using up_buffer_w = dbj::unique_ptr<wchar_t[]>;
+
+	template< class T  >
+	inline constexpr size_t up_buffer_size(std::unique_ptr<T[]> const& source)
+	{
+		using UP = std::unique_ptr<T[]>;
+		UP::element_type* ep_ = source.get();
+		return (sizeof(ep_) / sizeof(ep_[0]));
+	}
+
+	template< class T  >
+	inline std::unique_ptr<T[]> up_buffer_copy(std::unique_ptr<T[]> const & source)
+	{
+		using UP = std::unique_ptr<T[]>;
+		UP::element_type * ep_ = source.get();
+		const auto sze_ = ( sizeof(ep_) / sizeof(ep_[0]) );
+		UP up_ = std::make_unique<UP::element_type[]>(sze_) ;
+		std::copy(source.get(), source.get() + sze_, up_.get());
+		return up_;
+	}
+
+	template< class char_type,
+		typename UP = std::unique_ptr<char_type[]> >
+		inline constexpr UP up_buffer_make ( size_t const & sze_ )
+	{
+		UP up = std::make_unique<char_type[]>(sze_ + 1) ;
+		up[sze_] = char_type(0);
+		return up;
+	}
+
+	template< class char_type , 
+		typename UP = std::unique_ptr<char_type[]> ,
+		typename SV = std::basic_string_view<char_type>
+	>
+	inline constexpr UP up_buffer_make ( char_type const * sliteral_ )
+	{
+		SV sview_{  sliteral_  };
+		UP up = up_buffer_make<char_type>( sview_.size() );
+
+		std::copy(sview_.begin(), sview_.end(), up.get());
+		// add the string terminator
+		up[sview_.size()] = char_type(0);
+		return up;
+	}
+
+	inline std::unique_ptr<char[]> operator""_buffer( const char* sliteral_, size_t )
+	{
+		return up_buffer_make( sliteral_ );
+	}
+
+	inline std::unique_ptr<wchar_t[]> operator""_buffer( const wchar_t* sliteral_, size_t )
+	{
+		return up_buffer_make( sliteral_ );
+	}
+
+	template< class CHAR, size_t N >
+	inline constexpr
+		typename std::array< typename std::remove_cv_t<CHAR>, N > 
+		sliteral_to_std_array
+			( CHAR (&sliteral_) [N] )
+	{
+		return arr::native_to_std_array(sliteral_);
+	}
+
+	template< char ... Chs >
+	inline decltype(auto) operator"" _ct_buff( )
+	{
+		return  std::array { Chs... } ;
+	}
+
+
+	DBJ_TEST_UNIT(unique_ptr_simple_copy)
+	{
+		using namespace std;
+
+		auto std_arr = sliteral_to_std_array("WOW?!");
+
+		auto wotisthis = 123_ct_buff;
+
+		up_buffer wonder = "STRING LITERAL"_buffer;
+		auto wonder_wall = L"WIDE STRING LITERAL"_buffer;
+		up_buffer buffy{ up_buffer_make("Buffy") };
+		auto buffy_size = up_buffer_size( buffy );
+		auto buffy_count = _countof("Buffy");
+
+		auto up = up_buffer_copy( buffy );
+
+	console::print("\n\n", up);
+	}
+#pragma endregion unique_ptr copy
 }
