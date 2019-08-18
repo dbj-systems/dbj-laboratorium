@@ -47,31 +47,6 @@ if (error == -2)   return { "not a valid mangled name" };
 
 namespace dbj {
 
-	/* example usage:  
-	    compiles:
-	template<unsigned K>
-	using ascii_ordinal_compile_time = ::dbj::inside_t<unsigned, K, 0, 127>;
-
-	constexpr auto compile_time_ascii_index = ascii_ordinal_compile_time<64>() ;
-	    fails:
-    'std::enable_if_t<false,std::integral_constant<unsigned int,164>>' : Failed to specialize alias template
-	 constexpr auto compile_time__not_ascii_index = ascii_ordinal_compile_time<164>() ;
-	*/
-	template< typename T, T X, T L, T H>
-	using inside_t =
-		::std::enable_if_t< (X <= H) && (X >= L),
-		::std::integral_constant<T, X> >;
-
-	/*
-	    static_assert(  dbj::is_any_same_as_first_v<float, float, float> ) ;
-
-	fails, none is same as bool:
-		static_assert(  dbj::is_any_same_as_first_v<bool,  float, float>  );
-	*/
-	template<class _Ty,
-		class... _Types>
-		inline constexpr bool is_any_same_as_first_v
-		= ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
 
 
 	/*

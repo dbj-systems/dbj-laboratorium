@@ -21,6 +21,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_ops.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_painter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++core.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_chr_buf_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_utils_core.h" />

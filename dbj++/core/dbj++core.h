@@ -34,6 +34,7 @@ usage concept: use dbj++core always and only by including this header only
 #include "dbj_traits.h"
 #include "dbj_runtime.h"
 #include "dbj_insider.h"
+#include "dbj_buffers.h"
 #include "dbj_chr_buf_core.h"
 #include "dbj_constexpr.h"
 #include "dbj_utils_core.h"

@@ -88,7 +88,7 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 namespace inner {
 
 	//deliberately not constexpr
-	inline auto const& buffer_size = ::dbj::chr_buf::DBJ_MAX_BUFF_LENGTH;
+	inline auto const& buffer_size = ::dbj::DBJ_64KB;
 	inline auto const& max_iterations = 1000;
 
 	inline std::unique_ptr<char[]> naked_unique_ptr(size_t count_)
@@ -101,9 +101,9 @@ namespace inner {
 		return std::shared_ptr<char[]>( new char[count_+1]);
 	}
 
-	//inline ::dbj::chr_buf::yanb dbj_yanb(size_t count_) {
-	//	return ::dbj::chr_buf::yanb(count_);
-	//}
+	inline dbj::unique_ptr_buffer<char>  uniq_ptr_buffer(size_t count_) {
+		return dbj::unique_ptr_buffer<char>(count_);
+	}
 
 	inline auto dbj_vector_buffer(size_t count_) {
 		return  dbj::vector_buffer<char>::make(count_);
@@ -155,10 +155,11 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 	auto driver = [&](auto  buf_size_) 
 	{
 		print("\n\nBuffer size:\t\t",	buf_size_, "\nIterations:\t\t",max_iterations,"\n\n");
-		print(measure(naked_unique_ptr, buf_size_), " miki s. \tunique_ptr<char[]>\n");
-		print(measure(naked_shared_ptr, buf_size_), " miki s. \tshared_ptr<char[]>\n");
-		print(measure(dbj_vector_buffer,buf_size_), " miki s. \tstd::vector\n");
-		print(measure(string_buffer,	buf_size_), " miki s. \tstd::string\n");
+		print(measure(naked_unique_ptr, buf_size_), " miki s. \t unique_ptr<char[]>\n");
+		print(measure(naked_shared_ptr, buf_size_), " miki s. \t shared_ptr<char[]>\n");
+		print(measure(uniq_ptr_buffer, buf_size_), " miki s. \t	unique_ptr_buffer<char>\n");
+		print(measure(dbj_vector_buffer,buf_size_), " miki s. \t std::vector\n");
+		print(measure(string_buffer,	buf_size_), " miki s. \t std::string\n");
 	};
 
 	using namespace inner;

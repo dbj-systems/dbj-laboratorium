@@ -201,112 +201,6 @@ namespace dbj::samples::init {
 
 namespace dbj::samples::inner {
 
-	/*
-	run-time, dynamic, self cleaning char buffer
-	*/
-
-	template<typename CHAR>
-	struct dbj_char_buffer final 
-	{
-		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, 
-			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
-
-		using type			= dbj_char_buffer;
-		using char_type		= CHAR;
-		using value_type	= std::unique_ptr<char_type[]>;
-		using pair_type		= std::pair< size_t, value_type >;
-
-		// String Terminator
-		constexpr static inline char_type ST = char_type(0);
-
-		explicit dbj_char_buffer(size_t size_arg_) 
-			: pair_ ( std::make_pair(size_arg_, std::make_unique<char_type[]>(size_arg_ + 1)) )
-		{
-			// add the string terminator
-			pair_.second[size_arg_] = ST;
-		}
-
-		explicit dbj_char_buffer(std::basic_string_view<char_type> sview_ )
-			: pair_(std::make_pair(sview_.size(), std::make_unique<char_type[]>(sview_.size() + 1)))
-		{
-			std::copy( sview_.begin(), sview_.end(), this->pair_.second.get() );
-			// add the string terminator
-			this->pair_.second[this->pair_.first] = ST;
-		}
-
-		dbj_char_buffer() = delete;
-
-		// std::uniqe_ptr can not be copied, ditto
-		dbj_char_buffer(const dbj_char_buffer & other_) 
-		{
-			const auto sz_ = other_.size();
-			this->pair_.first = other_.pair_.first ; 
-			this->pair_.second = std::make_unique<char_type[]>(sz_ + 1);
-			type::copy( this->pair_ , other_.pair_ );
-			this->pair_.second[sz_] = ST;
-		}
-
-		dbj_char_buffer & operator = (dbj_char_buffer const & ) = default;
-		dbj_char_buffer(dbj_char_buffer&& other_) = default;
-
-		dbj_char_buffer& operator = (dbj_char_buffer&& other_) 
-		{
-			const auto sz_ = other_.size();
-			this->pair_.first =  std::move( other_.pair_.first  );
-			this->pair_.second = std::move( other_.pair_.second );
-			this->pair_.second[sz_] = ST; // ?
-		}
-
-		// interface
-
-		const size_t size() const noexcept { return pair_.first; };
-		value_type const & buffer () const noexcept { return pair_.second; };
-
-		operator size_t () const noexcept { return pair_.first; };
-		operator value_type  const & () const noexcept { return pair_.second; };
-
-		// utilities
-		static pair_type & copy(pair_type & left_ , pair_type const & right_) {
-
-			DBJ_VERIFY( left_.first == right_.first );
-			value_type&  left_p_	= left_.second;
-			value_type const &  right_p_	= right_.second;
-			
-			for (auto j = 0; j < left_.first; j++) {
-				left_p_[j] = right_p_[j];
-			}
-			return left_ ;
-		}
-
-		/*
-		friend type  clone( type const & other_) {
-			// create pair with no buffer content
-			type copy_( other_.pair_.first );
-			// copy the buffer content
-			assign(copy_, other_.buffer().get());
-			return copy_; // move out
-		}
-		*/
-		// assign as much as possible,with leaving the rest
-		//friend dbj_char_buffer & assign 
-		//	(dbj_char_buffer & buf_, std::basic_string_view<char_type> sview_ ) 
-		//{
-		//	const auto sz_ = buf_.size();
-		//	const auto sv_sz_ = sview_.size() - 1 ;
-		//	// 
-		//	for (auto j = 0; j < sz_; j++) {
-		//		if (j > sv_sz_) break;
-		//		buf_.buffer()[j] = sview_[j];
-		//	}
-
-		//	buf_.buffer()[sz_] = ST;
-
-		//	return buf_;
-		//}
-
-	private:
-		mutable pair_type pair_;
-	};
 
 	DBJ_TEST_UNIT( array_uniq_ptr )
 	{
@@ -314,15 +208,15 @@ namespace dbj::samples::inner {
 		auto mover = [](auto arg_) { return arg_ ;  };
 		auto  [ arr_size, smart_p ] = dbj::make_smart_array_pair<char>(BUFSIZ);
 
-		dbj_char_buffer<char>		buffy("Buffy");
-		dbj_char_buffer<wchar_t>	duffy(L"Duffy");
+		unique_ptr_buffer<char>		buffy = "Buffy"sv ;
+		unique_ptr_buffer<wchar_t>	duffy(L"Duffy"sv);
 
-		print("\n\nbuffy: ", buffy.buffer()); print(L"\nduffy: ", duffy.buffer());
+		print("\n\nbuffy: ", buffy); print(L"\nduffy: ", duffy);
 
-		auto buffy_copy = mover( buffy ) ;
+		auto buffy_copy =  buffy ;
 		auto duffy_copy = mover( duffy ) ;
 
-		print("\n\nbuffy copy: ", buffy_copy.buffer(), "\nduffy copy: ", duffy_copy.buffer());
+		print("\n\nbuffy copy: ", buffy_copy, "\nduffy copy: ", duffy_copy);
 	}
 	// creator functions must return values
 	// this is to prevent them keeping static instances

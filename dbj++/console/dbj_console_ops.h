@@ -456,18 +456,6 @@ with reference or pointer type argument.
 			::dbj::console::print("{ value: empty }");
 	}
 
-	inline void out
-	(::std::vector<char> const& vector_charr_buffer_ )
-	{
-		::dbj::console::PRN.printf(L"%S", vector_charr_buffer_.data());
-	}
-
-	inline void out
-	(::std::vector<wchar_t> const& vector_charr_buffer_ )
-	{
-		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
-	}
-
 #pragma region smart pointers 
 
 	/*
@@ -524,14 +512,29 @@ with reference or pointer type argument.
 
 #pragma endregion 
 
-#ifdef DBJ_COMFY_BUFFER
-	inline void out(::dbj::chr_buffer::buffer const & cb_)
+#pragma region dbj buffers
+
+	inline void out
+	(::std::vector<char> const& vector_charr_buffer_)
 	{
-		::dbj::console::PRN.printf(
-			L"{ size: %d, data: '%s' }", cb_.size(), cb_.data()
-		);
+		::dbj::console::PRN.printf(L"%S", vector_charr_buffer_.data());
 	}
-#endif
+
+	inline void out
+	(::std::vector<wchar_t> const& vector_charr_buffer_)
+	{
+		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
+	}
+
+		inline void out( typename ::dbj::unique_ptr_buffer<char> const & x_) {
+			PRN.printf("%s", x_.buffer().get());
+		}
+
+		inline void out( typename ::dbj::unique_ptr_buffer<wchar_t> const & x_) {
+			PRN.printf(L"%s", x_.buffer().get());
+		}
+
+#pragma endregion 
 
 #pragma region error codes and options
 	// we can not place a friend inside std::error_code, so...
@@ -599,24 +602,20 @@ with reference or pointer type argument.
 } // dbj::console
 
 
-#ifndef DBJ_CONSOLE_SYSTEM
-#define DBJ_CONSOLE_SYSTEM
 /* 
 to use dbj::console::print on UDT's
-you do it like this:
+you add the required out method here in this file
+thus the UDT has to be visible at this point
 
-   struct X  {
-      cont char * name = "X" ;
-#ifdef DBJ_CONSOLE_SYTEM
-       friend void out ( const X & x_ ) {
-	      ::dbj::console::out::(x.name) ;
+   namespace dbj::console  {
+   // be sure X is not const but the reference is const
+       inline void out ( X const & x_ ) {
+	         out(x.name) ;
 		  // or the shortcut solution
-		  // ::dbj::console::PRN::printf("%s",x.name)
+		  PRN.printf("%s",x.name)
 	   }
-#endif
    };
 
    ::dbj::console::print(X{}) ; // works
 
 */
-#endif // !DBJ_CONSOLE_SYTEM

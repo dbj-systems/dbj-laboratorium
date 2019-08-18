@@ -368,60 +368,38 @@ namespace dbj {
 		  return base_ + 1;
 	  }
 
-	// it is not very usefull to have buffers of 
-	// unlimited size in programs
-	// thus we will define the upper limit
-	// it is
-	// in posix terms BUFSIZ * 2 * 64 aka 64KB
-	constexpr std::size_t DBJ_64KB = UINT16_MAX;
+#pragma region very core type traits
 
-	/*
-	only unique_ptr<char[]> is faster than vector of  chars
-	by a margin
-	*/
+	  /* example usage:
+	  compiles:
+  template<unsigned K>
+  using ascii_ordinal_compile_time = ::dbj::inside_t<unsigned, K, 0, 127>;
 
-	template<typename CHAR>
-	struct vector_buffer final {
+  constexpr auto compile_time_ascii_index = ascii_ordinal_compile_time<64>() ;
+	  fails:
+  'std::enable_if_t<false,std::integral_constant<unsigned int,164>>' : Failed to specialize alias template
+   constexpr auto compile_time__not_ascii_index = ascii_ordinal_compile_time<164>() ;
+  */
+	  template< typename T, T X, T L, T H>
+	  using inside_inclusive_t =
+		  ::std::enable_if_t< (X <= H) && (X >= L),
+		  ::std::integral_constant<T, X> >;
 
-		static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
+	  template< typename T, T X, T L, T H>
+	  inline constexpr bool  inside_inclusive_v = inside_inclusive_t<T,X,L,H>();
 
-		using narrow	=  std::vector<char>;
-		using wide		=  std::vector<wchar_t>;
+	  /*
+		  static_assert(  dbj::is_any_same_as_first_v<float, float, float> ) ;
 
-		static
-			std::vector<CHAR> make(size_t count_)
-		{
-			DBJ_VERIFY(count_ > 0);
-			DBJ_VERIFY(DBJ_64KB >= count_);
-			std::vector<CHAR> retval_(count_ + 1);
-			// terminate!
-			retval_[count_] = CHAR(0);
-			return retval_;
-		}
+	  fails, none is same as bool:
+		  static_assert(  dbj::is_any_same_as_first_v<bool,  float, float>  );
+	  */
+	  template<class _Ty,
+		  class... _Types>
+		  inline constexpr bool is_any_same_as_first_v
+		  = ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
+#pragma endregion
 
-		static
-			std::vector<CHAR> make(std::basic_string_view<CHAR> sview_)
-		{
-			DBJ_VERIFY(sview_.size() > 0);
-			DBJ_VERIFY(DBJ_64KB >= sview_.size());
-			std::vector<CHAR> retval_(sview_.begin(), sview_.end());
-			// terminate!
-			retval_.push_back(CHAR(0));
-			return retval_;
-		}
-
-		static
-			std::vector<CHAR> make(std::unique_ptr<CHAR[]> const& upc_)
-		{
-			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
-		}
-
-		static
-			std::vector<CHAR> _make(std::shared_ptr<CHAR[]> const& upc_)
-		{
-			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
-		}
-	};
 }
 
 /* inclusion of this file defines the kind of a licence used */
