@@ -321,29 +321,44 @@ namespace dbj::samples::inner {
 		// add the string terminator
 		up[sview_.size()] = char_type(0);
 		return up;
-	}
-
-	inline std::unique_ptr<char[]> operator""_buffer( const char* sliteral_, size_t )
+	}	
+	
+	template< class char_type , 
+		typename UP = std::unique_ptr<char_type[]> ,
+		typename SV = std::basic_string_view<char_type>
+	>
+	inline constexpr UP up_buffer_make ( char_type const * sliteral_, size_t length_ )
 	{
-		return up_buffer_make( sliteral_ );
-	}
-
-	inline std::unique_ptr<wchar_t[]> operator""_buffer( const wchar_t* sliteral_, size_t )
-	{
-		return up_buffer_make( sliteral_ );
+		UP up = up_buffer_make<char_type>(length_ + 1);
+			std::copy(sliteral_, sliteral_ + length_ , up.get());
+		// add the string terminator
+		up[length_] = char_type(0);
+		return up;
 	}
 
 	template< class CHAR, size_t N >
 	inline constexpr
-		typename std::array< typename std::remove_cv_t<CHAR>, N > 
-		sliteral_to_std_array
-			( CHAR (&sliteral_) [N] )
+		typename std::array< typename std::remove_cv_t<CHAR>, N >
+		sliteral_to_std_char_array
+		(CHAR(&sliteral_)[N])
 	{
 		return arr::native_to_std_array(sliteral_);
 	}
 
+	inline  std::unique_ptr<char[]> 
+		operator""_buffer( const char* sliteral_, size_t length_)
+	{
+		return up_buffer_make( sliteral_ , length_);
+	}
+
+	inline  std::unique_ptr<wchar_t[]> 
+		operator""_buffer( const wchar_t* sliteral_, size_t length_)
+	{
+		return up_buffer_make( sliteral_ , length_);
+	}
+
 	template< char ... Chs >
-	inline decltype(auto) operator"" _ct_buff( )
+	inline constexpr decltype(auto) operator"" _std_char_array( )
 	{
 		return  std::array { Chs... } ;
 	}
@@ -353,9 +368,16 @@ namespace dbj::samples::inner {
 	{
 		using namespace std;
 
-		auto std_arr = sliteral_to_std_array("WOW?!");
+		auto std_arr = sliteral_to_std_char_array("WOW?!");
 
-		auto wotisthis = 123_ct_buff;
+		// std::array{ '1','2','3' }
+		constexpr auto a_1 = 123_std_char_array;
+
+		// std::array{ '0','x','1','2' }
+		constexpr auto a_2 = 0x12_std_char_array;
+
+		// std::array{ '4'.'2','.','1','3' }
+		constexpr auto a_3 = 42.13_std_char_array;
 
 		up_buffer wonder = "STRING LITERAL"_buffer;
 		auto wonder_wall = L"WIDE STRING LITERAL"_buffer;

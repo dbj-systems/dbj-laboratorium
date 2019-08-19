@@ -91,17 +91,17 @@ namespace inner {
 	inline auto const& buffer_size = ::dbj::DBJ_64KB;
 	inline auto const& max_iterations = 1000;
 
-	inline std::unique_ptr<char[]> naked_unique_ptr(size_t count_)
+	inline auto naked_unique_ptr(size_t count_)
 	{
 		return std::make_unique<char[]>(count_ + 1);
 	}
 
-	inline std::shared_ptr<char[]> naked_shared_ptr(size_t count_)
+	inline auto naked_shared_ptr(size_t count_)
 	{
 		return std::shared_ptr<char[]>( new char[count_+1]);
 	}
 
-	inline dbj::unique_ptr_buffer<char>  uniq_ptr_buffer(size_t count_) {
+	inline auto  uniq_ptr_buffer(size_t count_) {
 		return dbj::unique_ptr_buffer<char>(count_);
 	}
 
@@ -109,8 +109,15 @@ namespace inner {
 		return  dbj::vector_buffer<char>::make(count_);
 	}
 
-	inline std::string string_buffer(size_t count_) {
+	inline auto string_buffer(size_t count_) {
 		return std::string (static_cast<size_t>(count_), static_cast<char>(0));
+	}
+
+	inline auto string_view_buffer(size_t count_) 
+	{
+		// string view has no facility to create char buffer of certain size
+		static auto up = std::make_unique<char[]>(count_ + 1);
+		return std::string_view (up.get(), count_ );
 	}
 
 	/*
@@ -132,8 +139,9 @@ namespace inner {
 			// call the '[]' operator 
 			// and change the char value
 			// for each char
-			for (::dbj::chr_buf::between_0_and_max j = 0; j < buffer_sz; j++ )
-					dumsy[j] = '?';
+			// using this nasty hack
+			for ( unsigned j = 0; j < buffer_sz; j++ )
+					 const_cast<char &>( dumsy[j]) = '?';
 		}
 		auto end_ = std::chrono::system_clock::now();
 		const auto micro_seconds = (end_ - start_).count() / 1000.0;
@@ -143,26 +151,27 @@ namespace inner {
 
 DBJ_TEST_UNIT(dbj_buffers_comparison) {
 
+	using namespace inner;
 	auto & print = ::dbj::console::print;
 
-	print("\n\nWill make/destroy on the stack, and measure four types of buffers\n\n");
+	print("\n\nWill test and measure six types of buffers\n\n");
+
 	/*
-	on this machine I have found, for normal buffer sizes
-	std::vector<char> is considerably slower
-	for very large buffers it is equaly slow as the two others
+	on this machine I have found, 
+	std::string is considerably slower
 	*/
 
 	auto driver = [&](auto  buf_size_) 
 	{
-		print("\n\nBuffer size:\t\t",	buf_size_, "\nIterations:\t\t",max_iterations,"\n\n");
-		print(measure(naked_unique_ptr, buf_size_), " miki s. \t unique_ptr<char[]>\n");
-		print(measure(naked_shared_ptr, buf_size_), " miki s. \t shared_ptr<char[]>\n");
-		print(measure(uniq_ptr_buffer, buf_size_), " miki s. \t	unique_ptr_buffer<char>\n");
-		print(measure(dbj_vector_buffer,buf_size_), " miki s. \t std::vector\n");
-		print(measure(string_buffer,	buf_size_), " miki s. \t std::string\n");
+		print("\n\nBuffer size:\t\t",		buf_size_,	"\nIterations:\t\t",max_iterations,"\n\n");
+		print(measure(naked_unique_ptr,		buf_size_), " miki s. \t unique_ptr<char[]>\n");
+		print(measure(naked_shared_ptr,		buf_size_), " miki s. \t shared_ptr<char[]>\n");
+		print(measure(uniq_ptr_buffer,		buf_size_), " miki s. \t	unique_ptr_buffer<char>\n");
+		print(measure(dbj_vector_buffer,	buf_size_), " miki s. \t std::vector\n");
+		print(measure(string_view_buffer,	buf_size_), " miki s. \t std::string_view\n");
+		print(measure(string_buffer,		buf_size_), " miki s. \t std::string\n");
 	};
 
-	using namespace inner;
 	driver(buffer_size / 1  );
 	driver(buffer_size / 2  );
 	driver(buffer_size / 4  );

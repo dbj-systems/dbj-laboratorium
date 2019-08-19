@@ -8,6 +8,27 @@ namespace dbj {
 // in posix terms BUFSIZ * 2 * 64 aka 64KB
 	constexpr inline std::size_t DBJ_64KB = UINT16_MAX;
 
+	// very doubtfull this can be decided
+	// this should be equal to BUFSIZ
+	// but that is invetned for setvbuf function, actually
+	constexpr std::size_t BUFFER_OPTIMAL_SIZE{ 2 * UINT8_MAX }; 
+
+/*
+Basically do not use std::string as buffer; it is crazy slow
+
+For compile timer char buffer-ing
+my preffered buffer type is std::array<>
+2019-02-11 dbj.org
+*/
+	using optimal_compile_time_buffer_type = ::std::array<char, BUFFER_OPTIMAL_SIZE >;
+	using optimal_compile_time_wbuffer_type = ::std::array<wchar_t, BUFFER_OPTIMAL_SIZE >;
+
+	inline constexpr auto optimal_buffer(void) noexcept
+	{ return optimal_compile_time_buffer_type{ {char(0)} }; }
+
+	inline constexpr auto optimal_wbuffer(void) noexcept
+	{ return optimal_compile_time_wbuffer_type{ {wchar_t(0)} }; }
+
 	/*
 	only unique_ptr<char[]> is faster than vector of  chars, by a margin
 	*/

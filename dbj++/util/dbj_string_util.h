@@ -350,7 +350,7 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
-	constexpr std::size_t buffer_optimal_size{ 0xFF };
+	constexpr std::size_t buffer_optimal_size = ::dbj::BUFFER_OPTIMAL_SIZE;
 
 	/*
 	Make a string optimized for small sizes
@@ -381,20 +381,6 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 			init_char_
 		);
 	}
-
-	/*
-	Basically I recomend do not use std::string, and for text manipulation(s)
-	std::vector<char> do use even less, it is crazy slow
-	
-	For simple char buffer-ing
-	my preffered buffer type is std::array<>
-	2019-02-11 dbj.org
-	*/
-	using buffer_type = ::std::array<char, buffer_optimal_size >;
-	using wbuffer_type = ::std::array<wchar_t, buffer_optimal_size >;
-
-	inline constexpr buffer_type optimal_buffer(void)	{ return buffer_type{ {char(0)} }; }
-	inline constexpr wbuffer_type optimal_wbuffer(void) {	return wbuffer_type{ {wchar_t(0)} };	}
 
 	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
