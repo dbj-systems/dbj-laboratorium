@@ -43,14 +43,15 @@ namespace dbj::arr {
 
 			// spcial tretment of char_type arrays is to 
 			// add the string terminator
+			// please note the return type size is N + 1
 			template <class CHAR, size_t N, size_t... I>
-			constexpr inline array<remove_cv_t<CHAR>, N>
+			constexpr inline array<remove_cv_t<CHAR>, N + 1>
 				to_char_array_impl(CHAR(&a)[N], index_sequence<I...>)
 			{
-				static_assert(dbj::is_any_same_as_first_v<CHAR, char, wchar_t>,
-					"\n\n" __FILE__  "\n\n\t to_char_array_impl requires char or wchar_t only\n\n");
+				static_assert(dbj::is_any_same_as_first_v< remove_cv_t<CHAR>, char, wchar_t>,
+					"\n\n" __FILE__  "\n\n\t to_char_array_impl requires char or wchar_t only\n\n\n");
 
-				return { { a[I]... , CHAR(0) } };
+				return { { a[I]... , remove_cv_t<CHAR>(0) } };
 			}
 
 			// std array is indeed "tuple like"
@@ -88,7 +89,8 @@ namespace dbj::arr {
 	*/
 	template< class CHAR, size_t N >
 	inline constexpr
-		typename std::array< typename std::remove_cv_t<CHAR>, N >
+		/* please note the return type size is N + 1, I have added '\0' */
+		typename std::array< typename std::remove_cv_t<CHAR>, N + 1 >
 		string_literal_to_std_char_array
 		( const CHAR (&string_literal_)[N] )
 	{

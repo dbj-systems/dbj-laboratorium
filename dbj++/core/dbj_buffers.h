@@ -158,24 +158,22 @@ my preffered buffer type is std::array<>
 		//using up_buffer = std::unique_ptr<char[]>;
 		//using up_buffer_w = std::unique_ptr<wchar_t[]>;
 
-		template< class CHAR  >
-		inline constexpr std::size_t 
-			up_buffer_size ( up_type<CHAR> const& source )
+		inline auto
+			up_buffer_size_suspicious = [](auto const& source)
+			-> std::size_t
 		{
-			up_type<CHAR>::element_type* element_pointer_ = source.get();
-			if (element_pointer_ == nullptr)
+			if (source.get() == nullptr)
 				return 0U;
-			return (sizeof(element_pointer_) / sizeof(element_pointer_[0]));
-		}
+			return (sizeof(source.get()) / sizeof(source.get()[0]));
+		};
 
-		template< class T  >
-		inline std::unique_ptr<T[]> up_buffer_copy(std::unique_ptr<T[]> const& source)
+		template< class CHAR  >
+		inline std::unique_ptr<CHAR[]> up_buffer_copy(std::unique_ptr<CHAR[]> const& source)
 		{
-			using UP = std::unique_ptr<T[]>;
-			const auto sze_ = up_buffer_size( source );
-			UP up_ = std::make_unique<UP::element_type[]>(sze_);
-			std::copy(source.get(), source.get() + sze_, up_.get());
-			return up_;
+			const auto sze_ = up_buffer_size_suspicious( source );
+			auto uptr_ = std::make_unique<CHAR[]>(sze_);
+			std::copy(source.get(), source.get() + sze_, uptr_.get());
+			return uptr_;
 		}
 
 		template< class char_type,
@@ -350,6 +348,36 @@ my preffered buffer type is std::array<>
 			operator "" _buffer(const wchar_t* sliteral_, size_t length_)
 		{
 			return unique_ptr_buffers::up_buffer_make(sliteral_, length_);
+		}
+
+		inline  std::pair<  std::size_t , std::unique_ptr<char[]> >
+			operator "" _buffer_pair(const char* sliteral_, size_t length_)
+		{
+			return std::pair(
+				length_ ,
+				unique_ptr_buffers::up_buffer_make(sliteral_, length_)
+				) ;
+		}
+
+		inline  std::pair<  std::size_t, std::unique_ptr<wchar_t[]> >
+			operator "" _buffer_pair(const wchar_t* sliteral_, size_t length_)
+		{
+			return std::pair(
+				length_,
+				unique_ptr_buffers::up_buffer_make(sliteral_, length_)
+			);
+		}
+
+		inline  std::vector< char >
+			operator "" _v_buffer (const char* sliteral_, size_t length_)
+		{
+			return vector_buffer<char>::make( sliteral_	) ;
+		}
+
+		inline  std::vector< wchar_t >
+			operator "" _v_buffer(const wchar_t * sliteral_, size_t length_)
+		{
+			return vector_buffer<wchar_t>::make( sliteral_);
 		}
 
 	} // core::unvarnished 

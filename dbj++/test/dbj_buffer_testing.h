@@ -6,11 +6,12 @@
 DBJ_TEST_SPACE_OPEN(dbj_buffer)
 
 
+
 DBJ_TEST_UNIT(buffers_and_literals)
 {
 	// using namespace std;
 	using namespace ::dbj::core::unvarnished ;
-	using namespace ::dbj::unique_ptr_buffer;
+	using namespace ::dbj::unique_ptr_buffers;
 	// auto & print = console::print ;
 
 	DBJ_TEST_ATOM(::dbj::arr::string_literal_to_std_char_array("WOW?!"));
@@ -24,6 +25,17 @@ DBJ_TEST_UNIT(buffers_and_literals)
 
 	DBJ_TEST_ATOM("STRING LITERAL"_buffer);
 	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_buffer);
+
+	DBJ_TEST_ATOM("STRING LITERAL"_buffer_pair);
+	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_buffer_pair);
+
+	DBJ_TEST_ATOM("STRING LITERAL"_v_buffer);
+	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_v_buffer);
+
+	// usability
+	auto [ s_1, p_1 ]	= "STRING LITERAL"_buffer_pair ;
+	auto [ s_2, p_2 ]	= L"WIDE STRING LITERAL"_buffer_pair ;
+
 	DBJ_TEST_ATOM(up_buffer_make("Buffy"));
 
 }
@@ -41,11 +53,6 @@ DBJ_TEST_UNIT(some_vector_buffer_helper_testing) {
 		DBJ_TUNIT(helper::make(specimen));
 		DBJ_TUNIT(helper::make(std::basic_string<T>(specimen)));
 		DBJ_TUNIT(helper::make(std::basic_string_view<T>(specimen)));
-
-		auto buf_ = helper::make(BUFSIZ) ;
-		auto sec_ = buf_ ;
-		DBJ_TUNIT(sec_ == buf_);
-
 	};
 	driver('*', "narrow string");
 	driver(L'*', L"wide string");
@@ -146,7 +153,7 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 	using namespace inner;
 	auto & print = ::dbj::console::print;
 
-	print("\n\nWill test and measure six types of buffers\n\n");
+	print("\n\nWill test and measure six types of runtime buffers\n\n");
 
 	/*
 	on this machine I have found, 
