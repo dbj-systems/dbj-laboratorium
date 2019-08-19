@@ -1,21 +1,21 @@
 #pragma once
 
-#ifndef _INC_WINDOWS
-#ifndef WIN32_LEAN_AND_MEAN
-# define WIN32_LEAN_AND_MEAN 1
-#endif
-#define STRICT
-#define NOSERVICE
-// avoid min/max macros 
-#define NOMINMAX
-#include <windows.h>
-#endif
-
-#ifndef _ASSERTE
-#include <crtdbg.h>
-#endif
-#include <cstdint>
-#include <chrono>
+//#ifndef _INC_WINDOWS
+//#ifndef WIN32_LEAN_AND_MEAN
+//# define WIN32_LEAN_AND_MEAN 1
+//#endif
+//#define STRICT
+//#define NOSERVICE
+//// avoid min/max macros 
+//#define NOMINMAX
+//#include <windows.h>
+//#endif
+//
+//#ifndef _ASSERTE
+//#include <crtdbg.h>
+//#endif
+//#include <cstdint>
+//#include <chrono>
 
 extern "C" inline void dbj_sleep_seconds(int seconds_) {
 	std::this_thread::sleep_for(::std::chrono::seconds(seconds_));
@@ -281,7 +281,7 @@ namespace dbj::kalends {
 	// for comfortable measurements
 
 	template<typename T>
-	inline auto unit_str(time_ticks_type t_) = delete;
+	inline auto unit_str(dbj::kalends::time_ticks_type ) = delete;
 	//{ return  std::to_string( to_desired_unit<T>(t_ ).count() ) + " nanoseconds"; }
 
 	template<> inline auto unit_str< dbj::kalends::time_ticks_type >(time_ticks_type t_)

@@ -6,7 +6,31 @@
 DBJ_TEST_SPACE_OPEN(dbj_buffer)
 
 
-DBJ_TEST_UNIT(some_yanb_helper_testing) {
+DBJ_TEST_UNIT(buffers_and_literals)
+{
+	// using namespace std;
+	using namespace ::dbj::core::unvarnished ;
+	using namespace ::dbj::unique_ptr_buffer;
+	// auto & print = console::print ;
+
+	DBJ_TEST_ATOM(::dbj::arr::string_literal_to_std_char_array("WOW?!"));
+
+	// std::array{ '1','2','3' }
+	DBJ_TEST_ATOM(123_std_char_array);
+	// std::array{ '0','x','1','2' }
+	DBJ_TEST_ATOM(0x12_std_char_array);
+	// std::array{ '4'.'2','.','1','3' }
+	DBJ_TEST_ATOM(42.13_std_char_array);
+
+	DBJ_TEST_ATOM("STRING LITERAL"_buffer);
+	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_buffer);
+	DBJ_TEST_ATOM(up_buffer_make("Buffy"));
+
+}
+
+
+
+DBJ_TEST_UNIT(some_vector_buffer_helper_testing) {
 
 	auto driver = [](auto C_, auto specimen)
 	{
@@ -33,56 +57,26 @@ DBJ_TEST_UNIT(dbj_light_buffer)
 	const auto bufsiz_ = BUFSIZ;
 	using helper = dbj::vector_buffer<char>;
 
-	auto alphabet = [&](helper::narrow & cbr)
+	auto driver = [&]( typename dbj::vector_buffer<char>::narrow cbr) noexcept -> void
 	{
-		char k = 65; // 'A'
-		for (auto& c_ : cbr)
+		auto alphabet = [](auto & cbr)
 		{
-			c_ = char(k++);
-		}
-	};
-
-	auto my_memset = [](void* s, size_t n, char val_ = 0) noexcept
-	{
-		volatile char* p = (char*)s;
-		while (n--)* p++ = val_;
-	};
-
-	auto sizeshow = [&]( helper::narrow cbr) noexcept -> void
-	{
-		auto show = [](auto&& obj_, auto filler) {
-			filler(obj_);
-			dbj::console::prinf("\ntype: %s\n\tsize of type: %zu\n\tsize of instance: %zu",
-				typeid(obj_).name(), sizeof(decltype(obj_)), sizeof(obj_)
-			);
+			char k = 65; // 'A'
+			for (auto& c_ : cbr)
+			{
+				c_ = char( (k++) % (65 + 26) );
+			}
+			return cbr;
 		};
 
-		show(std::vector<char>(BUFSIZ), [](auto& obj_) { std::fill(obj_.begin(), obj_.end(), '\0'); });
-		show(std::string(BUFSIZ, '\0'), [](auto& obj_) { std::fill(obj_.begin(), obj_.end(), '\0'); });
-		show(cbr, [](auto& obj_) {  std::fill(obj_.begin(), obj_.end(), '*'); } );
+		alphabet(cbr);
+		DBJ_TEST_ATOM( cbr );
+		DBJ_ATOM_TEST( cbr.size() );
+		DBJ_TEST_ATOM( cbr.data() );
+		DBJ_ATOM_TEST( std::strlen(cbr.data() ) );
 	};
 
-	helper::narrow cb1(BUFSIZ);
-
-	alphabet(cb1);	sizeshow(cb1);
-
-	// show the copying
-	{
-		helper::narrow cb2(BUFSIZ);
-		DBJ_ATOM_TEST(cb2); //rezult
-		DBJ_TEST_ATOM(cb1 = cb2); // assignment
-
-		DBJ_VERIFY(cb1.data());
-		DBJ_VERIFY(cb2.data());
-
-		DBJ_VERIFY(cb1.size() == cb2.size());
-	}
-	// tranformations to string, wstring and vector
-	{
-		auto filler = [](auto& obj_ , char fillchr ) {  std::fill(obj_.begin(), obj_.end(), fillchr); };
-		filler( cb1, 'X'); // assignment
-		DBJ_ATOM_TEST(cb1);
-	}
+	driver(helper::narrow(BUFSIZ));
 }
 
 namespace inner {
@@ -102,7 +96,7 @@ namespace inner {
 	}
 
 	inline auto  uniq_ptr_buffer(size_t count_) {
-		return dbj::unique_ptr_buffer<char>(count_);
+		return dbj::unique_ptr_buffer_type<char>(count_);
 	}
 
 	inline auto dbj_vector_buffer(size_t count_) {
@@ -115,9 +109,7 @@ namespace inner {
 
 	inline auto string_view_buffer(size_t count_) 
 	{
-		// string view has no facility to create char buffer of certain size
-		static auto up = std::make_unique<char[]>(count_ + 1);
-		return std::string_view (up.get(), count_ );
+		return dbj::runtime_shared_string_view_buffer<char>( count_ );
 	}
 
 	/*

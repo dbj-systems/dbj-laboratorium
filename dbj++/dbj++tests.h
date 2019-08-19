@@ -28,6 +28,11 @@ or even run time...but ... this works
 #define dbj_any_optional_tests
 
 
+
+#ifdef dbj_core_tests   
+#include "test\dbj_core_tests.h"
+#endif
+
 #ifdef dbj_buffer_testing
 #include "test\dbj_buffer_testing.h"  
 #endif
@@ -69,10 +74,6 @@ or even run time...but ... this works
 #endif
 #ifdef dbj_static_matrix_test   
 #include "test\dbj_static_matrix_test.h"  
-#endif
-
-#ifdef dbj_core_tests   
-#include "test\dbj_core_tests.h"
 #endif
 
 #ifdef dbj_any_optional_tests   

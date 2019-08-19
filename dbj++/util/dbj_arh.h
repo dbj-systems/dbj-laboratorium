@@ -41,6 +41,18 @@ namespace dbj::arr {
 				return { { a[I]... } };
 			}
 
+			// spcial tretment of char_type arrays is to 
+			// add the string terminator
+			template <class CHAR, size_t N, size_t... I>
+			constexpr inline array<remove_cv_t<CHAR>, N>
+				to_char_array_impl(CHAR(&a)[N], index_sequence<I...>)
+			{
+				static_assert(dbj::is_any_same_as_first_v<CHAR, char, wchar_t>,
+					"\n\n" __FILE__  "\n\n\t to_char_array_impl requires char or wchar_t only\n\n");
+
+				return { { a[I]... , CHAR(0) } };
+			}
+
 			// std array is indeed "tuple like"
 			// but in some use cases one might 
 			// need to make a tuple from an native array
@@ -66,6 +78,26 @@ namespace dbj::arr {
 	{
 		return inner::to_array_impl(narf, make_index_sequence<N>{});
 	}
+
+	/*
+	transform string literals to std::array at compile time
+	we do this separately simply because we ad the string 
+	terminator 0 inside the implementation
+	so that .data() on this array returns a zero terminated string
+	aka char_type array
+	*/
+	template< class CHAR, size_t N >
+	inline constexpr
+		typename std::array< typename std::remove_cv_t<CHAR>, N >
+		string_literal_to_std_char_array
+		( const CHAR (&string_literal_)[N] )
+	{
+		static_assert(::dbj::is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\t string_literal_to_std_char_array requires char or wchar_t only\n\n");
+
+		return inner::to_char_array_impl(string_literal_, make_index_sequence<N>{});
+	}
+
 
 	/*
 	Transform native array into tuple at compile time

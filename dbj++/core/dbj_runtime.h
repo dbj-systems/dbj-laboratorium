@@ -400,7 +400,7 @@ namespace dbj {
 		  = ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
 #pragma endregion
 
-}
+} // dbj
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"

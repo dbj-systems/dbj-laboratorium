@@ -526,11 +526,11 @@ with reference or pointer type argument.
 		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
 	}
 
-		inline void out( typename ::dbj::unique_ptr_buffer<char> const & x_) {
+		inline void out( typename ::dbj::unique_ptr_buffer_type <char> const & x_) {
 			PRN.printf("%s", x_.buffer().get());
 		}
 
-		inline void out( typename ::dbj::unique_ptr_buffer<wchar_t> const & x_) {
+		inline void out( typename ::dbj::unique_ptr_buffer_type <wchar_t> const & x_) {
 			PRN.printf(L"%s", x_.buffer().get());
 		}
 

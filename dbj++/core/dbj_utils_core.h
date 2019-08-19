@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef _HAS_CXX17
-	#error C++17 please ...
-#endif
-
 namespace dbj {
 	// the first time dbj::core namespace was introduced was here
 	namespace core {
@@ -13,17 +9,17 @@ namespace dbj {
 			using namespace  ::std::literals::string_view_literals;
 			namespace h = ::std::chrono;
 
-			using buf_helper = typename ::dbj::vector_buffer<char> ;
-			using buf_type = typename buf_helper::narrow ;
+			using buf_helper = typename ::dbj::vector_buffer<char>;
+			using buf_type = typename buf_helper::narrow;
 
 			// this is *very* tricky to get right
 			template<typename T>
-			constexpr T midpoint(T a, T b) noexcept 
+			constexpr T midpoint(T a, T b) noexcept
 			{
 				// only numbers please
-				static_assert( std::is_arithmetic_v<T> );
+				static_assert(std::is_arithmetic_v<T>);
 
-				return T((a) + ((b) - (a)) / 2);
+				return T((a)+((b)-(a)) / 2);
 			}
 
 			// as per http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0811r2.html
@@ -32,10 +28,10 @@ namespace dbj {
 				return int(U(a) + (U(b) - U(a)) / 2);
 			}
 
-			constexpr inline char const * TIME_STAMP_FULL_MASK
+			constexpr inline char const* TIME_STAMP_FULL_MASK
 				= "%Y-%m-%d %H:%M:%S";
 
-			constexpr inline char const * TIME_STAMP_SIMPLE_MASK
+			constexpr inline char const* TIME_STAMP_SIMPLE_MASK
 				= "%H:%M:%S";
 
 			// time stamp size is max 22 + '\0'
@@ -43,14 +39,14 @@ namespace dbj {
 			[[nodiscard]]
 			inline buf_type
 				make_time_stamp(
-					std::error_code & ec_,
-					char const * timestamp_mask_ = TIME_STAMP_SIMPLE_MASK
+					std::error_code& ec_,
+					char const* timestamp_mask_ = TIME_STAMP_SIMPLE_MASK
 				) noexcept
 			{
 				ec_.clear();
 				constexpr size_t buf_len = 64U;
 				std::array<char, buf_len>  buffer_{ {0} };
-				char * buf = buffer_.data();
+				char* buf = buffer_.data();
 				// Get the current time
 				auto now = h::system_clock::now();
 				// Format the date/time
@@ -76,9 +72,9 @@ namespace dbj {
 			};
 
 			/*	caller must check std::error_code ref arg	*/
-			[[nodiscard]] inline 
+			[[nodiscard]] inline
 				buf_type
-				dbj_get_envvar(std::string_view varname_, std::error_code & ec_) noexcept
+				dbj_get_envvar(std::string_view varname_, std::error_code& ec_) noexcept
 			{
 				_ASSERTE(!varname_.empty());
 				constexpr size_t buflen_ = 256U;
@@ -89,15 +85,41 @@ namespace dbj {
 				{
 					ec_ = std::error_code(::GetLastError(), std::system_category());
 				}
-					return buf_helper::make( bar.data() );
+				return buf_helper::make(bar.data());
 			}
 
 			/*	caller must check the ec_	*/
 			[[nodiscard]] inline auto
-				program_data_path( std::error_code & ec_ ) noexcept -> buf_type
+				program_data_path(std::error_code& ec_) noexcept -> buf_type
 			{
-					return dbj_get_envvar("ProgramData", ec_ );
+				return dbj_get_envvar("ProgramData", ec_);
 			}
+
 		} // util
+
+		/*
+		unvarnished is synonim for literal
+		it seems MSVC has a problem if nemapsace is called 'literals'
+		*/
+		namespace unvarnished {
+			/*
+			numeric literals user defined literal. usege:
+
+				using namespace dbj::core::literals ;
+
+				// std::array{ '1','2','3' }
+				constexpr auto a_1 = 123_std_char_array ;
+				// std::array{ '0','x','1','2' }
+				constexpr auto a_2 = 0x12_std_char_array ;
+				// std::array{ '4'.'2','.','1','3' }
+				constexpr auto a_3 = 42.13_std_char_array ;
+			*/
+			template< char ... Chs >
+			inline constexpr decltype(auto) operator"" _std_char_array()
+			{
+				return  std::array{ Chs... , char(0) };
+			}
+
+		} // unvarnished
 	}// core
 } // dbj

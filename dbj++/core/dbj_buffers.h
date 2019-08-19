@@ -11,8 +11,9 @@ namespace dbj {
 	// very doubtfull this can be decided
 	// this should be equal to BUFSIZ
 	// but that is invetned for setvbuf function, actually
-	constexpr std::size_t BUFFER_OPTIMAL_SIZE{ 2 * UINT8_MAX }; 
+	constexpr std::size_t BUFFER_OPTIMAL_SIZE{ 2 * UINT8_MAX };
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 Basically do not use std::string as buffer; it is crazy slow
 
@@ -24,18 +25,26 @@ my preffered buffer type is std::array<>
 	using optimal_compile_time_wbuffer_type = ::std::array<wchar_t, BUFFER_OPTIMAL_SIZE >;
 
 	inline constexpr auto optimal_buffer(void) noexcept
-	{ return optimal_compile_time_buffer_type{ {char(0)} }; }
+	{
+		return optimal_compile_time_buffer_type{ {char(0)} };
+	}
 
 	inline constexpr auto optimal_wbuffer(void) noexcept
-	{ return optimal_compile_time_wbuffer_type{ {wchar_t(0)} }; }
+	{
+		return optimal_compile_time_wbuffer_type{ {wchar_t(0)} };
+	}
 
+#pragma region vector char_type buffer
 	/*
+	for runtime buffering the most comfortable and in the same time fast 
+	solution is vector<char_type>
+
 	only unique_ptr<char[]> is faster than vector of  chars, by a margin
 	*/
 	template<typename CHAR>
 	struct vector_buffer final {
 
-		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>, 
+		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
 
 		using narrow	=  std::vector<char>;
@@ -74,19 +83,162 @@ my preffered buffer type is std::array<>
 		{
 			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
 		}
-	};
+	}; // vector_buffer
+
+#pragma endregion vector char_type buffer
+
+#pragma region string view  char_type buffer
+	/*
+	once made string view is fast,  almost as vector<char>
+	it is also having std methods for comfort
+
+	CAUTION! THIS IS OF LIMITED VALUE
+
+	Following method deliver string view on one single shared char buffer of particular size
+
+	NOTE! at runtime you can *not* change the data inside the string view instance,
+	unless you are naughty:
+
+		  const_cast<char&>(sview_[0]) = '!' ;
+	*/
+	template<typename CHAR>
+	inline auto runtime_shared_string_view_buffer(size_t count_)
+	{
+		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
+		// string view has no facility to create char buffer of certain size
+		// this is how we allocate smart buffer for it at runtime
+		static auto shared_up = [&]() {
+			auto up_ = std::make_unique<CHAR[]>(count_ + 1);
+			up_[count_] = CHAR(0);
+			return up_;
+		}();
+
+		return std::string_view(shared_up.get(), count_);
+	}
 
 	/*
-	run-time, dynamic, self cleaning char buffer
+	 here we create an "empty" string veiw of certain size at compile time
+
+	 CAUTION! go easy on this, as this is naturally an stack memory affair
+	 for an populated compile time string view please use the literal available
+	 constexpr auto svw = "Literal"sv ;
+
+	 CAUTION! Same as method above this delivers string view onto a series of
+	 shared char buffer made on stack
+
+	*/
+	template<typename CHAR, size_t N>
+	inline constexpr auto compile_time_shared_string_view_buffer()
+	{
+		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
+		// string view has no facility to create char buffer of certain size
+		// this is how we allocate buffer for it at runtime
+		static auto std_array_ = [&]() {
+			// terminate, just to be sure
+			std::array<CHAR, N + 1> arr_;
+			arr_[N] = CHAR(0);
+			return arr_;
+		} ();
+
+		return std::string_view(std_array_.data());
+	}
+
+#pragma region string view  char_type buffer
+
+
+#pragma region naked unique_ptr as buffer
+
+	namespace unique_ptr_buffers {
+
+		template <typename CHAR>
+		using up_type = typename std::unique_ptr<CHAR[]>;
+
+		//using up_buffer = std::unique_ptr<char[]>;
+		//using up_buffer_w = std::unique_ptr<wchar_t[]>;
+
+		template< class CHAR  >
+		inline constexpr std::size_t 
+			up_buffer_size ( up_type<CHAR> const& source )
+		{
+			up_type<CHAR>::element_type* element_pointer_ = source.get();
+			if (element_pointer_ == nullptr)
+				return 0U;
+			return (sizeof(element_pointer_) / sizeof(element_pointer_[0]));
+		}
+
+		template< class T  >
+		inline std::unique_ptr<T[]> up_buffer_copy(std::unique_ptr<T[]> const& source)
+		{
+			using UP = std::unique_ptr<T[]>;
+			const auto sze_ = up_buffer_size( source );
+			UP up_ = std::make_unique<UP::element_type[]>(sze_);
+			std::copy(source.get(), source.get() + sze_, up_.get());
+			return up_;
+		}
+
+		template< class char_type,
+			typename UP = std::unique_ptr<char_type[]> >
+			inline constexpr UP up_buffer_make(size_t const& sze_)
+		{
+			UP up = std::make_unique<char_type[]>(sze_ + 1);
+			up[sze_] = char_type(0);
+			return up;
+		}
+
+		template< class char_type,
+			typename UP = std::unique_ptr<char_type[]>,
+			typename SV = std::basic_string_view<char_type>
+		>
+			inline constexpr UP up_buffer_make(char_type const* sliteral_)
+		{
+			SV sview_{ sliteral_ };
+			UP up = up_buffer_make<char_type>(sview_.size());
+
+			std::copy(sview_.begin(), sview_.end(), up.get());
+			// add the string terminator
+			up[sview_.size()] = char_type(0);
+			return up;
+		}
+
+		template< class char_type,
+			typename UP = std::unique_ptr<char_type[]>,
+			typename SV = std::basic_string_view<char_type>
+		>
+			inline constexpr UP up_buffer_make(char_type const* sliteral_, size_t length_)
+		{
+			UP up = up_buffer_make<char_type>(length_ + 1);
+			std::copy(sliteral_, sliteral_ + length_, up.get());
+			// add the string terminator
+			up[length_] = char_type(0);
+			return up;
+		}
+
+	} // unique_ptr_buffers namespace 
+
+#pragma endregion unique_ptr copy
+
+#pragma region unique_ptr_buffer_type
+
+	/*
+	Following is run-time, dynamic, self cleaning char buffer
+	An light wrapup of unique_ptr<CHAR[]>
+
+	I can't claim I am some performant code expert, but this is surprisingly
+	fast, beside being more confortable to use vs naked std unique poiinter.
+
+	Perhaps the only 'trick' I used it so keep a size of the buffer when created
+	in a pair with the buffer created.
 	*/
 
 	template<typename CHAR>
-	struct unique_ptr_buffer final
+	struct unique_ptr_buffer_type final
 	{
 		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
 
-		using type			= unique_ptr_buffer;
+		using type			= unique_ptr_buffer_type;
 		using char_type		= CHAR;
 		using value_type	= std::unique_ptr<char_type[]>;
 		using pair_type		= std::pair< size_t, value_type >;
@@ -94,16 +246,16 @@ my preffered buffer type is std::array<>
 		// String Terminator
 		constexpr static inline char_type ST = char_type(0);
 
-		unique_ptr_buffer() = delete;
+		unique_ptr_buffer_type() = delete;
 
-		explicit unique_ptr_buffer(size_t size_arg_)
+		explicit unique_ptr_buffer_type(size_t size_arg_)
 			: pair_(std::make_pair(size_arg_, std::make_unique<char_type[]>(size_arg_ + 1)))
 		{
 			// add the string terminator
 			pair_.second[size_arg_] = ST;
 		}
 
-		unique_ptr_buffer(std::basic_string_view<char_type> sview_)
+		unique_ptr_buffer_type(std::basic_string_view<char_type> sview_)
 			: pair_(std::make_pair(sview_.size(), std::make_unique<char_type[]>(sview_.size() + 1)))
 		{
 			std::copy(sview_.begin(), sview_.end(), this->pair_.second.get());
@@ -111,7 +263,7 @@ my preffered buffer type is std::array<>
 			this->pair_.second[this->pair_.first] = ST;
 		}
 
-		unique_ptr_buffer& operator = (std::basic_string_view<char_type> sview_)
+		unique_ptr_buffer_type& operator = (std::basic_string_view<char_type> sview_)
 		{
 			pair_ = std::make_pair(sview_.size(), std::make_unique<char_type[]>(sview_.size() + 1));
 			std::copy(sview_.begin(), sview_.end(), this->pair_.second.get());
@@ -121,7 +273,7 @@ my preffered buffer type is std::array<>
 		}
 
 		// std::uniqe_ptr can not be copied, ditto
-		unique_ptr_buffer(const unique_ptr_buffer& other_)
+		unique_ptr_buffer_type(const unique_ptr_buffer_type& other_)
 		{
 			const auto sz_ = other_.size();
 			this->pair_.first = other_.pair_.first;
@@ -130,7 +282,7 @@ my preffered buffer type is std::array<>
 			this->pair_.second[sz_] = ST;
 		}
 
-		unique_ptr_buffer& operator = (unique_ptr_buffer const& other_) {
+		unique_ptr_buffer_type& operator = (unique_ptr_buffer_type  const& other_) {
 			const auto sz_ = other_.size();
 			this->pair_.first = other_.pair_.first;
 			this->pair_.second = std::make_unique<char_type[]>(sz_ + 1);
@@ -139,14 +291,14 @@ my preffered buffer type is std::array<>
 			return *this;
 		}
 
-		unique_ptr_buffer(unique_ptr_buffer&& other_) {
+		unique_ptr_buffer_type(unique_ptr_buffer_type&& other_) {
 			const auto sz_ = other_.size();
 			this->pair_.first = std::move(other_.pair_.first);
 			this->pair_.second = std::move(other_.pair_.second);
 			this->pair_.second[sz_] = ST; // ?
 		}
 
-		unique_ptr_buffer& operator = (unique_ptr_buffer&& other_)
+		unique_ptr_buffer_type& operator = (unique_ptr_buffer_type&& other_)
 		{
 			const auto sz_ = other_.size();
 			this->pair_.first = std::move(other_.pair_.first);
@@ -157,7 +309,7 @@ my preffered buffer type is std::array<>
 
 		// interface
 
-		char_type& operator [] ( size_t idx_ ) { return pair_.second[idx_]; }
+		char_type& operator [] (size_t idx_) { return pair_.second[idx_]; }
 		const size_t size() const noexcept { return pair_.first; };
 		value_type const& buffer() const noexcept { return pair_.second; };
 
@@ -177,12 +329,32 @@ my preffered buffer type is std::array<>
 			return left_;
 		}
 
-
-
 	private:
 		mutable pair_type pair_;
-	};
+	}; // unique_ptr_buffer_type
 
+	/*
+	unvarnished is synonim for literal
+	*/
+	namespace core::unvarnished {
+
+		// using namespace ::dbj::unique_ptr_buffer;
+
+		inline  std::unique_ptr<char[]>
+			operator "" _buffer(const char* sliteral_, size_t length_)
+		{
+			return unique_ptr_buffers::up_buffer_make(sliteral_, length_);
+		}
+
+		inline  std::unique_ptr<wchar_t[]>
+			operator "" _buffer(const wchar_t* sliteral_, size_t length_)
+		{
+			return unique_ptr_buffers::up_buffer_make(sliteral_, length_);
+		}
+
+	} // core::unvarnished 
+
+#pragma endregion unique_ptr_buffer_type
 
 
 } // dbj

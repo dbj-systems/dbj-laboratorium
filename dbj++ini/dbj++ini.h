@@ -15,15 +15,19 @@
 #endif
 #endif
 
-#include <map>
-#include <string>
-#include <memory>
-#include <string_view>
-#include <array>
-#include <cassert>
+//#include <map>
+//#include <string>
+//#include <memory>
+//#include <string_view>
+//#include <array>
+//#include <cassert>
+//
+//#include <dbj++/core/dbj++core.h>
+//#include <dbj++/util/dbj++util.h>
 
-#include <dbj++/core/dbj++core.h>
-#include <dbj++/util/dbj++util.h>
+#define DBJ_INCLUDE_STD_
+#include <dbj++/dbj++required.h>
+#include <dbj++/dbj++.h>
 
 namespace dbj::ini 
 {
@@ -44,7 +48,7 @@ namespace dbj::ini
 	struct ini_reader;
 
 	// NOTE: to avoid std::string we use ::dbj::chr_buf::yanb
-	using smart_buffer = typename ::dbj::chr_buf::yanb::type ;
+	using smart_buffer = typename ::dbj::vector_buffer<char>::narrow ;
 
 	/*
 	   ini file descriptor

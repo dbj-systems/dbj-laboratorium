@@ -32,6 +32,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_traits.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_win32_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj++required.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj+erc.h" />
