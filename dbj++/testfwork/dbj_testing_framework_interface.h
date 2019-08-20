@@ -215,7 +215,7 @@ namespace dbj {
 		} ;
 
 		// by default if result is bool, show it
-		inline bool atom_show_true_rezult = flip_atom_show_true_rezult::flip_flop ;
+		inline bool atom_show_true_rezult = flip_atom_show_true_rezult::flip_flop() ;
 
 
 		///<summary>

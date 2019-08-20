@@ -42,15 +42,24 @@ namespace dbj {
 				constexpr static const T low = L;
 				constexpr static const T high = H;
 
-				insider(const T & newsz = L) noexcept
-					: value(newsz)	{
-					valid_ = policy::check(value);
+				constexpr insider( T const & newsz ) noexcept
+					: value(newsz)
+				{
+					policy::check(value);
 				}
-				operator T & ()    const noexcept { return value; }
-				T &  operator () () const noexcept { return value; }
+
+				constexpr insider & operator = (T const & newsz ) noexcept
+				{
+					value = newsz;
+					policy::check(value) ;
+						return *this;
+				}
+
+				constexpr operator T & ()    const noexcept { return value; }
+				constexpr T &  operator () () const noexcept { return value; }
 
 				/*	simple check for clients is the policy result	*/
-				bool valid() const noexcept { return valid_; }
+				constexpr bool valid() const noexcept { return valid_; }
 			private:
 				mutable T value{};
 				mutable bool valid_{};
@@ -63,7 +72,7 @@ namespace dbj {
 			template<typename T, T L, T H >
 			struct insider_silent_policy final
 			{
-				static bool check(T const & v_)
+				static constexpr bool check(T const & v_)
 				{
 					if (v_ >= L)
 						if (v_ <= H)
@@ -79,7 +88,7 @@ namespace dbj {
 			template<typename T, T L, T H >
 			struct insider_exit_policy final
 			{
-				static bool check(T const & v_)
+				static constexpr bool check(T const & v_)
 				{
 					DBJ_VERIFY(v_ >= L); // kick's the bucket
 					DBJ_VERIFY(v_ <= H); // at runtime
@@ -94,12 +103,12 @@ namespace dbj {
 			template<typename T, T L, T H >
 			struct insider_error_code_throw_policy final
 			{
-				static bool check(T const & v_)
+				static constexpr bool check(T const & v_)
 				{
 					if (v_ >= L)
 						if (v_ <= H)
 							return true;
-					throw std::make_error_code(std::errc::invalid_argument);
+					throw /*std::make_error_code(*/ std::errc::invalid_argument /*)*/ ;
 				}
 			};
 

@@ -8,6 +8,18 @@ namespace dbj
 	using between_0_and_max =
 		::dbj::core::util::insider<size_t, 0, DBJ_MAX_BUFF_LENGTH, ::dbj::core::util::insider_error_code_throw_policy>;
 
+	template<unsigned K>
+	using inclusive_0_and_max = ::dbj::inside_inclusive_t< unsigned, K, 0, DBJ_MAX_BUFF_LENGTH >;
+
+	/*
+	compile time, failed to specialize alias template -->
+	inline inclusive_0_and_max<DBJ_MAX_BUFF_LENGTH + 42 > index_test_;
+	*/
+
+	/*
+	runtime -- this will throw the exception as soon as program "passes" through here
+	inline between_0_and_max b0max = DBJ_MAX_BUFF_LENGTH + 2;
+	*/
 }
 
 #if 0
@@ -92,6 +104,5 @@ namespace dbj::chr_buf
 	}; // inner
 
 } // dbj::chr_buf
-
 
 #endif
