@@ -572,8 +572,9 @@ with reference or pointer type argument.
 	inline auto print = []( auto const & first_param, auto const & ... params)
 		constexpr 
 	{
+#if DBJ_CONSOLE_INIT_REQUIRED
 		_ASSERTE(::dbj::console_is_initialized());
-
+#endif
 		out(first_param);
 
 		// if there are  more params
@@ -595,7 +596,9 @@ with reference or pointer type argument.
 	template <typename T, typename ... Args>
 	inline void prinf(T const * format_, Args ... args) noexcept
 	{
+#if DBJ_CONSOLE_INIT_REQUIRED
 		_ASSERTE(::dbj::console_is_initialized());
+#endif
 		_ASSERTE(format_);
 		PRN.printf(format_, args...);
 	}

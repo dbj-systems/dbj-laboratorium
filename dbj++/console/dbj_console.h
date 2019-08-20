@@ -1,8 +1,13 @@
 ﻿#pragma once
 
+
+#if DBJ_CONSOLE_INIT_REQUIRED
+
 namespace dbj {
-	inline constexpr bool console_is_initialized() ;
+	inline constexpr bool console_is_initialized();
 }
+
+#endif
 
 namespace dbj::console {
 
@@ -35,7 +40,7 @@ namespace dbj::console {
 
 	public:
 
-		static constexpr CODE DEFAULT_CODEPAGE_ = CODE::page_65001 ;
+		static constexpr CODE DEFAULT_CODEPAGE_ = CODE::page_65001;
 
 		WideOut(CODE CODEPAGE_ = DEFAULT_CODEPAGE_) noexcept
 			: code_page_((UINT)CODEPAGE_)
@@ -55,11 +60,11 @@ namespace dbj::console {
 			// after this guess the right font and you are ok ;)
 		}
 		// no copying
-		WideOut(const WideOut & other) = delete;
-		WideOut & operator = (const WideOut & other) = delete;
+		WideOut(const WideOut& other) = delete;
+		WideOut& operator = (const WideOut& other) = delete;
 		// we need this one so we can pass the singleton instance out
-		WideOut(WideOut && other) = default;
-		WideOut & operator = (WideOut && other) = default;
+		WideOut(WideOut&& other) = default;
+		WideOut& operator = (WideOut&& other) = default;
 
 		~WideOut()
 		{
@@ -72,23 +77,23 @@ namespace dbj::console {
 		/* what code page is used */
 		const unsigned code_page() const noexcept override { return this->code_page_; }
 		/* out__ is based on HANDLE and std::wstring */
-		HANDLE handle() const override  { 
+		HANDLE handle() const override {
 
 			DBJ_VERIFY(output_handle_ != INVALID_HANDLE_VALUE);
 #ifdef _DEBUG
 			DWORD lpMode{};
 			DBJ_VERIFY(0 != GetConsoleMode(output_handle_, &lpMode));
 #endif
-				return this->output_handle_;
+			return this->output_handle_;
 		}
-    	// from --> to, must be a sequence
+		// from --> to, must be a sequence
 		// this is the *fastest* method
-		void out( const wchar_t * from,  const wchar_t * to) const override
+		void out(const wchar_t* from, const wchar_t* to) const override
 		{
 #ifndef _DEBUG
 			static
 #endif // !_DEBUG
-			const HANDLE output_h_ =  this->handle();
+				const HANDLE output_h_ = this->handle();
 
 			_ASSERTE(output_h_ != INVALID_HANDLE_VALUE);
 			_ASSERTE(from != nullptr);
@@ -96,7 +101,7 @@ namespace dbj::console {
 			_ASSERTE(from != to);
 
 			std::size_t size = std::distance(from, to);
-			_ASSERTE( size > 0 );
+			_ASSERTE(size > 0);
 
 			// this is *crucial*
 			// otherwise ::WriteConsoleW will fail
@@ -113,21 +118,21 @@ namespace dbj::console {
 				static_cast<DWORD>(size), NULL, NULL
 			);
 			DBJ_VERIFY(retval != 0);
-	} // out
+		} // out
 
-	/* as dictated by the interface implemented */
-	void out(const std::wstring_view wp_) const override
-	{
-		this->out(wp_.data(), wp_.data() + wp_.size());
-	}
+		/* as dictated by the interface implemented */
+		void out(const std::wstring_view wp_) const override
+		{
+			this->out(wp_.data(), wp_.data() + wp_.size());
+		}
 
-		private:
+	private:
 		/*
-		here we hide the single application wide 
+		here we hide the single application wide
 		IConsole instance maker
 		*/
-		static WideOut & instance( 
-			CODE_PAGE const & code_page = default_code_page
+		static WideOut& instance(
+			CODE_PAGE const& code_page = default_code_page
 		)
 		{
 			static WideOut single_instance
@@ -138,21 +143,23 @@ namespace dbj::console {
 			return single_instance;
 		};
 
-		friend const Printer & printer_instance();
+		friend const Printer& printer_instance();
 
 	}; // WideOut
 
 	/* this is Printer's    friend*/
 	/* this is also WideOut friend*/
-	inline const Printer & printer_instance()
+	inline const Printer& printer_instance()
 	{
 		static Printer single_instance
-			= [&]() -> Printer 
+			= [&]() -> Printer
 		{
 			// we can do this only because from inside config we do not 
 			// use WideOut or Printer
+#if DBJ_CONSOLE_INIT_REQUIRED
 			auto DBJ_MAYBE(is_it_) = console_is_initialized();
-			static WideOut & console_engine_ = WideOut::instance();
+#endif
+			static WideOut& console_engine_ = WideOut::instance();
 			return { &console_engine_ };
 		}(); // call immediately but only once!
 		return single_instance;
@@ -167,7 +174,7 @@ namespace dbj::console {
 
 #pragma endregion 
 
-	inline void paint(const painter_command & cmd_) {
+	inline void paint(const painter_command& cmd_) {
 		painter_commander().execute(cmd_);
 	}
 
@@ -181,38 +188,38 @@ namespace dbj::console {
 		*/
 		inline bool instance()
 		{
-				try {
-					
-					// NOT required for WIN10?
-					//::dbj::console::set_font(
-					//	::dbj::console::default_font
-					//);
-					//::dbj::core::trace(L"\nConsole font set to: %s\n", ::dbj::console::default_font);
+			try {
 
-					//// and now the really crazy and important measure 
-					//// for Windows console
-					//::system("@chcp 65001>nul");
-					//::dbj::core::trace(L"\nConsole chcp 65001 done\n");
+				// NOT required for WIN10?
+				//::dbj::console::set_font(
+				//	::dbj::console::default_font
+				//);
+				//::dbj::core::trace(L"\nConsole font set to: %s\n", ::dbj::console::default_font);
 
-				}
-				catch (...) {
-					// can happen before main()
-					// and user can have no terminators set up
-					// so ...
-					dbj::vector_buffer<char>::narrow message_(
-						 ::dbj::win32::get_last_error_message(
-							"dbj console configuration has failed"sv
-						)
-					) ;
-					::dbj::core::trace(L"\nERROR %s", message_.data());
-					// throw dbj::exception(message_);
+				//// and now the really crazy and important measure 
+				//// for Windows console
+				//::system("@chcp 65001>nul");
+				//::dbj::core::trace(L"\nConsole chcp 65001 done\n");
+
+			}
+			catch (...) {
+				// can happen before main()
+				// and user can have no terminators set up
+				// so ...
+				dbj::vector_buffer<char>::narrow message_(
+					::dbj::win32::get_last_error_message(
+						"dbj console configuration has failed"sv
+					)
+				);
+				::dbj::core::trace(L"\nERROR %s", message_.data());
+				// throw dbj::exception(message_);
 #pragma warning(push)
 #pragma warning(disable: 4127 )
-					DBJ_VERIFY(false);
+				DBJ_VERIFY(false);
 #pragma warning(pop)
-				}
-				//
-				return true;
+			}
+			//
+			return true;
 		} // instance()
 
 		// inline const bool & single_start = instance();
@@ -221,15 +228,16 @@ namespace dbj::console {
 
 } // dbj::console
 
+#if DBJ_CONSOLE_INIT_REQUIRED
+
 namespace dbj {
-	inline constexpr bool console_is_initialized() 
+	inline constexpr bool console_is_initialized()
 	{
-		// actually not reuired for WIN10? 
-		// see the comments just above
-		// return ::dbj::console::config::instance();
-		return true;
+		return ::dbj::console::config::instance();
 	}
 }
+
+#endif
 
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_gpl_license.h"

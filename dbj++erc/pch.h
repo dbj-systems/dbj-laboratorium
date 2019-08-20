@@ -3,15 +3,11 @@
 #define PCH_H
 
 
+#define DBJ_INCLUDE_STD_
+#include "../dbj++/dbj++required.h"
 
-// dbj++ 'bans' std iostreams
-// #include <iostream>
-#undef DBJ_WMAIN_USED
+#define DBJ_WMAIN_USED
 #include "../dbj++/dbj++.h"
-
-
-
-
 
 
 #endif //PCH_H

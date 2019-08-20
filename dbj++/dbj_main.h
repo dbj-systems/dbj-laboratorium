@@ -58,6 +58,9 @@ namespace dbj
 
 } // dbj
 
+///////////////////////////////////////////////////////////////////////////////////
+//
+// users muste define this if DBJ_WMAIN_USED is defined
 
 extern inline void dbj_program_start(
 	int , /* argc */

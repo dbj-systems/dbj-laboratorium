@@ -2,7 +2,7 @@
 
 // #define DBJ_INCLUDE_STD_
 
-#ifdef DBJ_INCLUDE_STD_
+#if 0 // def DBJ_INCLUDE_STD_
 #include <limits.h>
 #include <fcntl.h>
 #include <io.h>

@@ -17,18 +17,18 @@
 /// just execute all the registered tests
 /// in no particular order
 /// </summary>
-static void dbj_program_start(
+void dbj_program_start(
 	const int argc,
 	const wchar_t *argv[],
 	const wchar_t *envp[]
 )
 {
-	DBJ_VERIFY(::dbj::console_is_initialized());
 	::dbj::core::trace("\nDBJ++ERR -- ::dbj::console_is_initialized()");
 	// TODO: make this async
 	dbj::testing::execute(argc, argv, envp);
 }
 
+#if 0
 #ifdef UNICODE
 int wmain(const int argc, const wchar_t *argv[], const wchar_t *envp[])
 #else
@@ -49,3 +49,4 @@ int wmain(const int argc, const wchar_t *argv[], const wchar_t *envp[])
 	}
 	return  EXIT_SUCCESS;
 }
+#endif
