@@ -369,13 +369,13 @@ my preffered buffer type is std::array<>
 		}
 
 		inline  std::vector< char >
-			operator "" _v_buffer (const char* sliteral_, size_t length_)
+			operator "" _v_buffer (const char* sliteral_, size_t )
 		{
 			return vector_buffer<char>::make( sliteral_	) ;
 		}
 
 		inline  std::vector< wchar_t >
-			operator "" _v_buffer(const wchar_t * sliteral_, size_t length_)
+			operator "" _v_buffer(const wchar_t * sliteral_, size_t )
 		{
 			return vector_buffer<wchar_t>::make( sliteral_);
 		}

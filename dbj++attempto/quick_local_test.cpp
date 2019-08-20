@@ -13,8 +13,8 @@ namespace dbj::samples::palindromes_research {
 	extern "C" inline bool petar_pal(const char* str)
 	{
 		char* a = (char*)str,
-			*p = a,
-			*q = p;
+			* p = a,
+			* q = p;
 		size_t n = strlen(str);
 		for (p = a, q = a + n - 1;
 			p < q;
@@ -55,7 +55,7 @@ namespace dbj::samples::palindromes_research {
 	}
 
 
-	inline void test_palindroma(const char * word_ = "012345678909876543210")
+	inline void test_palindroma(const char* word_ = "012345678909876543210")
 	{
 		_ASSERTE(is_pal("ANA"));
 		_ASSERTE(is_pal(word_));
@@ -67,40 +67,40 @@ namespace dbj::samples::palindromes_research {
 namespace dbj::samples::bulk_free {
 
 	DBJ_TEST_UNIT(bulk_free)
-	{ 
+	{
 		constexpr size_t newlen = 1024;
 		constexpr size_t ARRSZ = 9;
-		typedef char  * arr_type[ARRSZ];
+		typedef char* arr_type[ARRSZ];
 		arr_type slave = {
-	(char*)calloc( newlen, sizeof(char)), /* 0 */
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)),
-	(char*)calloc( newlen, sizeof(char)) /* 8 */
+	(char*)calloc(newlen, sizeof(char)), /* 0 */
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)),
+	(char*)calloc(newlen, sizeof(char)) /* 8 */
 		};
 
-		arr_type * copy_ = (arr_type*)malloc( ARRSZ * newlen );
+		arr_type* copy_ = (arr_type*)malloc(ARRSZ * newlen);
 
-		_ASSERTE( copy_ );
+		_ASSERTE(copy_);
 
-		for (size_t n = 0; n < ARRSZ; ++n) (*copy_)[n] = _strdup (slave[n]);
-
-		DBJ_MULTI_FREE(
-		slave[0], slave[1], slave[2], slave[3], slave[4], 
-		slave[5], slave[6], slave[7], slave[8]
-	);
+		for (size_t n = 0; n < ARRSZ; ++n) (*copy_)[n] = _strdup(slave[n]);
 
 		DBJ_MULTI_FREE(
-		(*copy_)[0], (*copy_)[1], (*copy_)[2], (*copy_)[3], (*copy_)[4], 
-		(*copy_)[5], (*copy_)[6], (*copy_)[7], (*copy_)[8]
-	);
+			slave[0], slave[1], slave[2], slave[3], slave[4],
+			slave[5], slave[6], slave[7], slave[8]
+		);
 
-	char * p = (char*)malloc(42);
-	free_free_set_them_free(p, NULL);
+		DBJ_MULTI_FREE(
+			(*copy_)[0], (*copy_)[1], (*copy_)[2], (*copy_)[3], (*copy_)[4],
+			(*copy_)[5], (*copy_)[6], (*copy_)[7], (*copy_)[8]
+		);
+
+		char* p = (char*)malloc(42);
+		free_free_set_them_free(p, NULL);
 
 	}
 
@@ -109,9 +109,9 @@ namespace dbj::samples::bulk_free {
 
 namespace dbj::samples {
 	template<class T, T v>
-	struct integral_constant 
+	struct integral_constant
 	{
-		static_assert( is_integral_v<T>);
+		static_assert(is_integral_v<T>);
 
 		static constexpr T value = v;
 		typedef T value_type;
@@ -133,7 +133,7 @@ namespace dbj::samples {
 
 DBJ_TEST_UNIT(compile_time_entities_as_objects_instead_of_types)
 {
-	 DBJ_TEST_ATOM(DBJ_ARR_LEN("ABC") );
+	DBJ_TEST_ATOM(DBJ_ARR_LEN("ABC"));
 
 	{
 		// integral constant as type
@@ -144,12 +144,12 @@ DBJ_TEST_UNIT(compile_time_entities_as_objects_instead_of_types)
 		constexpr int one_constexpr = decltype(one_rt)::value;
 	}
 	{
-using zero_int_type = dbj::integral_constant<int, 0>;
-	
-auto succ = [] (auto N) {
-	return dbj::integral_constant<int, decltype(N)::value + 1 >{};
-};
-		auto zero = dbj::samples::int_c<0> ;
+		using zero_int_type = dbj::integral_constant<int, 0>;
+
+		auto succ = [](auto N) {
+			return dbj::integral_constant<int, decltype(N)::value + 1 >{};
+		};
+		auto zero = dbj::samples::int_c<0>;
 		auto three = dbj::samples::int_c<1> +dbj::samples::int_c<2>;
 	}
 }
@@ -177,7 +177,7 @@ namespace dbj::samples::init {
 		int IID_ARG,
 		std::enable_if_t< std::is_constructible_v<T>, int> = IID_ARG
 	>
-	struct singletor final
+		struct singletor final
 	{
 		using value_type = T;
 
@@ -190,7 +190,7 @@ namespace dbj::samples::init {
 		// construct the single_instance_ of T 
 		// and keep it
 		template< typename ...A>
-		static T const & construct(A...args)
+		static T const& construct(A...args)
 		{
 			// if T is function bellow will not compile
 			static T	single_instance_(args...);
@@ -203,19 +203,19 @@ namespace dbj::samples::init {
 namespace dbj::samples::inner {
 
 
-	DBJ_TEST_UNIT( array_uniq_ptr )
+	DBJ_TEST_UNIT(array_uniq_ptr)
 	{
 		using ::dbj::console::print;
-		auto mover = [](auto arg_) { return arg_ ;  };
-		auto  [ arr_size, smart_p ] = dbj::make_smart_array_pair<char>(BUFSIZ);
+		auto mover = [](auto arg_) { return arg_;  };
+		auto [arr_size, smart_p] = dbj::make_smart_array_pair<char>(BUFSIZ);
 
-		unique_ptr_buffer_type<char>		buffy = "Buffy"sv ;
+		unique_ptr_buffer_type<char>		buffy = "Buffy"sv;
 		unique_ptr_buffer_type<wchar_t>	duffy(L"Duffy"sv);
 
 		print("\n\nbuffy: ", buffy); print(L"\nduffy: ", duffy);
 
-		auto buffy_copy =  buffy ;
-		auto duffy_copy = mover( duffy ) ;
+		auto buffy_copy = buffy;
+		auto duffy_copy = mover(duffy);
 
 		print("\n\nbuffy copy: ", buffy_copy, "\nduffy copy: ", duffy_copy);
 	}
@@ -223,11 +223,11 @@ namespace dbj::samples::inner {
 	// this is to prevent them keeping static instances
 	// this is actually what is also known
 	// as 'creation policy'
-	bool is_ascii(const char * arg_) 
-	{ 
+	bool is_ascii(const char* arg_)
+	{
 		using ascii_ordinal_t = ::dbj::core::util::insider<unsigned, 0U, 127U>;
 
-		const size_t N =  strlen( arg_ ) ;
+		const size_t N = strlen(arg_);
 		for (size_t k = 0; k < N; k++) {
 			ascii_ordinal_t  ord = int(arg_[k]);
 			if (!ord.valid()) return false;
@@ -237,10 +237,10 @@ namespace dbj::samples::inner {
 
 
 	//-------------------------------------------------------
-	DBJ_TEST_UNIT( test_the_initor )
+	DBJ_TEST_UNIT(test_the_initor)
 	{
 		using namespace init;
-		using namespace ::dbj::util ;
+		using namespace ::dbj::util;
 		using      ::dbj::console::print;
 
 		// this line actually creates the function definition
@@ -250,15 +250,15 @@ namespace dbj::samples::inner {
 		// the single instance
 		print("\n", once(is_ascii, "Not two"));
 
-		print("\n", once( ::dbj::num::random_from_to<int>, 24, 42 ));
+		print("\n", once(::dbj::num::random_from_to<int>, 24, 42));
 
 		// this declares + defines the type
 		// + the type wide instance of std::string
 		// in other words: process wide instance
-		auto stringetor_1 = singletor<std::string, 42 >() ;
-		auto stringetor_2 = singletor<std::string, 24 >() ;
+		auto stringetor_1 = singletor<std::string, 42 >();
+		auto stringetor_2 = singletor<std::string, 24 >();
 
-		auto strinter = [&](auto strtor_ , auto arg_ ) {
+		auto strinter = [&](auto strtor_, auto arg_) {
 			using      ::dbj::console::print;
 			print("\nid:",
 				// the first call wins
@@ -276,4 +276,61 @@ namespace dbj::samples::inner {
 		strinter(stringetor_2, "D"); // it stays "C"
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	//
+	// https://stackoverflow.com/a/57561145/10870835
+	//
+
+	namespace yet_another_helper
+	{
+		using namespace std;
+		using ::dbj::console::print;
+
+		template <std::size_t N>
+		struct helper final {
+			std::array<char, N + 1> array_;
+		private:
+			template <std::size_t... Is>
+			constexpr helper(const char(&str)[N], std::index_sequence<Is...>)
+				:array_{ str[Is]... , char(0) }
+			{
+				print("\n inside hidden helper ctor, N: ", N, "\t string data: ", array_.data());
+			}
+		public:
+			/*
+			this ctor works
+				constexpr helper(const char (&str)[N])
+					:helper{str, std::make_index_sequence<N>{}}
+				{
+				}
+			*/
+			// DBJ added
+			constexpr helper(char const* const str_)
+				:helper{
+					   (const char(&)[N])str_,
+					   std::make_index_sequence<N>{}
+			}
+			{
+				print("\n inside public helper ctor, N: ", N, "\t argument string: ", str_);
+			}
+		};
+
+		/*
+		  this guide says: if given string literal as an constructor argument,
+		  use only its size as a template argument
+		*/
+		template <std::size_t N> helper(const char(&str)[N])->helper<N - 1>;
+		/*
+		constexpr auto operator "" _S( char const * str_, size_t len_ )
+		{
+			return helper<0xFF>(str_).string;
+		}
+		*/
+		DBJ_TEST_UNIT(yet_another_helper)
+		{
+			helper  str_("ABC");
+			print("\n", str_.array_);
+		}
+
+	}
 }

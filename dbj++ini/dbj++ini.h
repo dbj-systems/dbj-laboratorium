@@ -47,8 +47,8 @@ namespace dbj::ini
 	// to keep them strings
 	struct ini_reader;
 
-	// NOTE: to avoid std::string we use ::dbj::chr_buf::yanb
-	using smart_buffer = typename ::dbj::vector_buffer<char>::narrow ;
+	using smart_buffer			= typename ::dbj::vector_buffer<char>::narrow ;
+	using smart_buffer_helper	= typename ::dbj::vector_buffer<char> ;
 
 	/*
 	   ini file descriptor

@@ -5,14 +5,12 @@ inherently C *and* UNIX like lib.
 By hiding local includes here, I decouple user from them too ...
 */
 
-#include <cstdio>
-#include <cassert>
-#include <array>
-#include <map>
+#define DBJ_INCLUDE_STD_
+#include <dbj++/dbj++required.h>
 
-#include <dbj++/core/dbj++core.h>
-#include <dbj++/console/dbj++con.h>
-#include <dbj++/win/dbj++win.h>
+// #define DBJ_WMAIN_USED <-- since we are building a library we do not need wmain()
+#include <dbj++/dbj++.h>
+
 #include "dbj++log.h"
 #include "syslog/syslog.h"
 
@@ -46,13 +44,13 @@ namespace dbj::log {
 static BOOL WINAPI __dbj_log_console_handler(DWORD signal) {
 
 	if (signal == CTRL_C_EVENT) {
+
 		// namespace galimatias, almost like cppwinrt ;)
-		using dbj::chr_buf::yanb;
 		using ::dbj::core::trace;
 		using namespace ::dbj::win32;
 		using namespace ::dbj::log;
 
-		yanb basename_{ module_basename() };
+		auto basename_{ module_basename() };
 		DBJ_LOG_INF("CTRL+C event -- from %s", basename_.data());
 		trace("CTRL+C event -- from %s", basename_.data());
 	}
@@ -65,12 +63,11 @@ static BOOL WINAPI __dbj_log_console_handler(DWORD signal) {
 static const auto __dbj_log_init__ = []()
 {
 	// namespace galimatias, almost like cppwinrt ;)
-	using dbj::chr_buf::yanb;
 	using ::dbj::core::trace;
 	using namespace ::dbj::win32;
 	using namespace ::dbj::log;
 
-	yanb basename_{ module_basename() };
+	auto basename_{ module_basename() };
 	syslog_init();
 	// syslog_open_options::log_perror
 	// makes use of local log file

@@ -1,22 +1,15 @@
-#pragma once
-#include <cassert>
-#include <string_view>
-#include <ctime>
-#include <chrono>
-#include <array>
-#include <mutex>
+#define DBJ_INCLUDE_STD_
+#include <dbj++/dbj++required.h>
+
+// #define DBJ_WMAIN_USED <-- since we are building a library we do not need wmain()
+#include <dbj++/dbj++.h>
+
 #include "dbj_util.h"
 #include "dbj_local_log.h"
 
-struct lock_unlock final {
+using lock_unlock = dbj::sync::lock_unlock;
 
-	mutable std::mutex mux_;
-
-	lock_unlock() noexcept { mux_.lock(); }
-	~lock_unlock() { mux_.unlock(); }
-};
-
-#define DBJ_VERIFY(x) _ASSERT_AND_INVOKE_WATSON(x)
+// #define DBJ_VERIFY(x) _ASSERT_AND_INVOKE_WATSON(x)
 
 void dbj_write_to_local_log(
 	char * priority_name_ ,

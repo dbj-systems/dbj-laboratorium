@@ -21,7 +21,10 @@ and do it according to ancient windows lore
 namespace dbj::log {
 
 	using namespace ::std;
-	using smart_buffer = ::dbj::chr_buf::yanb;
+
+	using smart_buffer			= typename ::dbj::vector_buffer<char>::narrow;
+	using smart_buffer_helper	= typename ::dbj::vector_buffer<char>;
+
 	using namespace ::std::string_view_literals;
 	namespace fs = ::std::filesystem;
 
@@ -53,7 +56,7 @@ namespace dbj::log {
 
 		class log_file final {
 
-			::dbj::chr_buf::yanb	file_path_{};
+			smart_buffer	file_path_{};
 			int		old_std_err{};
 			mutable FILE	*log_file_{};
 			mutable bool opened = false;
@@ -79,7 +82,7 @@ namespace dbj::log {
 				this->opened = false;
 			}
 
-			log_file(::dbj::chr_buf::yanb file_path_param)
+			log_file(smart_buffer file_path_param)
 				: file_path_(file_path_param)
 			{
 				bool new_created
@@ -124,7 +127,7 @@ namespace dbj::log {
 
 				auto time_stamp = ::dbj::core::util::make_time_stamp(ec_, ::dbj::core::util::TIME_STAMP_FULL_MASK);
 
-				DBJ_FPRINTF(log_file_,"DBJ++ log file | %s | %s\n", this->file_path_.data() , time_stamp.get() ); 
+				DBJ_FPRINTF(log_file_,"DBJ++ log file | %s | %s\n", this->file_path_.data() , time_stamp.data() ); 
 
 				if (ec_) {
 					DBJ_FPRINTF(log_file_, "std error in local log file constructor: %s", ec_.message().c_str() );
@@ -264,12 +267,11 @@ namespace dbj::log {
 		// thus making this schema queued?
 	}
 
-	template<typename CHR>
 	inline void async_log_write(
-		::dbj::chr_buf::yanb_tpl<CHR> message
+		smart_buffer message
 	) noexcept
 	{
-		async_log_write(std::basic_string_view<CHR>{ message.data() });
+		async_log_write(std::string_view{ message.data() });
 	}
 
 	template<typename CHR, size_t N>

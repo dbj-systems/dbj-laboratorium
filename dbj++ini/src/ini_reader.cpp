@@ -21,6 +21,16 @@ namespace dbj::ini {
 
 	using hash_key_type = long;
 
+	// this is NOT a good idea probably?
+	// smart_buffer is vector<char> right now
+	using map_type = typename std::map<hash_key_type, smart_buffer>;
+
+	inline smart_buffer::value_type const * 
+		map_value_as_pointer ( map_type & the_map_, hash_key_type  const & the_key_ )
+	{
+		return the_map_[the_key_].data();
+	}
+
 	extern "C" {
 		static constexpr hash_key_type djb2_hash(unsigned char* str)
 		{
@@ -64,20 +74,20 @@ namespace dbj::ini {
 					return kv_map_.at(key);
 				}
 				else {
-					return smart_buffer(_strdup(default_value.data()));
+					return smart_buffer_helper::make(/*_strdup*/(default_value.data()));
 				}
 		}
 
 		smart_buffer get_string(string_view section, string_view name, string_view default_value) const
 		{
 			smart_buffer str = get(section, name, "");
-			return  (false == str ? smart_buffer(_strdup(default_value.data())) : str);
+			return  (! str.data() ? smart_buffer_helper::make(/*_strdup*/(default_value.data())) : str);
 		}
 
 		long get_integer(string_view section, string_view name, long default_value) const
 		{
 			smart_buffer valstr = get(section, name, "");
-			const char* value = valstr ;
+			const char* value = valstr.data() ;
 			char* end;
 			// This parses "1234" (decimal) and also "0x4D2" (hex)
 			long n = strtol(value, &end, 0);
@@ -87,7 +97,7 @@ namespace dbj::ini {
 		double get_real(string_view section, string_view name, double default_value) const
 		{
 			smart_buffer valstr = get(section, name, "");
-			const char* value = valstr ;
+			const char* value = valstr.data()  ;
 			char* end;
 			double n = strtod(value, &end);
 			return end > value ? n : default_value;
@@ -99,7 +109,7 @@ namespace dbj::ini {
 				return 0 == std::strcmp(left_, right_);
 			};
 			smart_buffer valstr = get(section, name, "");
-			char const * val = valstr ;
+			char const * val = valstr.data() ;
 			// Convert to lower case to make string comparisons case-insensitive
 			// std::transform(valstr.begin(), valstr.end(), valstr.begin(), ::tolower);
 			if (eq(val, "true") || eq(val, "yes") || eq(val, "on") || eq(val, "1"))
@@ -143,21 +153,25 @@ namespace dbj::ini {
 			*/
 			if (reader->kv_map_.count(key) > 0 ) 
 			{
-				string new_val(reader->kv_map_[key]);
+				string new_val(  map_value_as_pointer(reader->kv_map_, key)  );
 				new_val.append("\n");
 				new_val.append(value);
-				reader->kv_map_[key] = smart_buffer(_strdup(new_val.data()));
+				reader->kv_map_[key] = smart_buffer_helper::make  (/*_strdup*/(new_val.data()));
 			}
 			else {
-				reader->kv_map_[key] = smart_buffer(_strdup(value));
+				reader->kv_map_[key] = smart_buffer_helper::make (/*_strdup*/(value));
 			}
 			return 1;
 		}
+
 #ifdef _DEBUG
+		// clear the map oly in DEBUG mode 
+		// it can be long?
 		~ini_reader_engine() {
 			kv_map_.clear();
 		}
 #endif
+
 	private:
 
 		// dbj: here hide def. ctor and make this no copy, no move class
@@ -168,9 +182,10 @@ namespace dbj::ini {
 		ini_reader_engine & operator = (ini_reader_engine &&) = delete;
 
 		int _error{};
-		std::map<hash_key_type, smart_buffer> kv_map_{};
 
-	}; // ini_reader
+		map_type kv_map_{};
+
+	}; // ini_reader_engine
 
 	ini_reader const & ini_reader_instance(string_view ini_file_name)
 	{
