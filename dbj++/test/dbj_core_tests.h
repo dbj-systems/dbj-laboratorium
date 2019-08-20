@@ -1,17 +1,6 @@
 #pragma once
-#include "../core/dbj++core.h"
 
-#ifdef DBJ_CONSOLE_SYTEM
-void out(
-	::dbj::chr_buf::char_buffer const & cb_
-)
-{
-	using namespace ::dbj::console;
-	prinf(L"%S", cb_.data());
-}
-#endif
-
-#define DBJ_NO_TESTING
+// #include "../core/dbj++core.h"
 
 DBJ_TEST_SPACE_OPEN(core_tests)
 
@@ -52,7 +41,6 @@ DBJ_TEST_UNIT(core_format_utils)
 
 DBJ_TEST_UNIT(core_utils)
 {
-	using namespace ::dbj::chr_buf;
 	using namespace ::std::string_view_literals;
 
 	{
@@ -81,4 +69,3 @@ DBJ_TEST_UNIT(core_utils)
 
 DBJ_TEST_SPACE_CLOSE
 
-#undef DBJ_NO_TESTING

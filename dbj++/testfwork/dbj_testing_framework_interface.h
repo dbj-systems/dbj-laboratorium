@@ -198,20 +198,25 @@ namespace dbj {
 
 #ifndef DBJ_TEST_ATOM
 
-		// by default if result is bool, show it
-		inline bool atom_show_true_rezult = true;
-
 		struct flip_atom_show_true_rezult final {
 
-			flip_atom_show_true_rezult() {
-				atom_show_true_rezult = false;
+			inline static bool flip_flop_{ true };
+
+			constexpr flip_atom_show_true_rezult() {
+				flip_flop_ = false;
 			}
 
 			~flip_atom_show_true_rezult() {
-				atom_show_true_rezult = true;
+				flip_flop_ = true;
 			}
 
+			constexpr static bool flip_flop() { return flip_flop_;  }
+
 		} ;
+
+		// by default if result is bool, show it
+		inline bool atom_show_true_rezult = flip_atom_show_true_rezult::flip_flop ;
+
 
 		///<summary>
 		/// usage example: 
@@ -225,7 +230,7 @@ namespace dbj {
 		/// </summary>
 		template<typename return_type>
 		// inline decltype(auto)
-		inline return_type const &
+		inline constexpr return_type const &
 			test_lambada(
 				const char * expression,
 				return_type const & anything,

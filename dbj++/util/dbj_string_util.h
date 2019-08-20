@@ -27,7 +27,7 @@ namespace dbj::str {
 		compile time const *and* C
 		be advised C++ versions are better 
 		and "C" constepxr is very last C2x standard which is 
-		very surprising formn MSVC
+		very surprising working in MSVC
 		*/
 		inline constexpr size_t string_literal_length(const char str[1])
 		{

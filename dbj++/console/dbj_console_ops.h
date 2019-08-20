@@ -570,6 +570,7 @@ with reference or pointer type argument.
 	*/
 
 	inline auto print = []( auto const & first_param, auto const & ... params)
+		constexpr 
 	{
 		_ASSERTE(::dbj::console_is_initialized());
 

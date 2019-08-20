@@ -2,6 +2,9 @@
 
 namespace dbj::win32 {
 
+	using smart_buffer_helper = typename ::dbj::vector_buffer<char>;
+	using smart_buffer = typename smart_buffer_helper::narrow;
+
 	inline int last_win32_error() noexcept
 	{
 		struct last final
@@ -29,12 +32,12 @@ namespace dbj::win32 {
 
 	// Returns the last Win32 error message
 	// with optional prefix
-	inline  typename ::dbj::chr_buf::narrow_type // ::dbj::chr_buf::yanb 
+	inline  typename smart_buffer // ::dbj::chr_buf::yanb 
 		get_last_error_message(
 			std::string_view prompt = std::string_view{}
 		)
 	{
-		typename ::dbj::chr_buf::narrow_type buffer_;
+		smart_buffer buffer_;
 		//Get the error 
 		auto syserr = system_error_instance();
 		const char* sys_err_msg = syserr.what();
@@ -44,11 +47,10 @@ namespace dbj::win32 {
 			//use std::string only and if needed
 			std::string str_(prompt); str_.append(sys_err_msg);
 
-			dbj::chr_buf::core::assign(buffer_, str_.c_str());
+			buffer_ = smart_buffer_helper::make( str_.c_str());
 		}
 		else {
-			dbj::chr_buf::core::assign(buffer_, sys_err_msg);
-
+			buffer_ = smart_buffer_helper::make(sys_err_msg);
 		}
 		return  buffer_;
 	}

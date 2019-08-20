@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 namespace dbj {
-	extern inline bool console_is_initialized() ;
+	inline constexpr bool console_is_initialized() ;
 }
 
 namespace dbj::console {
@@ -179,10 +179,8 @@ namespace dbj::console {
 		/*
 		TODO: usable interface for users to define this
 		*/
-		inline const bool & instance()
+		inline bool instance()
 		{
-			static auto configure_once_ = []() -> bool
-			{
 				try {
 					
 					// NOT required for WIN10?
@@ -201,12 +199,12 @@ namespace dbj::console {
 					// can happen before main()
 					// and user can have no terminators set up
 					// so ...
-					dbj::chr_buf::narrow_type message_(
+					dbj::vector_buffer<char>::narrow message_(
 						 ::dbj::win32::get_last_error_message(
 							"dbj console configuration has failed"sv
-						) 
+						)
 					) ;
-					::dbj::core::trace(L"\nERROR %s", message_.get());
+					::dbj::core::trace(L"\nERROR %s", message_.data());
 					// throw dbj::exception(message_);
 #pragma warning(push)
 #pragma warning(disable: 4127 )
@@ -215,8 +213,6 @@ namespace dbj::console {
 				}
 				//
 				return true;
-			}();
-			return configure_once_;
 		} // instance()
 
 		// inline const bool & single_start = instance();
@@ -226,9 +222,12 @@ namespace dbj::console {
 } // dbj::console
 
 namespace dbj {
-	inline bool console_is_initialized() {
-		static bool is_it_ = ::dbj::console::config::instance();
-		return is_it_;
+	inline constexpr bool console_is_initialized() 
+	{
+		// actually not reuired for WIN10? 
+		// see the comments just above
+		// return ::dbj::console::config::instance();
+		return true;
 	}
 }
 

@@ -126,7 +126,7 @@ namespace inner {
 	*/
 	auto measure = [](
 		auto fp,
-		::dbj::chr_buf::between_0_and_max buffer_sz,
+		::dbj::between_0_and_max buffer_sz,
 		size_t max_iteration = max_iterations)
 	{
 		auto start_ = std::chrono::system_clock::now();

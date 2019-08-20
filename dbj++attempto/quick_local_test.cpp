@@ -287,50 +287,90 @@ namespace dbj::samples::inner {
 		using ::dbj::console::print;
 
 		template <std::size_t N>
-		struct helper final {
-			std::array<char, N + 1> array_;
-		private:
+		struct helper {
+			// dbj added +1
+			std::array<char, N + 1> buffer;
+
 			template <std::size_t... Is>
-			constexpr helper(const char(&str)[N], std::index_sequence<Is...>)
-				:array_{ str[Is]... , char(0) }
+			constexpr helper(const char(&str)[N + 1], std::index_sequence<Is...>)
+				// dbj added char(0)
+				:buffer{ str[Is]..., char(0) }
 			{
-				print("\n inside hidden helper ctor, N: ", N, "\t string data: ", array_.data());
 			}
-		public:
-			/*
-			this ctor works
-				constexpr helper(const char (&str)[N])
-					:helper{str, std::make_index_sequence<N>{}}
-				{
-				}
-			*/
+
+			//constexpr helper(const char(&str)[N + 1])
+			//	: helper{ str, std::make_index_sequence<N>{} }
+			//{
+			//}
+
 			// DBJ added
-			constexpr helper(char const* const str_)
-				:helper{
-					   (const char(&)[N])str_,
-					   std::make_index_sequence<N>{}
-			}
+			using narf =  char const(&)[N + 1];
+			// DBJ added
+			/*constexpr*/ helper(const char* str)
+				: helper{ narf(*str), std::make_index_sequence<N>{} }
 			{
-				print("\n inside public helper ctor, N: ", N, "\t argument string: ", str_);
+#ifdef _DEBUG
+				[[maybe_unused]] auto see_in_debugger = narf(*str);
+#endif
 			}
 		};
 
 		/*
 		  this guide says: if given string literal as an constructor argument,
-		  use only its size as a template argument
+		  use only its size as a template argument. thus one can do this:
+
+			helper  str_("ABC");
 		*/
 		template <std::size_t N> helper(const char(&str)[N])->helper<N - 1>;
-		/*
-		constexpr auto operator "" _S( char const * str_, size_t len_ )
-		{
-			return helper<0xFF>(str_).string;
-		}
-		*/
+
+		// DBJ  -- works but how is this to be used?
+		template <std::size_t N> helper(const char* str)->helper< N - 1>;
+
+				////////////////////////////////////////////////////////////////////
+
 		DBJ_TEST_UNIT(yet_another_helper)
 		{
 			helper  str_("ABC");
-			print("\n", str_.array_);
+			print("\n", str_.buffer);
 		}
+	}
+
+	/* size as a type  . usage:	*/
+	template< size_t sze_ >
+	using typed_size = 	std::integral_constant< size_t, sze_ >;
+
+	template< size_t sze_ >
+	using typed_size_t =  typename typed_size<sze_>::type ;
+
+	template< size_t sze_ >
+	constexpr inline size_t typed_size_v = typed_size<sze_>::value;
+
+	auto typed_size_less = []( auto left_, auto right_ ) -> bool {
+		return left_.value < right_.value;
+	};
+
+	template< size_t s1, size_t s2 >
+	constexpr bool operator < (typed_size_t<s1> const & sbt_1 , typed_size_t<s2> const & sbt_2 )
+	{
+		return  sbt_1.value < sbt_2.value ;
+	}
+
+	using dbj_bufsiz_  = typed_size<BUFSIZ> ;
+	using size_255 = typed_size<0xFF> ;
+
+	static_assert( std::is_same_v< dbj_bufsiz_ ::value_type, size_255::value_type >  );
+
+	using common_value_type =  std::common_type_t<  dbj_bufsiz_ ::value_type, size_255::value_type > ;
+
+	DBJ_TEST_UNIT(size_as_type)
+	{
+		// constexpr auto DBJ_MAYBE( size255 ) =  DBJ_TEST_ATOM( size_255::value );
+		constexpr auto size255  =  size_255::value ;
+		 auto DBJ_MAYBE( dbj_bufsiz_size   ) = DBJ_TEST_ATOM( dbj_bufsiz_ ::value );
+		 auto DBJ_MAYBE( comparator ) = DBJ_TEST_ATOM( std::less/*<common_value_type>*/{}(size_255::value, dbj_bufsiz_ ::value) );
+		 auto DBJ_MAYBE(isit) = DBJ_TEST_ATOM( typed_size_less( size_255{} , dbj_bufsiz_{} ) );
+
+		constexpr auto smaller_ = size_255{} < dbj_bufsiz_{};
 
 	}
 }

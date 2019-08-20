@@ -1,18 +1,25 @@
 #pragma once
 
+namespace dbj
+{
 
+	constexpr std::size_t DBJ_MAX_BUFF_LENGTH = ::dbj::DBJ_64KB;
+
+	using between_0_and_max =
+		::dbj::core::util::insider<size_t, 0, DBJ_MAX_BUFF_LENGTH, ::dbj::core::util::insider_error_code_throw_policy>;
+
+}
+
+#if 0
 
 namespace dbj::chr_buf 
 {
-	constexpr std::size_t DBJ_MAX_BUFF_LENGTH = ::dbj::DBJ_64KB;
     /*
 	everything is based on these two types
 	*/
 	using wide_type		=  std::shared_ptr<wchar_t[]>;
 	using narrow_type	=  std::shared_ptr<char[]>;
 
-	using between_0_and_max =
-		::dbj::core::util::insider<size_t, 0, DBJ_MAX_BUFF_LENGTH, ::dbj::core::util::insider_error_code_throw_policy>;
 	/*
 	very simple core routines for assigning char pointers to smart pointers
 	*/
@@ -85,3 +92,6 @@ namespace dbj::chr_buf
 	}; // inner
 
 } // dbj::chr_buf
+
+
+#endif
