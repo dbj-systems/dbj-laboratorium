@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // REMINDER: be sure you do not have a space after a macro name and before the '(' !!
 
@@ -354,7 +354,7 @@ namespace dbj {
 	template < typename T, size_t N > 
 	inline constexpr size_t countof(T const (&)[N]) { return N; };
 
-	  inline char* dbj_basename(
+	  extern "C" inline char* dbj_basename(
 		  char* full_path,
 		  bool remove_suffix = true,
 		  char delimiter = '\\')
@@ -399,6 +399,9 @@ namespace dbj {
 		  inline constexpr bool is_any_same_as_first_v
 		  = ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
 #pragma endregion
+
+	  //  https://en.wikipedia.org/wiki/Proof_that_22/7_exceeds_π
+	  constexpr inline auto DBJ_PI = 355 / 113;
 
 } // dbj
 
