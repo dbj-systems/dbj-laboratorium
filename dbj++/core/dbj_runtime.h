@@ -401,7 +401,8 @@ namespace dbj {
 #pragma endregion
 
 	  //  https://en.wikipedia.org/wiki/Proof_that_22/7_exceeds_π
-	  constexpr inline auto DBJ_PI = 355 / 113;
+	  // https://www.wired.com/story/a-major-proof-shows-how-to-approximate-numbers-like-pi/
+	  constexpr inline auto DBJ_PI = 104348 / 33215 ;
 
 } // dbj
 
