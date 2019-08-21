@@ -6,6 +6,61 @@
 DBJ_TEST_SPACE_OPEN(dbj_buffer)
 
 
+DBJ_TEST_UNIT(some_vector_buffer_testing) {
+
+	auto driver = [](auto C_, auto specimen)
+	{
+		using T = ::std::decay_t< decltype(C_) >;
+		using helper = dbj::vector_buffer<T>;
+
+		DBJ_TUNIT(helper::make(BUFSIZ));
+		DBJ_TUNIT(helper::make(specimen));
+		DBJ_TUNIT(helper::make(std::basic_string<T>(specimen)));
+		DBJ_TUNIT(helper::make(std::basic_string_view<T>(specimen)));
+	};
+	driver('*', "narrow string");
+	driver(L'*', L"wide string");
+}
+
+
+DBJ_TEST_UNIT(unique_ptr_buffer_type)
+{
+	// not as fast as naked unique ptr
+	// but comfortable api
+	using buffer = dbj::unique_ptr_buffer_type<char>;
+
+	auto mover = [](buffer b_) -> buffer { return b_; };
+
+	DBJ_TEST_ATOM( buffer(0xFF).size() );
+	DBJ_TEST_ATOM( mover( buffer("ABC")) );
+	DBJ_TEST_ATOM( mover( buffer("ABC")).size() );
+	DBJ_TEST_ATOM( mover( buffer("ABC"))[0] );
+	DBJ_TEST_ATOM( mover( buffer("ABC")).buffer() );
+
+	auto buffy = buffer("DEF");
+	buffy[0] = 'D';
+	buffy[1] = 'E';
+	buffy[2] = 'F';
+	DBJ_TEST_ATOM( buffy );
+
+		// checked !
+		//	buffy[5] = '!'; 
+}
+
+DBJ_TEST_UNIT(compile_time_buffers)
+{
+	using namespace ::dbj::compile_time_buffers;
+
+	DBJ_TEST_ATOM(narrow());
+	DBJ_TEST_ATOM(narrow< 0xFF >());
+	DBJ_TEST_ATOM(wide());
+	DBJ_TEST_ATOM(wide< 0xFF >());
+
+	/*
+	Will not compile thanks to dbj::ct_0_to_max 
+	DBJ_TEST_ATOM(wide<  ::dbj::DBJ_MAX_BUFF_LENGTH + 0xFF >());
+	*/
+}
 
 DBJ_TEST_UNIT(buffers_and_literals)
 {
@@ -39,25 +94,6 @@ DBJ_TEST_UNIT(buffers_and_literals)
 	DBJ_TEST_ATOM(up_buffer_make("Buffy"));
 
 }
-
-
-
-DBJ_TEST_UNIT(some_vector_buffer_helper_testing) {
-
-	auto driver = [](auto C_, auto specimen)
-	{
-		using T = ::std::decay_t< decltype(C_) >;
-		using helper = dbj::vector_buffer<T>;
-
-		DBJ_TUNIT(helper::make(BUFSIZ));
-		DBJ_TUNIT(helper::make(specimen));
-		DBJ_TUNIT(helper::make(std::basic_string<T>(specimen)));
-		DBJ_TUNIT(helper::make(std::basic_string_view<T>(specimen)));
-	};
-	driver('*', "narrow string");
-	driver(L'*', L"wide string");
-}
-
 
 DBJ_TEST_UNIT(dbj_light_buffer)
 {
@@ -114,11 +150,6 @@ namespace inner {
 		return std::string (static_cast<size_t>(count_), static_cast<char>(0));
 	}
 
-	inline auto string_view_buffer(size_t count_) 
-	{
-		return dbj::runtime_shared_string_view_buffer<char>( count_ );
-	}
-
 	/*
 	measure the performance of making/destroying three kinds of buffers
 	dbj buf, dbj buffer and vector<char>
@@ -126,7 +157,7 @@ namespace inner {
 	*/
 	auto measure = [](
 		auto fp,
-		::dbj::between_0_and_max buffer_sz,
+		::dbj::rt_0_to_max buffer_sz,
 		size_t max_iteration = max_iterations)
 	{
 		auto start_ = std::chrono::system_clock::now();
@@ -137,10 +168,8 @@ namespace inner {
 			auto dumsy = fp(buffer_sz);
 			// call the '[]' operator 
 			// and change the char value
-			// for each char
-			// using this nasty hack
-			for ( unsigned j = 0; j < buffer_sz; j++ )
-					 const_cast<char &>( dumsy[j]) = '?';
+			for ( unsigned j = 0; j < buffer_sz ; j++ )
+					 dumsy[j] = '?';
 		}
 		auto end_ = std::chrono::system_clock::now();
 		const auto micro_seconds = (end_ - start_).count() / 1000.0;
@@ -151,13 +180,14 @@ namespace inner {
 DBJ_TEST_UNIT(dbj_buffers_comparison) {
 
 	using namespace inner;
-	auto & print = ::dbj::console::print;
+	const auto & print = ::dbj::console::print;
 
-	print("\n\nWill test and measure six types of runtime buffers\n\n");
+	print("\n\n*****************************************************************************"
+		"\n\nWill test and measure FIVE types of runtime buffers\n\n");
 
 	/*
 	on this machine I have found, 
-	std::string is considerably slower
+	std::string is considerably slower than anything else
 	*/
 
 	auto driver = [&](auto  buf_size_) 
@@ -165,9 +195,8 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 		print("\n\nBuffer size:\t\t",		buf_size_,	"\nIterations:\t\t",max_iterations,"\n\n");
 		print(measure(naked_unique_ptr,		buf_size_), " miki s. \t unique_ptr<char[]>\n");
 		print(measure(naked_shared_ptr,		buf_size_), " miki s. \t shared_ptr<char[]>\n");
-		print(measure(uniq_ptr_buffer,		buf_size_), " miki s. \t	unique_ptr_buffer<char>\n");
+		print(measure(uniq_ptr_buffer,		buf_size_), " miki s. \t dbj unique_ptr_buffer<char>\n");
 		print(measure(dbj_vector_buffer,	buf_size_), " miki s. \t std::vector\n");
-		print(measure(string_view_buffer,	buf_size_), " miki s. \t std::string_view\n");
 		print(measure(string_buffer,		buf_size_), " miki s. \t std::string\n");
 	};
 
@@ -183,7 +212,7 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 
 DBJ_TEST_SPACE_CLOSE
 
-#undef _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
+// #undef _SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
 
 #endif // DBJ_LIGHT_BUFFER_TESTING
 

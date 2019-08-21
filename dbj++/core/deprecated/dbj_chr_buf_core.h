@@ -21,7 +21,7 @@ namespace dbj::chr_buf
 		always use this method of making share_ptr of char's of certain size
 		*/
 		template<typename CHAR>
-		static std::shared_ptr<CHAR> __CRTDECL make(rt_0_to_max sze_ ) 
+		static std::shared_ptr<CHAR> __CRTDECL make(between_0_and_max sze_ ) 
 		{
 			static_assert(std::is_same_v<char, CHAR> || std::is_same_v<wchar_t, CHAR>, "\n\n" __FILE__  "\n"  __FUNCSIG__ "\n\tcore requires char or wchar_t only\n\n");
 

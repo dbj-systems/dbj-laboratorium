@@ -3,24 +3,6 @@
 #ifndef DBJ_CORE_INCLUDED
 #define DBJ_CORE_INCLUDED
 
-#ifdef DBJ_INCLUDE_STD_
-#include <system_error>
-#include <cassert>
-#include <memory>
-#include <vector>
-#include <string_view>
-#include <type_traits>
-#include <cstdint>
-#include <cstddef>
-#include <cstring>
-#include <crtdbg.h>
-#include <memory>
-#include <cassert>
-#include <charconv>
-#include <system_error>
-#include <array>
-#endif
-
 #include "../dbj_gpl_license.h"
 
 /*
@@ -35,7 +17,6 @@ usage concept: use dbj++core always and only by including this header only
 #include "dbj_runtime.h"
 #include "dbj_insider.h"
 #include "dbj_buffers.h"
-#include "dbj_chr_buf_core.h"
 #include "dbj_constexpr.h"
 #include "dbj_utils_core.h"
 #include "dbj_format.h"

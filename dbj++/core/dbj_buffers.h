@@ -3,7 +3,7 @@
 /*
 Basically do not use std::string as buffer of char_types. It is crazy slow.
 std::string is not a char_type buffer
-std::string was invented an astonishing number of years back. 
+std::string was invented an astonishing number of years back.
 Officialy approx in 1998. Although it appeared in "STL" in appox 1983.
 
 ditto ...
@@ -16,16 +16,31 @@ namespace dbj {
 /*
 DBJ BUFFERING
 
+we do cater only for char and wchar_t, character types
+
  generaly 'ct_' is a prefix of "compile  time" type name
  generaly 'rt_' is a prefix of "run-time time" type name
+
+ string view
+
+	once made string view is fast,  almost as vector<char>
+	it is also having most of std::string methods for comfort
+
+	to make runtime buffer, quickly and efficiently and at compile time
+	string view literal works the best *IF* there is a string literal available
+
+	constexpr auto ct_string_literal = "String"sv ;
+
+	But. This is a constant view. This is not a buffer one can write into or change its chars.
+
 */
 
 namespace dbj {
-// it is not very usefull to have buffers of 
-// unlimited size in programs
-// thus we will define the upper limit
-// it is
-// in posix terms BUFSIZ * 2 * 64 aka 64KB
+	// it is not very usefull to have buffers of 
+	// unlimited size in programs
+	// thus we will define the upper limit
+	// it is
+	// in posix terms BUFSIZ * 2 * 64 aka 64KB
 	constexpr inline std::size_t DBJ_64KB = UINT16_MAX;
 	constexpr inline std::size_t DBJ_MAX_BUFF_LENGTH = ::dbj::DBJ_64KB;
 
@@ -34,11 +49,11 @@ namespace dbj {
 	// but that is invetned for setvbuf function, actually
 	constexpr inline std::size_t BUFFER_OPTIMAL_SIZE{ 2 * UINT8_MAX };
 
-	using rt_0_and_max =
+	using rt_0_to_max =
 		::dbj::core::util::insider<size_t, 0, DBJ_MAX_BUFF_LENGTH, ::dbj::core::util::insider_error_code_throw_policy>;
 
 	template<unsigned K>
-	using ct_0_and_max = ::dbj::inside_inclusive_t< unsigned, K, 0, DBJ_MAX_BUFF_LENGTH >;
+	using ct_0_to_max = ::dbj::inside_inclusive_t< unsigned, K, 0, DBJ_MAX_BUFF_LENGTH >;
 
 	/*
 	usage of the above:
@@ -47,31 +62,42 @@ namespace dbj {
 	inline inclusive_0_and_max<DBJ_MAX_BUFF_LENGTH + 42 > index_test_;
 
 	runtime -- this will throw the exception as soon as program "passes" through here
-	inline between_0_and_max b0max = DBJ_MAX_BUFF_LENGTH + 2;
-	*/
+	inline rt_0_to_max b0max = DBJ_MAX_BUFF_LENGTH + 2;
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-
-For compile timer char buffer-ing
-my preffered buffer type is std::array<>
-2019-02-11 dbj.org
+	For compile timer char buffer-ing
+	my preffered buffer type is std::array<char_type,N>
+	2019-02-11 dbj.org
 */
 	namespace compile_time_buffers {
 
-		using optimal_compile_time_buffer_type = ::std::array<char, BUFFER_OPTIMAL_SIZE >;
-		using optimal_compile_time_wbuffer_type = ::std::array<wchar_t, BUFFER_OPTIMAL_SIZE >;
+		using optimal_buffer_type = ::std::array<char, BUFFER_OPTIMAL_SIZE >;
+		using optimal_wbuffer_type = ::std::array<wchar_t, BUFFER_OPTIMAL_SIZE >;
 
-		inline constexpr auto optimal_buffer(void) noexcept
+		template<size_t SZ_>
+		inline constexpr auto narrow(void) noexcept
 		{
-			return optimal_compile_time_buffer_type{ {char(0)} };
+			/*
+			will not compile if SZ_ is out of boundaries
+			*/
+			return ::std::array<char, ct_0_to_max<SZ_>::value >{ {char(0)} };
 		}
 
-		inline constexpr auto optimal_wbuffer(void) noexcept
+		inline constexpr auto narrow(void) noexcept
 		{
-			return optimal_compile_time_wbuffer_type{ {wchar_t(0)} };
+			return optimal_buffer_type{ {char(0)} };
 		}
-	}
+
+		template<size_t SZ_>
+		inline constexpr auto wide(void) noexcept
+		{
+			return ::std::array<wchar_t, ct_0_to_max<SZ_>::value >{ {wchar_t(0)} };
+		}
+
+		inline constexpr auto wide(void) noexcept
+		{
+			return optimal_wbuffer_type{ {wchar_t(0)} };
+		}
+	} // compile_time_buffers
 
 #pragma region vector char_type buffer
 	/*
@@ -124,68 +150,7 @@ my preffered buffer type is std::array<>
 		}
 	}; // vector_buffer
 
-#pragma endregion vector char_type buffer
-
-#pragma region string view  char_type buffer
-	/*
-	once made string view is fast,  almost as vector<char>
-	it is also having std methods for comfort
-
-	CAUTION! THIS IS OF LIMITED VALUE
-
-	Following method deliver string view on one single shared char buffer of particular size
-
-	NOTE! at runtime you can *not* change the data inside the string view instance,
-	unless you are naughty:
-
-		  const_cast<char&>(sview_[0]) = '!' ;
-	*/
-	template<typename CHAR>
-	inline auto runtime_shared_string_view_buffer(size_t count_)
-	{
-		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
-			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
-		// string view has no facility to create char buffer of certain size
-		// this is how we allocate smart buffer for it at runtime
-		static auto shared_up = [&]() {
-			auto up_ = std::make_unique<CHAR[]>(count_ + 1);
-			up_[count_] = CHAR(0);
-			return up_;
-		}();
-
-		return std::string_view(shared_up.get(), count_);
-	}
-
-	/*
-	 here we create an "empty" string veiw of certain size at compile time
-
-	 CAUTION! go easy on this, as this is naturally an stack memory affair
-	 for an populated compile time string view please use the literal available
-	 constexpr auto svw = "Literal"sv ;
-
-	 CAUTION! Same as method above this delivers string view onto a series of
-	 shared char buffer made on stack
-
-	*/
-	template<typename CHAR, size_t N>
-	inline constexpr auto compile_time_shared_string_view_buffer()
-	{
-		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
-			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
-		// string view has no facility to create char buffer of certain size
-		// this is how we allocate buffer for it at runtime
-		static auto std_array_ = [&]() {
-			// terminate, just to be sure
-			std::array<CHAR, N + 1> arr_;
-			arr_[N] = CHAR(0);
-			return arr_;
-		} ();
-
-		return std::string_view(std_array_.data());
-	}
-
-#pragma region string view  char_type buffer
-
+#pragma endregion
 
 #pragma region naked unique_ptr as buffer
 
@@ -254,7 +219,7 @@ my preffered buffer type is std::array<>
 
 	} // unique_ptr_buffers namespace 
 
-#pragma endregion unique_ptr copy
+#pragma endregion
 
 #pragma region unique_ptr_buffer_type
 
@@ -346,7 +311,17 @@ my preffered buffer type is std::array<>
 
 		// interface
 
-		char_type& operator [] (size_t idx_) { return pair_.second[idx_]; }
+		char_type& operator [] ( unsigned idx_ ) { 
+//			DBJ_VERIFY( size() >= idx_ );
+			return pair_.second[idx_]; 
+		}
+
+//		// for constant instances we do not allow changing them chars
+//		char_type const & operator [] ( unsigned const & idx_) const { 
+////			DBJ_VERIFY( size() >= idx_);
+//			return pair_.second[idx_];
+//		}
+
 		const size_t size() const noexcept { return pair_.first; };
 		value_type const& buffer() const noexcept { return pair_.second; };
 
