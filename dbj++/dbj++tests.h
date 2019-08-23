@@ -2,7 +2,7 @@
 
 /*
 there ary many ways better than this one
-to include/exclude tests at compile time 
+to include/exclude tests at compile time
 or even run time...but ... this works
 */
 
@@ -11,19 +11,19 @@ or even run time...but ... this works
 // for using this include it after dbj++.h
 
 #define dbj_buffer_testing
-// #define dbj_ap_env_test   
-// #define dbj_commander_test   
-// #define dbj_console_test   
-// #define dbj_crt_testing 
+#define dbj_ap_env_test   
+#define dbj_commander_test   
+//#define dbj_console_test   
+#define dbj_crt_testing 
 #define dbj_core_tests
-// #define dbj_defval_testing   
-// #define dbj_kv_store_test   
-// #define dbj_array_testing   
-// #define dbj_traits_testing   
-// #define dbj_win32_tests   
-// #define dbj_kalends_test   
+#define dbj_defval_testing   
+#define dbj_kv_store_test   
+#define dbj_array_testing   
+#define dbj_traits_testing   
+#define dbj_win32_tests   
+#define dbj_kalends_test   
 #define dbj_string_util_test   
-// #define dbj_string_tests   
+#define dbj_string_tests   
 #define dbj_static_matrix_test 
 #define dbj_any_optional_tests
 

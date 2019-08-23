@@ -137,7 +137,7 @@ DBJ_TEST_UNIT(optimal_buffer)
 {
 	// std::array<char, 10> str;
 
-	DBJ_ATOM_TEST(dbj::str::buffer_optimal_size);
+	DBJ_ATOM_TEST(::dbj::BUFFER_OPTIMAL_SIZE);
 
 	// returns :std::array<char, dbj::str::buffer_optimal_size >
 	auto buf = ::dbj::compile_time_buffers::optimal_buffer_type();

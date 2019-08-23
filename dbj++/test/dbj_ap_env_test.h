@@ -8,10 +8,10 @@ DBJ_TEST_UNIT(_application_environment) {
 	using dbj::console::print;
 
 	auto application_rt_environment
-		= DBJ_TEST_ATOM(dbj::application_environment_data);
+		= DBJ_TEST_ATOM(dbj::application_environment_data());
 
 	DBJ_TEST_ATOM(application_rt_environment.cli_data);
-	print("\nEnv vars found");
+	print(L"\nEnv vars found");
 	int counter = 0;
 	for (auto [ key,val] : application_rt_environment.env_vars)
 	{

@@ -41,38 +41,4 @@ inline void test_dbj_defval_option_three() {
 	auto sness = smoothnes();
 }
 
-/****************************************************************/
-/*OPTION 2.1*/
-/****************************************************************/
-
-using dbj::v_two::holder_maker;
-
-// inside named namespace
-// create default values holders
-// creation happens on first call
-inline auto default_smoot =
-dbj::v_two::holder_maker(SmoothingMode::SmoothingModeAntiAlias);
-
-inline auto default_lncap =
-dbj::v_two::holder_maker(LineCap::LineCapRound);
-
-inline auto default_width =
-dbj::v_two::holder_maker(10);
-
-inline void test_dbj_defval_option_two() {
-	// just get the dflt width
-	auto df0 = default_smoot();
-	auto df1 = default_lncap();
-
-	// somewhere and sometimes latter someone 
-	// might change the default value
-	auto df2 = default_width(42);
-}
-
-DBJ_TEST_UNIT(dbjdefvaloptiontwo)
-{
-	test_dbj_defval_option_two(); 
-	test_dbj_defval_option_three();
-}
-
 DBJ_TEST_SPACE_CLOSE

@@ -15,29 +15,30 @@ for details please see https://docs.microsoft.com/en-us/cpp/cpp/char-wchar-t-cha
 template< typename T, size_t N>
 inline void strlen_strnlen_test
 (
-	const T(&prompt)[N]
+	 const T (&prompt)[N]
 )
 {
 	using ::dbj::console::print;
 	print("\n\nTesting array of type ", typeid(T).name(), " and of length ", N, "\t");
 	DBJ_ATOM_TEST(dbj::countof(prompt));
 	// native char arrays are using dbj.org "zero time" versions     
-	DBJ_ATOM_TEST(dbj::str::strlen(prompt));
+	DBJ_ATOM_TEST(dbj::str::strlen( prompt ));
 	DBJ_ATOM_TEST(dbj::str::strnlen(prompt, dbj::BUFSIZ_));
 
 	// testing for the T * support 
-	auto pointer_tester = [&](auto cptr)
+	auto pointer_tester = [&](T const * cptr)
 	{
 		using ::dbj::console::print;
 		// cptr become a pointer due to the standard decay
 		using pointer_to_array = decltype(cptr);
 
 		print("\n\nTesting the support for the ", typeid(pointer_to_array).name(), " pointer to the same array\n");
+		
 		// using UCRT strlen
-		DBJ_ATOM_TEST(dbj::str::strlen(cptr));
+		DBJ_ATOM_TEST(::dbj::str::strlen( cptr ));
 
 		// using UCRT strnlen note: std has no strnlen ...
-		DBJ_ATOM_TEST(dbj::str::strnlen(cptr, dbj::BUFSIZ_));
+		DBJ_ATOM_TEST(::dbj::str::strnlen(cptr, dbj::BUFSIZ_));
 	};
 
 	pointer_tester(prompt);
@@ -56,11 +57,6 @@ DBJ_TEST_UNIT(dbj_strnlen)
 	strlen_strnlen_test(promptW);
 	strlen_strnlen_test(prompt16);
 	strlen_strnlen_test(prompt32);
-
-	static_assert(dbj::str::strnlen(promptA, dbj::BUFSIZ_) == 10);
-	static_assert(dbj::str::strnlen(promptW, dbj::BUFSIZ_) == 10);
-	static_assert(dbj::str::strnlen(prompt16, dbj::BUFSIZ_) == 10);
-	static_assert(dbj::str::strnlen(prompt32, dbj::BUFSIZ_) == 10);
 
 }
 
@@ -113,9 +109,8 @@ DBJ_TEST_UNIT(dbjstringutils) {
 	//auto rez_4 = DBJ_ATOM_TEST(dbj::str::lowerize(L"PREFIX MIX FIX" ));
 	
 
-	wchar_t wide_charr_arr[]{ L"PREFIX MIX FIX" };
 	//auto rez_4 = 
-	   DBJ_ATOM_TEST(dbj::str::lowerize(wide_charr_arr));
+	   DBJ_ATOM_TEST(dbj::str::lowerize(L"PREFIX MIX FIX"sv));
 
 }
 

@@ -19,15 +19,30 @@ namespace dbj::console {
 
 	 namespace inner {
 
+		 template<typename T, typename U, typename = std::void_t<>>
+		 struct comparable_with_less
+			 : std::false_type
+		 {};
+
+		 template<typename T, typename U>
+		 struct comparable_with_less<T, U, std::void_t<decltype((std::declval<T>() < std::declval<U>()))>>
+			 : std::true_type
+		 {};
+
 		 /*
 		 print anything between two iterators
 		 note: of the same sequence
 		 */
 		 inline auto print_between = [](auto left_, auto right_) -> void
 		 {
+			 using namespace std;
+
+			 static_assert(comparable_with_less<  decltype(left_), decltype(right_)  >::value,
+				 "\n\n" __FILE__ "\n function: " __FUNCSIG__ "\n\n left_ < right_ operator cound not be found?\n\n");
+
 			 std::size_t argsize =
 				 static_cast<std::size_t>( std::distance( left_, right_  ) );
-
+			 
 			 _ASSERTE(argsize);
 			 _ASSERTE(argsize < MAX_ELEMENTS );
 
@@ -42,7 +57,7 @@ namespace dbj::console {
 
 			  do {
 				 delimited_out( *left_++ );
-			 } while (left_ < right_);
+			 }  while ( left_ < right_ );
 
 			 PRN.wchar_to_console(wspace_str); PRN.wchar_to_console(wsuffix_str);
 		 };

@@ -77,9 +77,6 @@ DBJ_TEST_UNIT(containertraitstests)
 		DBJ_TEST_ATOM(::dbj::is_range_v<ia3>);
 		DBJ_TEST_ATOM(::dbj::is_range_v<vector<int>>);
 
-		using rc10 = dbj::util::rac<int, 10>;
-
-		DBJ_TEST_ATOM(::dbj::is_range_v<rc10>);
 	}
 
 	DBJ_TEST_UNIT(_dbj_container_traits_tests)
@@ -98,14 +95,6 @@ DBJ_TEST_UNIT(containertraitstests)
 	DBJ_TEST_ATOM(dbj::is_range_v<ia3>);
 	DBJ_TEST_ATOM(dbj::is_range_v<vi>);
 
-	// bellow wont work because comma operator screws macros in a royal way
-	// DBJ_TEST_ATOM(dbj::inner::is_range<range_container<int,3>>::value);
-	// it actually screws the whole closure it is in
-	// https://stackoverflow.com/questions/13842468/comma-in-c-c-macro
-	// ditto ...
-
-	using rci3 = dbj::util::rac<int, 3>;
-	DBJ_TEST_ATOM(dbj::is_range_v<rci3>);
 }
 
 DBJ_TEST_UNIT(_dbj_pointer_traits_tests) 

@@ -23,16 +23,7 @@ namespace dbj::str {
 #pragma region low level
 
 	extern "C" {
-		/*
-		compile time const *and* C
-		be advised C++ versions are better 
-		and "C" constepxr is very last C2x standard which is 
-		very surprising working in MSVC
-		*/
-		inline constexpr size_t string_literal_length(const char str[1])
-		{
-			return *str ? 1 + string_literal_length(str + 1) : 0;
-		}
+
 
 	/* and the test of the above
 	constexpr std::array<char, string_literal_length("Hola Lola Loyola!") >
@@ -126,7 +117,7 @@ namespace dbj::str {
 		}
 
 		// locale unaware, for ASCII char 0 - char 127
-		inline constexpr int tolower(int c)
+		inline constexpr int dbj_tolower(int c)
 		{
 			if (!::dbj::str::isalpha(c)) return c;
 			return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
@@ -148,198 +139,60 @@ namespace dbj::str {
 	}
 #pragma endregion 
 
-	/*
-	(c) 2017, 2018 by dbj.org
-	"zero" time modern C++ versions of str(n)len
-	this should speed up any modern C++ code ... perhaps quite noticeably
 
-	standard pointer versions of strlen and strnlen are not used by these two
-	which are for arrays only
-	note: str(n)len is charr array length  -1 because it does not count the null byte at the end
-	note: strnlen is a GNU extension and also specified in POSIX (IEEE Std 1003.1-2008).
-	If strnlen is not available for char arrays
-	use the dbj::strnlen replacement.
-
-	Inspired by: https://opensource.apple.com/source/bash/bash-80/bash/lib/sh/strnlen.c
-	inline size_t strnlen(const CHAR_T *s, size_t maxlen)
-	{
-	const CHAR_T *e = {};
-	size_t n = {};
-
-	for (e = s, n = 0; *e && n < maxlen; e++, n++)
-	;
-	return n;
-	}
-
-	in here we cater for char, wchar_t, char16_t, char32_t
-	for details please see https://docs.microsoft.com/en-us/cpp/cpp/char-wchar-t-char16-t-char32-t
-
-	*/
-	template<typename T, size_t N>
-	constexpr inline size_t strnlen(
-		const T(&carr)[N],
-		const size_t & maxlen
-	)
-	{
-		static_assert(dbj::is_std_char_v< std::remove_cv_t<T>>,
-			"[dbj strnlen] requires only standard chars");
-
-		return dbj::MIN(N, maxlen) - 1;
-	}
-
-	// stop pointer to array shennanigans
-	template<typename T, size_t N>
-	inline size_t strnlen(
-		const T(*carr)[N],	const size_t & maxlen
-	) = delete;
-
-	/*
-	strlen for C++ native char array reference
-	of course this requires zero terminated strings
-	*/
-	template<typename T, size_t N>
-	constexpr inline size_t strlen(	const T(&carr)[N]	)
-	{
-		static_assert(dbj::is_std_char_v< std::remove_cv_t<T>>,
-			"[dbj strlen] requires only standard chars");
-		return N - 1;
-	}
-
-	// stop pointer to array shennanigans
-	template<typename T, size_t N>
-	inline size_t strlen(const T(*carr)[N]) = delete;
-
-
-/*
-Pointer character support
-
-2018 JUL 19  We would not repeat here what UCRT already has done
-namely char and wchar_t versions
-std lib defines strlen for char * and wchar_t *, only
-
-constexpr inline size_t strlen(const wchar_t  * cp) { return std::char_traits<wchar_t>::length(cp); }
-constexpr inline size_t strlen(const char     * cp) { return std::char_traits<char>::length(cp); }
-constexpr inline size_t strlen(const char16_t * cp) { return std::char_traits<char16_t>::length(cp); }
-constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<char32_t>::length(cp); }
-
-
-*/
-	// https://godbolt.org/z/L_uhKR
-	// this was apparently not ok for MSVC
-	// but now (2019AUG02) it is
-	template<typename C>
-	inline constexpr size_t strlen(const C * cp) 
-	{ 
-		return std::char_traits<C>::length(cp); 
-	}
-
-
-#if 0 // ifdef _MSC_VER
-
-	// it seems as of 2019AUG02 this is no longer necessary
-	// strnlen on char pointers
-	
-	template<typename C >
-	struct strnlen_provider final
-	{
-		using ptr_t = C * ;
-
-		constexpr size_t operator () ( const ptr_t cp_, size_t maxlen) const noexcept
-		{
-			auto sz_ = std::char_traits<C>::length(cp_);
-			return (sz_ > maxlen ? maxlen : sz_);
-		}
-
-		template<size_t N>
-		constexpr size_t operator () (const C(&)[N]) const noexcept
-		{
-			return N;
-		}
-	};
-
-	constexpr inline strnlen_provider<char>       char_strnlen{};
-	constexpr inline strnlen_provider<wchar_t>   wchar_strnlen{};
-	constexpr inline strnlen_provider<char16_t> char16_strnlen{};
-	constexpr inline strnlen_provider<char32_t> char32_strnlen{};
-
-	/*---------------------------------------------------------------*/
-	constexpr inline size_t strnlen(const wchar_t * cp, const size_t & maxlen) {
-		return wchar_strnlen( const_cast<strnlen_provider<wchar_t>::ptr_t>(cp), maxlen);
-	}
-
-	constexpr inline size_t strnlen(const char * cp, const size_t & maxlen) {
-		return char_strnlen(const_cast<strnlen_provider<char>::ptr_t>(cp), maxlen);
-	}
-
-	constexpr inline size_t strnlen(const char16_t * cp, const size_t & maxlen) {
-		return char16_strnlen(const_cast<strnlen_provider<char16_t>::ptr_t>(cp), maxlen);
-	}
-	constexpr inline size_t strnlen(const char32_t * cp, const size_t & maxlen) {
-		return char32_strnlen(const_cast<strnlen_provider<char32_t>::ptr_t>(cp), maxlen);
-	}
-#else
-	// this was non MSVC version only
-	// now it is not
-	template<typename T>
-	inline size_t strnlen(const T * cp, const size_t & maxlen) {
-		size_t cpl = std::char_traits<T>::length(cp);
-		return (cpl > maxlen ? maxlen : cpl);
-	}
-
-#endif
 	/////////////////////////////////////////////////////////////////////////////////
 	// constexpr string
 	// dbj: big note! this class does not own anything, 
 	// just points to
-	class str_const final
-	{
-		const char* const p_{ nullptr };
-		const std::size_t sz_{ 0 };
-	public:
+	//class str_const final
+	//{
+	//	const char* const p_{ nullptr };
+	//	const std::size_t sz_{ 0 };
+	//public:
 
-		template<std::size_t N>
-		constexpr str_const(const char(&a)[N]) : // ctor
-			p_(a), sz_(N - 1) {
-		}
+	//	template<std::size_t N>
+	//	constexpr str_const(const char(&a)[N]) : // ctor
+	//		p_(a), sz_(N - 1) {
+	//	}
 
-		template<std::size_t N>
-		constexpr str_const(const char(&a)[N], std::size_t from, std::size_t to) : // ctor
-			p_(a + from), sz_(from + to)
-		{
-			static_assert(to <= N);
-			static_assert(from < to);
-		}
+	//	template<std::size_t N>
+	//	constexpr str_const(const char(&a)[N], std::size_t from, std::size_t to) : // ctor
+	//		p_(a + from), sz_(from + to)
+	//	{
+	//		static_assert(to <= N);
+	//		static_assert(from < to);
+	//	}
 
-		// dbj added
-		constexpr const char * data() const { return this->p_; }
+	//	// dbj added
+	//	constexpr const char * data() const { return this->p_; }
 
-		constexpr char operator[](const std::size_t & n) const
-		{
-			return (n <= sz_ ? this->p_[n] : throw std::out_of_range(__func__));
-		}
+	//	constexpr char operator[](const std::size_t & n) const
+	//	{
+	//		return (n <= sz_ ? this->p_[n] : throw std::out_of_range(__func__));
+	//	}
 
-		constexpr std::size_t size() const noexcept { return this->sz_; }
+	//	constexpr std::size_t size() const noexcept { return this->sz_; }
 
-		// dbj added
-		constexpr bool friend operator == (const str_const & left, const str_const & right)
-		{
-			if (left.size() != right.size())
-				return false;
-			std::size_t index_ = 0, max_index_ = left.size();
-			while (index_ < max_index_) {
-				if (left[index_] != right[index_]) {
-					return false;
-				}
-				index_ += 1;
-			}
-			return true;
-		}
-	}; // str_const
+	//	// dbj added
+	//	constexpr bool friend operator == (const str_const & left, const str_const & right)
+	//	{
+	//		if (left.size() != right.size())
+	//			return false;
+	//		std::size_t index_ = 0, max_index_ = left.size();
+	//		while (index_ < max_index_) {
+	//			if (left[index_] != right[index_]) {
+	//				return false;
+	//			}
+	//			index_ += 1;
+	//		}
+	//		return true;
+	//	}
+	//}; // str_const
 
 	// https://en.cppreference.com/w/cpp/language/constexpr
 	// C++11 constexpr functions had to put everything in a single return statement
 	// (C++14 doesn't have that requirement)
-	constexpr std::size_t countlower(str_const s, std::size_t n = 0,
+	constexpr std::size_t countlower(std::string_view s, std::size_t n = 0,
 		std::size_t c = 0)
 	{
 		return n == s.size() ? c :
@@ -348,10 +201,6 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////
-	constexpr std::size_t buffer_optimal_size = ::dbj::BUFFER_OPTIMAL_SIZE;
-
 	/*
 	Make a string optimized for small sizes
 	that is up to arbitrary value of 255
@@ -359,7 +208,7 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 	for strings up to 255 in length
 	Discussion (for example):
 	http://www.modernescpp.com/index.php/component/jaggyblog/c-17-avoid-copying-with-std-string-view
-	*/
+     */
 	template <
 		typename CT,
 		typename string_type = std::basic_string< CT >,
@@ -371,7 +220,7 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 		std::enable_if_t< dbj::is_std_char_v<CT>, string_type  >
 		optimal
 		(
-			size_type SMALL_SIZE = buffer_optimal_size,
+			size_type SMALL_SIZE = ::dbj::BUFFER_OPTIMAL_SIZE,
 			char_type init_char_
 			= static_cast<char_type>('?')
 		)
@@ -382,8 +231,6 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 		);
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
 	
 	inline auto user_pref_locale = std::locale("");
@@ -422,8 +269,15 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 		assert(N < npos );
 #endif
 
-		auto the_end_[[maybe_unused]] 
-			= facet_of_user_preferred_locale_< char_type, char_type>.tolower( from_,  last_);
+		for (char_type* walker = from_; walker < last_; walker++)
+		{
+			*walker = static_cast<char_type>(
+				std::tolower(
+				static_cast<char_type>(*walker)
+			)
+				);
+		}
+
 		return from_ ;
 	}	
 	

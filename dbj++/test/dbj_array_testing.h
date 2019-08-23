@@ -102,7 +102,7 @@ inline auto different_ways_to_obtain_reference(T arf)
 	// watch the retval in debugger to check 
 	// the survival
 	dbj::narf::apply(arf, [](auto idx, auto element) {
-		char word[]{ (char)dbj::util::random(90, 64) };
+		char word[]{ (char)dbj::num::random(90, 64) };
 		element = word;
 	});
 	// return by value
@@ -257,11 +257,6 @@ DBJ_TEST_UNIT(would_you_believe_it_more_native_array_utils)
 	C3::ARV v_of_c{ 'A','B','C' };
 
 	C3::ARR  DBJ_MAYBE(std_arr) = C3::from_vector(v_of_c);
-
-	{  // manual way
-		constexpr size_t N = 3;
-		auto DBJ_MAYBE(std_arr_) = v_2_a<char, N>(v_of_c);
-	}
 
 	const char(&DBJ_MAYBE(ref_to_arr_of_chars))[3] =
 		*(char(*)[3])v_of_c.data();

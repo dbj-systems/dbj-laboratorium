@@ -14,6 +14,7 @@
 #include "dbj_startend.h"
 #include "dbj_string_compare.h"
 #include "dbj_string_util.h"
+#include "dbj_str_len.h"
 #include "dbj_tokenizer.h"
 #include "dbj_util.h"
 #include "dbj_file_util.h"
