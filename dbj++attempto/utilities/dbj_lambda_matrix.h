@@ -24,8 +24,8 @@ namespace dbj::samples {
 	int lambada()
 	{
 		// two INSTANCES for two storages
-		auto sstorage = lambda_instance_handle(dbj::lambda_matrix::mtx<int>(3, 3));
-		auto mmstorage = lambda_instance_handle(dbj::lambda_matrix::fast_mtx< int, 3, 3>());
+		auto sstorage = lambda_instance_handle(::dbj::lambda_matrix::mtx<int>(3, 3));
+		auto mmstorage = lambda_instance_handle(::dbj::lambda_matrix::fast_mtx< int, 3, 3>());
 
 		auto cv1 = mmstorage(0, 0) = 42;
 		auto cv2 = sstorage(0, 0) = 42;
@@ -75,7 +75,7 @@ namespace dbj::samples {
 
 		T& operator () (base::row_range R, base::col_range C) const override
 		{
-			static auto storage = dbj::lambda_matrix::fast_mtx< T, H, W>();
+			static auto storage = ::dbj::lambda_matrix::fast_mtx< T, H, W>();
 			return storage(R, C);
 		}
 	};
@@ -88,7 +88,7 @@ namespace dbj::samples {
 
 		T& operator () (base::row_range R, base::col_range C) const override
 		{
-			static auto storage = dbj::lambda_matrix::mtx< T >(H, W);
+			static auto storage = ::dbj::lambda_matrix::mtx< T >(H, W);
 			return storage(R, C);
 		}
 	};
@@ -151,4 +151,4 @@ namespace dbj::samples {
 #pragma endregion  LAMBDA MATRIX
 
 
-} // namespace dbj::samples 
+} // namespace ::dbj::samples 

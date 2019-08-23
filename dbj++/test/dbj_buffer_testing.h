@@ -155,11 +155,21 @@ namespace inner {
 	dbj buf, dbj buffer and vector<char>
 	size of the buffers is user defined
 	*/
-	auto measure = [](
+	inline auto measure = [](
 		auto fp,
 		::dbj::rt_0_to_max buffer_sz,
 		size_t max_iteration = max_iterations)
 	{
+		// good enough for the purpose
+		auto random = [](int max_val, int min_val = 1)
+			-> int {
+			static auto initor = []() {
+				std::srand((unsigned)std::time(nullptr));
+				return 0;
+			}();
+			return ::abs(int(min_val + std::rand() / ((RAND_MAX + 1u) / max_val)));
+		};
+
 		auto start_ = std::chrono::system_clock::now();
 		for (long i = 0; i < max_iteration; i++)
 		{
@@ -169,7 +179,8 @@ namespace inner {
 			// call the '[]' operator 
 			// and change the char value
 			for ( unsigned j = 0; j < buffer_sz ; j++ )
-					 dumsy[j] = '?';
+				    // prevent the compiler to optimize away the loop
+					 dumsy[j] =  char( random( 64 + 25, 64) );
 		}
 		auto end_ = std::chrono::system_clock::now();
 		const auto micro_seconds = (end_ - start_).count() / 1000.0;

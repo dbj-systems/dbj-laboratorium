@@ -19,6 +19,8 @@
 
 namespace dbj_r_and_d {
 
+	using ::dbj::console::print;
+
 	/*
 	tuple append
 	*/
@@ -45,7 +47,6 @@ namespace dbj_r_and_d {
 	{
 		using namespace std::string_view_literals;
 
-		using dbj::console::print;
 		int iar[]{ 0,1,2,3 };
 		auto t0 = std::make_tuple(iar);
 		std::tuple<int, float> t1{ 1, 13.0f };
@@ -108,8 +109,6 @@ namespace dbj_r_and_d {
 
 	DBJ_TEST_UNIT(test_dbj_function_holder)
 	{
-		using dbj::console::print;
-
 		auto void_bool = [](const char * arg) -> const char * { return arg;  };
 		/*
 		first we instantiate a template for a concrete
@@ -147,11 +146,11 @@ namespace dbj_r_and_d {
 			const char * carr_1 = "Abra Ka Dabra";
 			//char const * carr_2 = "Mamma Mia!";
 
-			DBJ_TEST_ATOM(dbj::arr::native_to_std_array("Abra Ka Dabra"));
-			DBJ_TEST_ATOM(dbj::arr::native_to_std_array("Wide String Literal"));
+			DBJ_TEST_ATOM(::dbj::arr::native_to_std_array("Abra Ka Dabra"));
+			DBJ_TEST_ATOM(::dbj::arr::native_to_std_array("Wide String Literal"));
 
-			DBJ_ATOM_TEST(dbj::arr::assign(sarr_1, carr_1, carr_1 + ::strlen(carr_1)));
-			DBJ_ATOM_TEST(dbj::arr::assign(sarr_2, "Mamma Mia!"));
+			DBJ_ATOM_TEST(::dbj::arr::assign(sarr_1, carr_1, carr_1 + ::strlen(carr_1)));
+			DBJ_ATOM_TEST(::dbj::arr::assign(sarr_2, "Mamma Mia!"));
 
 			DBJ_ATOM_TEST(sarr_1 = sarr_2);
 		}
@@ -159,7 +158,7 @@ namespace dbj_r_and_d {
 			int iar[]{ 0,1,2,3,4,5,6,7,8,9 };
 			using narf = int(&)[];
 			std::array<int, 255> sarr;
-			DBJ_ATOM_TEST(dbj::arr::assign(sarr, iar));
+			DBJ_ATOM_TEST(::dbj::arr::assign(sarr, iar));
 		}
 	}
 	/**************************************************************************************************/
@@ -417,7 +416,7 @@ namespace dbj_r_and_d {
 			static int c = 0xFF;
 			static char buf[0xFF]{};
 			std::generate(left_, right_, [&] {
-				return dbj::util::itox::itod(c++);
+				return ::dbj::util::itox::itod(c++);
 			});
 		};
 

@@ -28,7 +28,7 @@ namespace dbj::samples {
 
 	DBJ_TEST_UNIT(remove_all_pointers) 
 	{
-		using namespace dbj::tt;
+		using namespace ::dbj::tt;
 
 		static_assert(std::is_same_v<int, to_base_t<int **************> >);
 	}

@@ -9,7 +9,7 @@ namespace dbj::samples {
 	/* */
 	DBJ_TEST_UNIT(string_literals_with_universal_character_names) {
 
-		using dbj::console::print;
+		using ::dbj::console::print;
 
 		/*
 		https://docs.microsobase_type.com/en-us/cpp/cpp/string-and-character-literals-cpp

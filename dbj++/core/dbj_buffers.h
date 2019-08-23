@@ -112,11 +112,12 @@ namespace dbj {
 		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
 
-		using narrow	=  std::vector<char>;
-		using wide		=  std::vector<wchar_t>;
+		using buffer_type		=  std::vector<CHAR>;
+		using narrow			=  std::vector<char>;
+		using wide				=  std::vector<wchar_t>;
 
 		static
-			std::vector<CHAR> make(size_t count_)
+			buffer_type make(size_t count_)
 		{
 			DBJ_VERIFY(count_ > 0);
 			DBJ_VERIFY(DBJ_64KB >= count_);
@@ -127,24 +128,24 @@ namespace dbj {
 		}
 
 		static
-			std::vector<CHAR> make(std::basic_string_view<CHAR> sview_)
+			buffer_type make(std::basic_string_view<CHAR> sview_)
 		{
 			DBJ_VERIFY(sview_.size() > 0);
 			DBJ_VERIFY(DBJ_64KB >= sview_.size());
-			std::vector<CHAR> retval_(sview_.begin(), sview_.end());
+			buffer_type retval_(sview_.begin(), sview_.end());
 			// terminate!
 			retval_.push_back(CHAR(0));
 			return retval_;
 		}
 
 		static
-			std::vector<CHAR> make(std::unique_ptr<CHAR[]> const& upc_)
+			buffer_type make(std::unique_ptr<CHAR[]> const& upc_)
 		{
 			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
 		}
 
 		static
-			std::vector<CHAR> _make(std::shared_ptr<CHAR[]> const& upc_)
+			buffer_type make(std::shared_ptr<CHAR[]> const& upc_)
 		{
 			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
 		}

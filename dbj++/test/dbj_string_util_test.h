@@ -5,6 +5,7 @@
 
 DBJ_TEST_SPACE_OPEN(dbj_string_util)
 
+
 DBJ_TEST_UNIT(dbj_string_util_replace_inplace) {
 
 	using namespace std::literals;
@@ -72,16 +73,7 @@ DBJ_TEST_UNIT(dbj_string_util_lowerize) {
 
 	using namespace std::literals;
 
-	// no const allowed since  we lowerize in place
-	{
-		static char specimen[]{ "ABRA KA DABRA" };
-		static const auto specimen_size = _countof(specimen);
-		DBJ_ATOM_TEST(dbj::str::lowerize(&specimen[0], &specimen[specimen_size - 1]));
-	}
-	{
-		static char specimen[]{ "ABRA KA DABRA" };
-		DBJ_ATOM_TEST(dbj::str::lowerize(specimen));
-	}
+	DBJ_ATOM_TEST(dbj::str::lowerize ("ABRA KA DABRA"sv));
 }
 
 DBJ_TEST_UNIT(dbj_string_util_ui_string_compare) {
@@ -148,24 +140,26 @@ DBJ_TEST_UNIT(optimal_buffer)
 	DBJ_ATOM_TEST(dbj::str::buffer_optimal_size);
 
 	// returns :std::array<char, dbj::str::buffer_optimal_size >
-	auto buf = ::dbj::str::optimal_buffer();
+	auto buf = ::dbj::compile_time_buffers::optimal_buffer_type();
 
 	// returns :std::array<char, dbj::str::buffer_optimal_size >
-	auto wbuf = ::dbj::str::optimal_wbuffer();
+	auto wbuf = ::dbj::compile_time_buffers::optimal_wbuffer_type();
 
 	[[maybe_unused]]  auto[ptr, erc] = std::to_chars(buf.data(), buf.data() + buf.size(), LONG_MAX);
 
 	DBJ_TEST_ATOM(::dbj::dbj_ordinal_string_compareA(buf.data(), "42", true));
 
 	{
+		using namespace ::std::string_view_literals;
 		// string split testing
-		std::string required_state = "ABR A\f \n KA DAB\r RA\t \v";
-		std::string  test_input(
-			"        AAABBBBRRRR AAAA        \f \n KKKKAAAAA         DDDAAAABBB\r RRRRAAAA      \t         \v     "
-		);
+		constexpr auto required_state = "ABR A\f \n KA DAB\r RA\t \v"sv;
+		constexpr auto  test_input =
+			"        AAABBBBRRRR AAAA        \f \n KKKKAAAAA         DDDAAAABBB\r RRRRAAAA      \t         \v     "sv;
+		
 
 		DBJ_ATOM_TEST(::dbj::str::fast_string_split(required_state));
 		DBJ_ATOM_TEST(::dbj::str::fast_string_split(test_input));
+		// run time argument
 		DBJ_ATOM_TEST(::dbj::str::fast_string_split("Andra\nBabra\tKa Dabra\vKod\fPekara"));
 	}
 }

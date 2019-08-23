@@ -4,7 +4,12 @@
 
 namespace dbj_tree_research
 {
-using namespace std;
+using namespace ::std;
+
+inline auto narrow_to_wide_string = []( string const& node_value_) -> wstring {
+	return { node_value_.begin(), node_value_.end() };
+};
+
 
 // Definition for a binary tree node.
 template <typename T>
@@ -66,9 +71,9 @@ struct tree_node_t final
 	template argument is function pointer of a function
 	that transforms T to string
 	*/
-	template <string (*as_string_)(value_type /*const &*/)>
 	static void tree_pretty_print(
-		type *node, string prefix = "", bool isLeft = true)
+		type *node, wstring prefix = L"", bool isLeft = true
+	)
 	{
 
 		if (node == nullptr)
@@ -76,28 +81,32 @@ struct tree_node_t final
 
 		if (node->right)
 		{
-			tree_pretty_print<as_string_>(node->right, prefix + (isLeft ? "│   " : "    "), false);
+			tree_pretty_print( node->right, prefix + (isLeft ? L"│   " : L"    "), false);
 		}
 
-		dbj::fmt::print("%s", (prefix + (isLeft ? "└── " : "┌── ") + as_string_(node->val) + "\n").c_str());
+		std::wprintf( L"%s%s\n", 
+			   (prefix + (isLeft ? L"└── " : L"┌── ")).c_str() , 
+			   narrow_to_wide_string( node->val.c_str() ).c_str()
+			);
 
 		if (node->left)
 		{
-			tree_pretty_print<as_string_>(node->left, prefix + (isLeft ? "    " : "│   "), true);
+			tree_pretty_print( node->left, prefix + (isLeft ? L"    " : L"│   "), true);
 		}
 	}
 }; // tree node
 
-DBJ_TEST_UNIT ( simple_tree_test_very_elegant_printing_algo )
+DBJ_TEST_UNIT(simple_tree_test_very_elegant_printing_algo)
 {
+
 	if (0 != system(NULL)) {
 		if (-1 == system("chcp 65001"))// utf-8 codepage! 
 		{
 			switch (errno) {
-case E2BIG : perror("The argument list(which is system - dependent) is too big"); break ;
-case ENOENT	: perror("The command interpreter cannot be found."); break ;
-case ENOEXEC : perror("The command - interpreter file cannot be executed because the format is not valid."); break ;
-case ENOMEM	: perror("Not enough memory is available to execute command; or available memory has been corrupted; or a non - valid block exists, which indicates that the process that's making the call was not allocated correctly."); break ;
+			case E2BIG: perror("The argument list(which is system - dependent) is too big"); break;
+			case ENOENT: perror("The command interpreter cannot be found."); break;
+			case ENOEXEC: perror("The command - interpreter file cannot be executed because the format is not valid."); break;
+			case ENOMEM: perror("Not enough memory is available to execute command; or available memory has been corrupted; or a non - valid block exists, which indicates that the process that's making the call was not allocated correctly."); break;
 			}
 		}
 	}
@@ -105,33 +114,32 @@ case ENOMEM	: perror("Not enough memory is available to execute command; or avai
 	constexpr static auto word_length = 7U;
 	constexpr static auto words_count = 9U;
 
-	auto test_lambda = [&](kind word_kind, string prompt) {
-		auto stocp = [](string /*const & */ s_) { return s_; };
-		using bst = tree_node_t<string>;
-		bst *root = new bst("root");
+	auto test_lambda = [&](dbj_research::kind word_kind, string prompt) {
 
-		array<char, word_length> word_{{0}};
+		using bst = tree_node_t< string >;
+		bst* root = new bst("root");
+
+		array<char, word_length> word_{ {0} };
 
 		for (int k = 1; k < words_count; k++)
 		{
 			root->append(string(
-				random_word(word_, word_kind).data()));
+				dbj_research::random_word(word_, word_kind).data()));
 			word_.fill(0);
 		}
 
-		dbj::fmt::print("\n%s\n\n", prompt.c_str());
-		
-		bst::tree_pretty_print<stocp>(root);
+		::std::wprintf( L"\n%S\n\n", prompt.c_str());
+
+		bst::tree_pretty_print( root );
 	}; // test
 
 #define DRIVER(x) test_lambda(x, _CRT_STRINGIZE(x) )
 	// also does the start-up
-	DRIVER(kind::alpha);
-	DRIVER(kind::alpha_vowels);
-	DRIVER(kind::alpha_vowels_digits);
-	DRIVER(kind::digits);
-	DRIVER(kind::vowels);
+	DRIVER(dbj_research::kind::alpha);
+	DRIVER(dbj_research::kind::alpha_vowels);
+	DRIVER(dbj_research::kind::alpha_vowels_digits);
+	DRIVER(dbj_research::kind::digits);
+	DRIVER(dbj_research::kind::vowels);
 #undef DRIVER
-}
-
+	}
 } // namespace dbj_tree_research

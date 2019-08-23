@@ -385,30 +385,33 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
-	// inline auto loc = std::locale("");
+	
+	inline auto user_pref_locale = std::locale("");
+	
 	// facet of user's preferred locale
 
-	template<typename input_char_type, typename output_char_type >
-	inline const std::ctype<input_char_type >& 
+	template<typename input_char_type, typename output_char_type = std::decay_t<input_char_type> >
+	inline const /*std::ctype<output_char_type >*/ auto &
 		facet_of_user_preferred_locale_
-		= std::use_facet<std::ctype<output_char_type>>(std::locale(""));
+		= std::use_facet<std::ctype<output_char_type>>( user_pref_locale );
 
 	/*
 	-------------------------------------------------------------
+	RUN TIME
 	locale friendly lowerize in place
 	*/
 	template <
 		typename CT,
-		typename char_type = std::decay_t<CT>,
+		typename char_type = CT ,
 		typename return_type = char_type 
 	>
-		inline constexpr
-		// alow only char and wchar_t 
-		std::enable_if_t< dbj::is_char_v<char_type> || dbj::is_wchar_v<char_type>, char_type *  >
-		lowerize(
-			CT * from_, CT  const * last_
+		inline char_type *  lowerize_in_place(
+			char_type * from_, char_type  * last_
 		)
 	{
+		static_assert(::dbj::is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\t lowerize_in_place() requires char or wchar_t only\n\n");
+
 		assert((from_ != nullptr) && (last_ != nullptr) && (last_ != from_));
 #ifdef _DEBUG
 		// TODO: how do we know N is really valid?
@@ -420,42 +423,57 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 #endif
 
 		auto the_end_[[maybe_unused]] 
-			= facet_of_user_preferred_locale_<CT, return_type>.tolower( from_,  last_);
-		return from_;
-	}
-	/*-------------------------------------------------------------
-	Can not operate on the view and chage the data 
-    */
-	template <	typename CT	>
-	inline std::basic_string< CT >
-	lowerize(std::basic_string_view<CT> view_) = delete;
-
+			= facet_of_user_preferred_locale_< char_type, char_type>.tolower( from_,  last_);
+		return from_ ;
+	}	
+	
 	/*
 	-------------------------------------------------------------
-	native arrays ... e.g. string literals
-	accepting 'only' char and wchar_t
-	lowerize in place
+	COMPILE TIME?
+	locale friendly lowerize **NOT** in place
+	string literals are constants and can not be changed
 	*/
-	template <	typename CT, std::size_t N	>
-		constexpr inline
-		// only char or wchar_t
-		// return std::array
-		std::enable_if_t< dbj::is_char_v<CT> || dbj::is_wchar_v<CT>, std::array<CT, N>  >
-		lowerize(
-			CT(&charr_)[N]
-		)
+	template <
+		typename CT, size_t N,
+		typename char_type = std::decay_t<CT>,
+		typename buffer_helper = typename ::dbj::vector_buffer<char_type>
+	>
+		inline auto lowerize_char_array (
+			const char_type(& char_arr) [N]
+		) -> typename buffer_helper::buffer_type
 	{
-		return lowerize(charr_, charr_ + (N - 1));
-
-		//array<CT, N> rezult_{ {CT(0)} };
-		//copy(charr_, (charr_ + N), rezult_.data());
-
-		//transform(rezult_.begin(), rezult_.end(), rezult_.begin(),
-		//	[](char c) { return tolower(c); });
-
-		//return rezult_;
+		using namespace std;
+		// first copy to non const array
+		typename buffer_helper::buffer_type  retval_{};
+		copy(begin(char_arr), end(char_arr), retval_);
+        // now lowerize the copy in place
+		lowerize_in_place< char_type >(
+			retval_.data(),
+			retval_.data() + retval_.size() - 1
+		);
+		// done
+		return retval_;
 	}
-
+	/*-------------------------------------------------------------
+	Can not operate on the view and chage the data inside it
+    */
+	template <
+		typename CT,
+		typename char_type = std::decay_t<CT>,
+		typename buffer_helper = typename ::dbj::vector_buffer<char_type>
+	>
+		inline auto lowerize( std::basic_string_view< CT > view_ ) -> typename buffer_helper::buffer_type
+	{
+		// first copy to non const buffer
+		typename buffer_helper::buffer_type retval_{ buffer_helper::make(view_) };
+		// now lowerize the copy in place
+		lowerize_in_place< char_type>(
+			retval_.data(),
+			retval_.data() + retval_.size() - 1
+			);
+		// done
+		return retval_;
+	}
 
 	/// <summary>
 	/// ui compare means locale friendly compare
@@ -463,15 +481,15 @@ constexpr inline size_t strlen(const char32_t * cp) { return std::char_traits<ch
 	/// char16_t and char32_t
 	/// </summary>
 	template<
-		bool ignore_case,
-		typename CT,
-		typename std::enable_if_t< dbj::is_char_v<CT> || dbj::is_wchar_v<CT>, int > = 0
+		bool ignore_case, typename CT
 	>
 		inline int ui_string_compare
 		(
 			 CT const * p1,  CT  const * p2
 		)
 	{
+		static_assert(::dbj::is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\t ui_string_compare requires char or wchar_t only\n\n");
 		// the collate type 
 		using collate_type = std::collate<CT>;
 		// the "C" locale is default 
@@ -1061,13 +1079,18 @@ on them types only
 // now this is even faster
 // DBJ: made it so that delims are the standard white space chars
 
-			inline ::dbj::string_vector fast_string_split(
+			// vector< string > is an abomination
+			// ditto
+			using string_vector = std::vector<  std::vector<char> >;
+
+			inline string_vector fast_string_split(
 				const string_view & str,
 				const string_view & delims = " \t\v\n\r\f"
 			)
 			{
-				::dbj::string_vector output;
-				//output.reserve(str.size() / 2);
+				string_vector output;
+				// speculation
+				output.reserve(str.size() / 2);
 
 				for (
 					auto first = str.data(), second = str.data(), last = first + str.size();
