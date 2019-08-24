@@ -955,8 +955,11 @@ on them types only
 						first, last, std::cbegin(delims), std::cend(delims)
 					);
 
-					if (first != second)
-						output.emplace_back(first, second);
+					if (first != second) {
+						std::vector<char> word (first, second);
+						word.push_back( char(0) );
+						output.emplace_back( word );
+					}
 				}
 
 				return output;

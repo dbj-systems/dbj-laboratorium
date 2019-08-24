@@ -188,6 +188,8 @@ namespace inner {
 	};
 } // inner
 
+#ifdef DBJ_BUFFERS_PERFORMANCE_TESTING
+
 DBJ_TEST_UNIT(dbj_buffers_comparison) {
 
 	using namespace inner;
@@ -220,6 +222,8 @@ DBJ_TEST_UNIT(dbj_buffers_comparison) {
 	system("@pause");
 	system("@echo.");
 }
+
+#endif // DBJ_BUFFERS_PERFORMANCE_TESTING
 
 DBJ_TEST_SPACE_CLOSE
 
