@@ -13,7 +13,7 @@ or even run time...but ... this works
 #define dbj_buffer_testing
 #define dbj_ap_env_test   
 #define dbj_commander_test   
-//#define dbj_console_test   
+// #define dbj_console_test   
 #define dbj_crt_testing 
 #define dbj_core_tests
 #define dbj_defval_testing   

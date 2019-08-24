@@ -166,39 +166,6 @@ namespace dbj {
 			}
 		}
 
-		//-----------------------------------------------------------------------------
-		// I prefer it to std::array ;)
-		template< typename T, std::size_t N	>
-		struct nano_range final
-		{
-			constexpr static const auto MAX_CAPACITY = BUFSIZ * 2 * 64; // ~64K 
-			static_assert(N > 0);
-			static_assert(N < MAX_CAPACITY );
-			using type = nano_range;
-			using value_type = T;
-			// using data_ref = std::reference_wrapper<T[N]>;
-			using data_ref = T(&)[N];
-			constexpr T * begin() const { return value; }
-			constexpr T * end() const { return value + N; }
-			constexpr size_t size() const { return N; }
-			// note: returning ref to array, not a pointer
-			constexpr  data_ref data() const { return data_ref{ value }; }
-			// yes data is public
-			// if you need a foot gun
-			// help yourself
-			mutable T value[N]{};
-		};
-
-
-
-		/*
-		does not compile *if* 'range' has no begind and no end
-		*/
-		inline decltype(auto) dbj_range_count = [](auto && range) 
-		{
-			static_assert(::dbj::is_range_v< decltype(range) >);
-				return std::distance(std::begin(range), std::end(range));
-		};
 
 		/*
 		this is good idea: call F(), N times

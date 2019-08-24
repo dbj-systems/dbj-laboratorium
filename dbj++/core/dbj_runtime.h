@@ -104,7 +104,14 @@ standard c++
 works in any space, example here
 https://godbolt.org/z/jGC98L
 */
-#define DBJ_NOUSE(...) static_assert( (noexcept(__VA_ARGS__),true) );
+// #define DBJ_UNUSED(...) static_assert( (noexcept(__VA_ARGS__),true) );
+
+// pull out all the brakes :) 
+#ifdef _unused
+#error _unused is already defined somewhere ...
+#else
+#define _unused(...)  static_assert( noexcept( __VA_ARGS__ , true ) )
+#endif
 
 #if 0
 // https://www.boost.org/doc/libs/1_35_0/boost/preprocessor/stringize.hpp
@@ -425,6 +432,14 @@ constexpr auto compile_time_ascii_index = ascii_ordinal_compile_time<64>() ;
 	_dbj_repeat_counter is reused for each macro expansion into for(;;){} of course ...
 	*/
 #define DBJ_REPEAT(N) for(size_t _dbj_repeat_counter = 0 ; _dbj_repeat_counter < ::dbj::dbj_repeat_value(N); _dbj_repeat_counter++)
+
+	// pull out all the brakes
+#ifdef repeat
+	#error repeat is already defined somewhere ...
+#else
+	#define repeat(N) for(size_t _dbj_repeat_counter = 0 ; _dbj_repeat_counter < ::dbj::dbj_repeat_value(N); _dbj_repeat_counter++)
+#endif
+
 
 	/*
 	usage:

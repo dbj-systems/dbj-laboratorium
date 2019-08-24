@@ -57,11 +57,11 @@ namespace dbj::samples {
 		auto tail = [&](auto list_lambda) {
 			return list_lambda([=](
 				auto first, auto ...rest
-				) {  DBJ_NOUSE(first); return llist(rest...); });
+				) {  _unused(first); return llist(rest...); });
 		};
 
 		auto length = [&](auto list_lambda) {
-			return list_lambda([=](auto ...z) { DBJ_NOUSE( std::make_tuple(z...) ); return sizeof...(z); });
+			return list_lambda([=](auto ...z) { auto dumzy_ = std::make_tuple(z...) ;  return sizeof...(z); });
 		};
 
 		/* dbj added 

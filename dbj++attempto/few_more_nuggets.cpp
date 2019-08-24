@@ -177,8 +177,8 @@ L"Хрущёв", L"Брежнев", L"Андропов", L"Черненко", L"
 		int DBJ_MAYBE(a) = 13;
 		const int & b = 42;
 		auto DBJ_MAYBE(are_they) = dbj::tt::same_fundamental_types(a, b);
-		DBJ_NOUSE(dbj::tt::same_fundamental_types(a, b));
-		DBJ_NOUSE(a / b);
+		_unused(dbj::tt::same_fundamental_types(a, b));
+		_unused(a / b);
 	}
 #pragma endregion
 	} // namespace dbj::samples 

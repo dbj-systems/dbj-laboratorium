@@ -73,7 +73,7 @@ namespace dbj::num {
 
 		[[maybe_unused]] auto[p, ec]
 			= std::to_chars(str.data(), str.data() + str.size(), l_);
-		DBJ_NOUSE(p);
+		_unused(p);
 		_ASSERTE(ec != std::errc::value_too_large);
 		return str;
 	}
@@ -181,5 +181,24 @@ namespace dbj::num {
 		}
 		return factorials64[i];
 	}
+
+	using fibo_type = int64_t;
+
+		/*
+		this is the best runtime fibonacci
+		non recursive
+		compiler is free to optimize this in the best possible way
+		on i5 CPU / 8GB ram x64 WIN10 this was the fastest for N=40
+		*/
+		extern "C" constexpr fibo_type fibo (fibo_type n)
+		{
+			fibo_type c = 0, a = 1, b = 1;
+			for (fibo_type i = 3; i <= n; i++) {
+				c = a + b;
+				a = b;
+				b = c;
+			}
+			return b;
+		}
 
 } // dbj::num

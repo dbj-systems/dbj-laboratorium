@@ -14,7 +14,7 @@ class uuid final {
 public:
 	explicit uuid() noexcept {
 		RPC_STATUS ret_val = ::UuidCreate(&this->uuid_);
-		DBJ_NOUSE(ret_val);
+		_unused(ret_val);
 		_ASSERTE(ret_val == RPC_S_OK);
 	}
 	~uuid() {

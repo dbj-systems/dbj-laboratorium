@@ -605,6 +605,14 @@ namespace dbj {
 	template<typename T>
 	constexpr inline bool is_range_v = ::dbj::inner::is_range<T>::value;
 
+	inline decltype(auto) dbj_range_count = [](auto&& range) constexpr
+	{
+		/* does not compile *if* 'range' has no begind and no end */
+		static_assert(::dbj::is_range_v< decltype(range) >);
+		return std::distance(std::begin(range), std::end(range));
+	};
+
+
 	// back to normal
 	// ::std::decay<T> does not remove constness
 	template <typename T>

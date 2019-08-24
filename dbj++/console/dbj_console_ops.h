@@ -10,6 +10,69 @@
 /// </summary>
 namespace dbj::console {
 
+#pragma region forward declarations
+	template <typename T> inline void out( T );
+
+	// stings and string literals are different by design ***********************************************
+	template<> inline void out< char*>(char* str) ;
+	template<> inline void out< wchar_t*>(wchar_t* str) ;
+	template<> inline void out< char16_t*>(char16_t* str) ;
+	template<> inline void out< char32_t*>(char32_t* str) ;
+
+	template<> inline void out<const char*>(const char* str) ;
+	template<> inline void out<const wchar_t*>(const wchar_t* str) ;
+	template<> inline void out<const char16_t*>(const char16_t* str) ;
+	template<> inline void out<const char32_t*>(const char32_t* str) ;
+	// std strings
+	template<> inline void out< std::string >(std::string  str);
+	template<> inline void out< std::wstring >(std::wstring  str);
+	template<> inline void out< std::u16string >(std::u16string  str);
+	template<> inline void out< std::u32string >(std::u32string  str);
+
+	// std string views
+	template<> inline void out< std::string_view >(std::string_view  str);
+	template<> inline void out< std::wstring_view >(std::wstring_view  str);
+	template<> inline void out< std::u16string_view >(std::u16string_view  str);
+
+	// DBJ: char32_t is a problem for the latest CL as of 2019-07-22
+#ifndef _MSC_VER
+	template<> inline void out< std::u32string_view >(std::u32string_view  str);
+#endif
+
+	// fundamental types ********************************************************************************
+	template<> inline void out<nullptr_t>(nullptr_t) ;
+	// fundamental - floating point types
+	template<> inline void out<float>(float fv) ;
+	template<> inline void out<double>(double fv) ;
+	template<> inline void out<long double>(long double fv) ;
+	// fundamental - integral types
+	template<> inline void out<bool>(bool bv) ;
+	// char types are integral types too
+	template<> inline void out<char>(char val) ;
+	template<> inline void out<signed char>(signed char val) ;
+	template<> inline void out<unsigned char>(unsigned char val) ;
+	template<> inline void out<wchar_t>(wchar_t val) ;
+	template<> inline void out<char16_t>(char16_t val) ;
+	template<> inline void out<char32_t>(char32_t val) ;
+
+	/// <summary>
+	/// signed integer types (short int, int, long int, long long int);
+	/// </summary>
+	template<> inline void out<int>(int val) ;
+	template<> inline void out<short int>(short int val) ;
+	template<> inline void out<long int>(long int val) ;
+	template<> inline void out<long long int>(long long int val) ;
+
+	/// <summary>
+	/// unsigned integer types (unsigned short int, unsigned int, unsigned long int, unsigned long long int);
+	/// </summary>
+	template<> inline void out<unsigned short int>(unsigned short int val) ;
+	template<> inline void out<unsigned int>(unsigned int val) ;
+	template<> inline void out<unsigned long int>(unsigned long int val) ;
+	template<> inline void out<unsigned long long int>(unsigned long long int val) ;
+
+#pragma endregion
+
 	constexpr inline auto MAX_ARGUMENTS = BUFSIZ * 2; // 1024
 	// for compound types
 	constexpr inline auto MAX_ELEMENTS  = BUFSIZ * 2 * 64 ; // 65535
@@ -33,12 +96,19 @@ namespace dbj::console {
 		 print anything between two iterators
 		 note: of the same sequence
 		 */
-		 inline auto print_between = [](auto left_, auto right_) -> void
+		 // inline auto print_between = [](auto left_, auto right_) -> void
+		 template<
+			 typename TL_, typename TR_ 
+			 , std::enable_if_t<
+			     std::is_same_v< TL_, TR_ >
+			 , bool
+			 > = true
+		 >
+		 inline void print_between (TL_ left_, TR_ right_)
 		 {
-			 using namespace std;
 
-			 static_assert(comparable_with_less<  decltype(left_), decltype(right_)  >::value,
-				 "\n\n" __FILE__ "\n function: " __FUNCSIG__ "\n\n left_ < right_ operator cound not be found?\n\n");
+		 static_assert(comparable_with_less<  decltype(left_), decltype(right_)  >::value,
+		 "\n\n" __FILE__ "\n function: " __FUNCSIG__ "\n\n left_ < right_ operator cound not be found?");
 
 			 std::size_t argsize =
 				 static_cast<std::size_t>( std::distance( left_, right_  ) );
@@ -47,17 +117,19 @@ namespace dbj::console {
 			 _ASSERTE(argsize < MAX_ELEMENTS );
 
 			 std::size_t arg_count{ 0 };
-			 auto delimited_out = [&](auto && val_) {
-				 // try to find the required out()
-				 out(val_);
-				 if ((arg_count++) < (argsize - 1)) PRN.wchar_to_console(wdelim_str);
-			 };
+			 //auto delimited_out = [&](auto && val_) {
+				// // try to find the required out()
+				// out(val_);
+				// if ((arg_count++) < (argsize - 1)) PRN.wchar_to_console(wdelim_str);
+			 //};
 
 			 PRN.wchar_to_console(wprefix_str); PRN.wchar_to_console(wspace_str);
 
 			  do {
-				 delimited_out( *left_++ );
-			 }  while ( left_ < right_ );
+				  out(*left_); 
+				  std::advance(left_, 1);
+				 if ((arg_count++) < (argsize - 1)) PRN.wchar_to_console(wdelim_str);
+			 }  while ( std::distance( left_ , right_ ) );
 
 			 PRN.wchar_to_console(wspace_str); PRN.wchar_to_console(wsuffix_str);
 		 };
@@ -65,7 +137,8 @@ namespace dbj::console {
 		 anything that has begin and end
 		 NOTE: that includes references to native arrays
 		 */
-		 inline auto print_range = [](const auto & range) {
+		 template<typename RG_>
+		 inline void print_range ( RG_ const & range) {
 
 			 print_between(std::begin(range), std::end(range));
 #if 0
@@ -176,7 +249,7 @@ with reference or pointer type argument.
 	/// the one and only, only the lonely ...etc ...
 	/// </summary>
 	template <typename T>
-	void out([[maybe_unused]] T specimen)
+	inline void out([[maybe_unused]] T specimen)
 	{
 		using actual = dbj::tt::actual_type<T>;
 
@@ -276,6 +349,7 @@ with reference or pointer type argument.
 			}
 	}
 
+	// pointer to native array?
 	template <typename T, size_t N>
 	inline void out(T(*native_array)[N])
 	{
@@ -436,7 +510,13 @@ with reference or pointer type argument.
 	template <typename T1, typename T2>
 	inline void out (const std::pair<T1, T2>& pair_) {
 		DBJ_TYPE_REPORT_FUNCSIG;
-		std::apply(	[](auto&&... xs) { inner::print_varargs(xs...);	},	pair_);
+
+		PRN.wchar_to_console(L"{ ");
+		out(pair_.first);
+		PRN.wchar_to_console(L" , ");
+		out(pair_.second);
+		PRN.wchar_to_console(L" }");
+		// std::apply(	[](auto&&... xs) { inner::print_varargs(xs...);	},	pair_);
 	}
 
 	/* output the { ... } aka std::initializer_list<T> */
