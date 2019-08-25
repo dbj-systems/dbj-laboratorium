@@ -1,8 +1,33 @@
 #pragma once
 
-//#include <cstdint>
-//#include <cassert>
-//#include <string_view>
+/*
+
+#The Design
+
+```
+STRUCTURE IDMESSAGE_TYPE {
+   ID_TYPE			ID ;
+   MESSAGE_TYPE		MESSAGE;
+}
+
+```
+
+- { ID, MESSAGE } is the "base of everything" in its utility
+- I will pronounce it: "the most usefull data type"
+
+```
+USING STRUCTURE ERROR_TYPE = IDMESSAGE_TYPE ;
+
+USING STRUCTURE LOCATION_TYPE = IDMESSAGE_TYPE ;
+
+STRUCTUE ERROR_RETURN {
+      ERROR_TYPE ERROR ;
+	  OPTIONAL LOCATION_TYPE LOCATION ;
+}
+
+```
+
+*/
 
 namespace dbj::errc
 {
