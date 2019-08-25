@@ -147,29 +147,49 @@ static_assert( std::is_standard_layout<idmessage>::value,
    "idmessage is not POD aka 'not standard layout'" );
 ```
 
-The above must not assert. We shall leave it in a code to check future developments.
+The above must not assert. We shall leave it in a code to 
+check future developments.
 
-### error structure
+We will implent idmessage as a POD and function helpers to manage instance of it.
 
+#### Creating instances of idmessage type
 ```cpp
-struct error_type final {
-   idmessage      error; 
-   idmessage      location; 
-};
-
-// also POD
-static_assert( std::is_standard_layout<error_type>::value, 
-   " error_type not standard layout" );
+    // value semnatics of function parameter passing
+    idmessage idmessage_make
+    ( idmessage::id_type , idmessage::message_type ) ;
 ```
-#### optionality/validity mechanims
+Same as standard C++ we are coding in value semantics fashion.
 
-**Both error  and location, data members of error_type, can be non-initialized. And that is not legal.**
-
-`error` field has to always exist.
+Since we have came to the conslusion vactor<char> is the optimal solution for the `message_type` implementations, we will require small set of helpers to create from types that users might use to create idmessage type instances.
+```cpp
+    // zero terminated strings
+    idmessage idmessage_make
+    ( idmessage::id_type , const char * ) ;
+    // string views
+    idmessage idmessage_make
+    ( idmessage::id_type , string_view ) ;
+    // strings
+    idmessage idmessage_make
+    ( idmessage::id_type , string ) ;
+    // std arrays
+    template<size_t N>
+    idmessage idmessage_make
+    ( idmessage::id_type , array<char,N> ) ;
+    // unique ptr char array
+    // has no copy semantics
+    idmessage idmessage_make
+    ( idmessage::id_type , unique_ptr<char[]> const &) ;
+    // shared ptr char array
+    idmessage idmessage_make
+    ( idmessage::id_type , shared_ptr<char[]> ) ;
+```
+#### What is the valid idmessage instance?
 
 For e.g pointers `nullptr` means "it is not there". If we just deal with simple values , not pointers or references, and POD's, the question is how do we implement the "not there" concept.  
 ```cpp
 // we declare id 0 as "not an id"
+// we create and keep it as an unique 
+// compile time value
 inline constexpr idmessage::id_type not_id{ 0 } ;
 ```
 By simple act of declaration we declare id 0 as "not an id". Ande we create and keep that "not an id" value as above.
@@ -192,13 +212,34 @@ Thus we can produce an simple helper
     return idm_.id > not_id && idm_.message.size() > 0 ;
  }
 ```
-Now we use this simple mechanism for the error_type validity check.
+## error type structure
+
+```cpp
+struct error_type final {
+   idmessage      error; 
+   idmessage      location; 
+};
+
+// also POD
+static_assert( std::is_standard_layout<error_type>::value, 
+   " error_type not standard layout" );
+```
+#### optionality/validity mechanims
+
+**Both error  and location, data members of error_type, can be non-initialized. And that is not legal.**
+
+`error` field has to always exist.
+
+Now we use idmessage type to create simple mechanism for the error_type validity check.
 ```cpp
  constexpr bool is_error_valid ( error_type const & err_ ) 
  {
     return is_idmessage_valid( err_.error ) ;
  }
 ```
+### Creating instances of error_types
+
+
 
 
 
