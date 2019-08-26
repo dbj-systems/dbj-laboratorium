@@ -34,7 +34,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++required.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj+erc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj++erc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_err_type.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_retval.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_idmessage.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_err.h" />
@@ -63,6 +64,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_traits_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_util_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_win32_tests.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_errc_tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\zAllocator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj++util.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_arh.h" />

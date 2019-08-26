@@ -4,7 +4,10 @@
 // Licence Appache 2.0
 // https://github.com/DBJDBJ/dbj_error_concept
 
-
+/*
+The universal return type, cotains value AND eror
+The key is AND not OR as it is in many other designs
+*/
 
 namespace dbj::errc {
 
@@ -18,6 +21,7 @@ namespace dbj::errc {
 		using value_option = std::optional<VALUE_TYPE>;
 		using error_option = std::optional<ERROR_TYPE>;
 
+		// for structured return
 		using return_type = std::pair<
 			value_option,
 			error_option
@@ -26,7 +30,7 @@ namespace dbj::errc {
 		/*
 		make and return an 'empty' return type
 		*/
-		static return_type make() noexcept {
+		static constexpr return_type make() noexcept {
 			return { std::nullopt, std::nullopt };
 		}
 
@@ -34,25 +38,23 @@ namespace dbj::errc {
 		we do not overload 'make' in order to make
 		code simpler *and* the calling code simpler 
 
-		we use standard ISO C++ where arguments are passed by value
-
 		make no error, just value
 		*/
-		static return_type make_val(value_type const & val_) noexcept {
+		static constexpr return_type make_val(value_type const & val_) noexcept {
 			return { val_, std::nullopt };
 		}
 
 		/*
 		make no value, just error
 		*/
-		static return_type make_err(error_type const & err_) noexcept {
+		static constexpr return_type make_err(error_type const & err_) noexcept {
 			return { std::nullopt , err_ };
 		}
 
 		/*
 		make both value and error
 		*/
-		static return_type make_val_err(value_type & val_, error_type & err_) noexcept {
+		static constexpr return_type make_val_err(value_type & val_, error_type & err_) noexcept {
 			return { val_, err_ };
 		}
 

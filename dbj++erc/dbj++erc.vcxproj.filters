@@ -21,9 +21,6 @@
     <ClInclude Include="snippets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_simple_error.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="r_and_d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -31,6 +28,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dbj_c_lib_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deprecated\dbj_simple_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

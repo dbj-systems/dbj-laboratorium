@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../dbj++.h"
-#include <cstdlib>
-#include <chrono>
-#include <type_traits>
+//#include "../dbj++.h"
+//#include <cstdlib>
+//#include <chrono>
+//#include <type_traits>
+
+#define ST_2_(x) #x
+#define TT(x)   ::dbj::console::print("\n", ST_2_(x) ,"\n\t-> ", (x))
 
 namespace quick_dirty
 {
@@ -43,7 +46,7 @@ namespace quick_dirty
 // #include "dbj_kalends.h"
 DBJ_TEST_SPACE_OPEN( dbj_kalends_testing )
 
-DBJ_TEST_UNIT(dbj_timers_) {
+DBJ_TEST_UNIT(dbj_timers_2) {
 
 	using namespace dbj::kalends;
 
@@ -127,9 +130,6 @@ namespace fast {
 	template<> struct fibonacci<0> : integral_constant<fibo_type, 0> {};
 }
 
-#define ST_2_(x) #x
-#define TT(x)   ::dbj::console::print("\n", ST_2_(x) ,"\n\t-> ", (x))
-
 struct ya_timer final {
 	mutable 
 		::std::chrono::time_point<::std::chrono::system_clock> 
@@ -191,7 +191,7 @@ DBJ_TEST_UNIT(more_chrono_testing)
 	);
 }
 
-#undef ST
+#undef ST_2_
 #undef TT
 
 #pragma endregion

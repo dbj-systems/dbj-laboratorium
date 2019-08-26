@@ -7,8 +7,6 @@
 //#include "r_and_d.h"
 //#include "snippets.h"
 
-#include "dbj_simple_error.h"
-
 #ifdef DBJ_C_LIB_TEST
 #include "dbj_c_lib_test.h"
 #endif

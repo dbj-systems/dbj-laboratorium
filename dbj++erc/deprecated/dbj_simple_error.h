@@ -3,15 +3,27 @@
 #include "pch.h"
 
 namespace dbj::errc  {
+
+	struct error_type final {
+		idmessage error;
+		idmessage location;
+	};
+
+	constexpr bool is_error_valid(error_type const& err_)
+	{
+		return  idmessage::valid(err_.error);
+	}
+
+	/*
 	struct simple_error_type 
 	{
-		const idmessage_type id_and_message;
-		optional<idmessage_type> line_and_file;
+		const idmessage id_and_message;
+		optional<idmessage> line_and_file;
 
 		// make with no location
 		static simple_error_type
 			make(
-				idmessage_type::id_type id_,
+				idmessage::id_type id_,
 				const char* msg_
 			) {
 			DBJ_ASSERT(msg_);
@@ -21,20 +33,20 @@ namespace dbj::errc  {
 		// with optional location
 		static simple_error_type
 			make(
-				idmessage_type::id_type id_,
+				idmessage::id_type id_,
 				const char* msg_,
-				idmessage_type::id_type loc_id_,
+				idmessage::id_type loc_id_,
 				const char* loc_msg_
 			) {
 			DBJ_ASSERT(msg_ && loc_msg_);
-			return simple_error_type{ { id_, msg_}, idmessage_type(loc_id_, loc_msg_) };
+			return simple_error_type{ { id_, msg_}, idmessage(loc_id_, loc_msg_) };
 		}
 
 		// add location to error instance
 		static simple_error_type
 			locate(
 				simple_error_type err_,
-				idmessage_type::id_type loc_id_,
+				idmessage::id_type loc_id_,
 				const char* loc_msg_
 			) {
 			DBJ_ASSERT( loc_msg_);
@@ -68,9 +80,9 @@ namespace dbj::errc  {
 		return make_tuple(
 			err_.id_and_message.id(),
 			err_.id_and_message.message(),
-			idmessage_type::id_type{},
-			idmessage_type::message_type{}
+			idmessage::id_type{},
+			idmessage::message_type{}
 		);
 	}
-
+	*/
 } // eof dbj::errc ns

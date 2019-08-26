@@ -48,7 +48,7 @@
 
 #include "./core/dbj++core.h"
 #include "./util/dbj++util.h"
-#include "./errc/dbj+erc.h"
+#include "./errc/dbj++erc.h"
 //
 // DEPRECATED -> #include "./err/dbj_err.h"
 //#include "./err/dbj_errc.h"
