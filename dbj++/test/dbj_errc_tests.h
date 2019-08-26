@@ -21,7 +21,7 @@ namespace e_repo
 	constexpr inline auto BASE_ERR_ID = 1000;
 
 	inline const array errors{
-		e{ { BASE_ERR_ID + 0, "Unknown error"_buff }},
+		e{ { BASE_ERR_ID + 0, "Unknown error ID"_buff }},
 		e{ { BASE_ERR_ID + 1, "Well, this is weird?"_buff }},
 		e{ { BASE_ERR_ID + 2, "Has anybody seen this?"_buff }},
 		e{ { BASE_ERR_ID + 3, "Divisor 0 has no meaing"_buff }}
@@ -41,42 +41,62 @@ namespace e_repo
 } // e_repo
 
 /*
+depends on e_repo
+why don't we create error reporsitory required interface?
+with SQL DB in the back ?! Ju, hu!
+*/
+template < typename T_, typename RH_ = retval_type<int> >
+inline auto failure(
+	typename dbj::errc::error_type::id_type id_,
+	typename dbj::errc::error_type::id_type loc_id_,
+	const char* filename_)
+{
+	// first we need to create/find the error object
+	auto e_ = e_repo::query_by_id(id_);
+	// second we need to add the location to it
+	e_.location = dbj::errc::helpers::idmessage_make(loc_id_, filename_);
+	// third we create and return the retval 
+	// with error info only
+	return RH_::make_err(e_);
+}
+
+template < typename T_, typename RH_ = retval_type<int> >
+inline auto success(
+	T && return_value_
+)
+{
+	return RH_::make_val(return_value_);
+}
+
+
+/*
 now we use the above
 
 for int's we decalre reqiored return value type
 */
 using int_retval = retval_type<int>;
 
-inline int_retval::return_type
-	divider(int number, int divisor)
-	{
-	if (divisor == 0) {
-		// first we need to create/find the error object
-		auto e_ = e_repo::query_by_id(3);
-		// second we need to add the location to it
-		e_.location = dbj::errc::helpers::idmessage_make ( __LINE__, __FILE__ );
-		// third we create and return the retval 
-		// with error info only
-		return int_retval::make_err(e_);
-	}
+inline auto	divider(int number, int divisor)
+{
+	if (divisor == 0)
+		return failure<int>(3, __LINE__, __FILE__);
 
-	int result_ = number / divisor;
 	//  create and return the retval 
 	// with value only, no error info only
-	return int_retval::make_val(result_);
-	}
+	return success<int>(number / divisor);
+}
 
-DBJ_TEST_UNIT(dbj_timers_) 
+DBJ_TEST_UNIT(dbj_err_concept_)
 {
-	auto & print = ::dbj::console::print;
+	auto& print = ::dbj::console::print;
 	/* here we consume the return value */
 	auto [value_, error_] = divider(1, 0);
 
-	if (error_) 
+	if (error_)
 	{
 		auto err = *error_;
 		print("\nError returned",
-			"\nid: ",  err.error.id,
+			"\nid: ", err.error.id,
 			"\nmessage: ", err.error.message,
 			"\nlocation",
 			"\nline: ", err.location.id,
