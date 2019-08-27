@@ -11,6 +11,8 @@
 #include "dbj_c_lib_test.h"
 #endif
 
+#include "ned14system_error2/system_error2.h"
+
 /// <summary>
 /// just execute all the registered tests
 /// in no particular order

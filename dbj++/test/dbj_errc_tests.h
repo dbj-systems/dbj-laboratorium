@@ -62,10 +62,10 @@ inline auto failure(
 
 template < typename T_, typename RH_ = retval_type<int> >
 inline auto success(
-	T && return_value_
+	T_ && return_value_
 )
 {
-	return RH_::make_val(return_value_);
+	return RH_::make_val( move(return_value_) );
 }
 
 
