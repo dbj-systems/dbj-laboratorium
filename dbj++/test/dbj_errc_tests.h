@@ -65,7 +65,7 @@ inline auto success(
 	T_ && return_value_
 )
 {
-	return RH_::make_val( move(return_value_) );
+	return RH_::make_val( forward<T_>(return_value_) );
 }
 
 
