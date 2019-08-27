@@ -6,6 +6,52 @@
 
 ## Architecture
 
+### The Vision
+
+As an "C++ Arcitect" (very dubious role), I can imagine a really simple and usefull, error 
+creating, reporting and consuming concept. The real C++ code but of imagined types and mechanisms, 
+should explain quickly.
+
+```cpp
+// error consumption
+
+// standard C++ structured binding declaration
+auto [value_ , error_ ] = some_function () ;_
+
+//
+if ( error_ ) {
+    // error__ contains the information 
+    // e.g. id, message, line number and file name
+}
+
+//
+if ( value_ ) {
+    // the value returnd
+}
+
+```
+#### Key points to take away
+- Returned are both value AND error
+- Each of them can be in two states: existent and non existent
+  - this is in contrast to many current concepts based on value OR error being returned 
+  - I feel value AND error are oferring richer communication paradigm
+  - **status** is perhaps the better term here
+  - It is better to keep the term **error**, 
+  - on most ocassions it will actually be an error, not an status
+  - consumers will be hardly confused if they have to code for situation where both return value and error does egsist.
+
+- The code above can be implemented with minimal ammount of new types and mechanisms, not in the std library
+- consuming code is very easy to understand and adopt 
+
+#### Are errors persistent information?
+
+Actually they are.  People are capable of cataloguing and storing errors perceived to be happening in the software.
+
+After decades of building and running complex IT systems, it is widely understoond, not each and evey error can be or has to be, catalogued and peristently stored. 
+If need be, new error definition can be added to the peristen storage, in the form of code, on the micro level, or in the form of some external peristent storage.
+
+### The Roadmap
+
 For the core concepts please refer to ["DBJ ERRC" project](https://github.com/DBJDBJ/dbj_error_concept).
 
 Here we develeop a recomendation to the common error structure design and implementation.
