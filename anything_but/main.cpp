@@ -19,6 +19,7 @@
 #include <cstdio>
 
 
+	void test_vector_walk();
 	void test_different_types();
 	void test_try_to_trick();
 	void test_assignments();
@@ -28,6 +29,7 @@ int main()
 {
 	using namespace std;
 	try {
+		test_vector_walk();
 		test_different_types();
 		test_try_to_trick();
 		test_assignments();

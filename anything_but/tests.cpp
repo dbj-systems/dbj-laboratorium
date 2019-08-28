@@ -63,14 +63,46 @@ namespace dbj {
 	template<typename T>
 	using remove_cvr_t = typename std::remove_reference_t< std::remove_cv_t<T> >;
 } // dbj
-/*
------------------------------------------------------------------------------
-*/
-
-auto mover = [](auto arg_) noexcept
+/**/
+inline auto mover = [](auto arg_) noexcept
 {
 	return arg_;
 };
+
+// safe computing in action
+// Safe SiZE
+using safe_size = dbj::util::nothing_but< size_t >;
+// Safe u char
+using unsigned_char_type  = dbj::util::nothing_but < unsigned char >;
+// safe u char buffer
+using uc_buffer_type = std::vector<unsigned_char_type>;
+
+/* safe buffer does not allow mixing singed and unsigned char's */
+static uc_buffer_type uc_buffer(safe_size  sz_) noexcept
+{
+	// Safe u char
+	return uc_buffer_type( safe_size::value_type(sz_), unsigned_char_type::value_type(0) );
+};
+
+void test_vector_walk() {
+
+	// Safe SiZE
+	using safe_size = dbj::util::nothing_but < size_t >;
+
+	auto buffy_ = uc_buffer( safe_size::value_type(BUFSIZ) );
+
+	for (safe_size walker = safe_size(safe_size::value_type(0)) ;
+		walker < safe_size(buffy_.size()); 
+		walker++
+		) {
+		// since this is safe buffer of u chars 
+		// we need to take care so that we
+		// pass u char and notthing but u char
+		buffy_[walker] = unsigned_char_type::value_type('?') ;
+	}
+
+	SX( buffy_.data() );
+}
 
 template<typename T >
 auto test_basic(void) -> dbj::util::nothing_but<T>
@@ -94,7 +126,7 @@ auto test_basic(void) -> dbj::util::nothing_but<T>
 	assert(!(nbt_a < nbt_b));
 
 	// notice the use of TT
-	TT & peeping_tom = nbt_b.data();
+	TT& peeping_tom = nbt_b.data();
 
 	SX(nbt_b);
 	return nbt_b;
@@ -223,7 +255,7 @@ void test_assignments()
 -----------------------------------------------------------------------------
 */
 template<typename T>
-auto native_array_filler (T(&sarr_arg)[3]) ->T(&)[3]
+auto native_array_filler(T(&sarr_arg)[3])->T(&)[3]
 {
 	typedef T nb_t;
 	typedef typename nb_t::value_type VT;
@@ -236,14 +268,14 @@ auto native_array_filler (T(&sarr_arg)[3]) ->T(&)[3]
 };
 
 template<typename T>
-auto native_array_filler (T *(&sarr_arg)[3]) ->T*(&)[3]
+auto native_array_filler(T* (&sarr_arg)[3])->T* (&)[3]
 {
 	typedef T nb_t;
 	typedef typename nb_t::value_type VT;
 
-	sarr_arg[0] = & nb_t(VT('X'));
-	sarr_arg[1] = & nb_t(VT('Y'));
-	sarr_arg[2] = & nb_t(VT('Z'));
+	sarr_arg[0] = &nb_t(VT('X'));
+	sarr_arg[1] = &nb_t(VT('Y'));
+	sarr_arg[2] = &nb_t(VT('Z'));
 
 	return sarr_arg;
 };
@@ -253,8 +285,8 @@ void test_compatibility()
 	auto filler = [](auto sarr_arg)
 	{
 		using container = decltype(sarr_arg);
-		using nothing_but = typename container::value_type ;
-		using v_type = typename nothing_but::value_type ;
+		using nothing_but = typename container::value_type;
+		using v_type = typename nothing_but::value_type;
 
 		sarr_arg[0] = nothing_but(v_type('A'));
 		sarr_arg[1] = nothing_but(v_type('B'));
@@ -265,7 +297,7 @@ void test_compatibility()
 
 	auto display = [](auto arg_)
 	{
-		if constexpr ( false == std::is_pointer< decltype(arg_[0]) >::value ) {
+		if constexpr (false == std::is_pointer< decltype(arg_[0]) >::value) {
 			wprintf(L"\n\n%S\n\n{ %c %c %c }\n\n",
 				typeid(arg_).name(),
 				arg_[0].data(),
@@ -296,8 +328,8 @@ void test_compatibility()
 	display(native_array_filler(sarr));
 	display(native_array_filler(uarr));
 
-	just_signed	* sparr[3];
-	just_unsigned	* uparr[3];
+	just_signed* sparr[3];
+	just_unsigned* uparr[3];
 
 	//display(native_array_filler(sparr));
 	// display(native_array_filler(uparr));
@@ -306,7 +338,7 @@ void test_compatibility()
 	{
 		std::vector<just_signed>	std_vec(3);
 		std::array<just_signed, 3>	std_arr;
-		
+
 		display(filler(std_arr));
 		display(filler(std_vec));
 	}

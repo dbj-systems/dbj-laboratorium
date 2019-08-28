@@ -104,7 +104,7 @@ namespace dbj {
 			// template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
 			template< typename X> type & operator = (X const & new_val_) = delete;
 
-			// conversion to T&, but only if not const
+			// conversion to T& -- but only if not const
 			operator T & () { return val_; }
 
 			/* conversion to X is banned */
