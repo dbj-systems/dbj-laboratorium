@@ -5,15 +5,55 @@
 //
 // https://github.com/benhoyt/inih
 
-#include <string_view>
-#include <algorithm>
-#include <cctype>
-#include <cstdlib>
-#include <set>
+//#include <string_view>
+//#include <algorithm>
+//#include <cctype>
+//#include <cstdlib>
+//#include <set>
+
+#define DBJ_INCLUDE_STD_
+#include <dbj++/dbj++required.h>
+#include <dbj++/dbj++.h>
+
 #include "ini.h"
 #include "../dbj++ini.h"
 
-namespace dbj::ini {
+namespace dbj::ini 
+{
+
+	/*
+   ini file descriptor
+   folder -- %programdata%\\dbj\\module_base_name
+   basename -- module_base_name + ".log"
+*/
+	struct ini_file_descriptor final :
+		::dbj::util::file_descriptor
+	{
+		virtual const char* suffix() const noexcept override { return ".ini"; }
+	};
+
+	static ini_file_descriptor ini_file()
+	{
+		ini_file_descriptor ifd_;
+		::dbj::util::make_file_descriptor(ifd_);
+		return ifd_;
+	}
+
+	buffer_type legal_full_path_ini( std::string_view inifile_base_name  ) {
+		
+		ini_file_descriptor ifd = ini_file();
+
+		buffer_type buffy_ = buffer::make(BUFSIZ);
+
+		auto rez_ = std::snprintf( buffy_.data(), buffy_.size(),
+			"%s\\%s", ifd.folder.data() , inifile_base_name.data()
+		);
+
+		if (rez_ < 1) dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
+
+		return buffy_;
+	}
+
 	using std::string;
 	using std::string_view;
 
@@ -22,10 +62,10 @@ namespace dbj::ini {
 	using hash_key_type = long;
 
 	// this is NOT a good idea probably?
-	// smart_buffer is vector<char> right now
-	using map_type = typename std::map<hash_key_type, smart_buffer>;
+	// buffer_type is vector<char> right now
+	using map_type = typename std::map<hash_key_type, buffer_type>;
 
-	inline smart_buffer::value_type const * 
+	inline buffer_type::value_type const * 
 		map_value_as_pointer ( map_type & the_map_, hash_key_type  const & the_key_ )
 	{
 		return the_map_[the_key_].data();
@@ -65,7 +105,7 @@ namespace dbj::ini {
 			return _error;
 		}
 
-		smart_buffer get(string_view section, string_view name, string_view default_value) const
+		buffer_type get(string_view section, string_view name, string_view default_value) const
 		{
 			hash_key_type key = make_key(section, name);
 
@@ -74,19 +114,19 @@ namespace dbj::ini {
 					return kv_map_.at(key);
 				}
 				else {
-					return smart_buffer_helper::make(/*_strdup*/(default_value.data()));
+					return buffer::make(/*_strdup*/(default_value.data()));
 				}
 		}
 
-		smart_buffer get_string(string_view section, string_view name, string_view default_value) const
+		buffer_type get_string(string_view section, string_view name, string_view default_value) const
 		{
-			smart_buffer str = get(section, name, "");
-			return  (! str.data() ? smart_buffer_helper::make(/*_strdup*/(default_value.data())) : str);
+			buffer_type str = get(section, name, "");
+			return  (! str.data() ? buffer::make(/*_strdup*/(default_value.data())) : str);
 		}
 
 		long get_integer(string_view section, string_view name, long default_value) const
 		{
-			smart_buffer valstr = get(section, name, "");
+			buffer_type valstr = get(section, name, "");
 			const char* value = valstr.data() ;
 			char* end;
 			// This parses "1234" (decimal) and also "0x4D2" (hex)
@@ -96,7 +136,7 @@ namespace dbj::ini {
 
 		double get_real(string_view section, string_view name, double default_value) const
 		{
-			smart_buffer valstr = get(section, name, "");
+			buffer_type valstr = get(section, name, "");
 			const char* value = valstr.data()  ;
 			char* end;
 			double n = strtod(value, &end);
@@ -108,7 +148,7 @@ namespace dbj::ini {
 			auto eq = [](char const * left_, char const * right_) {
 				return 0 == std::strcmp(left_, right_);
 			};
-			smart_buffer valstr = get(section, name, "");
+			buffer_type valstr = get(section, name, "");
 			char const * val = valstr.data() ;
 			// Convert to lower case to make string comparisons case-insensitive
 			// std::transform(valstr.begin(), valstr.end(), valstr.begin(), ::tolower);
@@ -156,10 +196,10 @@ namespace dbj::ini {
 				string new_val(  map_value_as_pointer(reader->kv_map_, key)  );
 				new_val.append("\n");
 				new_val.append(value);
-				reader->kv_map_[key] = smart_buffer_helper::make  (/*_strdup*/(new_val.data()));
+				reader->kv_map_[key] = buffer::make  (/*_strdup*/(new_val.data()));
 			}
 			else {
-				reader->kv_map_[key] = smart_buffer_helper::make (/*_strdup*/(value));
+				reader->kv_map_[key] = buffer::make (/*_strdup*/(value));
 			}
 			return 1;
 		}
@@ -193,7 +233,7 @@ namespace dbj::ini {
 		return singleton_;
 	}
 
-	/*static*/ smart_buffer ini_reader::default_inifile_path()
+	/*static*/ buffer_type ini_reader::default_inifile_path()
 	{
 		auto[folder, basename, fullpath] = ini_file ();
 		return fullpath;

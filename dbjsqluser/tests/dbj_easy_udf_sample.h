@@ -1,10 +1,6 @@
 #pragma once
 #include "../pch.h"
 
-// NOTE: this is a bit unusual for syslog but
-// we are testing dbj++log, too ..
-// we use local syslog server called "Syslog Watcher" 
-
 /*
  SQL user defined functions aka UDF
  are parts of SQL statement defined by users
@@ -30,9 +26,13 @@ namespace dbj_easy_udfs_sample {
 
 	using namespace ::std;
 	using namespace ::std::string_view_literals;
+	
+	// DB_FILE_PATH setup
+	// current default:
+	// setup of constexpr inline auto DB_FILE_PATH = "d:\\dictionary.db"sv;
 
-	/* one table "words", with one text column "word" */
-	constexpr inline auto DB_FILE_PATH = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
+#include "../db_file_path.inc"
+
 
 	/* use case: solve the following query using
 	   notice the two udf's required

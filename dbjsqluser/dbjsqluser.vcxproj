@@ -163,11 +163,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dbj_nanolib.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="tests\core_tests.h" />
     <ClInclude Include="tests\dbj_easy_udf_sample.h" />
-    <ClInclude Include="tests\ini_file_and_syslog_testing.h" />
     <ClInclude Include="tests\two_tests.h" />
+    <ClInclude Include="tu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -191,6 +192,10 @@
     <ProjectReference Include="..\sqlite3_lib\sqlite3_lib.vcxproj">
       <Project>{c7425ad8-771a-4921-833c-93626eb0efce}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="db_file_path.inc" />
+    <None Include="readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

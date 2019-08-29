@@ -66,15 +66,15 @@ we use  `dbj_db_status_type`, please see the `dbj_sql_error_concept.h`
 
 In case of terminating error, we write it to the stderr and call the `exit()`. 
 
-<hr>
+---
 
 Built with Microsoft Visual Studio 2019 and C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
 
 
--------------------------------------
+---
 
-<pre>
-Copyright 2017,2018, 2019 by dbj@dbj.org, dbj.org, dbj.systems ltd.
+```
+Copyright 2017,2018, 2019 by dbj.systems uk ltd.
 
 Licensed under the GNU GPL License, Version 3.0 (the "License");
 you may not use any of files in this project except in compliance with the License.
@@ -88,7 +88,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-</pre>
+```
 ---------------------------------------------------------------------  
 
 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  

@@ -9,25 +9,8 @@
 #ifndef __INIREADER_H__
 #define __INIREADER_H__
 
-#ifdef _MSVC_LANG
-#if _MSVC_LANG < 201402L
-#error "C++17 required ..."
-#endif
-#endif
+#include "dbj_ini_nanolib.h"
 
-//#include <map>
-//#include <string>
-//#include <memory>
-//#include <string_view>
-//#include <array>
-//#include <cassert>
-//
-//#include <dbj++/core/dbj++core.h>
-//#include <dbj++/util/dbj++util.h>
-
-#define DBJ_INCLUDE_STD_
-#include <dbj++/dbj++required.h>
-#include <dbj++/dbj++.h>
 
 namespace dbj::ini 
 {
@@ -47,26 +30,17 @@ namespace dbj::ini
 	// to keep them strings
 	struct ini_reader;
 
-	using smart_buffer			= typename ::dbj::vector_buffer<char>::narrow ;
-	using smart_buffer_helper	= typename ::dbj::vector_buffer<char> ;
+	using buffer				= v_buffer ;
+	using buffer_type			= typename buffer::buffer_type;
 
 	/*
-	   ini file descriptor
+	   uses ini file descriptor, where
 	   folder -- %programdata%\\dbj\\module_base_name
-	   basename -- module_base_name + ".log"
-	*/
-	struct ini_file_descriptor final :
-		::dbj::util::file_descriptor
-	{
-		virtual const char * suffix() const noexcept override { return ".ini"; }
-	};
+	   basename -- module_base_name + ".ini"
 
-	inline ini_file_descriptor ini_file()
-	{
-		ini_file_descriptor ifd_;
-		::dbj::util::make_file_descriptor(ifd_);
-		return ifd_;
-	}
+	   to create full path to any ini file placed in that folder
+	*/
+	buffer_type legal_full_path_ini(std::string_view /* inifile_base_name */);
 
 	// this is the factory method that delivers the reference 
 	// of the implementation object aka instance
@@ -75,18 +49,18 @@ namespace dbj::ini
 	// this is the interface to the ini_reader
 	struct ini_reader
 	{
-		static smart_buffer default_inifile_path();
+		static buffer_type default_inifile_path();
 		// Return the result of ini_parse(), i.e., 0 on success, line number of
 		// first error on parse error, or -1 on file open error.
 		virtual int parse_error() const = 0;
 
 		// Get a string value from INI file, returning default_value if not found.
-		virtual smart_buffer get( string_view section, string_view name,
+		virtual buffer_type get( string_view section, string_view name,
 			string_view default_value) const = 0;
 
 		// Get a string value from INI file, returning default_value if not found,
 		// empty, or contains only whitespace.
-		virtual smart_buffer get_string(string_view section, string_view name,
+		virtual buffer_type get_string(string_view section, string_view name,
 			string_view default_value) const = 0;
 
 		// Get an integer (long) value from INI file, returning default_value if

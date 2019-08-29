@@ -231,7 +231,7 @@ int ini_parse(const char* filename, ini_handler handler, void* user)
     return error;
 }
 
-/* An ini_reader function to read the next line from a string buffer. This
+/* An ini_reader function to read the next line from a string buffer_type. This
    is the fgets() equivalent used by ini_parse_string(). */
 static char* ini_reader_string(char* str, int num, void* stream) {
     ini_parse_string_ctx* ctx = (ini_parse_string_ctx*)stream;

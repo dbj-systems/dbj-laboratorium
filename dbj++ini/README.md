@@ -13,9 +13,8 @@ Also please visit that project page to understand all the other various features
 ## Standard C++
 
 The purpose of this project is modern C++ interface. It is resilient and fast.
-`std::string` use is minimal, and will be completetely removed in the next release.
-
-Future release will be also built with C++exceptions removed.
+`std::string` use is completetely removed. buffer_type tyoe used is `std::vector<char>`.
+It and it's little helper are used from `dbj++`.
 
 ### The API
 
@@ -42,13 +41,13 @@ int main()
 		, (reader.get_bool("user", "active", true) ? "true" : "false")
 	);
 ```
-Return type of the `get()` and `get_string()` methods is `smart_buffer`.
-which is actually a shared pointer.
+Return type of the `get()` and `get_string()` methods is `buffer_type`.
+which is actually `std::vector<char>`.
 ```cpp
-using smart_buffer = std::shared_ptr<char>;
+using buffer_type = std::shared_ptr<char>;
 ```
 To avoid `std::string` we use `std::shared_ptr<char>`. Why?
-`std::string` is not to be used as a simple char buffer, rather it is to be used for 
+`std::string` is not to be used as a simple char buffer_type, rather it is to be used for 
 large(r) text processing in the context of the C++ code.
 We also deliberately do not introduce some elaborate wrapper 
 to figure as yet another 'special type' on this API, 
@@ -88,10 +87,9 @@ At the time of this writting, dbj++ini does not include `wchar_t` or Unicode han
 
 > (In 2019Q1, standard C++ was C++17)
 
+---
 
--------------------------------------
-
-<pre>
+```
 Copyright 2017,2018, 2019 by dbj@dbj.org, dbj.org, dbj.systems ltd.
 
 Licensed under the GNU GPL License, Version 3.0 (the "License");
@@ -106,8 +104,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-</pre>
----------------------------------------------------------------------  
+```
+---
 
 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
 

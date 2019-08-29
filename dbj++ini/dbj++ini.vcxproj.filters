@@ -8,6 +8,7 @@
     <ClInclude Include="src\ini.h" />
     <ClInclude Include="dbj++ini.h" />
     <ClInclude Include="ini_reader_sampler.h" />
+    <ClInclude Include="dbj_ini_nanolib.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

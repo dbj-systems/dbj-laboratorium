@@ -24,10 +24,13 @@
     <ClInclude Include="tests\dbj_easy_udf_sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\ini_file_and_syslog_testing.h">
+    <ClInclude Include="tests\two_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\two_tests.h">
+    <ClInclude Include="dbj_nanolib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,5 +41,11 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md" />
+    <None Include="db_file_path.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
