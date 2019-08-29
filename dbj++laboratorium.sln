@@ -27,9 +27,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++ini", "dbj++ini\dbj++i
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++", "dbj++\dbj++.vcxitems", "{09BA3370-4F1F-40D7-9A0D-F9B7AAFFD817}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++nano", "dbj++nano\dbj++nano.vcxitems", "{59D2CE3D-CF91-4777-ACAF-CF74764F21D5}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dbj++\dbj++.vcxitems*{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}*SharedItemsImports = 9
+		dbj++nano\dbj++nano.vcxitems*{59d2ce3d-cf91-4777-acaf-cf74764f21d5}*SharedItemsImports = 9
 		dbj++\dbj++.vcxitems*{9c92850f-c359-4e82-b3b1-e274da337058}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

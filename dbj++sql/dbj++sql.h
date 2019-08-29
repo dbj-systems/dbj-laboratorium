@@ -382,7 +382,9 @@ namespace dbj::sql {
 		[[nodiscard]] status_type exec(const char* sql_) const noexcept
 		{
 			_ASSERTE(sql_);
-			return { SQLITE_ERROR , ::std::errc::protocol_error };
+			// in release build 
+			if ( ! sql_ )
+			return { SQLITE_ERROR , ::std::errc::invalid_argument };
 
 			return { sqlite::sqlite3_exec(
 				handle.get(), /* An open database */

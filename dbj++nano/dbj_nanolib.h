@@ -1,12 +1,59 @@
 #pragma once
-#include <cstdio>
+// #include <string>
+#include <stdint.h>
+#include <stdio.h>
+#include <array>
 #include <vector>
+#include <chrono>
+#include <cmath>
 #include <string_view>
+#include <future>
+#include <mutex>
+
 
 #ifdef _MSVC_LANG
 #if _MSVC_LANG < 201402L
 #error "C++17 required ..."
 #endif
+#endif
+
+/*
+from vcruntime.h
+*/
+#define _DBJ_STRINGIZE_(x) #x
+#define _DBJ_STRINGIZE(x) _DBJ_STRINGIZE_(x)
+
+#define _DBJ_WIDE_(s) L ## s
+#define _DBJ_WIDE(s) _DBJ_WIDE_(s)
+
+#define _DBJ_CONCATENATE_(a, b) a ## b
+#define _DBJ_CONCATENATE(a, b)  _DBJ_CONCATENATE_(a, b)
+
+#define _DBJ_EXPAND_(s) s
+#define _DBJ_EXPAND(s) _DBJ_EXPAND_(s)
+
+#ifdef _MSC_VER
+// https://developercommunity.visualstudio.com/content/problem/195665/-line-cannot-be-used-as-an-argument-for-constexpr.html
+#define CONSTEXPR_LINE long(_DBJ_CONCATENATE(__LINE__,U)) 
+#else
+#define CONSTEXPR_LINE __LINE__
+#endif
+
+/*
+
+this macro is actually superior solution to the repeat template function
+_dbj_repeat_counter is local for each macro expansion
+
+DBJ_REPEAT(50){ std::printf("\n%d", _dbj_repeat_counter ); }
+
+*/
+#define DBJ_REPEAT(N) for(size_t _dbj_repeat_counter = 0 ; _dbj_repeat_counter < static_cast<size_t>(N); _dbj_repeat_counter++)
+
+
+#ifdef _unused
+#error _unused is already defined somewhere ...
+#else
+#define _unused(...)  static_assert( noexcept( __VA_ARGS__ , true ) )
 #endif
 
 namespace dbj::nanolib {
@@ -26,7 +73,27 @@ namespace dbj::nanolib {
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
-#pragma region vector char_type buffer
+#pragma region synchronisation
+
+	/*
+	usage:
+
+	void thread_safe_fun() {
+		lock_unlock autolock_ ;
+	}
+
+	*/
+	struct lock_unlock final {
+
+		mutable std::mutex mux_;
+
+		lock_unlock() noexcept { mux_.lock(); }
+		~lock_unlock() { mux_.unlock(); }
+	};
+
+#pragma endregion
+
+#pragma region buffer type and helper
 
 constexpr inline std::size_t DBJ_64KB = UINT16_MAX;
 /*

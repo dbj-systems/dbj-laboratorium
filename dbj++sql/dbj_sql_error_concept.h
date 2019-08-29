@@ -174,14 +174,14 @@ namespace dbj::sql
 
 			int rez_ = std::snprintf(
 				buffy_.data(), buffy_.size(),
-				"SQLITE3 id:%d, message:%s\nSTD::ERRC id:%d, message:%s",
+				"sqlite3 id:%d, message:%s\nstd::errc id:%d, message:%s",
 				(sql_status_id ? int(*sql_status_id) : 0 ),
 				(sql_status_message_ ? (*sql_status_message_).data() : "SQLITE_OK" ),
 				(std_errc_id ? int(*std_errc_id) : 0 ),
 				(std_status_message_ ? (*std_status_message_).data() : "POSIX_OK" )
 			);
 
-			if (rez_ < 1 || rez_ < buffy_.size())
+			if (rez_ < 0 )
 				dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
 
 			return buffy_;

@@ -1,44 +1,9 @@
 #pragma once
+#include "dbj_nanolib.h"
 
-// #include <string>
-#include <stdint.h>
-#include <stdio.h>
-#include <array>
-#include <vector>
-#include <chrono>
-#include <cmath>
+#define TU_REGISTER inline auto  _DBJ_CONCATENATE( dumsy_ , __COUNTER__ ) = ::dbj::tu::catalog
 
-/*
-from vcruntime.h
-*/
-#define _DBJ_STRINGIZE_(x) #x
-#define _DBJ_STRINGIZE(x) _DBJ_STRINGIZE_(x)
-
-#define _DBJ_WIDE_(s) L ## s
-#define _DBJ_WIDE(s) _DBJ_WIDE_(s)
-
-#define _DBJ_CONCATENATE_(a, b) a ## b
-#define _DBJ_CONCATENATE(a, b)  _DBJ_CONCATENATE_(a, b)
-
-#define _DBJ_EXPAND_(s) s
-#define _DBJ_EXPAND(s) _DBJ_EXPAND_(s)
-
-#ifdef _MSVC_VER
-// https://developercommunity.visualstudio.com/content/problem/195665/-line-cannot-be-used-as-an-argument-for-constexpr.html
-#define CONSTEXPR_LINE long(_DBJ_CONCATENATE(__LINE__,U)) 
-#else
-#define CONSTEXPR_LINE __LINE__
-#endif
-
-#define TU_REGISTER inline auto  _DBJ_CONCATENATE( dumsy_ , __COUNTER__ ) = ::tu::catalog
-
-#ifdef _unused
-#error _unused is already defined somewhere ...
-#else
-#define _unused(...)  static_assert( (void)noexcept( __VA_ARGS__ , true ) )
-#endif
-
-namespace tu {
+namespace dbj::tu {
 
 	using namespace std;
 
@@ -124,4 +89,4 @@ namespace tu {
 
 	constexpr inline testing_system catalog;
 
-} // tu
+} // dbj::tu

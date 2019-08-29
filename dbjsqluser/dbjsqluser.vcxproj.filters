@@ -27,12 +27,6 @@
     <ClInclude Include="tests\two_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_nanolib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

@@ -11,6 +11,11 @@ namespace dbj::sql {
 	{
 		_ASSERTE(msg_ && file_ && line_);
 		std::fprintf(stderr, "\n\ndbj++sql Terminating error:%s\n%s (%d)", msg_, file_, line_);
+#ifdef _DEBUG
+		::system("@echo .");
+		::system("@echo .");
+		::system("@pause");
+#endif
 		::exit(EXIT_FAILURE);
 	}
 

@@ -163,12 +163,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="dbj_nanolib.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="tests\core_tests.h" />
     <ClInclude Include="tests\dbj_easy_udf_sample.h" />
     <ClInclude Include="tests\two_tests.h" />
-    <ClInclude Include="tu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
