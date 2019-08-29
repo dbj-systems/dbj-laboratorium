@@ -3,13 +3,15 @@
 
 namespace dbj_db_test_
 {
-	using namespace  ::std;
-	namespace sql = ::dbj::db;
-	// namespace sqr = ::dbj::db::err;
+	// using namespace  ::std;
+	// namespace sql = ::dbj::sql;
+
+	//using status_type = typename dbj::sql::dbj_db_status_type;
+	//using buffer = typename dbj::sql::v_buffer;
+	//using buffer_type = typename dbj::sql::v_buffer::buffer_type;
 
 	// in memory db for testing
-	inline sql::database const&
-		demo_db(error_code& ec)
+	inline auto const & demo_db( status_type & ec)
 		// no throwing from here
 		noexcept
 	{
@@ -17,7 +19,7 @@ namespace dbj_db_test_
 			-> const sql::database &
 		{
 			ec.clear();
-			// notice the error_code argument 
+			// notice the status_type argument 
 			// to the cosntructor
 			// it does not throw on error
 			static sql::database db(":memory:", ec);
@@ -35,26 +37,24 @@ namespace dbj_db_test_
 			return db;
 		};
 		static  sql::database const& instance_ = initor();
-		// note: caller must check the error_code !
+		// note: caller must check the status_type !
 		return instance_;
 	} // demo_db
 
 		/*
 		usage is with no exception being thrown
-		NOTE: we pass the error_code out, which is not
+		NOTE: we pass the status_type out, which is not
 		introducing unknown abstraction to the calling site
-		std::error_code is part of the std lib
+		std::status_type is part of the std lib
 		*/
-	[[nodiscard]] inline error_code
+	[[nodiscard]] inline status_type
 		test_insert(const char* = 0) noexcept
 	{
-		error_code err_;
+		status_type err_;
 		const sql::database& db = demo_db(err_);
 		if (err_) {
-			// it is already logged
 			return err_;
 		}
-		err_.clear(); // always advisable
 		// please read here about u8 and execution_character_set
 		// https://docs.microsoft.com/en-gb/cpp/preprocessor/execution-character-set?view=vs-2017
 		return db.exec(
@@ -76,11 +76,14 @@ namespace dbj_db_test_
 		// get the int value of the first column
 		int   id_ = cell(0);
 		// get the string value of the second column
-		dbj::chr_buf::yanb   name_ = cell(1);
+		buffer_type   name_ = cell(1);
 		// print what we got
-		DBJ_LOG_INF("\n\t %zu \t %s = %d \t %s = %s",
+		
+		DBJ_FPRINTF( stdout, "\n\t %zu \t %s = %d \t %s = %s",
 			row_id, cell.name(0), id_, cell.name(1), name_.data());
+
 		return SQLITE_OK;
+		// we have to use SQLITE_OK macro
 		// otherwise sqlite3 will stop the 
 		// result set traversal
 	}
@@ -91,10 +94,10 @@ namespace dbj_db_test_
 	)
 	{
 		auto print_cell = [&](int j_) {
-			DBJ_LOG_INF("%10s: %s,", cell.name(j_), ((dbj::chr_buf::yanb)cell(j_)).data());
+			DBJ_FPRINTF(stdout, "%10s: %s,", cell.name(j_), ((buffer_type)cell(j_)).data());
 		};
 
-		DBJ_LOG_INF("\n\t%zu", row_id);
+		DBJ_FPRINTF(stdout, "\n\t%zu", row_id);
 		for (int k = 0; k < cell.column_count(); k++)
 			print_cell(k);
 		return SQLITE_OK;
@@ -104,33 +107,35 @@ namespace dbj_db_test_
 	/*
 	use the above callback's
 	*/
-	[[nodiscard]] inline error_code
+	[[nodiscard]] inline status_type
 		test_table_info()
 		noexcept
 	{
-		error_code err_;
+		status_type err_;
 		const sql::database& db = demo_db(err_);
 		if (err_) return err_;
 
-		DBJ_LOG_INF("\nmeta data for columns of the table 'demo_table'\n");
+		DBJ_FPRINTF(stdout, "\nmeta data for columns of the table 'demo_table'\n");
 		err_.clear();
 		err_ = sql::table_info(db, "demo_table", universal_callback);
-		if (err_)
-			DBJ_LOG_INF("\n\nstd::error_code domain:%s, id:%d, message:%s ", err_.category().name(), err_.value(), err_.message().c_str());
+		if (err_) {
+			DBJ_FPRINTF(stdout, "\n%s",	err_.to_buffer(err_).data()	);
+		}
 
 		return err_;
 	}
-	[[nodiscard]] inline error_code
+
+	[[nodiscard]] inline status_type
 		test_select()
 		noexcept
 	{
-		error_code err_;
+		status_type err_;
 		const sql::database& db = demo_db(err_);
 		if (err_) {
 			// it is already logged
 			return err_;
 		}
-		DBJ_LOG_INF("\nexecute: 'SELECT Id, Name FROM demo_table'\n");
+		DBJ_FPRINTF(stdout, "\nexecute: 'SELECT Id, Name FROM demo_table'\n");
 		err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
 		return err_;
 	}
@@ -144,12 +149,12 @@ namespace dbj_db_test_
 	   please replace it with yours
 	   for that use one of the many available SQLite management app's
 	*/
-	[[nodiscard]] inline error_code test_statement_using(
+	[[nodiscard]] inline status_type test_statement_using(
 		sql::result_row_callback row_user_,
 		const char* db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
 	) noexcept
 	{
-		error_code err_;
+		status_type err_;
 		const sql::database db(db_file, err_); // using the real db
 		if (err_) {
 			// it is already logged

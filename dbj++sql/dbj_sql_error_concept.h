@@ -10,7 +10,7 @@ return value type can have or not have, sqlite status code and std::errc code
 
 */
 
-namespace dbj::db
+namespace dbj::sql
 {
 	using namespace std;
 
@@ -61,7 +61,7 @@ namespace dbj::db
 	this is the sqlite3 logic 
 	not all error codes mean errors
 	*/
-	bool is_sqlite_error (status_code const & sc_ )
+	inline constexpr bool is_sqlite_error (status_code const & sc_ ) noexcept
 	{
 		switch (sc_) {
 		case status_code::sqlite_ok:
@@ -84,7 +84,7 @@ namespace dbj::db
 	*/
 	struct dbj_db_status_type final
 	{
-		using sqlite_status_type = optional< ::dbj::db::status_code >;
+		using sqlite_status_type = optional< ::dbj::sql::status_code >;
 		using std_errc_type = optional< std::errc >;
 		
 		sqlite_status_type	sqlite_status_id;
@@ -93,9 +93,22 @@ namespace dbj::db
 		dbj_db_status_type() { clear();  };
 
 		dbj_db_status_type(
-			sqlite_status_type sqlite_status_, 	std_errc_type std_errc_
+			sqlite_status_type sqlite_status_, 	
+			std_errc_type std_errc_ = nullopt
 			)
 			: sqlite_status_id(sqlite_status_), std_errc(std_errc_)
+		{
+		}
+
+		/*
+		from sqlite3 code int's are coming
+		*/
+		dbj_db_status_type(
+			int sqlite_status_,
+			std_errc_type std_errc_ = nullopt
+			)
+			: sqlite_status_id(::dbj::sql::status_code(sqlite_status_))
+			, std_errc(std_errc_)
 		{
 		}
 
@@ -125,7 +138,9 @@ namespace dbj::db
 		*/
 		optional<buffer_type> sql_err_message() noexcept
 		{
+			// not set
 			if (!sqlite_status_id) return nullopt;
+
 			status_code ev = *sqlite_status_id;
 			if (const char* mp_ = ::sqlite::sqlite3_errstr(int(ev)); mp_ != nullptr)
 			{
@@ -133,7 +148,7 @@ namespace dbj::db
 			}
 			else
 			{
-				return buffer::make("Unknown SQLITE error ode");
+				return buffer::make("Unknown SQLITE status code");
 			}
 		}
 
@@ -145,6 +160,31 @@ namespace dbj::db
 			std::errc posix_retval = * std_errc;
 			::std::error_code ec = std::make_error_code(posix_retval);
 			return buffer::make(ec.message().c_str());
+		}
+
+		static buffer_type to_buffer(dbj_db_status_type & status_ ) 
+		{
+			buffer_type buffy_ = buffer::make(0xFF + 0xFF); // 512 aka POSIX BUFSIZ
+
+			auto sql_status_id = status_.sqlite_status_id;
+			auto sql_status_message_ = status_.sql_err_message();
+
+			auto std_errc_id = status_.std_errc;
+			auto std_status_message_ = status_.std_err_message();
+
+			int rez_ = std::snprintf(
+				buffy_.data(), buffy_.size(),
+				"SQLITE3 id:%d, message:%s\nSTD::ERRC id:%d, message:%s",
+				(sql_status_id ? int(*sql_status_id) : 0 ),
+				(sql_status_message_ ? (*sql_status_message_).data() : "SQLITE_OK" ),
+				(std_errc_id ? int(*std_errc_id) : 0 ),
+				(std_status_message_ ? (*std_status_message_).data() : "POSIX_OK" )
+			);
+
+			if (rez_ < 1 || rez_ < buffy_.size())
+				dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
+
+			return buffy_;
 		}
 
 	}; // dbj_db_status_type

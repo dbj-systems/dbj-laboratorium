@@ -30,11 +30,9 @@ namespace dbj_easy_udfs_sample {
 
 	using namespace ::std;
 	using namespace ::std::string_view_literals;
-	namespace sql = ::dbj::db;
-	namespace err = ::dbj::db::err;
 
 	/* one table "words", with one text column "word" */
-	constexpr inline auto DB_FILE = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
+	constexpr inline auto DB_FILE_PATH = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"sv;
 
 	/* use case: solve the following query using
 	   notice the two udf's required
@@ -80,12 +78,22 @@ namespace dbj_easy_udfs_sample {
 
 			first and only argument is a string
 		*/
-		dbj::chr_buf::yanb word_ = args_(0);
-		int result = is_pal(word_.data());
-		/*
-		as per sql statement requirements we need to reurn an int
-		*/
-		result_(result);
+		auto optional_transformer = args_(0);
+		if (!optional_transformer) return;
+
+		// can not use auto here
+		buffer_type word_ = *optional_transformer;
+
+		if (word_.size() > 1 )
+		{
+			/*
+			as per sql statement requirements we need to reurn an int
+			1 means yes that is a palindrome
+			*/
+			result_( is_pal(word_.data()) );
+		}
+
+		result_( 0 );
 	}
 
 	/* the strlen udf :  int strlen( const char *)
@@ -99,9 +107,11 @@ namespace dbj_easy_udfs_sample {
 		// do not throw from the UDF
 		noexcept
 	{
-		dbj::chr_buf::yanb word_ = args_(0);
-		int result = (int)(word_.size());
-		result_(result);
+		auto optional_transformer = args_(0);
+		if (!optional_transformer) return;
+		
+		buffer_type word_ = *optional_transformer;
+		result_((int)(word_.size()));
 	}
 
 	/* the standard dbj++sql result processor aka callback
@@ -113,9 +123,9 @@ namespace dbj_easy_udfs_sample {
 	)
 	{
 		/* this is deliberately verbose code */
-		dbj::chr_buf::yanb word = col(0);
+		buffer_type word = col(0);
 		int len_ = col(1);
-		DBJ_LOG_INF("\n\t[%3zu]\tword: %32s,\t%s: %12d",
+		DBJ_FPRINTF( stdout, "\n\t[%3zu]\tword: %32s,\t%s: %12d",
 			row_id, word.data(), col.name(1), len_);
 		// make sure to return always this
 		return SQLITE_OK;
@@ -124,21 +134,21 @@ namespace dbj_easy_udfs_sample {
 	/* to be called from your test unit
 	   here we register the two easy udf's we made above
 
-	   notice how we do not throw, we use std::error_code's
+	   notice how we do not throw, we use std::status_type's
 	   emanating from dbj++sql
 	*/
-	[[nodiscard]] error_code test_udf(
+	[[nodiscard]] status_type test_udf(
 		string_view query_ = QRY_WITH_UDF
 	) noexcept
 	{
-		DBJ_LOG_INF("\n\nthe query:\t%s\nthe result:\n\n", query_.data());
+		DBJ_FPRINTF( stdout, "\n\nthe query:\t%s\nthe result:\n\n", query_.data());
 		// assure the database presence
-		// return error_code on error
-		error_code ec;
-		sql::database db(DB_FILE, ec); if (ec) return ec;
+		// return status_type on error
+		status_type ec;
+		sql::database db(DB_FILE_PATH, ec); if (ec) return ec;
 		// register the two udf's required
 		// string names of udf's must match the SQL they are part of
-		// always returning the error_code on error
+		// always returning the status_type on error
 		// obviuosly macro afficionados are welcome here
 		ec.clear();
 		ec = sql::register_dbj_udf<palindrome>(db, "palindrome"); if (ec) return ec;
@@ -149,7 +159,7 @@ namespace dbj_easy_udfs_sample {
 		// standard result processing calback 
 		// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 		return db.query(query_.data(), dbj_udfs_result_handler);
-		// return the error_code
+		// return the status_type
 	} // test_udf
 
 } // namespace dbj_easy_udfs_sample 

@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-namespace dbj::db {
+namespace dbj::sql {
 
 	using namespace std;
 
@@ -15,7 +15,7 @@ namespace dbj::db {
 	}
 
 #ifndef DBJ_VERIFY
-#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::dbj_terror( #x ", failed", file, line )
+#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::sql::dbj_terror( #x ", failed", file, line )
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
@@ -66,4 +66,4 @@ namespace dbj::db {
 	}; // v_buffer
 
 #pragma endregion
-} // dbj::db
+} // dbj::sql

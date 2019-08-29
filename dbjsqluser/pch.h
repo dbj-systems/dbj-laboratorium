@@ -4,10 +4,10 @@
 #include <dbj++/dbj++required.h>
 
 // we let dbj++ to use it's own wmain() 
-#define DBJ_WMAIN_USED
+// #define DBJ_WMAIN_USED
 #include <dbj++/dbj++.h>
 
-#include "..//dbj++sql/sqlite++.h"
+#include "../dbj++sql/dbj++sql.h"
 #include "../dbj++ini/dbj++ini.h"
 
 // here we use dbj syslog client 

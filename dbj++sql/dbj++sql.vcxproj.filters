@@ -42,12 +42,6 @@
     <ClInclude Include="dbj_sqlite_nanolib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="discared\dbj_log\dbj_log_user.h">
-      <Filter>dbj_log</Filter>
-    </ClInclude>
-    <ClInclude Include="discared\err\dbj_db_err_discarded.h">
-      <Filter>err</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

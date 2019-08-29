@@ -27,7 +27,7 @@ More documentation is always in the works, if not all published. For immediate p
 Is in the separate project called `dbjsqluser`, also part of `dbj-laboratorium` Visual Studio solution.
 
 #### Dependancies
-All the code in here is the `dbj::db` namespace. This is done, so that it differs from the `sqlite` namespace we have made in here.
+All the code in here is the `dbj::sql` namespace. This is done, so that it differs from the `sqlite` namespace we have made in here.
 
 This is a static library. It depends on SQLITE 3, C library.
 It is is linked in, by the virtue of Visual Studio project.  But it is in the separate namespace, as done in `sqlite++.h`

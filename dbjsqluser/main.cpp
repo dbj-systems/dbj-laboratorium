@@ -1,3 +1,4 @@
+#define DBJ_WMAIN_USED
 #include "pch.h"
 
 #ifndef DBJ_WMAIN_USED
@@ -6,11 +7,16 @@
 #error DBJ_WMAIN_USED undefined?
 #endif
 
-#include "tests/core_tests.h"
-#include "tests/dbj_easy_udf_sample.h"
-#include "tests/more_dbj_db_tests.h"
-#include "tests/ini_file_and_syslog_testing.h"
+// used in headers bellow
+namespace sql = ::dbj::sql;
+// three important types used everywhere 
+using status_type = typename dbj::sql::dbj_db_status_type;
+using buffer = typename dbj::sql::v_buffer;
+using buffer_type = typename dbj::sql::v_buffer::buffer_type;
 
+
+#include "tests/two_tests.h"
+#include "tests/dbj_easy_udf_sample.h"
 
 #pragma warning( push )
 #pragma warning( disable: 4100 )
@@ -28,8 +34,12 @@ void dbj_program_start(
 )
 {
 	DBJ_TRACE(L"\n\n%s -- Started\n", argv[0] );
+
+	two_tests::test_dbj_sql_lite();
+	two_tests::test_dbj_sql_lite_udf();
+
 	// TODO: make this async
-	dbj::testing::execute(argc, argv, envp);
+	// dbj::testing::execute(argc, argv, envp);
 	DBJ_TRACE(L"\n\n%s -- Finished\n", argv[0]);
 }
 
