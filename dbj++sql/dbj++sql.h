@@ -134,7 +134,7 @@ namespace dbj::sql {
 		[[nodiscard]] static auto close(pointer value) noexcept
 			-> status_type
 		{
-			return { sqlite::sqlite3_close(value) };
+			return { sqlite::sqlite3_close(value), DBJ_LOCATION };
 		}
 	};
 
@@ -151,7 +151,7 @@ namespace dbj::sql {
 
 		[[nodiscard]] static auto close(pointer value) noexcept -> status_type
 		{
-			return { sqlite::sqlite3_finalize(value) };
+			return { sqlite::sqlite3_finalize(value), DBJ_LOCATION };
 		}
 	};
 
@@ -276,7 +276,7 @@ namespace dbj::sql {
 			if (ec) return ec;
 
 			// make the status_type, log if not OK and return it
-			return { sqlite::sqlite3_open(filename,	handle_.get_address_of()) };
+			return { sqlite::sqlite3_open(filename,	handle_.get_address_of()), DBJ_LOCATION };
 		}
 
 		[[nodiscard]] status_type
@@ -284,7 +284,7 @@ namespace dbj::sql {
 		{
 			_ASSERTE(query_);
 			if (!handle)
-				return { SQLITE_ERROR , ::std::errc::protocol_error };
+				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
 			// "dbj::sql::database -- Must call open() before " __FUNCSIG__ 
 
 	// make the status_type, log if error and return it
@@ -293,7 +293,8 @@ namespace dbj::sql {
 				query_,
 				-1,
 				statement_.get_address_of(),
-				NULL) };
+				NULL)
+			, DBJ_LOCATION };
 			// DBJ_ERR_PROMPT("sqlite3_prepare_v2() has failed"));
 		}
 
@@ -322,7 +323,7 @@ namespace dbj::sql {
 		) const noexcept
 		{
 			if (!handle)
-				return { SQLITE_ERROR , ::std::errc::protocol_error };
+				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
 
 			return {
 					sqlite::sqlite3_create_function(
@@ -333,7 +334,8 @@ namespace dbj::sql {
 					NULL, /* arbitrary pointer. UDF can gain access using sqlite::sqlite3_user_data().*/
 					udf_,
 					NULL,
-					NULL) };
+					NULL) 
+			, DBJ_LOCATION };
 		}
 
 		/*
@@ -346,7 +348,7 @@ namespace dbj::sql {
 		) const noexcept
 		{
 			if (!handle)
-				return { SQLITE_ERROR , ::std::errc::protocol_error };
+				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
 
 			// will release the statement upon exit
 			statement_handle statement_;
@@ -374,7 +376,7 @@ namespace dbj::sql {
 			if (sql_result == (int)dbj::sql::status_code::sqlite_done)
 				return { dbj::sql::status_code::sqlite_ok };
 
-			return { sql_result }; //  , DBJ_ERR_PROMPT("sqlite3_step() has failed"));
+			return { sql_result , DBJ_LOCATION }; //  , DBJ_ERR_PROMPT("sqlite3_step() has failed"));
 		}
 		/*
 		 execute SQL statements through here for which no result set is expected
@@ -384,7 +386,7 @@ namespace dbj::sql {
 			_ASSERTE(sql_);
 			// in release build 
 			if ( ! sql_ )
-			return { SQLITE_ERROR , ::std::errc::invalid_argument };
+			return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::invalid_argument };
 
 			return { sqlite::sqlite3_exec(
 				handle.get(), /* An open database */
@@ -392,7 +394,8 @@ namespace dbj::sql {
 				nullptr,	/* Callback function */
 				nullptr,	/* 1st argument to callback */
 				nullptr		/* Error msg written here */
-			) };
+			) 
+			, DBJ_LOCATION };
 		}
 
 	}; // database
@@ -598,7 +601,7 @@ namespace dbj::sql {
 		auto rez_ = std::snprintf(buffy.data(), 0xFF, "PRAGMA table_info('%s')", table_name.data());
 
 		if ((rez_ < 1) || (rez_ < 0xFF))
-			return { SQLITE_ERROR, std::errc::protocol_error };
+			return { SQLITE_ERROR, DBJ_LOCATION, std::errc::protocol_error };
 
 		// list of all tables and views
 		// auto qry = "SELECT name, sql FROM sqlite_master WHERE type = 'table' ORDER BY name;"sv;

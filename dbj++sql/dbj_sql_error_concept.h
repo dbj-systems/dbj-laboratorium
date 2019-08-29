@@ -73,6 +73,7 @@ namespace dbj::sql
 		};
 	}
 
+
 	/*-----------------------------------------------------------------
 	DBJ DB status type -- what is the status after the call
 
@@ -86,17 +87,23 @@ namespace dbj::sql
 	{
 		using sqlite_status_type = optional< ::dbj::sql::status_code >;
 		using std_errc_type = optional< std::errc >;
+
+		using buffer		= typename dbj::sql::v_buffer ;
+		using buffer_type	= typename buffer::buffer_type ;
+		using location_type = optional< buffer_type >;
 		
 		sqlite_status_type	sqlite_status_id;
 		std_errc_type		std_errc;
+		location_type		location;
 
 		dbj_db_status_type() { clear();  };
 
 		dbj_db_status_type(
 			sqlite_status_type sqlite_status_, 	
+			location_type      location_ = nullopt ,
 			std_errc_type std_errc_ = nullopt
 			)
-			: sqlite_status_id(sqlite_status_), std_errc(std_errc_)
+			: sqlite_status_id(sqlite_status_),  location( location_ ),  std_errc(std_errc_)
 		{
 		}
 
@@ -105,9 +112,11 @@ namespace dbj::sql
 		*/
 		dbj_db_status_type(
 			int sqlite_status_,
+			buffer_type  location_,
 			std_errc_type std_errc_ = nullopt
 			)
 			: sqlite_status_id(::dbj::sql::status_code(sqlite_status_))
+			, location( location_ ) 
 			, std_errc(std_errc_)
 		{
 		}
@@ -128,6 +137,7 @@ namespace dbj::sql
 		void clear( )
 		{
 			sqlite_status_id = nullopt;
+			location = nullopt;
 			std_errc = nullopt;
 		}
 
@@ -174,11 +184,12 @@ namespace dbj::sql
 
 			int rez_ = std::snprintf(
 				buffy_.data(), buffy_.size(),
-				"sqlite3 id:%d, message:%s\nstd::errc id:%d, message:%s",
+				"sqlite3 id:%d, message:%s\nstd::errc id:%d, message:%s\nlocation: %s",
 				(sql_status_id ? int(*sql_status_id) : 0 ),
 				(sql_status_message_ ? (*sql_status_message_).data() : "SQLITE_OK" ),
 				(std_errc_id ? int(*std_errc_id) : 0 ),
-				(std_status_message_ ? (*std_status_message_).data() : "POSIX_OK" )
+				(std_status_message_ ? (*std_status_message_).data() : "POSIX_OK" ),
+				( status_.location ? (*status_.location).data() : "Location unknown" )
 			);
 
 			if (rez_ < 0 )
@@ -188,4 +199,7 @@ namespace dbj::sql
 		}
 
 	}; // dbj_db_status_type
+
+#define DBJ_LOCATION  dbj::sql::v_buffer::make("(" _CRT_STRINGIZE( __LINE__ ) ") " __FILE__)
+
 } // namespace dbj::sqlite

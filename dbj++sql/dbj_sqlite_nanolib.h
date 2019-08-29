@@ -71,4 +71,5 @@ namespace dbj::sql {
 	}; // v_buffer
 
 #pragma endregion
+
 } // dbj::sql
