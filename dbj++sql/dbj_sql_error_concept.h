@@ -146,7 +146,7 @@ namespace dbj::sql
 		describes the result code, as UTF-8. Memory to hold the error message
 		string is managed internally and must not be freed by the application.
 		*/
-		optional<buffer_type> sql_err_message() noexcept
+		optional<buffer_type> sql_err_message() const noexcept
 		{
 			// not set
 			if (!sqlite_status_id) return nullopt;
@@ -164,7 +164,7 @@ namespace dbj::sql
 
 		// essentially transform POSIX error code
 		// into std::error_code message
-		optional<buffer_type> std_err_message()
+		optional<buffer_type> std_err_message() const noexcept
 		{
 			if (!std_errc) return nullopt;
 			std::errc posix_retval = * std_errc;
@@ -172,7 +172,13 @@ namespace dbj::sql
 			return buffer::make(ec.message().c_str());
 		}
 
-		static buffer_type to_buffer(dbj_db_status_type & status_ ) 
+		operator char const* () const {
+			static auto buffy_ = buffer::make(BUFSIZ);
+						buffy_ = to_buffer(*this);
+						return buffy_.data();
+		}
+
+		static buffer_type to_buffer(dbj_db_status_type const & status_ ) 
 		{
 			buffer_type buffy_ = buffer::make(0xFF + 0xFF); // 512 aka POSIX BUFSIZ
 
@@ -200,6 +206,6 @@ namespace dbj::sql
 
 	}; // dbj_db_status_type
 
-#define DBJ_LOCATION  dbj::sql::v_buffer::make("(" _CRT_STRINGIZE( __LINE__ ) ") " __FILE__)
+#define DBJ_LOCATION  dbj::sql::v_buffer::make("(line: " _CRT_STRINGIZE( __LINE__ ) "), file: " __FILE__)
 
 } // namespace dbj::sqlite

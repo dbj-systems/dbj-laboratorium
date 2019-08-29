@@ -162,4 +162,12 @@ namespace dbj_easy_udfs_sample {
 		// return the status_type
 	} // test_udf
 
+	TU_REGISTER([] {
+		
+		auto status_ = test_udf();
+
+		DBJ_FPRINTF( stdout, "\n%s", (char const *)status_ );
+
+		});
+
 } // namespace dbj_easy_udfs_sample 

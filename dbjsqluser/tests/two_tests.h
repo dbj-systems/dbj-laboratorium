@@ -45,19 +45,19 @@ namespace two_tests
 			::dbj::sql::dbj_db_status_type  status_;
 
 			status_ = dbj_db_test_::test_insert();
-			DBJ_FPRINTF(stdout, "\n Status : \n\t %s", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
 
 			status_.clear();
 			status_ = dbj_db_test_::test_table_info();
-			DBJ_FPRINTF(stdout, "\n Status : \n\t %s", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
 
 			status_.clear();
 			status_ = dbj_db_test_::test_select();
-			DBJ_FPRINTF(stdout, "\n Status : \n\t %s", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
 
 			status_.clear();
 			status_ = dbj_db_test_::test_statement_using(example_callback);
-			DBJ_FPRINTF(stdout, "\n Status : \n\t %s", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
 
 			/*
 			NOTE: above we just perform "rint-and-proceed"
