@@ -39,7 +39,7 @@ int example_callback(
 	using dbj::console::print;
 	// 'automagic' transform to std::string
 	// of the column 0 value for this row
-	dbj::chr_buf::yanb   word_ = row_(0);
+	buffer_type   word_ = row_(0);
 	print("\n\t", row_id, "\t", word_);
 
 	// all these should provoke exception

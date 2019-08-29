@@ -140,11 +140,14 @@ namespace dbj {
 			::OutputDebugStringA(buf_.data());
 		}
 
+#ifdef _DEBUG
+#define DBJ_TRACE( msg_ , ...) ::dbj::core::trace( msg_, __VA_ARGS__ )
+#else
+#define DBJ_TRACE(...)
+#endif
+
 
 	} //core
-} // dbj
-
-namespace dbj {
 
 	inline void errno_exit(errno_t errno_, const char* file, const int line, void(*ccb_)(void) = nullptr)
 	{

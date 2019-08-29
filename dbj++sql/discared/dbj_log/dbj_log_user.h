@@ -66,7 +66,7 @@ namespace dbj::db::err {
 	{
 		::std::error_code ec = int_to_dbj_error_code(sqlite_retval);
 
-		// _ASSERTE((int)dbj_err_code::sqlite_ok == SQLITE_OK );
+		// _ASSERTE((int)sqlite_err_id::sqlite_ok == SQLITE_OK );
 
 		// avoid double checking if this is SQL LITE error
 		if ( ! ::dbj::db::err::is_sql_not_err(ec))

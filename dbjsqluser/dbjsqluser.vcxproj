@@ -164,9 +164,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="tests\core_tests.h" />
+    <ClInclude Include="tests\dbj_easy_udf_sample.h" />
+    <ClInclude Include="tests\ini_file_and_syslog_testing.h" />
+    <ClInclude Include="tests\more_dbj_db_tests.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\dbj++attempto\database_tests.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

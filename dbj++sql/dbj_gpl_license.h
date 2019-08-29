@@ -1,6 +1,6 @@
 #pragma once
 /*
-Copyright 2017,2018, 2019 by dbj@dbj.org, dbj.org, dbj.systems ltd.
+Copyright 2017,2018, 2019 by dbj.systems uk ltd.
 
 Licensed under the GNU GPL License, Version 3.0 (the "License");
 you may not use any of files in this project except in compliance with the License.

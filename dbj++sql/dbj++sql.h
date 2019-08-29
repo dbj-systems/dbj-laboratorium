@@ -1,36 +1,22 @@
 ﻿#pragma once
 #include "stdafx.h"
 #include "sqlite++.h"
-#include "./err/dbj_db_err.h"
-#include "./dbj_log/dbj_log_user.h"
-#include <dbj++/core/dbj++core.h>
-#ifndef DBJ_VERIFY
-#define DBJ_VERIFY_(x, file, line ) if (false == x ) ::dbj::db::dbj_terror( #x ", failed", file, line )
-#define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
-#endif
+#include "dbj_sql_error_concept.h"
 
 namespace dbj::db {
 
 	// intelisense goes berserk on this -- using namespace ::std;
 	// using namespace ::sqlite;
 	using namespace ::std::literals::string_view_literals;
-	using namespace ::dbj::db::err;
 
+	constexpr inline auto version = "2.0.0"sv;
 
-	// constexpr inline auto version = "1.0.0"sv;
-	// core tests moved to core_tests.h
-	// also with advice on u8 string literals 
-	// constexpr inline auto version = "1.0.1"sv;
-	// raised on 2019-01-20 to "1.1.0"
-    // what's new
-    // dbj err concept
-	constexpr inline auto version = "1.1.0"sv;
-
+	using status_type = typename dbj::db::dbj_db_status_type;
 	/* 
 	bastardized version of Keny Kerr's unique_handle 
 	dbj's version can not be copied or moved
 	it is as simple as that ;)
-	and -- it is also adorned with std:error_code returns
+	and -- it is also adorned with std:status_type returns
 	so it is resilient *and* does not throw
 
 	see the traits after this class to understand their
@@ -87,7 +73,7 @@ namespace dbj::db {
 			return value;
 		}
 
-		auto reset(error_code & ec , pointer value = handle_trait::invalid()) const -> bool
+		auto reset(status_type & ec , pointer value = handle_trait::invalid()) const -> bool
 		{
 			if (m_value != value)
 			{
@@ -105,16 +91,16 @@ namespace dbj::db {
 		mutable	pointer m_value{};
 
 		[[nodiscard]] auto close() const noexcept
-			-> error_code 
+			-> status_type 
 		{
 			/*
-			if this method does not return the error_code
+			if this method does not return the status_type
 			caller does not know id closing action
 			has uscceeded, and that is the whole point
 
 			logic: if handler is handling
 			something go ahead and try and close
-			return the error_code made in the close()
+			return the status_type made in the close()
 			*/
 			if (*this)
 			{
@@ -124,11 +110,11 @@ namespace dbj::db {
 			otherwise just return ok 
 			note: we return enum value
 			this will construct the 
-			std::error_code	return value
+			std::status_type	return value
 			because we have correctly implemented
-			our std::error_code framework
+			our std::status_type framework
 			*/
-			return dbj_err_code::sqlite_ok;
+			return sqlite_err_id::sqlite_ok;
 		}
 
 	}; // unique_handle
@@ -144,7 +130,7 @@ namespace dbj::db {
 		}
 
 		[[nodiscard]] static auto close(pointer value) noexcept 
-			-> std::error_code
+			-> std::status_type
 		{
 			return sqlite_ec( sqlite::sqlite3_close(value), DBJ_ERR_PROMPT("sqlite3_close() has failed"));
 		}
@@ -161,7 +147,7 @@ namespace dbj::db {
 			return nullptr;
 		}
 
-		[[nodiscard]] static auto close(pointer value) noexcept -> std::error_code
+		[[nodiscard]] static auto close(pointer value) noexcept -> std::status_type
 		{
 			return sqlite_ec(sqlite::sqlite3_finalize(value), DBJ_ERR_PROMPT("sqlite3_finalize() has failed"));
 		}
@@ -277,31 +263,31 @@ namespace dbj::db {
 		mutable connection_handle handle{};
 /*
 this function by design does not return a value 
-so we do not return a pair, just the error_code
+so we do not return a pair, just the status_type
 */
-	[[nodiscard]] static error_code
+	[[nodiscard]] static status_type
 		dbj_sqlite_open(connection_handle & handle_, char const * filename)	noexcept
 	{
-		error_code ec;
+		status_type ec;
 		handle_.reset(ec);
 		// on error return, do not open the db
 		if (ec) return ec;
-		// make the error_code, log if not OK and return it
+		// make the status_type, log if not OK and return it
 		return sqlite_ec(sqlite::sqlite3_open(filename,
 			handle_.get_address_of())
 		, DBJ_ERR_PROMPT("sqlite3_open has failed."));
 	}	
 	
-	[[nodiscard]] error_code
+	[[nodiscard]] status_type
 		prepare_statement (char const * query_, statement_handle & statement_ ) const noexcept
 	{
 		_ASSERTE(query_);
 		if (!handle)
-			return to_std_error_code(
+			return to_std_status_type(
 				::std::errc::protocol_error, 
 				"dbj::db::database -- Must call open() before " __FUNCSIG__ 
 			);
-		// make the error_code, log if error and return it
+		// make the status_type, log if error and return it
 		return sqlite_ec(sqlite::sqlite3_prepare_v2(
 			handle.get(),
 			query_,
@@ -319,7 +305,7 @@ so we do not return a pair, just the error_code
 		database( database &&) = delete;
 
 		// can *not* throw from this constructor
-		explicit database( string_view storage_name, error_code & ec ) noexcept
+		explicit database( string_view storage_name, status_type & ec ) noexcept
 		{
 			ec.clear();
 			ec = dbj_sqlite_open( this->handle, storage_name.data() );
@@ -329,14 +315,14 @@ so we do not return a pair, just the error_code
 		will do 'something like':
 		sqlite::sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
 		*/
-		[[nodiscard]] error_code register_user_defined_function 
+		[[nodiscard]] status_type register_user_defined_function 
 		( 
 			string_view udf_name, 
 			void(__cdecl * udf_)(sqlite::sqlite3_context *, int, sqlite::sqlite3_value **)
 		) const noexcept
 		{
 			if (!handle)
-				return to_std_error_code(
+				return to_std_status_type(
 					::std::errc::protocol_error,
 					"dbj::db::database -- Must call open() before " __FUNCSIG__
 				);
@@ -357,23 +343,23 @@ so we do not return a pair, just the error_code
 		}
 
 /*
-call with a query and a callback, return std::error_code
+call with a query and a callback, return std::status_type
 no error is SQLITE_DONE or SQLITE_OK
 */
-[[nodiscard]] error_code query (
+[[nodiscard]] status_type query (
 	char const * query_, 
 	result_row_callback  row_user_ 
 ) const noexcept
 {
 		if (!handle)
-			return to_std_error_code(
+			return to_std_status_type(
 				::std::errc::protocol_error,
 				"dbj::db::database -- Must call open() before " __FUNCSIG__
 			);
 		// will release the statement upon exit
 		statement_handle statement_;
-		// return if error_code is not 0 
-		if ( error_code e = prepare_statement(query_, statement_ );	e ) return e;
+		// return if status_type is not 0 
+		if ( status_type e = prepare_statement(query_, statement_ );	e ) return e;
 
 #ifdef _DEBUG
 		auto col_count_ [[maybe_unused]]= sqlite::sqlite3_column_count(statement_.get());
@@ -392,18 +378,18 @@ no error is SQLITE_DONE or SQLITE_OK
 			if (sql_result != SQLITE_OK) break;
 	    }
 		// if SQLITE_DONE return SQLITE_OK
-		if (sql_result == (int)dbj_err_code::sqlite_done )
-			return dbj_err_code::sqlite_ok;
+		if (sql_result == (int)sqlite_err_id::sqlite_done )
+			return sqlite_err_id::sqlite_ok;
 	    return sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite3_step() has failed"));
 	}
 /*
  execute SQL statements through here for which no result set is expected
 */
-		[[nodiscard]] error_code exec( const char * sql_ ) const noexcept
+		[[nodiscard]] status_type exec( const char * sql_ ) const noexcept
 		{
 			_ASSERTE(sql_);
 			if (!handle)
-				return to_std_error_code(
+				return to_std_status_type(
 					::std::errc::protocol_error,
 					"dbj::db::database -- Must call open() before " __FUNCSIG__
 				);
@@ -417,7 +403,7 @@ no error is SQLITE_DONE or SQLITE_OK
 			);
 
 			// this will log if sql_result was error
-		std::error_code ec_
+		std::status_type ec_
 				= sqlite_ec(sql_result, DBJ_ERR_PROMPT("sqlite3_exec() failed"));
 
 			return ec_ ;
@@ -480,8 +466,8 @@ no error is SQLITE_DONE or SQLITE_OK
 			_ASSERTE(this->argv_);
 
 			if (col_idx > argc_)
-				// throw error_instance(error_code::UDF_ARGC_INVALID);
-			throw std::make_error_code( errc::result_out_of_range );
+				// throw error_instance(status_type::UDF_ARGC_INVALID);
+			throw std::make_status_type( errc::result_out_of_range );
 
 			return transformer{
 				this->argv_, col_idx
@@ -567,7 +553,7 @@ static void function
 }; // udf_holder
 
 	template<dbj_sql_udf_type dbj_udf_>
-	[[nodiscard]] inline std::error_code 
+	[[nodiscard]] inline std::status_type 
 	register_dbj_udf(
 		database const & db,
 		char const * dbj_udf_name_
@@ -576,7 +562,7 @@ static void function
 		_ASSERTE(dbj_udf_name_);
 		using udf_container_type = udf_holder<dbj_udf_>;
 		sqlite3_udf_type udf_ = &udf_container_type::function;
-		std::error_code ec =  db.register_user_defined_function(dbj_udf_name_, udf_);
+		std::status_type ec =  db.register_user_defined_function(dbj_udf_name_, udf_);
 		return ec;
 	}
 
@@ -608,7 +594,7 @@ cid|name|type|notnull|dflt_value|pk
 1|json|JSON|0||0
 2|name|TEXT|0||0
 */
-	[[nodiscard]] inline error_code 
+	[[nodiscard]] inline status_type 
 		table_info(database const & db, 
 			std::string_view table_name ,
 			result_row_callback  result_callback_ )

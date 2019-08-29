@@ -220,7 +220,7 @@ scrPosition scrGetConsoleSize()
 {
 	scrPosition pos;
 
-	pos.row = pos.column = -1;
+	pos.row = pos.column = (size_t)-1;
 	scrInit();
 
 #ifdef SO_WINDOWS

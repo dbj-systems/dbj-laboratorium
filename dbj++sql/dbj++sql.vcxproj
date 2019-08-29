@@ -157,12 +157,12 @@
   <ItemGroup>
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_gpl_license.h" />
-    <ClInclude Include="dbj_log\dbj_log_user.h" />
-    <ClInclude Include="err\dbj_db_err.h" />
+    <ClInclude Include="discared\dbj_log\dbj_log_user.h" />
+    <ClInclude Include="dbj_sqlite_nanolib.h" />
+    <ClInclude Include="dbj_sql_error_concept.h" />
+    <ClInclude Include="discared\err\dbj_db_err_discarded.h" />
     <ClInclude Include="sqlite++.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="test\core_tests.h" />
-    <ClInclude Include="test\dbj_easy_udf_sample.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

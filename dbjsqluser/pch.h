@@ -1,32 +1,18 @@
 #pragma once
-#ifndef PCH_H
-#define PCH_H
 
- #include <sysinfoapi.h>
- #include <strsafe.h>
- #include <algorithm>
- #include <array>
- #include <cstddef>
- #include <cwctype>
- #include <cctype>
- #include <string>
- #include <vector>
- #include <map>
- #include <algorithm>
+#define DBJ_INCLUDE_STD_
+#include <dbj++/dbj++required.h>
 
-/*
-I would like it is not, but since Aug 13, 2019 and after VS update it is
-important what is included when.
+// we let dbj++ to use it's own wmain() 
+#define DBJ_WMAIN_USED
+#include <dbj++/dbj++.h>
 
-I am actively watching that space to overcome this limitation
-*/
-#include <dbj++/core/dbj++core.h>
-#include <dbj++/util/dbj++util.h>
-#include <dbj++/console/dbj++con.h>
-#include <dbj++/testfwork/dbj++testing_framework.h>
+#include "..//dbj++sql/sqlite++.h"
+#include "../dbj++ini/dbj++ini.h"
+
+// here we use dbj syslog client 
+// as we imagine this is some GUI app ...
+#ifndef DBJ_SYSLOG
 #define DBJ_SYSLOG (1==1)
+#endif
 #include <dbj++log/dbj++log.h>
-#include <dbj++sql/test/core_tests.h>
-#include <dbj++sql/test/dbj_easy_udf_sample.h>
-
-#endif //PCH_H

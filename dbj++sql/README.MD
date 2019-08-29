@@ -1,28 +1,74 @@
 
 # dbj++sql 
 
-Yet Another API (YAPI)
+**Version 2.0.0**
 
-This library is part of the dbj++ suite of utilities. It depends on it. For easy no struggle results, fork the whole dbj-laboratorium of which this is one project.
-
-There are things in there which are important. Like using syslog, windows client and server, and a such. Or proper usage of std::system_error etc. Time is short and documentation is surely comming. Please stay tuned.
-
-For immediate professional help please do mail me at: dbj@dbj.org
-
-#### C++17 SQLITE(3) for the rest of us
+#### YAPI (Yet Another API)
+C++17 SQLITE(3) for the rest of us
 
 (2019Q1, standard C++ is C++17)
 
+This is independent lib, but logicaly a part of the [**`dbj-laboratorium`** solution](https://github.com/dbj-systems/dbj-laboratorium).
+
+What we think is minimal functionality is implemented. For more we hope you can use this lib as the base.
+
+Currently ( 2019 AUG ) this is MSVC code. "Compiler agnostic", that is CLANG and GNU version, will come out next.
+
 > Disclaimer: <br/>
 > Immediatly usable in your projects. <br/>
-> This release is Proof Of Concept (POC). <br/>
-> Use at your own risk.
+> This is Proof Of Concept (POC). <br/>
+> Use at your own risk.<br/>
+> I do.
 
-For descriptions and instructions [please start from here](https://dbj.org/c-sqlite-yet-another-api/).
+More documentation is always in the works, if not all published. For immediate professional help please do mail me at: 
+[dbj@dbj.org](mailto:dbj@dbj.org)
 
-This is a static library. SQLITE 3 is linked in. 
+#### Testing
+Is in the separate project called `dbjsqluser`, also part of `dbj-laboratorium` Visual Studio solution.
 
-Built with Microsoft (R) C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
+#### Dependancies
+All the code in here is the `dbj::db` namespace. This is done, so that it differs from the `sqlite` namespace we have made in here.
+
+This is a static library. It depends on SQLITE 3, C library.
+It is is linked in, by the virtue of Visual Studio project.  But it is in the separate namespace, as done in `sqlite++.h`
+```cpp
+#ifdef __cplusplus
+namespace sqlite{
+#endif
+/*
+here we use the relative path
+and sqlite3 static lib
+
+in case you hotly disagree and wish to use the dll
+please download and install some sqlite3 built as dll, 
+and include its header bellow
+*/
+#include "../sqlite3_lib/sqlite3.h"
+
+#ifdef __cplusplus
+}
+#endif
+/*
+assumption is you know how to use pragma comment lib
+in case you might preffer it.
+*/
+```
+
+Beside C++ std lib no other external code is required.
+
+### Exception safety
+
+Writing such a code is [not trivial](https://stackoverflow.com/questions/1853243/do-you-really-write-exception-safe-code/1853769#1853769). We are hoping we might help you if you 
+need or want to write such a code. 
+
+C++ STD lib code is throwing exceptions. Code we have in here is never throwing exceptions. To signal the status to the callers
+we use  `dbj_db_status_type`, please see the `dbj_sql_error_concept.h`
+
+In case of terminating error, we write it to the stderr and call the `exit()`. 
+
+<hr>
+
+Built with Microsoft Visual Studio 2019 and C/C++ Optimizing Compiler Version 19.15.26732.1 or better.
 
 
 -------------------------------------

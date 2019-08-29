@@ -5,6 +5,9 @@ DBJ_TEST_SPACE_OPEN(dbj_kalends_testing)
 
 using namespace std;
 
+using buffer = typename ::dbj::vector_buffer<char>;
+using buffer_type = buffer::narrow ;
+
 /*
   first we declare return value type we will use
 */

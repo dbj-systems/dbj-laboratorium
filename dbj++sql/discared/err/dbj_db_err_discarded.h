@@ -50,7 +50,7 @@ namespace dbj::db::err
 
 #pragma endregion
 
-	enum class dbj_err_code
+	enum class sqlite_err_id
 	{
 		/*
 		https://sqlite.org/c3ref/c_abort.html
@@ -88,7 +88,7 @@ namespace dbj::db::err
 		sqlite_warning = 28,   /* warnings from sqlite= 3 ,_log() */
 		sqlite_row = 100,  /* sqlite= 3 ,_step() has another row ready */
 		sqlite_done = 101    /* sqlite= 3 ,_step() has finished executing */
-	}; // dbj_err_code
+	}; // sqlite_err_id
 } // dbj::db::err 
 
 // system_error fwk requires api private enums to be
@@ -96,7 +96,7 @@ namespace dbj::db::err
 namespace std
 {
 	template <>
-	struct is_error_code_enum<::dbj::db::err::dbj_err_code>
+	struct is_error_code_enum<::dbj::db::err::sqlite_err_id>
 		: public true_type {};
 }
 
@@ -151,22 +151,22 @@ string is managed internally and must not be freed by the application.
 	inline std::error_code int_to_dbj_error_code(int sqlite_retval) {
 		// careful! this is DEBUG only
 		_ASSERTE(
-			(sqlite_retval >= (int)dbj_err_code::sqlite_ok) &&
-			(sqlite_retval <= (int)dbj_err_code::sqlite_done)
+			(sqlite_retval >= (int)sqlite_err_id::sqlite_ok) &&
+			(sqlite_retval <= (int)sqlite_err_id::sqlite_done)
 		);
 
 		return
 		::std::error_code(sqlite_retval, get_dbj_err_category());
 	}
 
-	inline std::error_code make_error_code(dbj_err_code e)
+	inline std::error_code make_error_code(sqlite_err_id e)
 	{
 		return std::error_code(
 			static_cast<int>(e),
 			get_dbj_err_category());
 	}
 
-	inline  std::error_condition make_error_condition(dbj_err_code e)
+	inline  std::error_condition make_error_condition(sqlite_err_id e)
 	{
 		return std::error_condition(
 			static_cast<int>(e),
@@ -176,21 +176,21 @@ string is managed internally and must not be freed by the application.
 	// ok, done and row are 3 codes not considered as errors in sqlite3 
 	inline bool is_sql_not_err ( std::error_code ec_ ) 
 	{
-		static std::error_code ok_{ dbj_err_code::sqlite_ok };
-		static std::error_code done_{ dbj_err_code::sqlite_done };
-		static std::error_code row_{ dbj_err_code::sqlite_row };
+		static std::error_code ok_{ sqlite_err_id::sqlite_ok };
+		static std::error_code done_{ sqlite_err_id::sqlite_done };
+		static std::error_code row_{ sqlite_err_id::sqlite_row };
 		return ((ec_ == ok_) || (ec_ == done_ ) || (ec_ == row_ )) ;
 	}
 	/*
 	inline bool is_sql_err_done( std::error_code ec_ ) 
 	{
-		static std::error_code done_{ dbj_err_code::sqlite_done };
+		static std::error_code done_{ sqlite_err_id::sqlite_done };
 		return ec_ == done_;
 	}
 
 	inline bool is_sql_err_row( std::error_code ec_ ) 
 	{
-		static std::error_code row_{ dbj_err_code::sqlite_row };
+		static std::error_code row_{ sqlite_err_id::sqlite_row };
 		return ec_ == row_;
 	}
 	*/
@@ -207,7 +207,7 @@ string is managed internally and must not be freed by the application.
 	 {
           return sucess(42) ;
 		  // error retval example
-		  return failure(0, dbj_err_code::bad_argument ) ;
+		  return failure(0, sqlite_err_id::bad_argument ) ;
 	 }
 
 	 simple usage is :
@@ -247,7 +247,7 @@ string is managed internally and must not be freed by the application.
 		auto succes(T v) 
 			-> dbj_err_return_type<T>
 		{
-			return std::pair{ v, dbj_err_code::sqlite_ok };
+			return std::pair{ v, sqlite_err_id::sqlite_ok };
 		};
 #pragma endregion
 } // dbj::db::err

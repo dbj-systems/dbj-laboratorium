@@ -14,9 +14,10 @@ namespace sqlite{
 /*
 here we use the relative path
 and sqlite3 static lib
-for production code please download and install 
-sqlite3 dll, put the header on the path
-and include accordingly
+
+if you hotly disagree and wish to use the dll
+please download and install the sqlite3 dll, 
+and include its header bellow
 */
 #include "../sqlite3_lib/sqlite3.h"
 

@@ -15,7 +15,7 @@ wide char strings in and out
 
 https://alfps.wordpress.com/2011/11/22/unicode-part-1-windows-console-io-approaches/	*/
 #ifdef _MSC_VER
-namespace {
+namespace dbj::db {
 	// Convert a wide Unicode string to an UTF8 string
 	std::string wide_to_multi(std::wstring_view wstr)
 	{

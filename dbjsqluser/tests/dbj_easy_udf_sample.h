@@ -1,13 +1,5 @@
 #pragma once
-#include "../dbj++sql.h"
-// her we use our own syslog client 
-// as we assume this library is linked to 
-// some GUI app ...
-// so there is no console
-#ifndef DBJ_SYSLOG
-#define DBJ_SYSLOG (1==1)
-#endif
-#include <dbj++log/dbj++log.h>
+#include "../pch.h"
 
 // NOTE: this is a bit unusual for syslog but
 // we are testing dbj++log, too ..
@@ -52,7 +44,7 @@ namespace dbj_easy_udfs_sample {
 	constexpr inline auto QRY_WITH_UDF
 		= "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"sv;
 	/*
-	for the above sql the result set will be: 
+	for the above sql the result set will be:
 	0:'word'(type:const char *), 1:'strlen(word)'(type:int)
 
 	Please observe and understand the shape of the sql select, result set
@@ -63,8 +55,8 @@ namespace dbj_easy_udfs_sample {
 	alsways the same for any udf
 	*/
 	inline void palindrome(
-		const sql::udf_argument  & args_,
-		const sql::udf_retval    & result_
+		const sql::udf_argument& args_,
+		const sql::udf_retval& result_
 	)
 		// do not throw from this UDF
 		noexcept
@@ -100,9 +92,9 @@ namespace dbj_easy_udfs_sample {
 	   to be used in this statement
 	   "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	*/
-	inline void strlen_udf (
-		const sql::udf_argument  & args_,
-		const sql::udf_retval    & result_
+	inline void strlen_udf(
+		const sql::udf_argument& args_,
+		const sql::udf_retval& result_
 	)
 		// do not throw from the UDF
 		noexcept
@@ -117,7 +109,7 @@ namespace dbj_easy_udfs_sample {
 	*/
 	static int dbj_udfs_result_handler(
 		const size_t row_id,
-		const sql::row_descriptor & col
+		const sql::row_descriptor& col
 	)
 	{
 		/* this is deliberately verbose code */

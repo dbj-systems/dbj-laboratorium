@@ -1,52 +1,36 @@
 #include "pch.h"
 
-#ifdef DBJ_LOG_TESTING
-static void log_sampler();
+#ifndef DBJ_WMAIN_USED
+#pragma message( "\n\n\n" __FILE__)
+#pragma message( "\nDBJ_WMAIN_USED has to be defined \n\n\n" )
+#error DBJ_WMAIN_USED undefined?
 #endif
 
-#ifdef DBJ_INI_READER_TESTING
-static void ini_sampler();
-#endif
+#include "tests/core_tests.h"
+#include "tests/dbj_easy_udf_sample.h"
+#include "tests/more_dbj_db_tests.h"
+#include "tests/ini_file_and_syslog_testing.h"
 
 
-extern void test_dbj_sql_lite_udf();
-extern void test_dbj_sql_lite();
+#pragma warning( push )
+#pragma warning( disable: 4100 )
+// https://msdn.microsoft.com/en-us/library/26kb9fy0.aspx 
 
-// int wmain( int argc, wchar_t * argv [], wchar_t * envp )
-int main( int argc, char * argv [])
+/// <summary>
+/// called from wmain() form inside dbj++
+/// just execute all the registered tests
+/// in no particular order
+/// </summary>
+void dbj_program_start(
+	const int argc,
+	const wchar_t* argv[],
+	const wchar_t* envp[]
+)
 {
-	test_dbj_sql_lite_udf();
-	test_dbj_sql_lite();
+	DBJ_TRACE(L"\n\n%s -- Started\n", argv[0] );
+	// TODO: make this async
+	dbj::testing::execute(argc, argv, envp);
+	DBJ_TRACE(L"\n\n%s -- Finished\n", argv[0]);
 }
 
-
-#ifdef DBJ_INI_READER_TESTING
-#include <dbj++ini/ini_reader_sampler.h>
-
-static void ini_sampler()
-{
-	auto test_ini = [](dbj::chr_buf::yanb folder_)
-		-> dbj::chr_buf::yanb
-	{
-		std::string rv(folder_);
-		return (rv.append("\\test.ini")).data();
-	};
-
-	dbj::ini::ini_file_descriptor ifd = dbj::ini::ini_file();
-	dbj::chr_buf::yanb my_data[] = { test_ini(ifd.folder) };
-	test_dbj_ini_reader(1, my_data);
-}
-#endif // DBJ_INI_READER_TESTING
-
-#ifdef DBJ_LOG_TESTING
-static void log_sampler()
-{
-	// namespace galimatias
-	using dbj::chr_buf::yanb;
-	using namespace ::dbj::win32;
-	using namespace ::dbj::log;
-
-	yanb basename_ = module_basename();
-	dbj_log_test(0, basename_);
-}
-#endif
+#pragma warning( pop ) // 4100
