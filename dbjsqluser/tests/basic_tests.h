@@ -21,8 +21,8 @@ namespace two_tests
 	std::unique_ptr<char[]> is the only other type we could use
 	but it is only slightly faster and not very easy to use
 	*/
-	using buffer = typename dbj::sql::v_buffer;
-	using buffer_type = typename dbj::sql::v_buffer::buffer_type;
+	using buffer = typename dbj::nanolib::v_buffer;
+	using buffer_type = typename buffer::buffer_type;
 
 
 	// in memory db for testing
@@ -92,7 +92,7 @@ namespace two_tests
 		 note: db.exec return the status too
 
 		 this SQL is wrong because we already have 4,5,6 as primary keys in that table in the demo db
-		 thus the caller will be notified in will decide what to do
+		 thus the caller will be notified and will decide what to do
 		 */
 		return db.exec(
 			u8"INSERT INTO demo_table (Id, Name) "
@@ -125,22 +125,7 @@ namespace two_tests
 		// result set traversal
 	}
 
-	int universal_callback(
-		const size_t row_id,
-		const sql::row_descriptor& cell
-	)
-	{
-		auto print_cell = [&](int j_) {
-			DBJ_FPRINTF(stdout, "%10s: %s,", cell.name(j_), ((buffer_type)cell(j_)).data());
-		};
 
-		DBJ_FPRINTF(stdout, "\n\t%zu", row_id);
-		for (int k = 0; k < cell.column_count(); k++)
-			print_cell(k);
-		return SQLITE_OK;
-		// otherwise sqlite3 will stop the 
-		// result set traversal
-	}
 	/*
 	use the above callback's
 	*/
@@ -154,58 +139,28 @@ namespace two_tests
 
 		DBJ_FPRINTF(stdout, "\nmeta data for columns of the table 'demo_table'\n");
 		err_.clear();
-		err_ = sql::table_info(db, "demo_table", universal_callback);
-		if (err_) {
-			DBJ_FPRINTF(stdout, "\n%s", err_.to_buffer(err_).data());
-		}
-
-		return err_;
+		/*
+		execute the table_info and pass the status out
+		*/
+		return sql::table_info(db, "demo_table", sql::universal_callback) ;
 	}
 
-	[[nodiscard]] inline status_type
-		test_select()
-		noexcept
+	[[nodiscard]] inline status_type test_select() noexcept
 	{
 		status_type err_;
 		const sql::database& db = demo_db(err_);
 		if (err_) 	return err_; // return on error
 
 		DBJ_FPRINTF(stdout, "\nexecute: 'SELECT Id, Name FROM demo_table'\n");
-		err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
-		return err_;
+		return db.query("SELECT Id,Name FROM demo_table", sample_callback);
 	}
 
-	/*
-	   As a sample DB, I am using an English dictionary in a file,
-	   https://github.com/dwyl/english-words/
-	   which I have transformed in the SQLite 3 DB file.
-	   It has a single table: words, with a single text column named word.
-	   this is full path to my SQLIte storage
-	   please replace it with yours
-	   for that use one of the many available SQLite management app's
-	*/
-	[[nodiscard]] inline status_type test_statement_using(
-		sql::result_row_callback row_user_,
-		const char* db_file = "C:\\dbj\\DATABASES\\EN_DICTIONARY.db"
-	) noexcept
-	{
-		status_type err_;
-		const sql::database db(db_file, err_); // using the real db
-		if (err_) {
-			// it is already logged
-			// just return it
-			return err_;
-		}
-		err_.clear();
-		// provoke error
-		return db.query(
-			"select word from words where word like 'bb%'",
-			row_user_);
-	}
+/*
+Remember: this is called once per each row
+SQL statement result set this is processing is:
 
-	/*
-	Remember: this is called once per each row
-	*/
+"select word, definition from entries where word like 'zy%'"
+*/
 	int example_callback(
 		const size_t row_id,
 		const dbj::sql::row_descriptor& row_
@@ -214,14 +169,35 @@ namespace two_tests
 		// 'automagic' transform to the buffer type
 		// of the column 0 value for this row
 		buffer_type  word_ = row_(0);
-		DBJ_FPRINTF(stdout, "\n\t ROW (%zd) : \t %s", row_id, word_.data() );
+		buffer_type  definition_ = row_(1);
+		DBJ_FPRINTF(stdout, "\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
 
-		// all these should provoke exception
-		// TODO: but they don't -- currently
-		long   DBJ_MAYBE(number_) = row_(0);
-		double DBJ_MAYBE(real_) = row_(0);
+		//// all these should provoke exception
+		//// TODO: but they don't -- currently
+		//long   DBJ_MAYBE(number_) = row_(0);
+		//double DBJ_MAYBE(real_) = row_(0);
+
 		return SQLITE_OK;
 	}
+	/* here we use the external database 
+	set the DB_FILE_PATH to its full path
+	*/
+#include "db_file_path.inc"
+
+	[[nodiscard]] inline status_type test_statement_using(
+		sql::result_row_callback row_user_,
+		const char* db_file = DB_FILE_PATH.data()
+	) noexcept
+	{
+		status_type status;
+		const sql::database db(db_file, status); // using the real db from the db file
+		if (status) return status;
+
+		// returns the status
+		return db.query("select word, definition from entries where word like 'zy%'", row_user_);
+	}
+
+
 
 	/*
 	Test Unit registration
@@ -231,16 +207,16 @@ namespace two_tests
 			::dbj::sql::dbj_db_status_type  status_;
 
 			status_ = test_wrong_insert();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char *)status_);
+			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", (const char *)status_);
 
 			status_ = test_table_info();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
+			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", (const char*)status_);
 
 			status_ = test_select();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
+			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", (const char*)status_);
 
 			status_ = test_statement_using(example_callback);
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
+			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", (const char*)status_);
 
 			/*
 			NOTE: above we just perform "rint-and-proceed"

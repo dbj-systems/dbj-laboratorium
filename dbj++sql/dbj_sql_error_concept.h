@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dbj_sqlite_nanolib.h"
+#include <dbj++nano/dbj_nanolib.h>
 #include "sqlite++.h"
 
 /*
@@ -15,7 +15,7 @@ namespace dbj::sql
 	using namespace std;
 
 
-	using buffer = typename v_buffer ;
+	using buffer = typename dbj::nanolib::v_buffer ;
 	using buffer_type = typename buffer::buffer_type ;
 
 	enum class status_code : int
@@ -88,8 +88,8 @@ namespace dbj::sql
 		using sqlite_status_type = optional< ::dbj::sql::status_code >;
 		using std_errc_type = optional< std::errc >;
 
-		using buffer		= typename dbj::sql::v_buffer ;
-		using buffer_type	= typename buffer::buffer_type ;
+		//using buffer		= typename dbj::sql::v_buffer ;
+		//using buffer_type	= typename buffer::buffer_type ;
 		using location_type = optional< buffer_type >;
 		
 		sqlite_status_type	sqlite_status_id;
@@ -190,7 +190,7 @@ namespace dbj::sql
 
 			int rez_ = std::snprintf(
 				buffy_.data(), buffy_.size(),
-				"sqlite3 id:%d, message:%s\nstd::errc id:%d, message:%s\nlocation: %s",
+				"sqlite3 id:%d, message:%s, std::errc id:%d, message:%s, location: %s",
 				(sql_status_id ? int(*sql_status_id) : 0 ),
 				(sql_status_message_ ? (*sql_status_message_).data() : "SQLITE_OK" ),
 				(std_errc_id ? int(*std_errc_id) : 0 ),
@@ -199,13 +199,13 @@ namespace dbj::sql
 			);
 
 			if (rez_ < 0 )
-				dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
+				::dbj::nanolib::dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
 
 			return buffy_;
 		}
 
 	}; // dbj_db_status_type
 
-#define DBJ_LOCATION  dbj::sql::v_buffer::make("(line: " _CRT_STRINGIZE( __LINE__ ) "), file: " __FILE__)
+#define DBJ_LOCATION  dbj::sql::buffer::make("(line: " _CRT_STRINGIZE( __LINE__ ) "), file: " __FILE__)
 
 } // namespace dbj::sqlite

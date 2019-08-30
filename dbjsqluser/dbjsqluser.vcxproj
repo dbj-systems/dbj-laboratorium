@@ -165,7 +165,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="tests\easy_udf_sample.h" />
-    <ClInclude Include="tests\two_tests.h" />
+    <ClInclude Include="tests\basic_tests.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

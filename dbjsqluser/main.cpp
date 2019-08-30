@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "tests/two_tests.h"
+#include "tests/basic_tests.h"
 #include "tests/easy_udf_sample.h"
 
 #pragma warning( push )
@@ -18,6 +18,14 @@ void start_from_separate_thread(
 	DBJ_FPRINTF( stdout, "\n\n%s -- Started\n", argv[0] );
 		dbj::tu::catalog.execute();
 	DBJ_FPRINTF( stdout, "\n\n%s -- Finished\n", argv[0]);
+
+#ifdef _DEBUG
+#ifdef _MSC_VER
+	::system("@echo.");
+	::system("@echo.");
+	::system("@pause");
+#endif
+#endif
 }
 
 int main(int argc, char const * argv[], char const * envp[])

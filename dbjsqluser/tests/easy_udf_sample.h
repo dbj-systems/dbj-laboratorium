@@ -46,15 +46,25 @@ namespace dbj_easy_udfs_sample {
 	std::unique_ptr<char[]> is the only other type we could use
 	but it is only slightly faster and not very easy to use
 	*/
-	using buffer = typename dbj::sql::v_buffer;
-	using buffer_type = typename dbj::sql::v_buffer::buffer_type;
+	using buffer = typename dbj::nanolib::v_buffer;
+	using buffer_type = typename buffer::buffer_type;
 
 	// DB_FILE_PATH setup
 	// current default:
 	// setup of constexpr inline auto DB_FILE_PATH = "d:\\dictionary.db"sv;
 #include "../db_file_path.inc"
 
-
+	constexpr inline auto DEMO_DB_CREATE_SQL = "DROP TABLE IF EXISTS entries; "
+		"CREATE TABLE entries ( Id int primary key, Name nvarchar(100) not null ); "
+		"INSERT INTO entries values (1, 'LondonodnoL');"
+		"INSERT INTO entries values (2, 'Glasgow');"
+		"INSERT INTO entries values (3, 'CardifidraC');"
+		"INSERT INTO entries values (4, 'Belgrade');"
+		"INSERT INTO entries values (5, 'RomamoR');"
+		"INSERT INTO entries values (6, 'Sarajevo');"
+		"INSERT INTO entries values (7, 'Pregrevica');"
+		"INSERT INTO entries values (8, 'ZemunumeZ');"
+		"INSERT INTO entries values (9, 'Batajnica');";
 	/* use case:
 	   solve the following query using dbj++sql easy edf feature
 
@@ -63,7 +73,7 @@ namespace dbj_easy_udfs_sample {
 	   they are not available in SQLITE3 SQL as inbuilt functions
 	*/
 	constexpr inline auto QRY_WITH_UDF
-		= "SELECT word, strlen(word) FROM entries WHERE (1 == palindrome(word))"sv;
+		= "SELECT word, strlen(word) FROM entries WHERE ( 1 == palindrome(word) );";
 	/*
 	Please observe and understand the shape of the sql select, result set
 	as this is from where we source the argument for the palindrome()
@@ -123,16 +133,10 @@ namespace dbj_easy_udfs_sample {
 			we will now get to it, bit in a safe fashion
 			we must not throw exceptions from here
 		*/
-		auto optional_transformer = args_(0);
-		/*
-		if we made a call with the wrong index above the return value
-		will be nullopt
-		we will simly return on that ocassion
-		*/
-		if (!optional_transformer) return;
 
 		// can not use auto here
-		buffer_type word_ = *optional_transformer;
+		// dbj::sql::transformer in action
+		buffer_type word_ = args_(0);
 
 		if (word_.size() > 1)
 		{
@@ -160,10 +164,7 @@ namespace dbj_easy_udfs_sample {
 		// do not throw from the UDF
 		noexcept
 	{
-		auto optional_transformer = args_(0);
-		if (!optional_transformer) return;
-
-		buffer_type word_ = *optional_transformer;
+		buffer_type word_ = args_(0);
 		/*
 		note: we need to cast to int, SQL has no size_t
 		*/
@@ -179,7 +180,7 @@ namespace dbj_easy_udfs_sample {
 	for the above sql, each row of the result set will be:
 	0:'word'(type:const char *), 1:'strlen(word)'(type:int)
 
-	that is: only the plaindromes will be returned and thier strlen 
+	that is: only the plaindromes will be returned and thier strlen
 	will be displayed too
 	*/
 	static int dbj_udfs_result_handler(
@@ -190,10 +191,10 @@ namespace dbj_easy_udfs_sample {
 		/* this is deliberately verbose code */
 		buffer_type word = col(0);
 		int len_ = col(1);
-		
+
 		DBJ_FPRINTF(stdout, "\n\t[%3zu]\tword: %32s,\t%s: %12d",
 			row_id, word.data(), col.name(1), len_);
-		
+
 		// make sure to return always this  sqlite3 macro
 		return SQLITE_OK;
 	}
@@ -205,41 +206,68 @@ namespace dbj_easy_udfs_sample {
 	   emanating from dbj++sql
 	*/
 	[[nodiscard]] status_type test_udf(
-		string_view query_ = QRY_WITH_UDF
+		sql::database const& database,
+		char const* query_ = QRY_WITH_UDF
 	) noexcept
 	{
-		// assure the database presence
-		// return status_type on error
-		status_type status;
-		sql::database db(DB_FILE_PATH, status); 
-		// return on error status
-		if (status) return status;
-		// register the two udf's required
-		// string names of udf's must match the SQL they are part of
-		// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
-		// always returning the status_type on error
-		// obviuosly macro afficionados are welcome here
-		status.clear();
-		status = sql::register_dbj_udf<palindrome>(db, "palindrome"); 
-		if (status) return status; // return on error status
-		
-		status.clear();
-		status = sql::register_dbj_udf<strlen_udf>(db, "strlen"); 
-		if (status) return status; // return on error status
-
-		// execute the query using the 
-		// standard result processing calback 
-		// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
-		return db.query(query_.data(), dbj_udfs_result_handler);
+		_ASSERTE(query_);
+		DBJ_FPRINTF(stdout, "\n\nTEST UDF with the  query: '%s'\n\n", query_);
+		return database.query(query_, sql::universal_callback  /*dbj_udfs_result_handler*/);
 		// return the status_type
 	} // test_udf
 
+	#define CHECK_RETURN if (status) { DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status); return; }
+	/*
+	Test Unit registration
+	*/
 	TU_REGISTER([] {
 
-		auto status_ = test_udf();
+		status_type status;
 
-		DBJ_FPRINTF(stdout, "\n%s", (char const*)status_);
+		// this is called only on the firs call
+		auto initor = [](status_type& stat_)
+			-> const sql::database &
+		{
+			static sql::database db(":memory:", stat_);
+			if (stat_) return db; // return on error state
+			stat_ = db.exec(DEMO_DB_CREATE_SQL);
+			return db;
+		};
+		// here we keep the single sql::database type instance
+		static  sql::database const& database = initor(status);
+
+		CHECK_RETURN;
+
+			// register the two udf's required
+			// string names of udf's must match the SQL they are part of
+			// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
+			// always returning the status_type on error
+			// obviuosly macro afficionados are welcome here
+			status = sql::register_dbj_udf<
+				palindrome /* function we register */
+			>(
+				database,  /* to which database */
+				"palindrome" /* how we want it called when used from SQL */
+				);
+			CHECK_RETURN;// return on error status
+
+			status.clear();
+			status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
+			CHECK_RETURN; // return on error status
+
+			// no error thus proceed
+			// just see the :memory: demo db 
+			status = test_udf(database, "SELECT * FROM entries;");
+			if (status) DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status);
+
+			// execute the query using the 
+			// standard result processing calback 
+			// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
+			// that SQL will need 'strlen' and 'palindrome' UDF's
+			// they are not available by default
+			status = test_udf(database);
+			if (status) DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status);
 
 		});
-
+#undef CHECK_RETURN
 } // namespace dbj_easy_udfs_sample 

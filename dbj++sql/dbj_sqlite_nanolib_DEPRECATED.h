@@ -24,6 +24,13 @@ namespace dbj::sql {
 #define DBJ_VERIFY(x) DBJ_VERIFY_(x,__FILE__,__LINE__)
 #endif
 
+/*
+first arg has to be stdout, stderr, etc ...
+*/
+#define DBJ_FPRINTF(...) \
+	do { if (errno_t result_ = ::fprintf(__VA_ARGS__); result_ < 0) \
+	::dbj::nanolib::dbj_terror( ::dbj::sql::dbj_terror( "fprintf() failed", __FILE__, __LINE__); } while(false)
+
 #pragma region vector char_type buffer
 
 	constexpr inline std::size_t DBJ_64KB = UINT16_MAX;

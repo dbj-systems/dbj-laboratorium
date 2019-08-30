@@ -18,10 +18,10 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\two_tests.h">
+    <ClInclude Include="tests\easy_udf_sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\easy_udf_sample.h">
+    <ClInclude Include="tests\basic_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

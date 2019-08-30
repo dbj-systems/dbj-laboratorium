@@ -39,7 +39,7 @@
     <ClInclude Include="dbj_sql_error_concept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_sqlite_nanolib.h">
+    <ClInclude Include="dbj_sqlite_nanolib_DEPRECATED.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
