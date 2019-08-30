@@ -164,8 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="tests\core_tests.h" />
-    <ClInclude Include="tests\dbj_easy_udf_sample.h" />
+    <ClInclude Include="tests\easy_udf_sample.h" />
     <ClInclude Include="tests\two_tests.h" />
   </ItemGroup>
   <ItemGroup>

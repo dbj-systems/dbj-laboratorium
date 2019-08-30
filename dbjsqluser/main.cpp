@@ -1,15 +1,6 @@
 #include "pch.h"
-
-// used in headers bellow
-namespace sql = ::dbj::sql;
-// three important types used everywhere 
-using status_type	= typename dbj::sql::dbj_db_status_type;
-using buffer		= typename dbj::nanolib::v_buffer;
-using buffer_type	= typename dbj::nanolib::v_buffer::buffer_type;
-
-
 #include "tests/two_tests.h"
-#include "tests/dbj_easy_udf_sample.h"
+#include "tests/easy_udf_sample.h"
 
 #pragma warning( push )
 #pragma warning( disable: 4100 )
