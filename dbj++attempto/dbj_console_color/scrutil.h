@@ -39,6 +39,9 @@ https://github.com/Baltasarq/cscrutil
 			Color ink;
 		} scrAttributes;
 
+		/* dbj added */
+		void white_on_black();
+
 		/**
 			Clear the screen
 		*/

@@ -168,10 +168,8 @@ namespace two_tests
 	{
 		status_type err_;
 		const sql::database& db = demo_db(err_);
-		if (err_) {
-			// it is already logged
-			return err_;
-		}
+		if (err_) 	return err_; // return on error
+
 		DBJ_FPRINTF(stdout, "\nexecute: 'SELECT Id, Name FROM demo_table'\n");
 		err_ = db.query("SELECT Id,Name FROM demo_table", sample_callback);
 		return err_;
@@ -206,20 +204,6 @@ namespace two_tests
 	}
 
 	/*
-	here we register the tests
-	*/
-
-	//void test_dbj_sql_lite_udf()
-	TU_REGISTER(
-		[] {
-			namespace sql = ::dbj::sql;
-
-			using status_type = typename dbj::sql::dbj_db_status_type;
-			using buffer = typename dbj::sql::v_buffer;
-			using buffer_type = typename dbj::sql::v_buffer::buffer_type;
-		});
-
-	/*
 	Remember: this is called once per each row
 	*/
 	int example_callback(
@@ -247,19 +231,16 @@ namespace two_tests
 			::dbj::sql::dbj_db_status_type  status_;
 
 			status_ = test_wrong_insert();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char *)status_);
 
-			status_.clear();
 			status_ = test_table_info();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
 
-			status_.clear();
 			status_ = test_select();
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
 
-			status_.clear();
 			status_ = test_statement_using(example_callback);
-			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", status_.to_buffer(status_).data());
+			DBJ_FPRINTF(stdout, "\n Status : \n %s\n", (const char*)status_);
 
 			/*
 			NOTE: above we just perform "rint-and-proceed"

@@ -126,9 +126,19 @@ static inline void scrInit()
 	return;
 }
 
+/* dbj added  */
+void white_on_black()
+{
+	libAttrs.ink = scrWhite;
+	libAttrs.paper = scrBlack;
+}
+
 void scrClear()
 {
 	scrInit();
+
+	/* dbj added  */
+	white_on_black();
 
 #ifdef SO_WINDOWS
 	/*
