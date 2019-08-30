@@ -1,5 +1,5 @@
 # dbj-laboratorium
-Testing , Reasearch and Development. In and around  dbj++
+Testing , Reasearch and Development. In and around  ISO C++
 
 > Disclaimer: Various working and usable Proofs Of Concepts (POC). Unless stated otherwise.
 
