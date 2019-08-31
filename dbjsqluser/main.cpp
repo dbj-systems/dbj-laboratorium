@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "tests/basic_tests.h"
 #include "tests/easy_udf_sample.h"
+#include "tests/naked_udf.h"
 
 #pragma warning( push )
 #pragma warning( disable: 4100 )

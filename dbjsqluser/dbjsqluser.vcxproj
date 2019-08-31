@@ -101,6 +101,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -118,6 +119,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,6 +141,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,12 +163,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="sqlite3\sqlite3.h" />
     <ClInclude Include="tests\easy_udf_sample.h" />
     <ClInclude Include="tests\basic_tests.h" />
+    <ClInclude Include="tests\naked_udf.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -177,22 +183,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\dbj++ini\dbj++ini.vcxproj">
-      <Project>{26cc61dc-cded-4a26-9b9a-0b8d802a4a9e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
-      <Project>{1b5860b3-1de7-4232-9080-81af60e1bd7f}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\dbj++sql\dbj++sql.vcxproj">
-      <Project>{7f0bed4b-5cd0-45e8-aa55-b8c56b10e6cf}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\sqlite3_lib\sqlite3_lib.vcxproj">
-      <Project>{c7425ad8-771a-4921-833c-93626eb0efce}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="C:\dbj\sqlite-dll-win64-x64-3290000\sqlite3.def" />
     <None Include="db_file_path.inc" />
     <None Include="readme.md" />
+    <None Include="sqlite3.dll" />
+    <None Include="sqlite3\sqlite3.def" />
+    <None Include="sqlite3\sqlite3.dll">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="sqlite3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

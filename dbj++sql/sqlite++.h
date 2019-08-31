@@ -19,8 +19,10 @@ if you hotly disagree and wish to use the dll
 please download and install the sqlite3 dll, 
 and include its header bellow
 */
-#include "../sqlite3_lib/sqlite3.h"
+#include "sqlite3/sqlite3.h"
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma comment(lib, "sqlite3.lib")

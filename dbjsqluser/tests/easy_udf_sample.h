@@ -253,12 +253,12 @@ namespace dbj_easy_udfs_sample {
 
 			status.clear();
 			status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
-			CHECK_RETURN; // return on error status
+				CHECK_RETURN; // return on error status
 
 			// no error thus proceed
 			// just see the :memory: demo db 
 			status = test_udf(database, "SELECT * FROM entries;");
-			if (status) DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status);
+				CHECK_RETURN;
 
 			// execute the query using the 
 			// standard result processing calback 
@@ -266,7 +266,7 @@ namespace dbj_easy_udfs_sample {
 			// that SQL will need 'strlen' and 'palindrome' UDF's
 			// they are not available by default
 			status = test_udf(database);
-			if (status) DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status);
+				CHECK_RETURN;
 
 		});
 #undef CHECK_RETURN

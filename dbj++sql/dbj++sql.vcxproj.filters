@@ -39,7 +39,7 @@
     <ClInclude Include="dbj_sql_error_concept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_sqlite_nanolib_DEPRECATED.h">
+    <ClInclude Include="sqlite3\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,5 +50,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />
+    <None Include="sqlite3\sqlite3.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="sqlite3\sqlite3.dll" />
+    <None Include="sqlite3\sqlite3.exp" />
+    <None Include="sqlite3\readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="sqlite3\sqlite3.lib" />
   </ItemGroup>
 </Project>

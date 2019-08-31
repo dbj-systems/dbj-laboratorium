@@ -157,9 +157,9 @@
   <ItemGroup>
     <ClInclude Include="dbj++sql.h" />
     <ClInclude Include="dbj_gpl_license.h" />
-    <ClInclude Include="dbj_sqlite_nanolib_DEPRECATED.h" />
     <ClInclude Include="dbj_sql_error_concept.h" />
     <ClInclude Include="sqlite++.h" />
+    <ClInclude Include="sqlite3\sqlite3.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +172,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />
+    <None Include="sqlite3\readme.md" />
+    <None Include="sqlite3\sqlite3.def" />
+    <None Include="sqlite3\sqlite3.dll" />
+    <None Include="sqlite3\sqlite3.exp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="sqlite3\sqlite3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
