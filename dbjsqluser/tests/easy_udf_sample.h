@@ -98,7 +98,7 @@ namespace dbj_easy_udfs_sample {
 
 	udf begins here
 	*/
-	inline void palindrome(
+	extern "C" static void palindrome(
 		const sql::udf_argument& args_, // input
 		const sql::udf_retval& result_  // output
 	)
@@ -157,7 +157,7 @@ namespace dbj_easy_udfs_sample {
 	   example: to be used in this statement
 	   "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	*/
-	inline void strlen_udf(
+	extern "C" static void strlen_udf(
 		const sql::udf_argument& args_, // input
 		const sql::udf_retval& result_  // output
 	)

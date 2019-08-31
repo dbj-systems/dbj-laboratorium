@@ -563,7 +563,7 @@ namespace dbj::sql {
 	{
 		_ASSERTE(dbj_udf_name_);
 		using udf_container_type = udf_holder<dbj_udf_>;
-		sqlite3_udf_type udf_ = &udf_container_type::function;
+		sqlite3_udf_type udf_ = & udf_container_type::function;
 		// return the status after registering the function
 		return { db.register_user_defined_function(dbj_udf_name_, udf_) };
 	}
