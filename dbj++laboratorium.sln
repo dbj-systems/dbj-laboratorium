@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++", "dbj++\dbj++.vcxite
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++nano", "dbj++nano\dbj++nano.vcxitems", "{59D2CE3D-CF91-4777-ACAF-CF74764F21D5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj_buffering_research", "dbj_buffering_research\dbj_buffering_research.vcxproj", "{566171B0-CB90-4D41-A181-C5679B4E8850}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dbj++\dbj++.vcxitems*{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}*SharedItemsImports = 9
@@ -130,6 +132,14 @@ Global
 		{26CC61DC-CDED-4A26-9B9A-0B8D802A4A9E}.Release|x64.Build.0 = Release|x64
 		{26CC61DC-CDED-4A26-9B9A-0B8D802A4A9E}.Release|x86.ActiveCfg = Debug|x64
 		{26CC61DC-CDED-4A26-9B9A-0B8D802A4A9E}.Release|x86.Build.0 = Debug|x64
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Debug|x64.ActiveCfg = Debug|x64
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Debug|x64.Build.0 = Debug|x64
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Debug|x86.ActiveCfg = Debug|Win32
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Debug|x86.Build.0 = Debug|Win32
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x64.ActiveCfg = Release|x64
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x64.Build.0 = Release|x64
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x86.ActiveCfg = Release|Win32
+		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
