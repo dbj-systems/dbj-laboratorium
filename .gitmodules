@@ -1,0 +1,4 @@
+[submodule "dbj_buffering_research/dbj--nanolib"]
+	path = dbj_buffering_research/dbj--nanolib
+	url = https://github.com/dbj-systems/dbj--nanolib.git
+	branch = master
