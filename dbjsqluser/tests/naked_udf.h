@@ -53,7 +53,7 @@ namespace naked_udf {
 	sqlite3_context -- https://sqlite.org/c3ref/context.html
 	sqlite3_value -- https://sqlite.org/c3ref/value.html
 	*/
-	inline void palindrome(
+	extern "C" static void palindrome(
 		sqlite::sqlite3_context* context,
 		int argc,
 		sqlite::sqlite3_value** argv
