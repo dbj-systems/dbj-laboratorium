@@ -57,7 +57,7 @@ namespace dbj {
 		using optimal_wbuffer_type = ::std::array<wchar_t, BUFFER_OPTIMAL_SIZE >;
 
 		template<size_t SZ_>
-		inline constexpr optimal_buffer_type narrow(void) noexcept
+		inline constexpr auto narrow(void) noexcept
 		{
 			/*
 			will not compile if SZ_ is out of boundaries
@@ -71,7 +71,7 @@ namespace dbj {
 		}
 
 		template<size_t SZ_>
-		inline constexpr optimal_wbuffer_type wide(void) noexcept
+		inline constexpr auto wide(void) noexcept
 		{
 			return ::std::array<wchar_t, SZ_ >{ {wchar_t(0)} };
 		}
@@ -221,7 +221,7 @@ namespace dbj {
 	template<typename CHAR>
 	struct unique_ptr_buffer_type final
 	{
-		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
+		static_assert( dbj::nanolib::is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
 
 		using type			= unique_ptr_buffer_type;

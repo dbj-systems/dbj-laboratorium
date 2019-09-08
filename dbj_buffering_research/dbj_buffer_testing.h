@@ -1,5 +1,6 @@
 #pragma once
-
+#include <ctime>
+#include <chrono>
 
 
 TU_REGISTER([] {
@@ -9,114 +10,95 @@ TU_REGISTER([] {
 		using T = ::std::decay_t< decltype(C_) >;
 		using helper = dbj::vector_buffer<T>;
 
-		DBJ_TUNIT(helper::make(BUFSIZ));
-		DBJ_TUNIT(helper::make(specimen));
-		DBJ_TUNIT(helper::make(std::basic_string<T>(specimen)));
-		DBJ_TUNIT(helper::make(std::basic_string_view<T>(specimen)));
+		DBJ_FPRINTF( stdout, "\n%s", helper::make(BUFSIZ).data() );
+		DBJ_FPRINTF( stdout, "\n%s", helper::make(specimen).data() );
+		DBJ_FPRINTF( stdout, "\n%s", helper::make(std::basic_string<T>(specimen)).data());
+		DBJ_FPRINTF( stdout, "\n%s", helper::make(std::basic_string_view<T>(specimen)).data());
 	};
 	driver('*', "narrow string");
-	driver(L'*', L"wide string");
+	// driver(L'*', L"wide string");
 	});
 
 
-DBJ_TEST_UNIT(unique_ptr_buffer_type)
-{
+TU_REGISTER([] {
 	// not as fast as naked unique ptr
 	// but comfortable api
 	using buffer = dbj::unique_ptr_buffer_type<char>;
 
 	auto mover = [](buffer b_) -> buffer { return b_; };
 
-	DBJ_TEST_ATOM( buffer(0xFF).size() );
-	DBJ_TEST_ATOM( mover( buffer("ABC")) );
-	DBJ_TEST_ATOM( mover( buffer("ABC")).size() );
-	DBJ_TEST_ATOM( mover( buffer("ABC"))[0] );
-	DBJ_TEST_ATOM( mover( buffer("ABC")).buffer() );
+	DBJ_FPRINTF( stdout, "\n%zu", buffer(0xFF).size());
+	DBJ_FPRINTF( stdout, "\n%s", mover(buffer("ABC")).buffer().get() );
+	DBJ_FPRINTF( stdout, "\n%zu", mover(buffer("ABC")).size());
+	DBJ_FPRINTF( stdout, "\n%c", mover(buffer("ABC"))[0]);
+	DBJ_FPRINTF( stdout, "\n%s", mover(buffer("ABC")).buffer().get());
 
 	auto buffy = buffer("DEF");
 	buffy[0] = 'D';
 	buffy[1] = 'E';
 	buffy[2] = 'F';
-	DBJ_TEST_ATOM( buffy );
+	DBJ_FPRINTF( stdout, "\n%s", buffy.buffer().get());
 
-		// checked !
-		//	buffy[5] = '!'; 
-}
+	// checked !
+	//	buffy[5] = '!'; 
+	});
 
-DBJ_TEST_UNIT(compile_time_buffers)
-{
+TU_REGISTER([] {
 	using namespace ::dbj::compile_time_buffers;
 
-	DBJ_TEST_ATOM(narrow());
-	DBJ_TEST_ATOM(narrow< 0xFF >());
-	DBJ_TEST_ATOM(wide());
-	DBJ_TEST_ATOM(wide< 0xFF >());
+	DBJ_FPRINTF( stdout, "\n%s", narrow().data());
+	DBJ_FPRINTF( stdout, "\n%s", narrow< 0xFF >().data());
+	DBJ_FPRINTF( stdout, "\n%S", wide().data());
+	DBJ_FPRINTF( stdout, "\n%S", wide< 0xFF >().data());
 
-	/*
-	Will not compile thanks to dbj::ct_0_to_max 
-	DBJ_TEST_ATOM(wide<  ::dbj::DBJ_MAX_BUFF_LENGTH + 0xFF >());
-	*/
-}
+	});
 
-DBJ_TEST_UNIT(buffers_and_literals)
-{
+TU_REGISTER([] {
 	// using namespace std;
-	using namespace ::dbj::core::unvarnished ;
+	using namespace ::dbj::core::unvarnished;
 	using namespace ::dbj::unique_ptr_buffers;
 	// auto & print = console::print ;
 
-	DBJ_TEST_ATOM(::dbj::arr::string_literal_to_std_char_array("WOW?!"));
+	DBJ_FPRINTF( stdout, "\n%s",  ( "STRING LITERAL"_buffer ).get() );
+	DBJ_FPRINTF( stdout, "\n%S",  (L"WIDE STRING LITERAL"_buffer).get() );
 
-	// std::array{ '1','2','3' }
-	DBJ_TEST_ATOM(123_std_char_array);
-	// std::array{ '0','x','1','2' }
-	DBJ_TEST_ATOM(0x12_std_char_array);
-	// std::array{ '4'.'2','.','1','3' }
-	DBJ_TEST_ATOM(42.13_std_char_array);
+	DBJ_FPRINTF( stdout, "\n%s",  ("STRING LITERAL"_buffer_pair).second.get());
+	DBJ_FPRINTF( stdout, "\n%S",  (L"WIDE STRING LITERAL"_buffer_pair).second.get());
 
-	DBJ_TEST_ATOM("STRING LITERAL"_buffer);
-	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_buffer);
-
-	DBJ_TEST_ATOM("STRING LITERAL"_buffer_pair);
-	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_buffer_pair);
-
-	DBJ_TEST_ATOM("STRING LITERAL"_v_buffer);
-	DBJ_TEST_ATOM(L"WIDE STRING LITERAL"_v_buffer);
+	DBJ_FPRINTF( stdout, "\n%s",  ("STRING LITERAL"_v_buffer).data() );
+	DBJ_FPRINTF( stdout, "\n%S",  (L"WIDE STRING LITERAL"_v_buffer).data() );
 
 	// usability
-	auto [ s_1, p_1 ]	= "STRING LITERAL"_buffer_pair ;
-	auto [ s_2, p_2 ]	= L"WIDE STRING LITERAL"_buffer_pair ;
+	auto [s_1, p_1] = "STRING LITERAL"_buffer_pair;
+	auto [s_2, p_2] = L"WIDE STRING LITERAL"_buffer_pair;
 
-	DBJ_TEST_ATOM(up_buffer_make("Buffy"));
+	DBJ_FPRINTF(stdout, "\n%s", up_buffer_make("Buffy").get() );
 
-}
+	});
 
-DBJ_TEST_UNIT(dbj_light_buffer)
-{
+TU_REGISTER([] {
+
 	const auto bufsiz_ = BUFSIZ;
 	using helper = dbj::vector_buffer<char>;
 
-	auto driver = [&]( typename dbj::vector_buffer<char>::narrow cbr) noexcept -> void
+	auto driver = [&](typename dbj::vector_buffer<char>::buffer_type cbr) noexcept -> void
 	{
-		auto alphabet = [](auto & cbr)
+		auto alphabet = [](auto& cbr)
 		{
 			char k = 65; // 'A'
 			for (auto& c_ : cbr)
 			{
-				c_ = char( (k++) % (65 + 26) );
+				c_ = char((k++) % (65 + 26));
 			}
 			return cbr;
 		};
 
 		alphabet(cbr);
-		DBJ_TEST_ATOM( cbr );
-		DBJ_ATOM_TEST( cbr.size() );
-		DBJ_TEST_ATOM( cbr.data() );
-		DBJ_ATOM_TEST( std::strlen(cbr.data() ) );
+		DBJ_FPRINTF(stdout, "\n\nvector<char>, size: %zu, data: %s, strlen of data: %zu", cbr.size(), cbr.data(), std::strlen(cbr.data()));
 	};
 
 	driver(helper::narrow(BUFSIZ));
-}
+	});
 
 namespace inner {
 
@@ -153,7 +135,7 @@ namespace inner {
 	*/
 	inline auto measure = [](
 		auto fp,
-		::dbj::rt_0_to_max buffer_sz,
+		size_t buffer_sz,
 		size_t max_iteration = max_iterations)
 	{
 		// good enough for the purpose
@@ -186,36 +168,35 @@ namespace inner {
 
 
 
-DBJ_TEST_UNIT(dbj_buffers_comparison) {
+TU_REGISTER([] {
 
 	using namespace inner;
-	const auto & print = ::dbj::console::print;
 
-	print("\n\n*****************************************************************************"
+	DBJ_FPRINTF( stdout, "\n\n*****************************************************************************"
 		"\n\nWill test and measure FIVE types of runtime buffers\n\n");
 
 	/*
-	on this machine I have found, 
+	on this machine I have found,
 	std::string is considerably slower than anything else
 	*/
 
-	auto driver = [&](auto  buf_size_) 
+	auto driver = [&](size_t  buf_size_)
 	{
-		print("\n\nBuffer size:\t\t",		buf_size_,	"\nIterations:\t\t",max_iterations,"\n\n");
-		print(measure(naked_unique_ptr,		buf_size_), " miki s. \t unique_ptr<char[]>\n");
-		print(measure(naked_shared_ptr,		buf_size_), " miki s. \t shared_ptr<char[]>\n");
-		print(measure(uniq_ptr_buffer,		buf_size_), " miki s. \t dbj unique_ptr_buffer<char>\n");
-		print(measure(dbj_vector_buffer,	buf_size_), " miki s. \t std::vector\n");
-		print(measure(string_buffer,		buf_size_), " miki s. \t std::string\n");
+		DBJ_FPRINTF( stdout, "\n\nBuffer size: %zu \t\t\nIterations: %d\n\n", buf_size_, max_iterations );
+		DBJ_FPRINTF( stdout, "%f miki s. \t unique_ptr<char[]>\n" , measure(naked_unique_ptr, buf_size_));
+		DBJ_FPRINTF( stdout, "%f miki s. \t shared_ptr<char[]>\n", measure(naked_shared_ptr, buf_size_));
+		DBJ_FPRINTF( stdout, "%f miki s. \t dbj unique_ptr_buffer<char>\n", measure(uniq_ptr_buffer, buf_size_));
+		DBJ_FPRINTF( stdout, "%f miki s. \t std::vector\n", measure(dbj_vector_buffer, buf_size_));
+		DBJ_FPRINTF( stdout, "%f miki s. \t std::string\n", measure(string_buffer, buf_size_));
 	};
 
-	driver(buffer_size / 1  );
-	driver(buffer_size / 2  );
-	driver(buffer_size / 4  );
-	driver(buffer_size / 8  );
-	driver(buffer_size / 16 );
+	driver(buffer_size / 1);
+	driver(buffer_size / 2);
+	driver(buffer_size / 4);
+	driver(buffer_size / 8);
+	driver(buffer_size / 16);
 
 	system("@pause");
 	system("@echo.");
-}
+	});
 
