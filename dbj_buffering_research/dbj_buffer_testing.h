@@ -2,7 +2,7 @@
 
 
 
-DBJ_TEST_UNIT(some_vector_buffer_testing) {
+TU_REGISTER([] {
 
 	auto driver = [](auto C_, auto specimen)
 	{
@@ -16,7 +16,7 @@ DBJ_TEST_UNIT(some_vector_buffer_testing) {
 	};
 	driver('*', "narrow string");
 	driver(L'*', L"wide string");
-}
+	});
 
 
 DBJ_TEST_UNIT(unique_ptr_buffer_type)
