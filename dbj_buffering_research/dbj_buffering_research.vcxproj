@@ -158,8 +158,6 @@
     <ClCompile Include="dbj_buffering_research.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dbj--nanolib\dbj++nanolib.h" />
-    <ClInclude Include="dbj--nanolib\dbj++tu.h" />
     <ClInclude Include="dbj_buffers.h" />
     <ClInclude Include="dbj_buffer_testing.h" />
   </ItemGroup>

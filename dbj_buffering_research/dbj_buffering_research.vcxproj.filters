@@ -26,11 +26,5 @@
     <ClInclude Include="dbj_buffer_testing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj--nanolib\dbj++nanolib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dbj--nanolib\dbj++tu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
