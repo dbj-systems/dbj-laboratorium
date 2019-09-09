@@ -92,7 +92,7 @@ namespace dbj {
 	template<typename CHAR>
 	struct vector_buffer final {
 
-		static_assert( dbj::nanolib::is_any_same_as_first_v<CHAR, char, wchar_t>,
+		static_assert(dbj::nanolib::is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
 
 		using buffer_type		=  std::vector<CHAR>;
@@ -221,13 +221,13 @@ namespace dbj {
 	template<typename CHAR>
 	struct unique_ptr_buffer_type final
 	{
-		static_assert( dbj::nanolib::is_any_same_as_first_v<CHAR, char, wchar_t>,
+		static_assert(dbj::nanolib::is_any_same_as_first_v<CHAR, char, wchar_t>,
 			"\n\n" __FILE__  "\n\n\tdbj_char_buffer requires char or wchar_t only\n\n");
 
 		using type			= unique_ptr_buffer_type;
 		using char_type		= CHAR;
-		using value_type	= std::unique_ptr<char_type[]>;
-		using pair_type		= std::pair< size_t, value_type >;
+		using pointer_type	= std::unique_ptr<char_type[]>;
+		using pair_type		= std::pair< size_t, pointer_type >;
 
 		// String Terminator
 		constexpr static inline char_type ST = char_type(0);
@@ -293,31 +293,33 @@ namespace dbj {
 			return *this;
 		}
 
-		// interface
+		// public interface
 
-		char_type& operator [] ( unsigned idx_ ) { 
-//			DBJ_VERIFY( size() >= idx_ );
-			return pair_.second[idx_]; 
+		// for non const instances we do allow changing them chars
+		char_type& operator [] (unsigned idx_)
+		{
+			// reminder: debug check only
+			// this is performance killer
+			// soo ...
+			// _ASSERTE(size() >= idx_); 
+			return pair_.second[idx_];
 		}
 
-//		// for constant instances we do not allow changing them chars
-//		char_type const & operator [] ( unsigned const & idx_) const { 
-////			DBJ_VERIFY( size() >= idx_);
-//			return pair_.second[idx_];
-//		}
-
+		// for constant instances we do not allow changing them chars
 		const size_t size() const noexcept { return pair_.first; };
-		value_type const& buffer() const noexcept { return pair_.second; };
+		pointer_type const& buffer() const noexcept { return pair_.second; };
 
+		// questionable but comfortable
+		// easier use with legacy api's
 		operator size_t () const noexcept { return pair_.first; };
-		operator value_type  const& () const noexcept { return pair_.second; };
+		operator pointer_type  const& () const noexcept { return pair_.second; };
 
 		// utilities
-		static pair_type& copy(pair_type& left_, pair_type const& right_) {
+		static pair_type& copy_same_size (pair_type& left_, pair_type const& right_) {
 
 			DBJ_VERIFY(left_.first == right_.first);
-			value_type& left_p_ = left_.second;
-			value_type const& right_p_ = right_.second;
+			pointer_type& left_p_ = left_.second;
+			pointer_type const& right_p_ = right_.second;
 
 			for (auto j = 0; j < left_.first; j++) {
 				left_p_[j] = right_p_[j];
@@ -333,6 +335,24 @@ namespace dbj {
 	unvarnished is synonim for literal
 	*/
 	namespace core::unvarnished {
+
+		/*
+numeric literals user defined literal. usege:
+
+	using namespace dbj::core::literals ;
+
+	// std::array{ '1','2','3' }
+	constexpr auto a_1 = 123_std_char_array ;
+	// std::array{ '0','x','1','2' }
+	constexpr auto a_2 = 0x12_std_char_array ;
+	// std::array{ '4'.'2','.','1','3' }
+	constexpr auto a_3 = 42.13_std_char_array ;
+*/
+		template< char ... Chs >
+		inline constexpr decltype(auto) operator"" _std_char_array()
+		{
+			return  std::array{ Chs... , char(0) };
+		}
 
 		// using namespace ::dbj::unique_ptr_buffer;
 
