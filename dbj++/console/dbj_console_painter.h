@@ -10,7 +10,7 @@ namespace inner {
 				enum class Colour : unsigned {
 					None = 0,		White = 1,	Red =2,	Green = 3, Blue =4 , Cyan = 5,
 					Yellow = 6,		Grey = 7,
-					Bright = 0x10,
+					Bright = FOREGROUND_INTENSITY,
 
 					BrightRed   = Bright  | Red,	BrightGreen = Bright | Green,
 					BrightBlue  =  Bright | Cyan  /*Blue*/,	LightGrey = Bright | Grey,
@@ -46,7 +46,7 @@ namespace inner {
 			case Colour::LightGrey:     return setTextAttribute(FOREGROUND_INTENSITY);
 			case Colour::BrightRed:     return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_RED);
 			case Colour::BrightGreen:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_GREEN);
-			case Colour::BrightBlue:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_BLUE);
+			case Colour::BrightBlue:   return setTextAttribute( FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 			case Colour::BrightWhite:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 			default: throw "Exception in "  __FUNCSIG__ " : not a valid colour code?";
 		}

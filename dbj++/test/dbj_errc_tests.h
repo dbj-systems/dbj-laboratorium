@@ -26,7 +26,7 @@ namespace e_repo
 		e{{ BASE_ERR_ID + 0, "Unknown error ID"_v_buffer } },
 		e{{ BASE_ERR_ID + 1, "Well, this is weird?"_v_buffer }},
 		e{{ BASE_ERR_ID + 2, "Has anybody seen this?"_v_buffer }},
-		e{{ BASE_ERR_ID + 3, "Divisor 0 has no meaing"_v_buffer }}
+		e{{ BASE_ERR_ID + 3, "Divisor 0 has no meaning"_v_buffer }}
 	};
 
 	// search by 1,2,3 ... 0 is "unknown error"
