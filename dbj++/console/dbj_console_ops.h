@@ -18,6 +18,17 @@ namespace dbj::console {
 	*/
 	template <typename T> inline void out(T);
 
+	/*
+	this is the special out that does not use the console output class
+	but painter commander
+	Thus we achieved a decoupling of console and painter
+	*/
+	inline void out(dbj::console::painter_command cmd_)
+	{
+		dbj::console::painter_commander_instance.execute(cmd_);
+	}
+
+
 	// stings and string literals are different by design ***********************************************
 	template<> inline void out< char*>(char* str);
 	template<> inline void out< wchar_t*>(wchar_t* str);
@@ -80,12 +91,12 @@ namespace dbj::console {
 	for buffering we use vector<char_type> for runtime and array <char_type, N> for compile time
 	*/
 
-	/*template<>*/ inline void out/*<::std::vector<char> const & >*/ (::std::vector<char> const & );
-	/*template<>*/ inline void out/*< ::std::vector<wchar_t> const & >*/ (::std::vector<wchar_t> const &);
+	/*template<>*/ inline void out/*<::std::vector<char> const & >*/(::std::vector<char> const&);
+	/*template<>*/ inline void out/*< ::std::vector<wchar_t> const & >*/(::std::vector<wchar_t> const&);
 
 	// template <typename T> inline void out(T);
 
-	template<size_t N> inline void out/*<::std::array<char,N> const& >*/(::std::array<char,N> const&);
+	template<size_t N> inline void out/*<::std::array<char,N> const& >*/(::std::array<char, N> const&);
 	template<size_t N> inline void out/*< ::std::array<wchar_t, N> const& >*/(::std::array<wchar_t, N> const&);
 
 #pragma endregion
@@ -468,16 +479,6 @@ namespace dbj::console {
 	template<> inline void out<unsigned long int>(unsigned long int val) { DBJ_TYPE_REPORT_FUNCSIG; PRN.printf("%I32d", val); }
 	template<> inline void out<unsigned long long int>(unsigned long long int val) { DBJ_TYPE_REPORT_FUNCSIG; PRN.printf("%I64d", val); }
 
-	/*
-	this is the special out that does not use the console output class
-	but painter commander
-	Thus we achieved a decoupling of console and painter
-	*/
-	template<>	inline void out<dbj::console::painter_command>(dbj::console::painter_command cmd_)
-	{
-		dbj::console::painter_commander_instance.execute(cmd_);
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// std classes
 	///////////////////////////////////////////////////////////////////////////
@@ -634,12 +635,12 @@ namespace dbj::console {
 
 #pragma region dbj buffers
 
-	/*template<>*/ inline void out/*<::std::vector<char> const & >*/(::std::vector<char> const &  vector_charr_buffer_)
+	/*template<>*/ inline void out/*<::std::vector<char> const & >*/(::std::vector<char> const& vector_charr_buffer_)
 	{
 		::dbj::console::PRN.printf(L"%S", vector_charr_buffer_.data());
 	}
 
-	/*template<>*/ inline void out/*< ::std::vector<wchar_t> const & >*/(::std::vector<wchar_t> const & vector_charr_buffer_)
+	/*template<>*/ inline void out/*< ::std::vector<wchar_t> const & >*/(::std::vector<wchar_t> const& vector_charr_buffer_)
 	{
 		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
 	}
@@ -649,18 +650,18 @@ namespace dbj::console {
 		::dbj::console::PRN.printf(L"%S", charr_.data());
 
 	}
-	
+
 	template<size_t N> inline void out/*< ::std::array<wchar_t, N> const& >*/(::std::array<wchar_t, N> const& charr_)
 	{
 		::dbj::console::PRN.printf(L"%s", charr_.data());
 	}
 
 #ifdef DBJ_DEPRECATED_BUFFERS
-	inline void out(typename ::dbj::unique_ptr_buffer_type <char> const & x_) {
+	inline void out(typename ::dbj::unique_ptr_buffer_type <char> const& x_) {
 		PRN.printf("%s", x_.buffer().get());
 	}
 
-	inline void out(typename ::dbj::unique_ptr_buffer_type <wchar_t> const & x_) {
+	inline void out(typename ::dbj::unique_ptr_buffer_type <wchar_t> const& x_) {
 		PRN.printf(L"%s", x_.buffer().get());
 	}
 #endif // DBJ_DEPRECATED_BUFFERS

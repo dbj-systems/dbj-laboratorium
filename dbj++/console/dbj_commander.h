@@ -52,7 +52,7 @@ namespace dbj {
 				using command_map_type = std::map<	CMD_ENUM, executor_type, comparator_type >;
 
 				/*	commander's function */
-				const executor_return_type execute(const CMD_ENUM & command) const
+				const executor_return_type execute( CMD_ENUM  command) const
 				{
 					try {
 						return dbj::call(command_map_.at(command));

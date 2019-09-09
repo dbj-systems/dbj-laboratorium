@@ -31,11 +31,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++nano", "dbj++nano\dbj+
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj_buffering_research", "dbj_buffering_research\dbj_buffering_research.vcxproj", "{566171B0-CB90-4D41-A181-C5679B4E8850}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj--sqlite", "dbj--sqlite\dbj--sqlite.vcxitems", "{EC401CB2-0A27-4887-9761-E64E5E6C526B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dbj++\dbj++.vcxitems*{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}*SharedItemsImports = 9
 		dbj++nano\dbj++nano.vcxitems*{59d2ce3d-cf91-4777-acaf-cf74764f21d5}*SharedItemsImports = 9
 		dbj++\dbj++.vcxitems*{9c92850f-c359-4e82-b3b1-e274da337058}*SharedItemsImports = 4
+		dbj--sqlite\dbj--sqlite.vcxitems*{ec401cb2-0a27-4887-9761-e64e5e6c526b}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

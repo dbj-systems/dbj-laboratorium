@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{ec401cb2-0a27-4887-9761-e64e5e6c526b}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj++sql.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_sql_error_concept.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite++.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite3.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.MD" />
+  </ItemGroup>
+</Project>

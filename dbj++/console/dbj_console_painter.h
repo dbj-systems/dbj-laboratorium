@@ -8,13 +8,9 @@ namespace dbj::console {
 namespace inner {
 				/* modification of catch.h console colour mechanism */
 				enum class Colour : unsigned {
-					None = 0,		White = 1,	Red =2,	Green = 3, Blue =4 , Cyan = 5,
-					Yellow = 6,		Grey = 7,
-					Bright = FOREGROUND_INTENSITY,
-
-					BrightRed   = Bright  | Red,	BrightGreen = Bright | Green,
-					BrightBlue  =  Bright | Cyan  /*Blue*/,	LightGrey = Bright | Grey,
-					BrightWhite = Bright  | White,
+					None ,			White ,		Red ,		Green ,		Blue  ,			Cyan ,
+					Yellow ,		Grey ,		Bright ,	BrightRed ,	BrightGreen ,	BrightBlue  ,	
+					LightGrey ,		BrightWhite 
 
 				};
 				/* stop the colour to text attempts*/
@@ -48,8 +44,11 @@ namespace inner {
 			case Colour::BrightGreen:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_GREEN);
 			case Colour::BrightBlue:   return setTextAttribute( FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 			case Colour::BrightWhite:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
-			default: throw "Exception in "  __FUNCSIG__ " : not a valid colour code?";
+			default: 
+				perror( __FILE__ "(" _CRT_STRINGIZE(__LINE__) ")" " -- Exception in "  __FUNCSIG__ " : not a valid colour code?");
 		}
+		_ASSERTE(false); // debug break
+		std::exit(EXIT_FAILURE); // runtime exit
 	}
 	/* modern interface */
 	const bool text( std::variant<Colour> _colourCode) const {

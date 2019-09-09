@@ -44,20 +44,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="README.MD" />
-    <None Include="sqlite3\sqlite3.def">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="sqlite3\sqlite3.dll" />
-    <None Include="sqlite3\sqlite3.exp" />
-    <None Include="sqlite3\readme.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="sqlite3\sqlite3.lib" />
   </ItemGroup>
 </Project>
