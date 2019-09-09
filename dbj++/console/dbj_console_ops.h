@@ -629,7 +629,7 @@ namespace dbj::console {
 	{
 		::dbj::console::PRN.printf(L"%s", vector_charr_buffer_.data());
 	}
-
+#ifdef DBJ_DEPRECATED_BUFFERS
 	inline void out(typename ::dbj::unique_ptr_buffer_type <char> const & x_) {
 		PRN.printf("%s", x_.buffer().get());
 	}
@@ -637,7 +637,7 @@ namespace dbj::console {
 	inline void out(typename ::dbj::unique_ptr_buffer_type <wchar_t> const & x_) {
 		PRN.printf(L"%s", x_.buffer().get());
 	}
-
+#endif // DBJ_DEPRECATED_BUFFERS
 #pragma endregion 
 
 #pragma region error codes and options

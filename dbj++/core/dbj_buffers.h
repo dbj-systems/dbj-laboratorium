@@ -153,6 +153,8 @@ namespace dbj {
 
 #pragma endregion
 
+#ifdef DBJ_DEPRECATED_BUFFERS
+
 #pragma region naked unique_ptr as buffer
 
 	namespace unique_ptr_buffers {
@@ -383,6 +385,13 @@ namespace dbj {
 			);
 		}
 
+	} // core::unvarnished 
+
+#pragma endregion unique_ptr_buffer_type
+
+#endif // DBJ_DEPRECATED_BUFFERS
+
+	namespace literals {
 		inline  std::vector< char >
 			operator "" _v_buffer(const char* sliteral_, size_t)
 		{
@@ -394,11 +403,7 @@ namespace dbj {
 		{
 			return vector_buffer<wchar_t>::make(sliteral_);
 		}
-
-	} // core::unvarnished 
-
-#pragma endregion unique_ptr_buffer_type
-
+	} // literals
 
 } // dbj
 

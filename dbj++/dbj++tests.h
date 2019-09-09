@@ -10,7 +10,6 @@ or even run time...but ... this works
 // are not included in dbj++.h
 // for using this include it after dbj++.h
 
-#define dbj_buffer_testing
 #define dbj_ap_env_test   
 #define dbj_commander_test   
 // #define dbj_console_test   
@@ -36,9 +35,6 @@ or even run time...but ... this works
 #include "test\dbj_core_tests.h"
 #endif
 
-#ifdef dbj_buffer_testing
-#include "test\dbj_buffer_testing.h"  
-#endif
 #ifdef dbj_ap_env_test   
 #include "test\dbj_ap_env_test.h"  
 #endif

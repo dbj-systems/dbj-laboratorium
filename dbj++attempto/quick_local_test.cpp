@@ -202,6 +202,7 @@ namespace dbj::samples::init {
 
 namespace dbj::samples::inner {
 
+#ifdef DBJ_DEPRECATED_BUFFERS
 
 	DBJ_TEST_UNIT(array_uniq_ptr)
 	{
@@ -219,6 +220,8 @@ namespace dbj::samples::inner {
 
 		print("\n\nbuffy copy: ", buffy_copy, "\nduffy copy: ", duffy_copy);
 	}
+#endif // DBJ_DEPRECATED_BUFFERS
+
 	// creator functions must return values
 	// this is to prevent them keeping static instances
 	// this is actually what is also known

@@ -50,7 +50,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_any_optional_tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_ap_env_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_array_testing.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_buffer_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_commander_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_console_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_core_tests.h" />
