@@ -2,4 +2,8 @@
 
 #include "pch.h"
 
-// In general, ignore this file, but keep it around if you are using pre-compiled headers.
+#if _WIN64
+#pragma comment(lib, "dbj--sqlite3\\sqlite3.lib")
+#else
+#error SQLITE lib and dll are built for x64 applications.
+#endif
