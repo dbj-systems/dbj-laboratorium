@@ -2,16 +2,22 @@
 
 namespace dbj::errc{
 
-	struct error_type final 
+	/*
+	meaning of the state type depends on the wider scope 
+	*/
+	struct state_type final 
 	{
 		using id_type = typename idmessage::id_type;
 		using message_type = typename idmessage::message_type ;
 
-	   idmessage      error;
+	   idmessage      state;
 	   idmessage      location;
 
-	   static constexpr bool valid( error_type const & err_ ) {
-		   return  idmessage::valid(err_.error);
+	   /*
+	   by valid we mean has "state" field in non initial state
+	   */
+	   constexpr bool valid( ) {
+		   return  state.valid() ;
 	   }
     };
 

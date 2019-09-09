@@ -23,7 +23,7 @@ namespace e_repo
 	constexpr inline e::id_type BASE_ERR_ID = 1000U ;
 
 	inline const array errors{
-		e{{ BASE_ERR_ID + 0, "Unknown error ID"_v_buffer } },
+		e{ { BASE_ERR_ID + 0, "Unknown error ID"_v_buffer } },
 		e{{ BASE_ERR_ID + 1, "Well, this is weird?"_v_buffer }},
 		e{{ BASE_ERR_ID + 2, "Has anybody seen this?"_v_buffer }},
 		e{{ BASE_ERR_ID + 3, "Divisor 0 has no meaing"_v_buffer }}

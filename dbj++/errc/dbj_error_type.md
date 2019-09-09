@@ -48,12 +48,14 @@ Stay on the right side of simple. Use as the base type, Id + Message data type. 
 |  Message            |                   | Standard Library    |
 +---------------------+                   +---------------------+
 ```
-Same as eveything else in this design and implementation, idmessage structure
-depends on the iso C++, stdnard library. This is implied dependancy and we shall no repeaat it on every diagram.
+Same as everything else in this design and implementation, idmessage structure
+depends on the iso C++, standard library. 
+This is implied dependancy, thus we shall not repeat it on every diagram.
 
 #### idmessage is not literal
 
-Events provoking error states in any IT system are inherently run-time in nature. Thus the `idmessage` struture can not be requested to be created at compile-time, that is before system even starts to function.
+Events provoking error states in any IT system are inherently 
+run-time in nature. Thus the `idmessage` struture can not be requested to be created at compile-time, that is: before system even starts to function.
 
 ### error_type_
 
@@ -221,7 +223,7 @@ We will implement idmessage function helpers to manage instance of it.
 ```
 Same as standard C++ we are coding in value semantics fashion.
 
-Since we have came to the conslusion `vactor<char>` is the optimal solution for the `message_type` implementations, we will require small set of helpers to create from types that users might use to create idmessage type instances.
+Since `vector<char>` is the optimal solution for the `message_type` implementations, we will require small set of helpers to create from types that users might use to create idmessage type instances.
 ```cpp
     // zero terminated strings
     idmessage idmessage_make

@@ -109,7 +109,9 @@ namespace inner {
 	{ painter_command::green,			[&]() { painter_.text(Colour::Green);		return true;  }},
 	{ painter_command::blue,			[&]() { painter_.text(Colour::Blue);		return true;  }},
 	{ painter_command::bright_red,		[&]() { painter_.text(Colour::BrightRed);	return true;  }},
-	{ painter_command::bright_blue,		[&]() { painter_.text(Colour::BrightBlue);	return true;  }}
+	{ painter_command::bright_blue,		[&]() { painter_.text(Colour::BrightBlue);	return true;  }},
+	{ painter_command::cyan,    		[&]() { painter_.text(Colour::Cyan);	    return true;  }},
+	{ painter_command::grey,    		[&]() { painter_.text(Colour::Grey);	    return true;  }}
 				});
 					return cmdr_;
 			}(); // execute the once-init lambda in place	

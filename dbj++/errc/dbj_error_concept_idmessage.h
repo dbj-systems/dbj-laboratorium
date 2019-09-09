@@ -1,18 +1,25 @@
 #pragma once
 
 /*
+	The key 'building block' type.
+
+		+-----------------+
+		|  ID             |
+		+-----------------+
+		|  MESSAGE        |
+		+-----------------+
 
 */
+namespace dbj {
 
-namespace dbj::errc
-{
-	using smart_buffer_helper	 = ::dbj::vector_buffer<char>;
-	using smart_buffer			 =  smart_buffer_helper::narrow;
-	// id and message
-	struct idmessage final
-	{
+	using buffer_helper	 = ::dbj::vector_buffer<char>;
+	using buffer_type	 =  buffer_helper::buffer_type;
+
+
+	struct id_message_type {
+
 		// used from stdint.h
-		// not optional type
+		// not optional 
 		// https://en.cppreference.com/w/c/types/integer
 		using id_type = uint_fast64_t;
 
@@ -23,96 +30,121 @@ namespace dbj::errc
 		// note: it is important to use helper 
 		// routines that will assure zero terminated
 		// strings using this structure
-		using message_type = vector< char >;
+		using message_type  = buffer_type;
 
-		id_type        id;
-		message_type   message;
-
-		// idmessage() = delete;
+		// initial aka default state of the id is 0
+		// by that we know instance is not valid
+		// it has to valid id given and message with that
+		id_type        id{} ;
+		message_type   message{} ;
 
 		// we declare id 0 as "not an id"
 		// we create and keep it as an unique 
 		// compile time value
 		inline static constexpr id_type not_id{ 0 };
-		static constexpr bool valid_id ( id_type const& id_) { return id_ > not_id; }
-		static constexpr bool valid(idmessage const& idm_) { return idm_.id > not_id; }
-	};
 
-	inline namespace varnish {
+	}; // idemessage
 
-		// user defined literal, creates vector<char> from string literal
-		inline typename idmessage::message_type operator"" _buff(const char* str, size_t sze_) {
-			idmessage::message_type rt_(sze_, char(0));
-			std::copy(str, str + sze_, rt_.data());
-			rt_.push_back(0);
-			return rt_;
-		}
-	}
+} // dbj
 
-	namespace helpers
+namespace dbj::errc
+{
+	// id and message
+	struct idmessage final : 
+		 ::dbj::id_message_type
 	{
-		inline idmessage idmessage_make(idmessage::id_type id_, idmessage::message_type message_)
+		using base = ::dbj::id_message_type;
+
+		 static constexpr bool valid_id( id_type id_) noexcept { return id_ > not_id; }
+
+		 constexpr bool valid() const noexcept { return this->id > not_id; }
+
+#pragma region convenience
+
+		 static idmessage make (id_type id_, message_type message_)
 		{
-#ifdef _DEBUG
-			if (!idmessage::valid_id(id_))
+			if (!valid_id(id_))
 			{
-				// no excpetions throwing, sorry
-				perror("bad message id, exiting");
+				// debug time pop-up
+				_ASSERTE( false );
+				// no runtime exceptions throwing, sorry
+				perror(DBJ_ERR_PROMPT("bad message id, exiting"));
 				exit(42);
 			}
 
 			if (message_.size() < 1)
 			{
-				// no excpetions throwing, sorry
-				perror("bad message, exiting");
+				// debug time pop-up
+				_ASSERTE(false);
+				// no runtime exceptions throwing, sorry again
+				perror(DBJ_ERR_PROMPT("bad message, exiting"));
 				exit(42);
 			}
-#endif
-			return idmessage{ id_, message_ };
+
+			return { id_ , message_ } ;
 		}
 
-		inline idmessage idmessage_make(idmessage::id_type id_, const char* string_literal)
+		static idmessage make(id_type id_, const char* string_literal)
 		{
-			return idmessage_make(id_, smart_buffer_helper::make(string_literal));
+			return { id_, buffer_helper::make(string_literal) };
 		}
 
 		// string views
-		inline idmessage idmessage_make(idmessage::id_type id_, string_view sv_)
+		static idmessage make(id_type id_, string_view sv_)
 		{
-			return idmessage_make(id_, smart_buffer_helper::make(sv_.data()));
+			return { id_, buffer_helper::make(sv_.data()) };
 		}
 		// strings
-		inline idmessage idmessage_make(idmessage::id_type id_, string str_) {
-			return idmessage_make(id_, smart_buffer_helper::make(str_.c_str()));
+		static idmessage make(id_type id_, string str_) {
+			return { id_, buffer_helper::make(str_.c_str()) };
 		}
 
 		// std array of chars
 		template<size_t N>
-		inline idmessage idmessage_make(idmessage::id_type id_, array<char, N> const& arr_)
+		static idmessage make(id_type id_, array<char, N> const& arr_)
 		{
-			return idmessage_make(id_, smart_buffer_helper::make(arr_.data()));
+			return { id_, buffer_helper::make(arr_.data()) };
 		}
 
 		// unique ptr char array has no copy semantics
-		inline idmessage idmessage_make(idmessage::id_type id_, unique_ptr<char[]> const& up_)
+		static idmessage make(id_type id_, unique_ptr<char[]> const& up_)
 		{
-			return idmessage_make(id_, smart_buffer_helper::make(up_.get()));
+			return { id_, buffer_helper::make(up_.get()) };
 		}
 		// shared ptr char array
-		inline idmessage idmessage_make(idmessage::id_type id_, shared_ptr<char[]> const& sp_)
+		static idmessage make(id_type id_, shared_ptr<char[]> const& sp_)
 		{
-			return idmessage_make(id_, smart_buffer_helper::make(sp_.get()));
+			return { id_, buffer_helper::make(sp_.get()) };
 		}
 
 		// this one is a problem for MSVC
 		template<size_t N>
-		inline auto  idmessage_make(idmessage::id_type , const char(&string_literal)[N]) = delete;
+		static auto  make(id_type, const char(&string_literal)[N]) = delete;
 
 
 		// dissalow references to temporaries
 		template<size_t N>
-		inline auto  idmessage_make(idmessage::id_type, char(&& string_literal)[N]) = delete;
+		static auto  make(id_type, char(&& string_literal)[N]) = delete;
+
+#pragma endregion
+
+	}; // idmessage
+
+#if 0
+	// already defined in dbj++ core buffers 
+	inline namespace literal {
+
+		// user defined literal, creates vector<char> from string literal
+		inline typename message_type operator"" _buff(const char* str, size_t sze_) {
+			message_type rt_(sze_, char(0));
+			std::copy(str, str + sze_, rt_.data());
+			rt_.push_back(0);
+			return rt_;
+		}
 	}
+#endif
+
+
 
 } // dbj::errc
 
