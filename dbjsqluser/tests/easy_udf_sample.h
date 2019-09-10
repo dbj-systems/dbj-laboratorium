@@ -1,5 +1,5 @@
-#pragma once
-#include "../pch.h"
+ #pragma once
+#include "test_db.h"
 
 /*
  SQL user defined functions aka UDF
@@ -22,60 +22,23 @@
 	dbj++sql makes sqlite udf's realy easy, see the two examples bellow
 */
 
-namespace dbj_easy_udfs_sample {
+namespace dbj_sql_user {
 
-	using namespace ::std;
-	using namespace ::std::string_view_literals;
-
-	/*
-	the dbj++sql namespace
-	*/
-	namespace sql = ::dbj::sql;
-
-	/*
-	return value type, has 3 std::options
-
-	sqlite states code
-	std errc status code
-	location inf0
-	*/
-	using status_type = typename dbj::sql::dbj_db_status_type;
-
-	/*
-	std::string is very slow, we use std::vector<char> as a buffer
-	std::unique_ptr<char[]> is the only other type we could use
-	but it is only slightly faster and not very easy to use
-	*/
-	using buffer = typename dbj::nanolib::v_buffer;
-	using buffer_type = typename buffer::buffer_type;
-
-	// DB_FILE_PATH setup
+    // DB_FILE_PATH setup
 	// current default:
 	// setup of constexpr inline auto DB_FILE_PATH = "d:\\dictionary.db"sv;
 #include "../db_file_path.inc"
 
-	constexpr inline auto DEMO_DB_CREATE_SQL = "DROP TABLE IF EXISTS entries; "
-		"CREATE TABLE entries ( Id int primary key, Name nvarchar(100) not null ); "
-		"INSERT INTO entries values (1, 'LondonodnoL');"
-		"INSERT INTO entries values (2, 'Glasgow');"
-		"INSERT INTO entries values (3, 'CardifidraC');"
-		"INSERT INTO entries values (4, 'Belgrade');"
-		"INSERT INTO entries values (5, 'RomamoR');"
-		"INSERT INTO entries values (6, 'Sarajevo');"
-		"INSERT INTO entries values (7, 'Pregrevica');"
-		"INSERT INTO entries values (8, 'ZemunumeZ');"
-		"INSERT INTO entries values (9, 'Batajnica');";
 	/* use case:
 	   solve the following query using dbj++sql easy edf feature
 
 	   notice the two udf's required
 	   int palindrome( const char *) and int strlen( const char *)
 	   they are not available in SQLITE3 SQL as inbuilt functions
-	*/
-	constexpr inline auto QRY_WITH_UDF
-		= "SELECT word, strlen(word) FROM entries WHERE ( 1 == palindrome(word) );";
-	/*
-	Please observe and understand the shape of the sql select, result set
+	
+		"SELECT Name, strlen(Name) FROM entries WHERE ( 1 == palindrome(Name) );";
+
+		Please observe and understand the shape of the sql select, result set
 	as this is from where we source the argument for the palindrome()
 
 	for the above sql, each row of the result set will be:
@@ -98,28 +61,13 @@ namespace dbj_easy_udfs_sample {
 
 	udf begins here
 	*/
-	extern "C" static void palindrome(
+	inline void palindrome(
 		const sql::udf_argument& args_, // input
 		const sql::udf_retval& result_  // output
 	)
 		// do not throw from this UDF
 		noexcept
 	{
-		// lambda: return true if word is a palindrome
-		auto is_pal = [](const char* str) constexpr -> bool
-		{
-			char* s = (char*)str;
-			char* e = (char*)str;
-			while (*e) e++;
-			--e;
-			while (s < e) {
-				if (*s != *e) return false;
-				++s;
-				--e;
-				if (e < s) break;
-			}
-			return true;
-		};
 		/*	udf_argument and udf_retval types have all we need to pass
 			the values in and out of udf as required by the SQL statement
 
@@ -157,7 +105,7 @@ namespace dbj_easy_udfs_sample {
 	   example: to be used in this statement
 	   "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 	*/
-	extern "C" static void strlen_udf(
+	inline void strlen_udf(
 		const sql::udf_argument& args_, // input
 		const sql::udf_retval& result_  // output
 	)
@@ -207,7 +155,7 @@ namespace dbj_easy_udfs_sample {
 	*/
 	[[nodiscard]] status_type test_udf(
 		sql::database const& database,
-		char const* query_ = QRY_WITH_UDF
+		char const* query_ 
 	) noexcept
 	{
 		_ASSERTE(query_);
@@ -216,27 +164,14 @@ namespace dbj_easy_udfs_sample {
 		// return the status_type
 	} // test_udf
 
-	#define CHECK_RETURN if (status) { DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status); return; }
 	/*
 	Test Unit registration
 	*/
 	TU_REGISTER([] {
 
 		status_type status;
-
-		// this is called only on the firs call
-		auto initor = [](status_type& stat_)
-			-> const sql::database &
-		{
-			static sql::database db(":memory:", stat_);
-			if (stat_) return db; // return on error state
-			stat_ = db.exec(DEMO_DB_CREATE_SQL);
-			return db;
-		};
-		// here we keep the single sql::database type instance
-		static  sql::database const& database = initor(status);
-
-		CHECK_RETURN;
+				sql::database const& database = demo_db(status);
+				CHECK_RETURN;
 
 			// register the two udf's required
 			// string names of udf's must match the SQL they are part of
@@ -255,19 +190,13 @@ namespace dbj_easy_udfs_sample {
 			status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
 				CHECK_RETURN; // return on error status
 
-			// no error thus proceed
-			// just see the :memory: demo db 
-			status = test_udf(database, "SELECT * FROM entries;");
-				CHECK_RETURN;
-
 			// execute the query using the 
 			// standard result processing calback 
 			// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 			// that SQL will need 'strlen' and 'palindrome' UDF's
 			// they are not available by default
-			status = test_udf(database);
+			status = test_udf(database, "SELECT * FROM entries WHERE ( 1 == palindrome(Name) )");
 				CHECK_RETURN;
 
 		});
-#undef CHECK_RETURN
 } // namespace dbj_easy_udfs_sample 

@@ -172,9 +172,10 @@ namespace dbj::sql
 			return buffer::make(ec.message().c_str());
 		}
 
-		operator char const* () const {
+		// name of this method follows the std:: de-facto rule
+		char const* c_str () const {
 			static auto buffy_ = buffer::make(BUFSIZ);
-						buffy_ = to_buffer(*this);
+						buffy_ = dbj_db_status_type::to_buffer(*this);
 						return buffy_.data();
 		}
 

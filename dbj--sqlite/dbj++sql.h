@@ -419,7 +419,9 @@ namespace dbj::sql {
 			, DBJ_LOCATION };
 		}
 
-		auto the_db() {
+		// returns the naked sqlite3 *
+		// that is a pointer to the sqlite3 database handle
+		auto the_db() const noexcept {
 			_ASSERTE(handle);
 			return this->handle.get();
 		}

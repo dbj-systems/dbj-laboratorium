@@ -1,3 +1,5 @@
+	#ifndef	DB_FILE_PATH_INC
+	#define	DB_FILE_PATH_INC
 	/* 
 	local database taken from: 
 	https://github.com/AyeshJayasekara/English-Dictionary-SQLite
@@ -8,3 +10,5 @@
 	using namespace std::literals ;
 
 	constexpr inline auto DB_FILE_PATH = "d:\\dictionary.db"sv;
+
+	#endif //	DB_FILE_PATH_INC

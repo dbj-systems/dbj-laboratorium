@@ -184,6 +184,7 @@
     <ClInclude Include="tests\easy_udf_sample.h" />
     <ClInclude Include="tests\basic_tests.h" />
     <ClInclude Include="tests\naked_udf.h" />
+    <ClInclude Include="tests\test_db.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
