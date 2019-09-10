@@ -84,7 +84,8 @@ namespace naked_udf {
 	(
 		sql::database const& db,
 		std::string_view query_
-		= "SELECT word FROM entries WHERE (1 == palindrome(word))"
+		// = "SELECT palindrome(Name) FROM entries"
+		= "SELECT * FROM entries WHERE (1 == palindrome(Name))"
 	)
 	{
 		status_type  status =
@@ -94,13 +95,19 @@ namespace naked_udf {
 
 		if (status) return status; // error
 
+		DBJ_PRINT("\nQuery: '%s'\n", query_.data());
+
 		// execute the statement
 		// with the appropriate callback used
-		return db.query
+		status = db.query
 		(
 			query_.data(),
 			sql::universal_callback
 		);
+
+		DBJ_PRINT("\nDone...\n");
+
+		return status;
 	}
 
 #define CHECK_RETURN if (status) { DBJ_FPRINTF(stdout, "\n\n%s\n\n", (char const*)status); return; }
@@ -131,5 +138,72 @@ namespace naked_udf {
 		status = test_udf(database);
 		CHECK_RETURN;
 		});
-#undef CHECK_RETURN
 } // naked_udf
+
+namespace pure_udf {
+
+	/*
+using namespace ::sqlite; <-- this is where sqlite3 API is	sans macros of course
+*/
+	using namespace ::std;
+	using namespace ::std::string_view_literals;
+
+	/*	the dbj++sql namespace	*/
+	namespace sql = ::dbj::sql;
+
+	using status_type = typename dbj::sql::dbj_db_status_type;
+
+	using buffer = typename dbj::nanolib::v_buffer;
+	using buffer_type = typename buffer::buffer_type;
+
+
+	using namespace sqlite;
+
+	static void firstchar_udf (sqlite3_context* context, int argc, sqlite3_value** argv)
+	{
+		if (argc == 1) {
+
+			const unsigned char* text = sqlite3_value_text(argv[0]);
+
+			if (text && text[0]) {
+				char result[2];
+				result[0] = text[0]; result[1] = '\0';
+				sqlite3_result_text(context, result, -1, SQLITE_TRANSIENT);
+				return;
+			}
+		}
+		sqlite3_result_null(context);
+	}
+
+	TU_REGISTER([] {
+		status_type status;
+
+		// this is called only on the firs call
+		auto initor = [](status_type& stat_)
+			->  sql::database &
+		{
+			static sql::database db(":memory:", stat_);
+			if (stat_) return db; // return on error state
+			stat_ = db.exec( naked_udf::DEMO_DB_CREATE_SQL );
+			return db;
+		};
+		// here we keep the single sql::database type instance
+		static  sql::database& database = initor(status);
+		CHECK_RETURN;
+
+		// the pure sqlite3 API usage
+		auto db = database.the_db();
+		int sqlite3_retval = sqlite3_create_function(db, "firstchar", 1, SQLITE_UTF8, NULL, &firstchar_udf, NULL, NULL);
+
+		auto dbj_sql_status = database.query
+		(
+			"SELECT firstchar(Name) from entries",
+			sql::universal_callback
+		);
+
+		DBJ_PRINT("\n\nDone with 'SELECT firstchar(Name) from entries'");
+
+		});
+
+} // pure_udf
+#undef CHECK_RETURN

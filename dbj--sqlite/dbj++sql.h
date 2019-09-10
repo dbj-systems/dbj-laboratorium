@@ -419,6 +419,11 @@ namespace dbj::sql {
 			, DBJ_LOCATION };
 		}
 
+		auto the_db() {
+			_ASSERTE(handle);
+			return this->handle.get();
+		}
+
 	}; // database
 
 #pragma region dbj sqlite easy udf
@@ -578,7 +583,7 @@ namespace dbj::sql {
 	{
 		_ASSERTE(dbj_udf_name_);
 		using udf_container_type = udf_holder<dbj_udf_>;
-		sqlite3_udf_type udf_ = & udf_container_type::function;
+		sqlite3_udf_type udf_ = &udf_container_type::function;
 		// return the status after registering the function
 		return { db.register_user_defined_function(dbj_udf_name_, udf_) };
 	}
@@ -650,7 +655,7 @@ namespace dbj::sql {
 			DBJ_FPRINTF(stdout, "%10s: %s, ", cell_name, cell_value.data());
 		};
 
-		DBJ_FPRINTF(stdout, "\n\t%zu", row_id);
+		DBJ_FPRINTF(stdout, "\n\t%zu\t", row_id);
 		for (int k = 0; k < number_of_columns; k++)
 			print_cell(k);
 

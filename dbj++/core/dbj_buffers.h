@@ -149,6 +149,27 @@ namespace dbj {
 		{
 			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
 		}
+
+		/*
+		format is make too
+		*/
+		template <typename... Args, size_t max_arguments = 255>
+		static buffer_type
+			format(char const* format_, Args... args) noexcept
+		{
+			static_assert(sizeof...(args) < max_arguments, "\n\nmax 255 arguments allowed\n");
+			_ASSERTE(format_);
+			// 1: what is the size required
+			size_t size = 1 + std::snprintf(nullptr, 0, format_, args...);
+			_ASSERTE(size > 0);
+			// 2: use it at runtime
+			buffer_type buf = vector_buffer::make(size);
+			//
+			size = std::snprintf(buf.get(), size, format_, args...);
+			_ASSERTE(size > 0);
+
+			return buf;
+		}
 	}; // vector_buffer
 
 #pragma endregion
