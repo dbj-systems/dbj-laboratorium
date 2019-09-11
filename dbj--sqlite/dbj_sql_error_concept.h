@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dbj--nanolib/dbj++nanolib.h"
-#include "sqlite++.h"
+#ifndef DBJ_ERROR_CONCEPT_INC
+#define DBJ_ERROR_CONCEPT_INC
 
 /*
 no exception but return values
@@ -13,10 +13,6 @@ return value type can have or not have, sqlite status code and std::errc code
 namespace dbj::sql
 {
 	using namespace std;
-
-
-	using buffer = typename dbj::nanolib::v_buffer ;
-	using buffer_type = typename buffer::buffer_type ;
 
 	enum class status_code : int
 	{
@@ -56,6 +52,37 @@ namespace dbj::sql
 		sqlite_row =			SQLITE_ROW        , /* sqlite= 3 _step() has another row ready */
 		sqlite_done =			SQLITE_DONE        /* sqlite= 3 _step() has finished executing */
 	};                          // dbj_status_code/*
+
+			/*
+		The sqlite3_errstr() interface returns the English-language text that
+		describes the result code, as UTF-8. Memory to hold the error message
+		string is managed internally and must not be freed by the application.
+
+		function argument is int so that native sqlite3 return values can be
+		used also
+		*/
+	inline buffer_type err_message_sql(int sqlite_return_value)  noexcept
+	{
+
+		status_code sc_ = (status_code)sqlite_return_value;
+		if (const char* mp_ = ::sqlite::sqlite3_errstr(int(sc_)); mp_ != nullptr)
+		{
+			return buffer::make(mp_);
+		}
+		else
+		{
+			return buffer::make("Unknown SQLITE status code");
+		}
+	}
+
+	// essentially transform POSIX error code
+	// into std::error_code message
+	inline buffer_type err_message_errc(std::errc posix_retval)  noexcept
+	{
+		// std::errc posix_retval = * std_errc;
+		::std::error_code ec = std::make_error_code(posix_retval);
+		return buffer::make(ec.message().c_str());
+	}
 
 	/*
 	this is the sqlite3 logic 
@@ -120,7 +147,14 @@ namespace dbj::sql
 			, std_errc(std_errc_)
 		{
 		}
+		/*
+		if this operator returns true some error has happened
+         usage:
 
+		dbj_db_status_type status_ ;
+				.... here do something with the dbj++sqlite api ...
+						if ( status_ ) { .. we have an error state ... } ;
+		*/
 		operator bool() const
 		{
 			if (sqlite_status_id != nullopt)
@@ -133,6 +167,14 @@ namespace dbj::sql
 
 			return false; // not in an error state
 		}
+		/*
+		some people can not understand using the above. they need 
+		more explicti name, so ...
+		*/
+		bool is_error() const noexcept
+		{
+			return this->operator bool();
+		}
 
 		void clear( )
 		{
@@ -141,35 +183,20 @@ namespace dbj::sql
 			std_errc = nullopt;
 		}
 
-		/*
-		The sqlite3_errstr() interface returns the English-language text that
-		describes the result code, as UTF-8. Memory to hold the error message
-		string is managed internally and must not be freed by the application.
-		*/
-		optional<buffer_type> sql_err_message() const noexcept
+		optional<buffer_type> sql_err_message()  const noexcept
 		{
 			// not set
 			if (!sqlite_status_id) return nullopt;
 
-			status_code ev = *sqlite_status_id;
-			if (const char* mp_ = ::sqlite::sqlite3_errstr(int(ev)); mp_ != nullptr)
-			{
-				return buffer::make(mp_);
-			}
-			else
-			{
-				return buffer::make("Unknown SQLITE status code");
-			}
+			// err_message_sql has an int argument type
+			// so that it can be used with native sqlite3 return values
+			return err_message_sql( (int)*sqlite_status_id);
 		}
 
-		// essentially transform POSIX error code
-		// into std::error_code message
-		optional<buffer_type> std_err_message() const noexcept
+		optional<buffer_type> std_err_message()  const noexcept
 		{
 			if (!std_errc) return nullopt;
-			std::errc posix_retval = * std_errc;
-			::std::error_code ec = std::make_error_code(posix_retval);
-			return buffer::make(ec.message().c_str());
+			return err_message_errc(*std_errc);
 		}
 
 		// name of this method follows the std:: de-facto rule
@@ -210,3 +237,5 @@ namespace dbj::sql
 #define DBJ_LOCATION  dbj::sql::buffer::make("(line: " _CRT_STRINGIZE( __LINE__ ) "), file: " __FILE__)
 
 } // namespace dbj::sqlite
+
+#endif // !DBJ_ERROR_CONCEPT_INC

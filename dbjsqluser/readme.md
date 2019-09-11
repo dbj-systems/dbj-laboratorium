@@ -1,4 +1,8 @@
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 # Testing dbj++sql yapi
+
 
 ### YAPI == Yet Another API
 

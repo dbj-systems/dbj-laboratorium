@@ -1,97 +1,25 @@
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 #pragma once
+
 #include "test_db.h"
 
-#if 0
 namespace dbj_sql_user {
-
-	/* 
-	this is SQLITE3 UDF in its canonical form 
-
-	sqlite3_context -- https://sqlite.org/c3ref/context.html
-	sqlite3_value -- https://sqlite.org/c3ref/value.html
-	*/
-	extern "C" static void palindrome(
-		sqlite::sqlite3_context* context,
-		int argc,
-		sqlite::sqlite3_value** argv
-	)
-	{
-		sqlite::sqlite3_result_null(context);
-		// if no arguments just return
-		if (argc < 1) return;
-
-		// we are expecting the first qrgument to be TEXT 
-		if (sqlite::sqlite3_value_type(argv[0]) != SQLITE_TEXT) return;
-
-		// take the value as a text 
-		char* text = (char*)sqlite::sqlite3_value_text(argv[0]); DBJ_VERIFY(text);
-		// take the length of a text 
-		const size_t text_length = sqlite::sqlite3_value_bytes(argv[0]); DBJ_VERIFY(text_length > 0);
-		// store it to the std string
-		std::string word_{ text, text_length };
-		static int result = 0; // aka 'false'
-		// check if word is a palindrome
-		result = is_pal(word_.c_str());
-		// pass the result to the sqlite
-		sqlite::sqlite3_result_int(context, result);
-		return;
-	}
-
-	inline status_type test_udf
-	(
-		sql::database const& db,
-		std::string_view query_
-		// = "SELECT palindrome(Name) FROM entries"
-		= "SELECT * FROM entries WHERE (1 == palindrome(Name))"
-	)
-	{
-		status_type  status =
-			// here we register our C++ UDF, associate with a name
-			// to be used from SQL
-			db.register_user_defined_function("palindrome", palindrome);
-
-		if (status) return status; // error
-
-		DBJ_PRINT("\nQuery: '%s'\n", query_.data());
-
-		// execute the statement
-		// with the appropriate callback used
-		status = db.query
-		(
-			query_.data(),
-			sql::universal_callback
-		);
-
-		DBJ_PRINT("\nDone...\n");
-
-		return status;
-	}
 
 	/*
-	Test Unit registration
+	------------------------------------------------------------
+	An example on how to do native SQLITE UDF on top of dbj++sql 
 	*/
-	TU_REGISTER([] {
 
-		status_type status{};
-		
-		sql::database const& database = demo_db(status)
-		CHECK_RETURN;
-
-		// just check the :memory: demo db is here and in shape we need it to be
-		status = test_udf(database, "SELECT * FROM entries;");
-		CHECK_RETURN;
-
-		status = test_udf(database);
-		CHECK_RETURN;
-		});
-} // naked_udf
-#endif
-
-namespace dbj_sql_user {
-
-	/* using namespace ::sqlite; <-- this is where sqlite3 API is */
+	/* using namespace ::sqlite; <-- this is where sqlite3 API lives in dbj++ world */
 	using namespace sqlite;
 
+	/* 
+	SQLITE UDF is just an callback function, with required siganture 
+	this is an example of coding it with native sqlite3 api
+	notice hwo this is C++ with mangled function name too
+	*/
 	inline void firstchar_udf (sqlite3_context* context, int argc, sqlite3_value** argv)
 	{
 		if (argc == 1) {
@@ -99,8 +27,8 @@ namespace dbj_sql_user {
 			const unsigned char* text = sqlite3_value_text(argv[0]);
 
 			if (text && text[0]) {
-				char result[2];
-				result[0] = text[0]; result[1] = '\0';
+				char result[2]{ '\0' };
+				result[0] = text[0]; 
 				sqlite3_result_text(context, result, -1, SQLITE_TRANSIENT);
 				return;
 			}
@@ -109,21 +37,41 @@ namespace dbj_sql_user {
 	}
 
 	TU_REGISTER([] {
+
+		/*
+		Getting the dbj++sql database
+		*/
 		status_type status;
 			const sql::database& database = demo_db(status);
 				CHECK_RETURN;
 
-		// the pure sqlite3 API usage
-		auto db = database.the_db();
-		int sqlite3_retval = sqlite3_create_function(db, "firstchar", 1, SQLITE_UTF8, NULL, &firstchar_udf, NULL, NULL);
+		DBJ_PRINT("\n\nTesting SQLITE3 native UDF, with the help of dbj++sqlite");
 
-		auto dbj_sql_status = database.query
-		(
-			"SELECT firstchar(Name) from entries",
-			sql::universal_callback
-		);
+		// the native sqlite3 database handle
+		sqlite3 * db = database.the_db();
 
-		DBJ_PRINT("\n\nDone with 'SELECT firstchar(Name) from entries'");
+		// C++17 if syntax
+		if (
+			int sqlite3_retval = sqlite3_create_function(db, "firstchar", 1, SQLITE_UTF8, NULL, &firstchar_udf, NULL, NULL);
+			sqlite3_retval != SQLITE_OK
+			)
+		{
+			DBJ_PRINT("\n\nSQLITE error while trying to register a calback function ");
+			DBJ_PRINT("\nError message: %s", sql::err_message_sql(sqlite3_retval). data() );
+
+		} else {
+
+			status = database.query
+			(
+				"SELECT firstchar(Name) from entries",
+				// you can provide your own sql result handling callback
+				// we use ours right now
+				sql::universal_callback
+			);
+
+			DBJ_PRINT("\n\nDone with 'SELECT firstchar(Name) from entries'");
+			DBJ_PRINT("\n\nStatus returned is: %s\n", status.c_str() );
+		}
 
 		});
 

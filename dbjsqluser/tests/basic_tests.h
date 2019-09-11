@@ -1,4 +1,9 @@
+#pragma once
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 #include "test_db.h"
+
 
 namespace dbj_sql_user
 {
@@ -7,22 +12,8 @@ namespace dbj_sql_user
 	we return the status_type, and
 	we make sure it is not discarded
 	*/
-	[[nodiscard]] inline status_type test_wrong_insert() noexcept
+	[[nodiscard]] inline status_type test_wrong_insert(sql::database const& db) noexcept
 	{
-		/*
-		this is different use pattern
-		we create the status type in here vs receiving it
-		as ref. argument
-		*/
-		status_type err_;
-		/*
-		ref. to the single instance
-		*/
-		sql::database const& db = demo_db(err_);
-		/*
-		there is no point proceeding if in the error state
-		*/
-		if (err_) return err_;
 
 		/*
 		 here we make sure we insert utf8 encoded ANSI string literals
@@ -37,7 +28,7 @@ namespace dbj_sql_user
 		constexpr auto BAD_SQL = u8"INSERT INTO entries (Id, Name) "
 			u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')";
 
-		DBJ_PRINT("\nAttempting: %s", BAD_SQL);
+		DBJ_PRINT("\nAttempting BAD SQL: %s\n", BAD_SQL);
 				return db.exec(BAD_SQL);
 	}
 	/*
@@ -57,7 +48,7 @@ namespace dbj_sql_user
 		buffer_type   name_ = cell(1);
 		// print what we got
 
-		DBJ_FPRINTF(stdout, "\n\t %zu \t %s = %d \t %s = %s",
+		DBJ_PRINT( "\n\t %zu \t %s = %d \t %s = %s",
 			row_id, cell.name(0), id_, cell.name(1), name_.data());
 
 		return SQLITE_OK;
@@ -68,39 +59,28 @@ namespace dbj_sql_user
 
 
 	/*
-	use the above callback's
+	use the universal callback provided by dbj++sqlite
 	*/
-	[[nodiscard]] inline status_type
-		test_table_info()
-		noexcept
+	[[nodiscard]] inline status_type test_table_info( sql::database const& db ) noexcept
 	{
-		status_type err_;
-		const sql::database& db = demo_db(err_);
-		if (err_) return err_;
-
-		DBJ_FPRINTF(stdout, "\nmeta data for columns of the table 'entries'\n");
-		err_.clear();
+		DBJ_PRINT( "\nmeta data for columns of the table 'entries'\n");
 		/*
 		execute the table_info and pass the status out
 		*/
 		return sql::table_info(db, "entries", sql::universal_callback);
 	}
 
-	[[nodiscard]] inline status_type test_select() noexcept
+	[[nodiscard]] inline status_type test_select(sql::database const& db) noexcept
 	{
-		status_type err_;
-		const sql::database& db = demo_db(err_);
-		if (err_) 	return err_; // return on error
-
-		DBJ_FPRINTF(stdout, "\nexecute: 'SELECT Id, Name FROM entries'\n");
+		DBJ_PRINT( "\nexecute: 'SELECT Id, Name FROM entries'\n");
 		return db.query("SELECT Id,Name FROM entries", sample_callback);
 	}
 
 	/*
+	This is how dbj++sqlite helps you consume the sqlite3 query results
 	Remember: this is called once per each row
-	SQL statement result set this is processing is:
-
-	"select word, definition from entries where word like 'zy%'"
+	SQL statement result set this callback is processing is:
+	"select word, definition from entries where word like 'zyga%'"
 	*/
 	int example_callback(
 		const size_t row_id,
@@ -109,9 +89,11 @@ namespace dbj_sql_user
 	{
 		// 'automagic' transform to the buffer type
 		// of the column 0 value for this row
+		// auto can not be used here
+		// compiler would not know what type you want
 		buffer_type  word_ = row_(0);
 		buffer_type  definition_ = row_(1);
-		DBJ_FPRINTF(stdout, "\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
+		DBJ_PRINT( "\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
 
 		//// all these should provoke exception
 		//// TODO: but they don't -- currently
@@ -124,20 +106,24 @@ namespace dbj_sql_user
 	/* here we use the external database
 	the DB_FILE_PATH is set to its full path
 	*/
-	[[nodiscard]] inline status_type test_statement_using(
-		sql::result_row_callback row_user_,
-		const char* db_file = DB_FILE_PATH.data()
-	) noexcept
-	{
-		status_type status;
-		const sql::database db(db_file, status); // using the real db from the db file
-		if (status) return status;
+	TU_REGISTER(
+		[] {
+			::dbj::sql::dbj_db_status_type  status_{};
+			// 
+			sql::database db(DICTIONARY_DB_FILE_PATH, status_);
+			// some kind of error has happened
+			if (status_.is_error()) {
+				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile opening the database: %s\n", status_.c_str(), DICTIONARY_DB_FILE_PATH);
+				return ;
+			}
 
-		// returns the status
-		return db.query("select word, definition from entries where word like 'zy%'", row_user_);
-	}
-
-
+			constexpr auto SQL = "SELECT word, definition FROM entries WHERE word LIKE 'zyga%'";
+			DBJ_PRINT("\n\nExternal database: %s, testing the query: %s", db.db_name(), SQL);
+			// returns the status
+			status_ = db.query(SQL, example_callback);
+			if (status_.is_error()) 
+				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile querying the database: %s\n", status_.c_str(), db.db_name() );
+		});
 
 	/*
 	Test Unit registration
@@ -145,24 +131,25 @@ namespace dbj_sql_user
 	TU_REGISTER(
 		[] {
 			::dbj::sql::dbj_db_status_type  status_;
+				sql::database const & db = demo_db(status_);
+				// some kind of error has happened
+				if (status_.is_error()) {
+					DBJ_PRINT( "\n\n ERROR Status : \n %s\n\n", status_.c_str());
+					return;
+				}
 
-			status_ = test_wrong_insert();
-			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", status_.c_str());
+			status_ = test_wrong_insert( db );
+			if (status_.is_error()) DBJ_PRINT( "\n\n test_wrong_insert()\tStatus : \n %s\n\n", status_.c_str());
 
-			status_ = test_table_info();
-			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", status_.c_str());
+			status_ = test_table_info( db );
+			if (status_.is_error()) DBJ_PRINT( "\n\n test_table_info()\tStatus : \n %s\n\n", status_.c_str());
 
-			status_ = test_select();
-			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", status_.c_str());
-
-			status_ = test_statement_using(example_callback);
-			DBJ_FPRINTF(stdout, "\n\n Status : \n %s\n\n", status_.c_str());
+			status_ = test_select( db );
+			if (status_.is_error()) DBJ_PRINT( "\n\n test_select()\tStatus : \n %s\n\n", status_.c_str());
 
 			/*
 			NOTE: above we just perform "print-and-proceed"
-			usually callers will use it to develop another logic
-			if there is an error they wish to process and act
-			on the status_
+			usually callers will use status_ to develop another logic
 			*/
 		});
 

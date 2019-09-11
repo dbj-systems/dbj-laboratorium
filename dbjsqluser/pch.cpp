@@ -1,4 +1,8 @@
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 // pch.cpp: source file corresponding to pre-compiled header; necessary for compilation to succeed
+
 
 #include "pch.h"
 

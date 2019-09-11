@@ -1,4 +1,8 @@
- #pragma once
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/
+#pragma once
+
 #include "test_db.h"
 
 /*
@@ -24,18 +28,13 @@
 
 namespace dbj_sql_user {
 
-    // DB_FILE_PATH setup
-	// current default:
-	// setup of constexpr inline auto DB_FILE_PATH = "d:\\dictionary.db"sv;
-#include "../db_file_path.inc"
-
 	/* use case:
 	   solve the following query using dbj++sql easy edf feature
 
 	   notice the two udf's required
 	   int palindrome( const char *) and int strlen( const char *)
 	   they are not available in SQLITE3 SQL as inbuilt functions
-	
+
 		"SELECT Name, strlen(Name) FROM entries WHERE ( 1 == palindrome(Name) );";
 
 		Please observe and understand the shape of the sql select, result set
@@ -50,7 +49,7 @@ namespace dbj_sql_user {
 
 	the palindrome udf has to be:  int  palindrome ( const char * )
 	bellow we write it using the dbj easy udf, function signature
-	has to be always the same for any udf
+	which always has to be the same for any udf
 
 	inline void user_defined_udf (
 	   // the input
@@ -59,7 +58,9 @@ namespace dbj_sql_user {
 		const sql::udf_retval &
 	)
 
-	udf begins here
+	notice how sqlite3 api can work with C++ inline functions with mangled names
+
+	dbj++sqlite udf begins here
 	*/
 	inline void palindrome(
 		const sql::udf_argument& args_, // input
@@ -68,22 +69,33 @@ namespace dbj_sql_user {
 		// do not throw from this UDF
 		noexcept
 	{
-		/*	udf_argument and udf_retval types have all we need to pass
-			the values in and out of udf as required by the SQL statement
-
-			we are writing 'palindrom( word )' udf
+		// return true if argument str, is a pointer to palindrome, false otherwise
+		auto is_pal = [](const char* str) constexpr -> bool {
+			char* s = (char*)str;
+			char* e = (char*)str;
+			//
+			while (*e) e++;
+			--e;
+			while (s < e) {
+				if (*s != *e) return false;
+				++s;
+				--e;
+				if (e < s) break;
+			}
+			return true;
+		};
+		/*
+			we are writing 'palindrome( Name )' udf
 			first and only argument is a string passed into here from sqlite
-			as the result of procssing this SQL statement:
+			as the result of processing this SQL statement:
 
-			"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
+			"SELECT * FROM entries WHERE (1 == palindrome(Name))"
 
-			thus there is only a single argument
-			we will now get to it, bit in a safe fashion
-			we must not throw exceptions from here
+		thus there is only a single argument
+		we will now get to it, in a safe fashion
+		can not use auto here
+		dbj::sql::transformer in action
 		*/
-
-		// can not use auto here
-		// dbj::sql::transformer in action
 		buffer_type word_ = args_(0);
 
 		if (word_.size() > 1)
@@ -92,13 +104,18 @@ namespace dbj_sql_user {
 			as per sql statement requirements we need to reurn an int
 			1 means yes that is a palindrome
 			*/
+#ifdef NDEBUG
 			result_(is_pal(word_.data()));
+#else
+			char const * name = word_.data();
+			int isit = is_pal( name );
+			result_(isit);
+#endif
 		}
-
-		/*
-		0 means no that, word given is not a palindrome
-		*/
-		result_(0);
+		else {
+			/*	0 means no , word given is not a palindrome	*/
+			result_(0);
+		}
 	}
 
 	/* the strlen udf :  int strlen( const char *)
@@ -155,7 +172,7 @@ namespace dbj_sql_user {
 	*/
 	[[nodiscard]] status_type test_udf(
 		sql::database const& database,
-		char const* query_ 
+		char const* query_
 	) noexcept
 	{
 		_ASSERTE(query_);
@@ -170,33 +187,36 @@ namespace dbj_sql_user {
 	TU_REGISTER([] {
 
 		status_type status;
-				sql::database const& database = demo_db(status);
-				CHECK_RETURN;
+		sql::database const& database = demo_db(status);
+		CHECK_RETURN;
 
-			// register the two udf's required
-			// string names of udf's must match the SQL they are part of
-			// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
-			// always returning the status_type on error
-			// obviuosly macro afficionados are welcome here
-			status = sql::register_dbj_udf<
-				palindrome /* function we register */
-			>(
-				database,  /* to which database */
-				"palindrome" /* how we want it called when used from SQL */
-				);
-			CHECK_RETURN;// return on error status
+		// register the two udf's required
+		// string names of udf's must match the SQL they are part of
+		// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
+		// always returning the status_type on error
+		// obviuosly macro afficionados are welcome here
+		status = sql::register_dbj_udf<
+			palindrome /* function we register */
+		>(
+			database,  /* to which database */
+			"palindrome" /* how we want it called when used from SQL */
+			);
+		CHECK_RETURN;// return on error status
 
-			status.clear();
-			status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
-				CHECK_RETURN; // return on error status
+		status.clear();
+		status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
+		CHECK_RETURN; // return on error status
 
-			// execute the query using the 
-			// standard result processing calback 
-			// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
-			// that SQL will need 'strlen' and 'palindrome' UDF's
-			// they are not available by default
-			status = test_udf(database, "SELECT * FROM entries WHERE ( 1 == palindrome(Name) )");
-				CHECK_RETURN;
+	// execute the query using the 
+	// standard result processing calback 
+	// "SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
+	// that SQL will need 'strlen' and 'palindrome' UDF's
+	// they are not available in SQLITE3 
+
+		status = test_udf(database, "SELECT Name, strlen(Name) FROM entries WHERE ( 1 == palindrome(Name) )");
+		if (status) DBJ_PRINT("\nError: %s", status.c_str());
+		
+		DBJ_PRINT("\n\n");
 
 		});
 } // namespace dbj_easy_udfs_sample 

@@ -1,4 +1,8 @@
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 #pragma once
+
 #ifndef DBJ_TEST_DB_INC
 #define DBJ_TEST_DB_INC
 
@@ -72,25 +76,6 @@ namespace dbj_sql_user {
 		static  sql::database const& instance_ = initor();
 		return instance_;
 	} // demo_db
-
-		// return true if argument str
-		// is a pointer to palindrome
-		// false otherwise
-	    // used by demo UDF
-	extern "C"  inline bool is_pal(const char* str) {
-		char* s = (char*)str;
-		char* e = (char*)str;
-		//
-		while (*e) e++;
-		--e;
-		while (s < e) {
-			if (*s != *e) return false;
-			++s;
-			--e;
-			if (e < s) break;
-		}
-		return true;
-	}
 
 }; // dbj_sql_user nspace
 

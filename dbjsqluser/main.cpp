@@ -1,4 +1,8 @@
+/*
+(c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
+*/  
 #include "pch.h"
+
 #include "tests/basic_tests.h"
 #include "tests/easy_udf_sample.h"
 #include "tests/naked_udf.h"

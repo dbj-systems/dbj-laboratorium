@@ -1,4 +1,7 @@
 ﻿#pragma once
+#ifndef DBJ_SQL_PP_INCLUDED
+#define DBJ_SQL_PP_INCLUDED
+
 
 #define STRICT
 #define NOMINMAX
@@ -16,19 +19,23 @@
 #include <functional>
 
 #include "sqlite++.h"
+#include "dbj--nanolib/dbj++nanolib.h"
+
+namespace dbj::sql {
+	using buffer = typename dbj::nanolib::v_buffer;
+	using buffer_type = typename buffer::buffer_type;
+
+	using namespace ::std::literals::string_view_literals;
+
+	constexpr inline auto version = "2.0.0";
+}
+
 #include "dbj_sql_error_concept.h"
+
 
 namespace dbj::sql {
 
-	// intelisense goes berserk on this -- using namespace ::std;
-	// using namespace ::sqlite;
-	using namespace ::std::literals::string_view_literals;
-
-	constexpr inline auto version = "2.0.0"sv;
-
 	using status_type = typename dbj::sql::dbj_db_status_type;
-	//using buffer = typename dbj::sql::v_buffer;
-	//using buffer_type = typename dbj::sql::v_buffer::buffer_type;
 	/*
 	bastardized version of Keny Kerr's unique_handle
 	dbj's version can not be copied or moved
@@ -318,6 +325,8 @@ namespace dbj::sql {
 			// DBJ_ERR_PROMPT("sqlite3_prepare_v2() has failed"));
 		}
 
+		buffer_type last_opened_db_name{};
+
 	public:
 		/* default constructor is non existent */
 		database() = delete;
@@ -326,10 +335,23 @@ namespace dbj::sql {
 		database(database&&) = delete;
 
 		// can *not* throw from this constructor
-		explicit database(string_view storage_name, status_type& ec) noexcept
+		explicit database(char const * storage_name, status_type& ec) noexcept
 		{
 			ec.clear();
-			ec = dbj_sqlite_open(this->handle, storage_name.data());
+			ec = dbj_sqlite_open(this->handle, storage_name );
+
+			if ( false == ec.is_error())
+			{
+				last_opened_db_name = dbj::nanolib::v_buffer::make( storage_name );
+			}
+			else {
+				last_opened_db_name.clear();
+			}
+		}
+
+		// must not free this result
+		char const * db_name() const noexcept {
+			return this->last_opened_db_name.data();
 		}
 
 		/*
@@ -460,15 +482,16 @@ namespace dbj::sql {
 			// buffer_type == yet another buffer
 			operator buffer_type () const noexcept
 			{
-				//if (sqlite::sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) 
-				//{
-				//	// we can use this ... but ...
-				//}
-
+#ifndef NDEBUG 
+				if (sqlite::sqlite3_value_type(argv[col_index_]) != SQLITE_TEXT) 
+				{
+					perror("\n\nAsked for text value on a column that is not of a text type?");
+				}
+#endif
 				char* text = (char*)sqlite::sqlite3_value_text(argv[col_index_]);
 
-				// it seems sqlite3 return NULL if value is SQL NULL, ditto
-				return buffer::make("NULL");
+				// sqlite3 returns NULL pointer if cell value is SQL NULL, ditto
+				if ( text == nullptr )	return buffer::make("NULL");
 
 				size_t text_length = sqlite::sqlite3_value_bytes(argv[col_index_]);
 				_ASSERTE(text_length > 0);
@@ -654,10 +677,10 @@ namespace dbj::sql {
 			// in this call
 			buffer_type cell_value = cell(j_);
 
-			DBJ_FPRINTF(stdout, "%10s: %s, ", cell_name, cell_value.data());
+			DBJ_PRINT( "{ %-10s: %s } ", cell_name, cell_value.data());
 		};
 
-		DBJ_FPRINTF(stdout, "\n\t%zu\t", row_id);
+		DBJ_PRINT( "\n[%6zu] ", row_id);
 		for (int k = 0; k < number_of_columns; k++)
 			print_cell(k);
 
@@ -667,3 +690,6 @@ namespace dbj::sql {
 	}
 #pragma endregion
 } // namespace dbj::sql
+
+#endif // !DBJ_SQL_PP_INCLUDED
+
