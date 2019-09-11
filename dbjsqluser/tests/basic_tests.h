@@ -153,4 +153,13 @@ namespace dbj_sql_user
 			*/
 		});
 
+	TU_REGISTER(
+		[] {
+			auto sqls = dbj::sql::make_status(dbj::sql::status_code::sqlite_abort);
+			auto psxs = dbj::sql::make_status(std::errc::address_family_not_supported);
+
+			if ( sqls->is_error()) DBJ_PRINT("\n\n%s", sqls->json() );
+			if ( psxs->is_error()) DBJ_PRINT("\n\n%s", psxs->json() );
+ 		});
+
 } // eof two_tests namespace
