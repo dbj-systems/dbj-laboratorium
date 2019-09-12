@@ -9,10 +9,10 @@ namespace dbj_sql_user
 {
 	/*
 	no exceptions are thrown
-	we return the status_type, and
+	we return the sql::status_and_location, and
 	we make sure it is not discarded
 	*/
-	[[nodiscard]] inline status_type test_wrong_insert(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::status_and_location test_wrong_insert(sql::database const& db) noexcept
 	{
 
 		/*
@@ -61,7 +61,7 @@ namespace dbj_sql_user
 	/*
 	use the universal callback provided by dbj++sqlite
 	*/
-	[[nodiscard]] inline status_type test_table_info( sql::database const& db ) noexcept
+	[[nodiscard]] inline sql::status_and_location test_table_info( sql::database const& db ) noexcept
 	{
 		DBJ_PRINT( "\nmeta data for columns of the table 'entries'\n");
 		/*
@@ -70,7 +70,7 @@ namespace dbj_sql_user
 		return sql::table_info(db, "entries", sql::universal_callback);
 	}
 
-	[[nodiscard]] inline status_type test_select(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::status_and_location test_select(sql::database const& db) noexcept
 	{
 		DBJ_PRINT( "\nexecute: 'SELECT Id, Name FROM entries'\n");
 		return db.query("SELECT Id,Name FROM entries", sample_callback);
@@ -108,12 +108,12 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			::dbj::sql::dbj_db_status_type  status_{};
+			sql::status_and_location status_{};
 			// 
 			sql::database db(DICTIONARY_DB_FILE_PATH, status_);
 			// some kind of error has happened
-			if (status_.is_error()) {
-				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile opening the database: %s\n", status_.c_str(), DICTIONARY_DB_FILE_PATH);
+			if ( is_error( status_ )) {
+				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile opening the database: %s\n", to_json(status_).data(), DICTIONARY_DB_FILE_PATH);
 				return ;
 			}
 
@@ -121,8 +121,10 @@ namespace dbj_sql_user
 			DBJ_PRINT("\n\nExternal database: %s, testing the query: %s", db.db_name(), SQL);
 			// returns the status
 			status_ = db.query(SQL, example_callback);
-			if (status_.is_error()) 
-				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile querying the database: %s\n", status_.c_str(), db.db_name() );
+
+			if (is_error(status_)) {
+				DBJ_PRINT("\n\n ERROR Status : \n\n %s\n\nWhile querying the database: %s\n", to_json(status_).data(), db.db_name());
+			}
 		});
 
 	/*
@@ -130,22 +132,22 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			::dbj::sql::dbj_db_status_type  status_;
+			sql::status_and_location status_;
 				sql::database const & db = demo_db(status_);
 				// some kind of error has happened
-				if (status_.is_error()) {
-					DBJ_PRINT( "\n\n ERROR Status : \n %s\n\n", status_.c_str());
+				if (is_error(status_)) {
+					DBJ_PRINT( "\n\n ERROR Status : \n %s\n\n", to_json(status_).data());
 					return;
 				}
 
 			status_ = test_wrong_insert( db );
-			if (status_.is_error()) DBJ_PRINT( "\n\n test_wrong_insert()\tStatus : \n %s\n\n", status_.c_str());
+			if (is_error(status_)) DBJ_PRINT( "\n\n test_wrong_insert()\tStatus : \n %s\n\n", to_json(status_).data());
 
 			status_ = test_table_info( db );
-			if (status_.is_error()) DBJ_PRINT( "\n\n test_table_info()\tStatus : \n %s\n\n", status_.c_str());
+			if (is_error(status_)) DBJ_PRINT( "\n\n test_table_info()\tStatus : \n %s\n\n", to_json(status_).data());
 
 			status_ = test_select( db );
-			if (status_.is_error()) DBJ_PRINT( "\n\n test_select()\tStatus : \n %s\n\n", status_.c_str());
+			if (is_error(status_)) DBJ_PRINT( "\n\n test_select()\tStatus : \n %s\n\n", to_json(status_).data());
 
 			/*
 			NOTE: above we just perform "print-and-proceed"

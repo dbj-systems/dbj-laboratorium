@@ -15,15 +15,8 @@ namespace dbj_sql_user {
 	namespace sql = ::dbj::sql;
 
 	/*
-	return value type, has 3 std::options
+	return value is of this type : dbj::sql::status_and_location
 
-	sqlite states code
-	std errc status code
-	location inf0
-	*/
-	using status_type = typename dbj::sql::dbj_db_status_type;
-
-	/*
 	std::string is very slow, we use std::vector<char> as a buffer
 	std::unique_ptr<char[]> is the only other type we could use
 	but it is only slightly faster and not very easy to use
@@ -37,10 +30,10 @@ namespace dbj_sql_user {
 
 	// in memory db for testing
 	// we return an const reference to database singleton, made and hidden in here
-	// notice the status_type ref. argument `status`
+	// notice the status_and_location ref. argument `status`
 	// caller is laways reponisble to test it for the actual error state occurence
 	// staus is for signaling the status  n ot just for the error events
-	inline sql::database const& demo_db(status_type& status)
+	inline sql::database const& demo_db(sql::status_and_location & status)
 		// no throwing from here
 		noexcept
 	{
@@ -59,14 +52,12 @@ namespace dbj_sql_user {
 		auto initor = [&]()
 			-> const sql::database &
 		{
-			// good practice
-			status.clear();
 			// sql::database constructor does not throw on error
 			// it has the status to report 
 			static sql::database db(":memory:", status);
 			// if status is in the error state still return the db 
 			// the caller will decide on the course of action
-			if (status) return db;
+			if ( is_error(status)) return db;
 			// create the database 
 			// update the status
 			status = db.exec( DEMO_DB_CREATE_SQL );
@@ -79,7 +70,8 @@ namespace dbj_sql_user {
 
 }; // dbj_sql_user nspace
 
-#define CHECK_RETURN if (status) { DBJ_FPRINTF(stdout, "\n\n%s\n\n", status.c_str()); return; }
+/* this is a cludge */
+#define CHECK_RETURN if ( ::dbj::sql::is_error(status) ) { DBJ_FPRINTF(stdout, "\n\n%s\n\n",  ::dbj::sql::to_json( status).data() ); return; }
 
 
 #endif // !DBJ_TEST_DB_INC

@@ -21,7 +21,8 @@
 #include "sqlite++.h"
 #include "dbj--nanolib/dbj++nanolib.h"
 
-namespace dbj::sql {
+namespace dbj::sql 
+{
 	using buffer = typename dbj::nanolib::v_buffer;
 	using buffer_type = typename buffer::buffer_type;
 
@@ -30,17 +31,20 @@ namespace dbj::sql {
 	constexpr inline auto version = "2.0.0";
 }
 
+/*
+ dbj::sql::status_and_location
+*/
 #include "dbj_sql_error_concept.h"
+
 
 
 namespace dbj::sql {
 
-	using status_type = typename dbj::sql::dbj_db_status_type;
 	/*
 	bastardized version of Keny Kerr's unique_handle
 	dbj's version can not be copied or moved
 	it is as simple as that ;)
-	and -- it is also adorned with std:status_type returns
+	and -- it is also adorned with std:status_and_location returns
 	so it is resilient *and* does not throw
 
 	see the traits after this class to understand their
@@ -97,13 +101,12 @@ namespace dbj::sql {
 			return value;
 		}
 
-		auto reset(status_type& ec, pointer value = handle_trait::invalid()) const -> bool
+		auto reset( status_and_location & sl_,  pointer value = handle_trait::invalid()) const -> bool
 		{
 			if (m_value != value)
 			{
-				ec.clear();
 				// caller must inspect
-				ec = close();
+				sl_ = close();
 				m_value = value;
 			}
 			// API designer wants to return a bool 
@@ -115,16 +118,16 @@ namespace dbj::sql {
 		mutable	pointer m_value{};
 
 		[[nodiscard]] auto close() const noexcept
-			-> status_type
+			-> status_and_location
 		{
 			/*
-			if this method does not return the status_type
+			if this method does not return the status_and_location
 			caller does not know id closing action
 			has uscceeded, and that is the whole point
 
 			logic: if handler is handling
 			something go ahead and try and close
-			return the status_type made in the close()
+			return the status_and_location made in the close()
 			*/
 			if (*this)
 			{
@@ -134,11 +137,11 @@ namespace dbj::sql {
 			otherwise just return ok
 			note: we return enum value
 			this will construct the
-			status_type	return value
+			status_and_location	return value
 			because we have correctly implemented
-			our status_type framework
+			our status_and_location framework
 			*/
-			return { ::dbj::sql::status_code::sqlite_ok };
+			return DBJ_SQLOK;
 		}
 
 	}; // unique_handle
@@ -154,9 +157,9 @@ namespace dbj::sql {
 		}
 
 		[[nodiscard]] static auto close(pointer value) noexcept
-			-> status_type
+			-> status_and_location
 		{
-			return { sqlite::sqlite3_close(value), DBJ_LOCATION };
+			return DBJ_STATUS( sqlite::sqlite3_close(value) );
 		}
 	};
 
@@ -171,9 +174,9 @@ namespace dbj::sql {
 			return nullptr;
 		}
 
-		[[nodiscard]] static auto close(pointer value) noexcept -> status_type
+		[[nodiscard]] static auto close(pointer value) noexcept -> status_and_location
 		{
-			return { sqlite::sqlite3_finalize(value), DBJ_LOCATION };
+			return DBJ_STATUS( sqlite::sqlite3_finalize(value) );
 		}
 	};
 
@@ -292,36 +295,36 @@ namespace dbj::sql {
 		mutable connection_handle handle{};
 		/*
 		this function by design does not return a value
-		so we do not return a pair, just the status_type
+		so we do not return a pair, just the status_and_location
 		*/
-		[[nodiscard]] static status_type
+		[[nodiscard]] static status_and_location
 			dbj_sqlite_open(connection_handle& handle_, char const* filename)	noexcept
 		{
-			status_type ec;
-			handle_.reset(ec);
+			status_and_location sl_;
+			handle_.reset(sl_);
 			// on error return, do not open the db
-			if (ec) return ec;
+			if ( is_error(sl_) ) return sl_;
 
-			// make the status_type, log if not OK and return it
-			return { sqlite::sqlite3_open(filename,	handle_.get_address_of()), DBJ_LOCATION };
+			// make the status_and_location, log if not OK and return it
+			return DBJ_STATUS( sqlite::sqlite3_open(filename,	handle_.get_address_of()) );
 		}
 
-		[[nodiscard]] status_type
+		[[nodiscard]] status_and_location
 			prepare_statement(char const* query_, statement_handle& statement_) const noexcept
 		{
 			_ASSERTE(query_);
 			if (!handle)
-				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
+				return DBJ_STATUS( ::std::errc::protocol_error );
 			// "dbj::sql::database -- Must call open() before " __FUNCSIG__ 
 
-	// make the status_type, log if error and return it
-			return { sqlite::sqlite3_prepare_v2(
+	// make the status_and_location, log if error and return it
+			return DBJ_STATUS( sqlite::sqlite3_prepare_v2(
 				handle.get(),
 				query_,
 				-1,
 				statement_.get_address_of(),
 				NULL)
-			, DBJ_LOCATION };
+			);
 			// DBJ_ERR_PROMPT("sqlite3_prepare_v2() has failed"));
 		}
 
@@ -335,14 +338,13 @@ namespace dbj::sql {
 		database(database&&) = delete;
 
 		// can *not* throw from this constructor
-		explicit database(char const * storage_name, status_type& ec) noexcept
+		explicit database(char const * storage_name, status_and_location& sl_) noexcept
 		{
-			ec.clear();
-			ec = dbj_sqlite_open(this->handle, storage_name );
+			sl_ = dbj_sqlite_open(this->handle, storage_name );
 
-			if ( false == ec.is_error())
+			if ( false == is_error( sl_ ))
 			{
-				last_opened_db_name = dbj::nanolib::v_buffer::make( storage_name );
+				last_opened_db_name = buffer::make( storage_name );
 			}
 			else {
 				last_opened_db_name.clear();
@@ -358,16 +360,16 @@ namespace dbj::sql {
 		will do 'something like':
 		sqlite::sqlite3_create_function(db, "palindrome", 1, SQLITE_UTF8, NULL, &palindrome, NULL, NULL);
 		*/
-		[[nodiscard]] status_type register_user_defined_function
+		[[nodiscard]] status_and_location register_user_defined_function
 		(
 			string_view udf_name,
 			void(__cdecl* udf_)(sqlite::sqlite3_context*, int, sqlite::sqlite3_value**)
 		) const noexcept
 		{
 			if (!handle)
-				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
+				return DBJ_STATUS( ::std::errc::protocol_error ) ;
 
-			return {
+			return DBJ_STATUS(
 					sqlite::sqlite3_create_function(
 					handle.get(),
 					udf_name.data(),
@@ -377,27 +379,27 @@ namespace dbj::sql {
 					udf_,
 					NULL,
 					NULL)
-			, DBJ_LOCATION };
+			);
 		}
 
 		/*
-		call with a query and a callback, return status_type
+		call with a query and a callback, return status_and_location
 		no error is SQLITE_DONE or SQLITE_OK
 		*/
-		[[nodiscard]] status_type query(
+		[[nodiscard]] status_and_location query(
 			char const* query_,
 			result_row_callback  row_user_
 		) const noexcept
 		{
 			if (!handle)
-				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::protocol_error };
+				return DBJ_STATUS( ::std::errc::protocol_error );
 
 			// will release the statement upon exit
 			statement_handle statement_;
 
 			// return if prepare_statement returnd an error state
-			status_type status = prepare_statement(query_, statement_);
-			if (status) return status; // return on error
+			status_and_location status = prepare_statement(query_, statement_);
+			if ( is_error(status) ) return status; // return on error
 
 #ifdef _DEBUG
 			auto col_count_ [[maybe_unused]] = sqlite::sqlite3_column_count(statement_.get());
@@ -419,30 +421,30 @@ namespace dbj::sql {
 			//if (sql_result == (int)dbj::sql::status_code::sqlite_done)
 			//	return {  sql_result , DBJ_LOCATION };
 
-			return { sql_result , DBJ_LOCATION }; //  , DBJ_ERR_PROMPT("sqlite3_step() has failed"));
+			return DBJ_STATUS( sql_result ); //  , DBJ_ERR_PROMPT("sqlite3_step() has failed"));
 		}
 		/*
 		 execute SQL statements through here for which no result set is expected
 		*/
-		[[nodiscard]] status_type exec(const char* sql_) const noexcept
+		[[nodiscard]] status_and_location exec(const char* sql_) const noexcept
 		{
 			_ASSERTE(sql_);
 			// in release build 
 			if (!sql_)
-				return { SQLITE_ERROR , DBJ_LOCATION, ::std::errc::invalid_argument };
+				return DBJ_STATUS(::std::errc::invalid_argument );
 
-			return { sqlite::sqlite3_exec(
+			return DBJ_STATUS( sqlite::sqlite3_exec(
 				handle.get(), /* An open database */
 				sql_,		/* SQL to be evaluated */
 				nullptr,	/* Callback function */
 				nullptr,	/* 1st argument to callback */
 				nullptr		/* Error msg written here */
 			)
-			, DBJ_LOCATION };
+			);
 		}
 
-		// returns the naked sqlite3 *
-		// that is a pointer to the sqlite3 database handle
+		// returns the native sqlite3 *
+		// that is a sqlite3 database handle
 		auto the_db() const noexcept {
 			_ASSERTE(handle);
 			return this->handle.get();
@@ -531,16 +533,16 @@ namespace dbj::sql {
 
 		// this will cause the sqlite3 to throw the exeception from
 		// the udf using mechanism
-		void return_error(const std::string& msg_) const noexcept
+		void return_error( buffer_type const & msg_) const noexcept
 		{
-			sqlite::sqlite3_result_error(context_, msg_.c_str(),
+			sqlite::sqlite3_result_error(context_, msg_.data(),
 				static_cast<int>(msg_.size()));
 		}
 
 		// sink the result using the appropriate sqlite3 function
-		void  operator () (const std::string& value_) const noexcept
+		void  operator () (buffer_type const & value_) const noexcept
 		{
-			sqlite::sqlite3_result_text(context_, value_.c_str(),
+			sqlite::sqlite3_result_text(context_, value_.data(),
 				static_cast<int>(value_.size()), nullptr);
 		}
 
@@ -600,7 +602,7 @@ namespace dbj::sql {
 	}; // udf_holder
 
 	template<dbj_sql_udf_type dbj_udf_>
-	[[nodiscard]] inline status_type
+	[[nodiscard]] inline status_and_location
 		register_dbj_udf(
 			database const& db,
 			char const* dbj_udf_name_
@@ -610,7 +612,7 @@ namespace dbj::sql {
 		using udf_container_type = udf_holder<dbj_udf_>;
 		sqlite3_udf_type udf_ = &udf_container_type::function;
 		// return the status after registering the function
-		return { db.register_user_defined_function(dbj_udf_name_, udf_) };
+		return db.register_user_defined_function(dbj_udf_name_, udf_);
 	}
 
 #pragma endregion dbj sqlite easy udf
@@ -641,23 +643,23 @@ namespace dbj::sql {
 	1|json|JSON|0||0
 	2|name|TEXT|0||0
 	*/
-	[[nodiscard]] inline status_type
+	[[nodiscard]] inline status_and_location
 		table_info(
 			database const& db,
 			std::string_view		table_name,
 			result_row_callback		result_callback_)	noexcept
 	{
-		buffer_type buffy = buffer::make(0xFF);
+		buffer_type buffy = buffer::format("PRAGMA table_info('%s')", table_name.data());
+			return db.query(buffy.data(), result_callback_) ;
+	}
 
-		auto rez_ = std::snprintf(buffy.data(), 0xFF, "PRAGMA table_info('%s')", table_name.data());
-
-		if (rez_ < 0)
-			::dbj::nanolib::dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
-
-		// list of all tables and views
-		// auto qry = "SELECT name, sql FROM sqlite_master WHERE type = 'table' ORDER BY name;"sv;
-
-		return { db.query(buffy.data(), result_callback_), DBJ_LOCATION };
+	// list of all tables and views
+	[[nodiscard]] inline status_and_location
+		list_all_tables_and_views
+		( database const& db, result_row_callback result_callback_)	noexcept
+	{
+		constexpr auto qry = "SELECT name, sql FROM sqlite_master WHERE type = 'table' ORDER BY name;" ;
+			return db.query(qry, result_callback_);
 	}
 
 	// on the low sqlite level

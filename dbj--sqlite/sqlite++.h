@@ -1,4 +1,8 @@
 #pragma once
+#ifndef DBJ_SQLITE_INC
+#define DBJ_SQLITE_INC
+
+
 /*
 dbj.org -- 2019-01-26 -- created
 wrap the sqlite into the namespace
@@ -18,12 +22,13 @@ namespace sqlite{
 }
 #endif
 
-//#if _WIN64
-//#pragma comment(lib, "sqlite3\\sqlite3.lib")
-//#else
-//#error SQLITE lib and dll are built for x64 applications.
-//#endif
+#if _WIN64
+// #pragma comment(lib, "sqlite3\\sqlite3.lib")
+#else
+#error SQLITE lib and dll, we use, are built for x64 applications.
+#endif
 
 /*
 final app depends on sqlite3.dll (x64) being available
 */
+#endif // !DBJ_SQLITE_INC

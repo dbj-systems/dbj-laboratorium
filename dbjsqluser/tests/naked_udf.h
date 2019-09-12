@@ -41,7 +41,7 @@ namespace dbj_sql_user {
 		/*
 		Getting the dbj++sql database
 		*/
-		status_type status;
+		sql::status_and_location status;
 			const sql::database& database = demo_db(status);
 				CHECK_RETURN;
 
@@ -70,7 +70,7 @@ namespace dbj_sql_user {
 			);
 
 			DBJ_PRINT("\n\nDone with 'SELECT firstchar(Name) from entries'");
-			DBJ_PRINT("\n\nStatus returned is: %s\n", status.c_str() );
+			DBJ_PRINT("\n\nStatus returned is: %s\n", to_json( status ).data() );
 		}
 
 		});
