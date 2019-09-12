@@ -20,9 +20,9 @@ void start_from_separate_thread(
 	const char* envp[]
 )
 {
-	DBJ_FPRINTF( stdout, "\n\n%s -- Started\n", argv[0] );
+	DBJ_PRINT( "\n\n%s -- Started\n", argv[0] );
 		dbj::tu::catalog.execute();
-	DBJ_FPRINTF( stdout, "\n\n%s -- Finished\n", argv[0]);
+	DBJ_PRINT( "\n\n%s -- Finished\n", argv[0]);
 
 #ifdef _DEBUG
 #ifdef _MSC_VER
