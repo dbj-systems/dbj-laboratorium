@@ -6,7 +6,7 @@ Copyright (c) 2015 Baltasar García Perez-Schofield
 https://github.com/Baltasarq/cscrutil
 */
 
-#include "scrutil.h"
+#include "yet_another_color_console.h"
 
 #include <string.h>
 #include <stdio.h>

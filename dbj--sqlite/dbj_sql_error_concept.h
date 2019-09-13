@@ -89,7 +89,7 @@ namespace dbj::sql
 
 	/*
 	this is the sqlite3 logic
-	not all error codes mean errors
+	not all error codes are errors
 	*/
 	inline constexpr bool is_sqlite_error(status_code const& sc_) noexcept
 	{

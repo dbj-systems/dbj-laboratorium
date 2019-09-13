@@ -45,9 +45,6 @@
     <ClInclude Include="dbj_console_color\dbj_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_console_color\scrutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="object_store\dbj_object_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -67,6 +64,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="constexpr-format-master\constexpr_format_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_console_color\yet_another_color_console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
