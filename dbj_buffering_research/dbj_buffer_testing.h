@@ -179,19 +179,30 @@ TU_REGISTER([] {
 
 	using namespace inner;
 
-	DBJ_PRINT( "\n\n*****************************************************************************"
-		"\n\nWill test and measure FIVE types of runtime buffers\n\n");
+	DBJ_PRINT(DBJ_BG_BLUE
+		"\n\nTest and measure FIVE types of runtime buffers\n"  
+		DBJ_RESET);
+	DBJ_PRINT("\n\nThe test code, in a loop, creates each buffer type, then moves it and finally\n "
+		"changes the buffer content by using the '[]' operator, char by char\n"
+		"Care has been taken for compiler not to 'optimize out' the testing code\n"
+	);
+#ifdef _WIN64
+	DBJ_PRINT("\n64 bit build\n");
+#else
+	DBJ_PRINT("\n32 bit build\n");
+#endif // WIN64
 
 	/*
 	on this machine I have found,
 	std::string is considerably slower than anything else
+	the difference is more obvious on 32 bit builds vs 64 bit ones
 	*/
 
 	auto driver = [&](size_t  buf_size_)
 	{
-		DBJ_PRINT( "\n\nBuffer size: %zu \tIterations: %d\n\n", buf_size_, max_iterations );
+		DBJ_PRINT( "\nBuffer size: %zu \tIterations: %d\n\n", buf_size_, max_iterations );
 		DBJ_PRINT( "1. %f miki s. \t unique_ptr<char[]>\n" , measure(naked_unique_ptr, buf_size_));
-		DBJ_PRINT( "2. %f miki s. \t std::vector\n", measure(dbj_vector_buffer, buf_size_));
+		DBJ_PRINT( "2. %f miki s. \t std::vector<char>\n", measure(dbj_vector_buffer, buf_size_));
 		DBJ_PRINT( "3. %f miki s. \t dbj unique_ptr_buffer<char>\n", measure(uniq_ptr_buffer, buf_size_));
 		DBJ_PRINT( "4. %f miki s. \t shared_ptr<char[]>\n", measure(naked_shared_ptr, buf_size_));
 		DBJ_PRINT( "5. %f miki s. \t std::string\n", measure(string_buffer, buf_size_));
