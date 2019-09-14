@@ -155,11 +155,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="dbj_buffering_research.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj_buffers.h" />
     <ClInclude Include="dbj_buffer_testing.h" />
+    <ClInclude Include="dbj_shared_pointer_buffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

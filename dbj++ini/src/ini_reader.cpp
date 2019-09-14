@@ -10,50 +10,13 @@
 //#include <cctype>
 //#include <cstdlib>
 //#include <set>
-
-#define DBJ_INCLUDE_STD_
-#include <dbj++/dbj++required.h>
-#include <dbj++/dbj++.h>
+#include <map>
 
 #include "ini.h"
 #include "../dbj++ini.h"
 
 namespace dbj::ini 
 {
-
-	/*
-   ini file descriptor
-   folder -- %programdata%\\dbj\\module_base_name
-   basename -- module_base_name + ".log"
-*/
-	struct ini_file_descriptor final :
-		::dbj::util::file_descriptor
-	{
-		virtual const char* suffix() const noexcept override { return ".ini"; }
-	};
-
-	static ini_file_descriptor ini_file()
-	{
-		ini_file_descriptor ifd_;
-		::dbj::util::make_file_descriptor(ifd_);
-		return ifd_;
-	}
-
-	buffer_type legal_full_path_ini( std::string_view inifile_base_name  ) {
-		
-		ini_file_descriptor ifd = ini_file();
-
-		buffer_type buffy_ = buffer::make(BUFSIZ);
-
-		auto rez_ = std::snprintf( buffy_.data(), buffy_.size(),
-			"%s\\%s", ifd.folder.data() , inifile_base_name.data()
-		);
-
-		if (rez_ < 1) dbj_terror("std::snprintf() failed", __FILE__, __LINE__);
-
-		return buffy_;
-	}
-
 	using std::string;
 	using std::string_view;
 
@@ -61,8 +24,19 @@ namespace dbj::ini
 
 	using hash_key_type = long;
 
-	// this is NOT a good idea probably?
-	// buffer_type is vector<char> right now
+	/*
+	[section]
+	key = value
+
+	Idea is we keep "section" + "=" + "key", as the key 
+	in the map where we keep the value of the key, from the ini file
+
+	Thus we do not need a more complex data structure that will map
+	the simple hierachy from the ini file.
+
+	Assumption is all "section=key" combinations will be unique
+	*/
+
 	using map_type = typename std::map<hash_key_type, buffer_type>;
 
 	inline buffer_type::value_type const * 
@@ -87,11 +61,22 @@ namespace dbj::ini
 	// dbj
 	static hash_key_type make_key(string_view section, string_view name) /*const*/
 	{
+		/*
+		std::string '+' operator is notoriously slow, thus the appends bellow
+
 		string key(section.data()); key.append("="); key.append(name.data());
 
-		return djb2_hash((unsigned char *)key.c_str());
+		considering the above, is this not cleaner, faster + smaller in size
+		*/
+		buffer_type key = buffer::format("%s=%s", section.data(), name.data() );
+
+		return djb2_hash((unsigned char *)key.data());
 	}
 
+	/*
+	ini_reader is interface
+	ini_reader_engine is its implementation
+	*/
 	struct ini_reader_engine final : ini_reader
 	{
 
@@ -114,14 +99,14 @@ namespace dbj::ini
 					return kv_map_.at(key);
 				}
 				else {
-					return buffer::make(/*_strdup*/(default_value.data()));
+					return buffer::make((default_value.data()));
 				}
 		}
 
 		buffer_type get_string(string_view section, string_view name, string_view default_value) const
 		{
 			buffer_type str = get(section, name, "");
-			return  (! str.data() ? buffer::make(/*_strdup*/(default_value.data())) : str);
+			return  (! str.data() ? buffer::make((default_value.data())) : str);
 		}
 
 		long get_integer(string_view section, string_view name, long default_value) const
@@ -143,6 +128,14 @@ namespace dbj::ini
 			return end > value ? n : default_value;
 		}
 
+		/*
+		when storing boolean values in the ini file
+
+		true , yes, on , 1  -- are considered boolean true
+		false , no, off, 0  -- are considered boolean false
+
+		if none of the above is found, default_value will be retuned
+		*/
 		bool get_bool(string_view section, string_view name, bool default_value) const
 		{
 			auto eq = [](char const * left_, char const * right_) {
@@ -170,12 +163,17 @@ namespace dbj::ini
 		// dbj made into static
 		// this is sent to the C code as a callback
 		// thus the void *, instead of ini_reader_engine &
-		static int ValueHandler(
-			void* user, 
-			const char* section, 
-			const char* name,
-			const char* value)
+		// this is where map is populated
+		static int ValueHandler
+		(
+			void		* user, 
+			const char	* section, 
+			const char	* name,
+			const char	* value
+		)
 		{
+			_ASSERTE( user && section && name && value );
+
 			ini_reader_engine* reader = static_cast<ini_reader_engine*>(user);
 			hash_key_type key = make_key(section, name);
 			/*
@@ -187,19 +185,34 @@ namespace dbj::ini
 			key=B
 			key=C
 
-			key is: "section=key", value made as "A\nB\nC"
+			key is: "section=key", value will be stored as "A\nB\nC"
 
-			DBJ: what happens if value is empty string?
+			DBJ: why is '\n' list delimiter, is not clear, probably we can have 
+			values with comas embeded?
 			*/
 			if (reader->kv_map_.count(key) > 0 ) 
 			{
+				constexpr static char list_separator = '\n';
+				/*
 				string new_val(  map_value_as_pointer(reader->kv_map_, key)  );
 				new_val.append("\n");
 				new_val.append(value);
-				reader->kv_map_[key] = buffer::make  (/*_strdup*/(new_val.data()));
+
+				Again, observe how simpler it is not to use the string and string.append
+				*/
+				buffer_type new_val = buffer::format( "%s%c%s",
+					reader->kv_map_[key].data() , list_separator, value
+				);
+				/*
+				reader->kv_map_[key] = buffer::make  ((new_val.data()));
+
+				since we do not use the string we do not need the above
+				*/
+				reader->kv_map_[key] = new_val ;
 			}
 			else {
-				reader->kv_map_[key] = buffer::make (/*_strdup*/(value));
+				// just store the first key, value combination from ini file
+				reader->kv_map_[key] = buffer::make ((value));
 			}
 			return 1;
 		}
@@ -232,12 +245,5 @@ namespace dbj::ini
 		static ini_reader_engine singleton_(ini_file_name);
 		return singleton_;
 	}
-
-	/*static*/ buffer_type ini_reader::default_inifile_path()
-	{
-		auto[folder, basename, fullpath] = ini_file ();
-		return fullpath;
-	}		 
-	
 
 } // inih

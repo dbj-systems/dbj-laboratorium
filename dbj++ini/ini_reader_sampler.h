@@ -1,4 +1,5 @@
 #pragma once
+#define DBJ_INI_READER_TESTING
 #ifdef DBJ_INI_READER_TESTING
 /* 
 code bellow expects this ini file
@@ -38,11 +39,11 @@ namespace ini_reader_sampler {
 		ini_reader const& reader = ini_reader_instance(argv.data());
 
 		if (reader.parse_error() < 0) {
-			fprintf(stderr, "Can't load %s\n", argv.data());
+			DBJ_PRINT("Can't load %s\n", argv.data());
 			return 1;
 		}
 
-		::dbj::fmt::print
+		DBJ_PRINT
 		("\n\nConfig loaded from 'test.ini': \nversion=%3d\nname=%16s\nemail=%16s\npi=%3.3f\nactive=%6s"
 			, reader.get_integer("protocol", "version", -1)
 			, reader.get("user", "name", "UNKNOWN")
@@ -51,7 +52,7 @@ namespace ini_reader_sampler {
 			, (reader.get_bool("user", "active", true) ? "true" : "false")
 		);
 
-		::dbj::fmt::print
+		DBJ_PRINT
 		("\n\nList in the ini file:\n"
 			"\n[list]"
 			"\nkey = A"

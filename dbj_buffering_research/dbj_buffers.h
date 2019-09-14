@@ -299,9 +299,7 @@ namespace dbj {
 		char_type& operator [] (unsigned idx_)
 		{
 			// reminder: debug check only
-			// this is performance killer
-			// soo ...
-			// _ASSERTE(size() >= idx_); 
+			 _ASSERTE(size() >= idx_); 
 			return pair_.second[idx_];
 		}
 

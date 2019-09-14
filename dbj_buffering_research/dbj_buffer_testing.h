@@ -1,6 +1,7 @@
 #pragma once
 #include <ctime>
 #include <chrono>
+#include <map>
 
 
 
@@ -113,6 +114,11 @@ namespace inner {
 	inline auto const& buffer_size = ::dbj::DBJ_64KB;
 	inline auto const& max_iterations = 1000;
 
+	inline auto dbj_shared_ptr_buffer(size_t count_)
+	{
+		return dbj::shared_pointer_buffer<char>(count_ + 1);
+	}
+
 	inline auto naked_unique_ptr(size_t count_)
 	{
 		return std::make_unique<char[]>(count_ + 1);
@@ -169,7 +175,7 @@ namespace inner {
 		}
 		auto end_ = std::chrono::system_clock::now();
 		const auto micro_seconds = (end_ - start_).count() / 1000.0;
-		return  micro_seconds / 1000; // milli seconds
+		return  micro_seconds; //  / 1000; // milli seconds
 	};
 } // inner
 
@@ -192,6 +198,25 @@ TU_REGISTER([] {
 	DBJ_PRINT("\n32 bit build\n");
 #endif // WIN64
 
+	using results_map = std::map< double, const char* >;
+
+	results_map results{};
+
+	auto store_result = [&]( const char * fmt_, double time_)
+	{
+		results.emplace( time_ , fmt_ );
+	};
+
+	auto show_results = [&]( bool clear = true )
+	{
+		int position = 1;
+		for (auto [time_, fmt_] : results) {
+			DBJ_PRINT(" %3d : ", position++ );
+			DBJ_PRINT(fmt_, time_);
+		}
+			if (clear) results.clear();
+	};
+
 	/*
 	on this machine I have found,
 	std::string is considerably slower than anything else
@@ -200,19 +225,21 @@ TU_REGISTER([] {
 
 	auto driver = [&](size_t  buf_size_)
 	{
-		DBJ_PRINT( "\nBuffer size: %zu \tIterations: %d\n\n", buf_size_, max_iterations );
-		DBJ_PRINT( "1. %f miki s. \t unique_ptr<char[]>\n" , measure(naked_unique_ptr, buf_size_));
-		DBJ_PRINT( "2. %f miki s. \t std::vector<char>\n", measure(dbj_vector_buffer, buf_size_));
-		DBJ_PRINT( "3. %f miki s. \t dbj unique_ptr_buffer<char>\n", measure(uniq_ptr_buffer, buf_size_));
-		DBJ_PRINT( "4. %f miki s. \t shared_ptr<char[]>\n", measure(naked_shared_ptr, buf_size_));
-		DBJ_PRINT( "5. %f miki s. \t std::string\n", measure(string_buffer, buf_size_));
+		DBJ_PRINT( "\nMeasuring for buffer size: %zu \tIterations: %d\n\n", buf_size_, max_iterations );
+		store_result( "%5.2f micro s. \t unique_ptr<char[]>\n" , measure(naked_unique_ptr, buf_size_));
+		store_result( "%5.2f micro s. \t std::vector<char>\n", measure(dbj_vector_buffer, buf_size_));
+		store_result( "%5.2f micro s. \t dbj unique_ptr_buffer<char>\n", measure(uniq_ptr_buffer, buf_size_));
+		store_result( "%5.2f micro s. \t shared_ptr<char[]>\n", measure(naked_shared_ptr, buf_size_));
+		store_result( "%5.2f micro s. \t std::string\n", measure(string_buffer, buf_size_));
+
+		store_result( "%5.2f micro s. \t dbj_shared_ptr_buffer\n", measure(dbj_shared_ptr_buffer, buf_size_));
 	};
 
-	driver(buffer_size / 1);
-	driver(buffer_size / 2);
-	driver(buffer_size / 4);
-	driver(buffer_size / 8);
-	driver(buffer_size / 16);
+	driver(buffer_size / 1); 	show_results();
+	driver(buffer_size / 2);   	show_results();
+	driver(buffer_size / 4); 	show_results();
+	driver(buffer_size / 8); 	show_results();
+	driver(buffer_size / 16); 	show_results();
 
 	system("@pause");
 	system("@echo.");

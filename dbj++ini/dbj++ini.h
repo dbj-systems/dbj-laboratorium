@@ -1,4 +1,6 @@
 #pragma once
+/* (c) 2019 by dbj.org   -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/ */
+
 //
 // Started from: 
 // https://github.com/benhoyt/inih
@@ -9,7 +11,7 @@
 #ifndef __INIREADER_H__
 #define __INIREADER_H__
 
-#include "dbj_ini_nanolib.h"
+#include "dbj--nanolib/dbj++tu.h"
 
 
 namespace dbj::ini 
@@ -30,7 +32,7 @@ namespace dbj::ini
 	// to keep them strings
 	struct ini_reader;
 
-	using buffer				= v_buffer ;
+	using buffer				= dbj::nanolib::v_buffer ;
 	using buffer_type			= typename buffer::buffer_type;
 
 	/*
@@ -47,7 +49,7 @@ namespace dbj::ini
 	ini_reader const & ini_reader_instance( string_view /*ini_file_name*/ );
 
 	// this is the interface to the ini_reader
-	struct ini_reader
+	struct ini_reader 
 	{
 		static buffer_type default_inifile_path();
 		// Return the result of ini_parse(), i.e., 0 on success, line number of

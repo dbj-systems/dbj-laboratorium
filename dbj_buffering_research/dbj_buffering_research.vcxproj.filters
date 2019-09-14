@@ -15,16 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dbj_buffering_research.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="dbj_buffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dbj_buffer_testing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dbj_shared_pointer_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
