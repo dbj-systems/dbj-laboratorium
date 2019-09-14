@@ -115,4 +115,4 @@ namespace dbj {
 		} // util
 	} // core 
 } // dbj
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

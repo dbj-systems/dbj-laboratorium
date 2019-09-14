@@ -193,4 +193,4 @@ namespace dbj {
 
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

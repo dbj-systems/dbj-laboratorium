@@ -186,10 +186,10 @@ TU_REGISTER([] {
 	using namespace inner;
 
 	DBJ_PRINT(DBJ_BG_BLUE
-		"\n\nTest and measure FIVE types of runtime buffers\n"  
+		"\n\nTest and measure SIX types of runtime buffers\n"  
 		DBJ_RESET);
-	DBJ_PRINT("\n\nThe test code, in a loop, creates each buffer type, then moves it and finally\n "
-		"changes the buffer content by using the '[]' operator, char by char\n"
+	DBJ_PRINT("\n\nThe test code, in a loop, creates/destroys each buffer type, moves it and finally\n "
+		"changes the whole buffer content by using the '[]' operator\n"
 		"Care has been taken for compiler not to 'optimize out' the testing code\n"
 	);
 #ifdef _WIN64

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"
 //#include "../util/dbj_stack_matrix.h"
 //#include "../testfwork/dbj_testing.h"
 //#include "../console/dbj_console_ops.h"

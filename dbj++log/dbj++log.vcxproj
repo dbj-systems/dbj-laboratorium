@@ -28,12 +28,12 @@
     <ClInclude Include="dbj++log.h" />
     <ClInclude Include="dbj\dbj_local_log.h" />
     <ClInclude Include="dbj\dbj_util.h" />
-    <ClInclude Include="dbj_gpl_license.h" />
+    <ClInclude Include="dbj_license.h" />
     <ClInclude Include="syslog\syslog.h" />
     <ClInclude Include="test\dbj_log_test.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE" />
+    <None Include="LICENSE.md" />
     <None Include="README.MD" />
   </ItemGroup>
   <ItemGroup>

@@ -85,4 +85,4 @@ retval is standard -1,0,1 triplet
 } // dbj::core
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

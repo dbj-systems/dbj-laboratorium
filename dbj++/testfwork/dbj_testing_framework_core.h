@@ -218,4 +218,4 @@ DBJ_TEST_CASE_IMPL ( description , _DBJ_CONCATENATE( __dbj_test_unit__, x ) )
 // #define DBJ_CONCAT( x, y ) DBJ_CONCAT_IMPL( x, y )
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

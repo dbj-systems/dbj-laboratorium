@@ -285,6 +285,6 @@ namespace dbj::log {
 
 } // dbj::log
 
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"
 
 

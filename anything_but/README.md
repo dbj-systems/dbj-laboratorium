@@ -173,24 +173,9 @@ Please report issues or [questions here](https://github.com/dbj-systems/dbj-labo
 You can contact me via twitter at @dbjdbj
 ### Contributing
 Any feedback from users and stakeholders will be used to improve the library.
-<hr/>
-	Value Handle to Avoid Implicit Conversions in standard C++
-
-   Copyright 2019 Dušan B. Jovanović (dbj@dbj.org)
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-</hr>
-
- &copy; 2019 by
-
+### License
+![CC BY-SA 4.0](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-sa.png)
+#### [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+#### &copy; 2019 by dbj@dbj.org
+---------
 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  

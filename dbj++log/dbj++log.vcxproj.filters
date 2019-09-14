@@ -40,11 +40,11 @@
     <ClInclude Include="dbj\dbj_local_log.h">
       <Filter>dbj</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_gpl_license.h" />
+    <ClInclude Include="dbj_license.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE" />
     <None Include="README.MD" />
+    <None Include="LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="media\syslogwatcher.com.jpg">

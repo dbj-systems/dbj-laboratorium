@@ -96,6 +96,6 @@ namespace dbj::com {
 
 
 /* inclusion of this file defines the kind of a licence used */
-#include "dbj_gpl_license.h"
+#include "dbj_license.h"
 
 #endif

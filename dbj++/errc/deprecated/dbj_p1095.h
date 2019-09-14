@@ -70,4 +70,4 @@ namespace dbj::err {
 
 #endif // DBJ_ERR_P1095
 /* inclusion of this file defines the kind of a licence used */
-#include "dbj_gpl_license.h"
+#include "dbj_license.h"

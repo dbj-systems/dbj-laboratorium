@@ -10,7 +10,7 @@ namespace dbj {
 
 	/*
 	This type comes out as the fastest buffer type.
-	Which is confusing
+	Which is confusing.
 	*/
 
 	template<typename CHAR>

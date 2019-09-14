@@ -68,4 +68,4 @@ namespace dbj {
 #pragma comment( user, DBJ_BUILD_STAMP ) 
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

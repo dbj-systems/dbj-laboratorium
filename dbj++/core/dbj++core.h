@@ -3,7 +3,7 @@
 #ifndef DBJ_CORE_INCLUDED
 #define DBJ_CORE_INCLUDED
 
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"
 
 /*
 usage concept: use dbj++core always and only by including this header only

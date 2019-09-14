@@ -28,10 +28,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE" />
     <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="README.md" />
+    <None Include="LICENSE.md" />
   </ItemGroup>
 </Project>

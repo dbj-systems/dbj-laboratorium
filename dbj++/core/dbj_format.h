@@ -288,4 +288,4 @@ namespace dbj::fmt {
 	}
 }
 
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

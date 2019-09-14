@@ -33,7 +33,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++required.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_gpl_license.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_license.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj++erc.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_err_type.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_retval.h" />
@@ -93,7 +93,7 @@
     <None Include="$(MSBuildThisFileDirectory)cpp.hint" />
     <None Include="$(MSBuildThisFileDirectory)errc\dbj_error_type.md" />
     <None Include="$(MSBuildThisFileDirectory)errc\readme.md" />
-    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
   </ItemGroup>
 </Project>

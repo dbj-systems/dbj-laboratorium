@@ -166,7 +166,7 @@
     <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
-    <None Include="LICENSE" />
+    <None Include="LICENSE.md" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

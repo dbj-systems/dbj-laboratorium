@@ -326,4 +326,4 @@ GPLv3 (c) 2018 by dbj.org
 
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"

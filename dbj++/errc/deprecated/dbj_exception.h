@@ -84,5 +84,5 @@ The string returned by what() is guaranteed to contain what_arg as a substring.
 } // dbj
 
 /* inclusion of this file defines the kind of a licence used */
-#include "dbj_gpl_license.h"
+#include "dbj_license.h"
 #endif // DBJ_ERR_STANDARD_EXCEPTION

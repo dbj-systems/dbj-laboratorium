@@ -1,5 +1,5 @@
 #pragma once
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"
 
 /*
 include windows only from one place

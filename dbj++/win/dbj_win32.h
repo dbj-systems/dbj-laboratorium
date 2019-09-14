@@ -202,4 +202,4 @@ https://stackoverflow.com/a/54491532/10870835
 } // dbj
 
 /* inclusion of this file defines the kind of a licence used */
-#include "../dbj_gpl_license.h"
+#include "../dbj_license.h"
