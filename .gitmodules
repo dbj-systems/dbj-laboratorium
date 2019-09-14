@@ -14,3 +14,6 @@
 [submodule "dbj--sqlite/dbj--nanolib"]
 	path = dbj--sqlite/dbj--nanolib
 	url = https://github.com/dbj-systems/dbj--nanolib.git
+[submodule "dbj++ini/dbj--nanolib"]
+	path = dbj++ini/dbj--nanolib
+	url = https://github.com/dbj-systems/dbj--nanolib.git
