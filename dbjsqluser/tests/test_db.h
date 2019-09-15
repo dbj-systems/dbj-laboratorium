@@ -17,9 +17,9 @@ namespace dbj_sql_user {
 	/*
 	return value is of this type : dbj::sql::status_and_location
 
-	std::string is very slow, we use std::vector<char> as a buffer
+	We use std::vector<char> as a char buffer
 	std::unique_ptr<char[]> is the only other type we could use
-	but it is only slightly faster and not very easy to use
+	but it is only slightly faster and not that easy to use
 	*/
 	using buffer = typename dbj::nanolib::v_buffer;
 	using buffer_type = typename buffer::buffer_type;

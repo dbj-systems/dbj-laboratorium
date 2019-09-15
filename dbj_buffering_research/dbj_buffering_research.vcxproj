@@ -72,15 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
+    <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
+    <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
+    <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
+    <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -97,6 +105,12 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>DBJ POST BUILD SCRIPT</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,6 +127,12 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>DBJ POST BUILD SCRIPT</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -133,6 +153,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>DBJ POST BUILD SCRIPT</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -153,14 +179,21 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>DBJ POST BUILD SCRIPT</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj_buffers.h" />
+    <ClInclude Include="dbj_buffer_measurer.h" />
     <ClInclude Include="dbj_buffer_testing.h" />
-    <ClInclude Include="dbj_shared_pointer_buffer.h" />
+    <ClInclude Include="shared_pointer_buffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

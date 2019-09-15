@@ -21,7 +21,10 @@
     <ClInclude Include="dbj_buffer_testing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dbj_shared_pointer_buffer.h">
+    <ClInclude Include="shared_pointer_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dbj_buffer_measurer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,12 +3,20 @@
 
 #include <cstdio>
 #include <future>
+#include <ctime>
+#include <chrono>
+#include <map>
 
 #include "dbj--nanolib/dbj++tu.h"
 
 #include "dbj_buffers.h"
-#include "dbj_upb.h"
+#include "shared_pointer_buffer.h"
+
+#ifdef DBJ_JUST_TESTS
 #include "dbj_buffer_testing.h"
+#endif
+
+#include "dbj_buffer_measurer.h"
 
 #pragma warning( push )
 #pragma warning( disable: 4100 )
@@ -23,16 +31,17 @@ void start_from_separate_thread(
 	const char* envp[]
 )
 {
-	DBJ_PRINT("\n\n%s -- Started\n", 1 + strrchr(argv[0], '\\'));	
+	dbj::nanolib::set_console_font( L"Lucida Console", 24);
+
+	DBJ_PRINT(u8"\n(c) 2019 by Dušan B. Jovanović -- dbj@dbj.org\n");
+	DBJ_PRINT("\n\n%s -- Starting\n", 1 + strrchr(argv[0], '\\'));	
 	dbj::tu::catalog.execute();
 	DBJ_PRINT("\n\n%s -- Finished\n", 1 + strrchr(argv[0], '\\'));
 
-#ifdef _DEBUG
 #ifdef _MSC_VER
 	::system("@echo.");
 	::system("@echo.");
 	::system("@pause");
-#endif
 #endif
 }
 
