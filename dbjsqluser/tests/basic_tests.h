@@ -141,18 +141,34 @@ namespace dbj_sql_user
 				}
 
 			status_ = test_wrong_insert( db );
-			if (is_error(status_)) DBJ_PRINT( "\n\n test_wrong_insert()\tStatus : \n %s\n\n", to_json(status_).data());
+			PRINT_IF_ERROR(status_);
 
 			status_ = test_table_info( db );
-			if (is_error(status_)) DBJ_PRINT( "\n\n test_table_info()\tStatus : \n %s\n\n", to_json(status_).data());
+			PRINT_IF_ERROR(status_);
 
 			status_ = test_select( db );
-			if (is_error(status_)) DBJ_PRINT( "\n\n test_select()\tStatus : \n %s\n\n", to_json(status_).data());
+			PRINT_IF_ERROR(status_);
 
 			/*
 			NOTE: above we just perform "print-and-proceed"
 			usually callers will use status_ to develop another logic
 			*/
+		});
+
+	TU_REGISTER(
+		[] {
+
+			DBJ_PRINT("\n\nCreating and querying rezults database.\nRezults of C++ runtime buffer types.\n");
+			sql::status_and_location status_;
+			sql::database const& db = rezults_db(status_);
+			// some kind of error has happened
+			if (is_error(status_)) {
+				PRINT_IF_ERROR(status_);
+				return;
+			}
+
+			PRINT_IF_ERROR( db.query("SELECT rank,size, rezult,comment FROM rezults GROUP BY size ORDER BY rank", sql::universal_callback) );
+
 		});
 
 } // eof two_tests namespace

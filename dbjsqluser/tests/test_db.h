@@ -68,10 +68,85 @@ namespace dbj_sql_user {
 		return instance_;
 	} // demo_db
 
+	/*
+	-------------------------------------------------------------------------------------
+	*/
+	inline sql::database const& rezults_db(sql::status_and_location & status)
+		// no throwing from here
+		noexcept
+	{
+		constexpr auto REZULTS_DB_CREATE_SQL =
+			"DROP TABLE IF EXISTS rezults;"
+			"CREATE TABLE rezults ("
+			"rank INT PRIMARY KEY NOT NULL, "
+			"iterations INT NOT NULL,"
+			" size      INT NOT NULL,"
+			" rezult    REAL,"
+			" comment VARCHAR(255) NOT NULL);"
+			"INSERT INTO rezults VALUES (  1,  1000,   2047,  458.92, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES (  2,  1000,   2047,  459.30, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES (  3,  1000,   2047,  462.75, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES (  4,  1000,   2047,  467.14, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES (  5,  1000,   2047,  469.39, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES (  6,  1000,   2047,  483.10, 'std::string' );"
+			"INSERT INTO rezults VALUES (  7,  1000,   4095,  915.35, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES (  8,  1000,   4095,  923.54, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES (  9,  1000,   4095,  925.53, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 10,  1000,   4095,  927.42, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 11,  1000,   4095,  935.58, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES ( 12,  1000,   4095,  945.35, 'std::string' );"
+			"INSERT INTO rezults VALUES ( 13,  1000,   8191, 1821.79, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 14,  1000,   8191, 1823.44, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 15,  1000,   8191, 1839.44, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 16,  1000,   8191, 1848.01, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 17,  1000,   8191, 1854.97, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES ( 18,  1000,   8191, 1889.98, 'std::string' );"
+			"INSERT INTO rezults VALUES ( 19,  1000,  16383, 3661.54, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 20,  1000,  16383, 3688.72, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 21,  1000,  16383, 3692.42, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 22,  1000,  16383, 3693.39, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 23,  1000,  16383, 3704.24, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES ( 24,  1000,  16383, 3797.33, 'std::string' );"
+			"INSERT INTO rezults VALUES ( 25,  1000,  32767, 7288.90, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 26,  1000,  32767, 7327.26, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 27,  1000,  32767, 7357.97, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 28,  1000,  32767, 7363.80, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 29,  1000,  32767, 7403.32, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES ( 30,  1000,  32767, 7483.89, 'std::string' );"
+			"INSERT INTO rezults VALUES ( 31,  1000,  65535, 14570.30, 'home made shared_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 32,  1000,  65535, 14666.05, 'shared_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 33,  1000,  65535, 14697.39, 'home made unique_ptr buffer' );"
+			"INSERT INTO rezults VALUES ( 34,  1000,  65535, 14698.30, 'std::vector<char>' );"
+			"INSERT INTO rezults VALUES ( 35,  1000,  65535, 14841.03, 'unique_ptr<char[]>' );"
+			"INSERT INTO rezults VALUES ( 36,  1000,  65535, 15075.27, 'std::string' );";
+
+		// this lambda is executed only on the first call 
+		auto initor = [&]()
+			-> const sql::database &
+		{
+			// sql::database constructor does not throw on error
+			// it has the status to report 
+			static sql::database db(":memory:", status);
+			// if status is in the error state still return the db 
+			// the caller will decide on the course of action
+			if ( is_error(status)) return db;
+			// create the database 
+			// update the status
+			status = db.exec(REZULTS_DB_CREATE_SQL);
+			return db;
+		};
+		// here we3 keep the single sql::database type instance
+		static  sql::database const& instance_ = initor();
+		return instance_;
+	} // demo_db
+
 }; // dbj_sql_user nspace
 
-/* this is a cludge */
-#define CHECK_RETURN if ( ::dbj::sql::is_error(status) ) { DBJ_FPRINTF(stdout, "\n\n%s\n\n",  ::dbj::sql::to_json( status).data() ); return; }
+/* 
+dp not go overboard with macros
+*/
+#define CHECK_RETURN if ( ::dbj::sql::is_error(status) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Statusn%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( status).data() ); return; }
+#define PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( S_ ).data() ); }
 
 
 #endif // !DBJ_TEST_DB_INC
