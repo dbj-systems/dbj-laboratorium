@@ -74,21 +74,29 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>D:\DEVL\GitHub\dbj_laboratorium;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)dbj_sql_user\</OutDir>
+    <TargetName>dbj_sql_user_$(Configuration)_$(PlatformShortName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>D:\DEVL\GitHub\dbj_laboratorium;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)dbj_sql_user\</OutDir>
+    <TargetName>dbj_sql_user_$(Configuration)_$(PlatformShortName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>D:\DEVL\GitHub\dbj_laboratorium;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)dbj_sql_user\</OutDir>
+    <TargetName>dbj_sql_user_$(Configuration)_$(PlatformShortName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>D:\DEVL\GitHub\dbj_laboratorium;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <OutDir>$(SolutionDir)dbj_sql_user\</OutDir>
+    <TargetName>dbj_sql_user_$(Configuration)_$(PlatformShortName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -109,6 +117,12 @@
     <CustomBuildStep>
       <Command>copy "$(MSBuildProjectDirectory)\dbj--sqlite3\sqlite3.dll" "$(TargetDir)\sqlite3.dll"</Command>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_time_stamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generated build_time_stamp.inc</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -129,6 +143,12 @@
     <CustomBuildStep>
       <Command>copy "$(MSBuildProjectDirectory)\dbj--sqlite3\sqlite3.dll" "$(TargetDir)\sqlite3.dll"</Command>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_time_stamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generated build_time_stamp.inc</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -153,6 +173,12 @@
     <CustomBuildStep>
       <Command>copy "$(MSBuildProjectDirectory)\dbj--sqlite3\sqlite3.dll" "$(TargetDir)\sqlite3.dll"</Command>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_time_stamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generated build_time_stamp.inc</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -177,6 +203,12 @@
     <CustomBuildStep>
       <Command>copy "$(MSBuildProjectDirectory)\dbj--sqlite3\sqlite3.dll" "$(TargetDir)\sqlite3.dll"</Command>
     </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_time_stamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generated build_time_stamp.inc</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -3,6 +3,8 @@
 */  
 #include "pch.h"
 
+#include "build_time_stamp.inc"
+
 #include "tests/basic_tests.h"
 #include "tests/easy_udf_sample.h"
 #include "tests/naked_udf.h"
@@ -20,6 +22,7 @@ void start_from_separate_thread(
 	const char* envp[]
 )
 {
+	DBJ_PRINT("\nBuild time stamp: "  DBJ_BUILD_TIMESTAMP);
 	DBJ_PRINT( "\n\n%s -- Started\n", 1 + strrchr( argv[0], '\\') );
 		dbj::tu::catalog.execute();
 	DBJ_PRINT( "\n\n%s -- Finished\n", 1 + strrchr(argv[0], '\\') );

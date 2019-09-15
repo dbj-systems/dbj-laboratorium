@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /dbj_buff_performance_review
+/dbj_sql_user

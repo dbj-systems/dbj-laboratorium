@@ -74,21 +74,25 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
     <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
     <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
     <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>dbj_buffer_types_perf_$(Configuration)_$(PlatformShortName)</TargetName>
     <OutDir>$(SolutionDir)dbj_buff_performance_review\</OutDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -106,10 +110,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>DBJ POST BUILD SCRIPT</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
@@ -134,10 +140,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>DBJ POST BUILD SCRIPT</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
@@ -166,10 +174,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>DBJ POST BUILD SCRIPT</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
@@ -198,10 +208,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>@echo DBJ BUF RESEARCH BUILD  is DONE!</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>DBJ POST BUILD SCRIPT</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
@@ -218,9 +230,6 @@
     <ClInclude Include="dbj_buffer_measurer.h" />
     <ClInclude Include="dbj_buffer_testing.h" />
     <ClInclude Include="shared_pointer_buffer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="build_timestamp.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
