@@ -111,6 +111,12 @@
     <PostBuildEvent>
       <Message>DBJ POST BUILD SCRIPT</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating DBJ_BUILD_TIMESTAMP</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,6 +139,12 @@
     <PostBuildEvent>
       <Message>DBJ POST BUILD SCRIPT</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating DBJ_BUILD_TIMESTAMP</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -159,6 +171,12 @@
     <PostBuildEvent>
       <Message>DBJ POST BUILD SCRIPT</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating DBJ_BUILD_TIMESTAMP</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -185,6 +203,12 @@
     <PostBuildEvent>
       <Message>DBJ POST BUILD SCRIPT</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>echo #define DBJ_BUILD_TIMESTAMP __DATE__ " " __TIME__  &gt; build_timestamp.inc</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Generating DBJ_BUILD_TIMESTAMP</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -194,6 +218,9 @@
     <ClInclude Include="dbj_buffer_measurer.h" />
     <ClInclude Include="dbj_buffer_testing.h" />
     <ClInclude Include="shared_pointer_buffer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build_timestamp.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

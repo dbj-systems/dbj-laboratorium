@@ -1,6 +1,6 @@
-// dbj_buffering_research.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/* (c) 2019 by dbj.org   -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/ */
 
+#include "build_timestamp.inc"
 #include <cstdio>
 #include <future>
 #include <ctime>
@@ -34,6 +34,8 @@ void start_from_separate_thread(
 	dbj::nanolib::set_console_font( L"Lucida Console", 24);
 
 	DBJ_PRINT(u8"\n(c) 2019 by Dušan B. Jovanović -- dbj@dbj.org\n");
+
+	DBJ_PRINT("\nBuild time stamp -- " DBJ_BUILD_TIMESTAMP );
 	DBJ_PRINT("\n\n%s -- Starting\n", 1 + strrchr(argv[0], '\\'));	
 	dbj::tu::catalog.execute();
 	DBJ_PRINT("\n\n%s -- Finished\n", 1 + strrchr(argv[0], '\\'));
