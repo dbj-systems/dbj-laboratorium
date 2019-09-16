@@ -118,13 +118,9 @@ namespace dbj_sql_user
 			}
 
 			constexpr auto SQL = "SELECT word, definition FROM entries WHERE word LIKE 'zyga%'";
-			DBJ_PRINT("\n\nExternal database: %s, testing the query: %s", db.db_name(), SQL);
+			DBJ_PRINT("\n\nExternal database: %s, testing query: %s", db.db_name(), SQL);
 			// returns the status
-			status_ = db.query(SQL, example_callback);
-
-			if (is_error(status_)) {
-				DBJ_PRINT("\n\n ERROR Status : \n\n %s\n\nWhile querying the database: %s\n", to_json(status_).data(), db.db_name());
-			}
+			PRINT_IF_ERROR(db.query(SQL, example_callback));
 		});
 
 	/*
@@ -140,18 +136,15 @@ namespace dbj_sql_user
 					return;
 				}
 
-			status_ = test_wrong_insert( db );
-			PRINT_IF_ERROR(status_);
+				PRINT_IF_ERROR(test_wrong_insert( db ));
 
-			status_ = test_table_info( db );
-			PRINT_IF_ERROR(status_);
+				PRINT_IF_ERROR( test_table_info( db ));
 
-			status_ = test_select( db );
-			PRINT_IF_ERROR(status_);
+				PRINT_IF_ERROR( test_select( db ) );
 
 			/*
 			NOTE: above we just perform "print-and-proceed"
-			usually callers will use status_ to develop another logic
+			usually callers will use status_ to develop more involved logic
 			*/
 		});
 
@@ -166,8 +159,14 @@ namespace dbj_sql_user
 				PRINT_IF_ERROR(status_);
 				return;
 			}
+			
+			DBJ_PRINT("\nDatabase: %s, meta data for columns of the table 'rezults'\n", db.db_name() );
+			PRINT_IF_ERROR( sql::table_info(db, "rezults", sql::universal_callback) );
 
-			PRINT_IF_ERROR( db.query("SELECT rank,size, rezult,comment FROM rezults GROUP BY size ORDER BY rank", sql::universal_callback) );
+			const char * const QRY [] { "SELECT rank,size, rezult,comment FROM rezults GROUP BY size ORDER BY rank" };
+
+			DBJ_PRINT("\n%s\n", QRY[0] );
+			PRINT_IF_ERROR( db.query( QRY[0] , sql::universal_callback) );
 
 		});
 

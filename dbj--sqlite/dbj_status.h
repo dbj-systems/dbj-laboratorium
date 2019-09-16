@@ -5,13 +5,23 @@
 
 #include <memory>
 
-/*
-no exception but return values
+/*-----------------------------------------------------------------
 
-return value type can have or not have, sqlite status code and std::errc code
+Key concept: there is a 'status'. 'status' sometimes can represent an 'error', depending on the context.
+
+I use type/subtype little hierarchy because on of my key principles is to develop as little as posible
+The objective is to use std:: services,features,types and mechanims as much as possible.
+
+I do not use std::system_error becuase it is overcomplicated design and poor implementation.
+I see nothing wrong with status types bellow. Provided they are not thrown.
+Throw/Try/Catch are proven to make slow and bloated apps.
+
+This concept also solves the problem of error categories. The problem is, one has to implement
+them error categories. In this scenario type-name of the subtype is the error category
+
+Implementaion bellow conects the status concept with sqlite3 int codes, and with POSIX std::errc codes.
 
 */
-
 namespace dbj::sql
 {
 	using namespace std;
@@ -22,7 +32,7 @@ namespace dbj::sql
 			https://sqlite.org/c3ref/c_abort.html
 			note:
 			this must match with sqlite3 # defines
-			*/
+		*/
 		sqlite_ok = SQLITE_OK,	/* successful result */
 		sqlite_error = SQLITE_ERROR, /* generic error */
 		sqlite_internal = SQLITE_INTERNAL, /* internal logic error in sqlite */
@@ -78,7 +88,7 @@ namespace dbj::sql
 		}
 	}
 
-	// essentially transform POSIX error code
+	// essentially transforms POSIX error code
 	// into std::error_code message
 	inline buffer_type err_message_errc(std::errc posix_retval)  noexcept
 	{
@@ -89,7 +99,7 @@ namespace dbj::sql
 
 	/*
 	this is the sqlite3 logic
-	not all error codes are errors
+	not all codes are errors
 	*/
 	inline constexpr bool is_sqlite_error(status_code const& sc_) noexcept
 	{
@@ -103,34 +113,28 @@ namespace dbj::sql
 		};
 	}
 
-
-	/*-----------------------------------------------------------------
-
-	I do not throw anything.
-	I use type/subtype little hierarchy because on of my key principles is to develop as little as posible
-	The objective is to use std:: services,features,types and mechanims as much as possible.
-
-	I do not use std::system_error becuase it is overcomplicated design and poor implementation.
-	I see nothing wrong with type bellow. Provided they are not thrown.
-	Throw/Try/Catch are proven to make slow and bloated apps.
-
-	This concept also solves the problem of error categories. The problem is, one has to implement
-	them error categories. In this scenario type-name of the subtype is the error category
-
+	/*
+	----------------------------------------------------------------------------------------------
 	*/
-
 	struct status_base_type;
+
 	struct status_base_type
 	{
 		using pointer = typename std::shared_ptr<status_base_type>;
+
 		virtual char const* category() const = 0;
 		virtual char const* what() const = 0;
-		virtual int code() const = 0;
+		/*
+		sub types might have different code types
+		implementations have to cast to code_type
+		*/
+		using code_type = int;
+		virtual code_type code() const = 0;
 
 		/*
 		JSON format is universaly recognised. It gives us the ability to encode/decode the status message.
-		Changing the json format in turn gives us less rigid design/implementation, as not everything is 
-		coded properties. 
+		Changing the json format in turn gives us less rigid design/implementation, as not everything is
+		c++ properties or symbols.
 		*/
 		char const* json() const noexcept {
 			json_ = buffer::format("{ \"category\" : \"%s\" , \"code\" : %d, \"message\" : \"%s\" }",
@@ -141,7 +145,7 @@ namespace dbj::sql
 
 		/*
 		if this operator returns true some error has happened
-		 usage:
+		ie the status is in the 'error state'; usage:
 
 		dbj_db_status_type status_ ;
 				.... here do something with the dbj++sqlite api ...
@@ -162,14 +166,79 @@ namespace dbj::sql
 		mutable buffer_type json_;
 	};
 
-	struct sqlite3_status final : status_base_type
+
+	/*
+location is simillar to, but is not kind-of-a status
+*/
+	struct location_status final
+	{
+		// logicaly 'what' should be 'where' for location
+		virtual char const* where() const {
+			return location_.data();
+		}
+
+		char const* code() const { return code_.data(); }
+		char const* category() const { return "location"; }
+
+		char const* json() const noexcept {
+			this->json_ = buffer::format("{ \"category\" : \"%s\" , \"line\" : %s, \"file\" : \"%s\" }",
+				category(), code(), where()
+			);
+			return json_.data();
+		}
+
+		location_status() = default;
+
+
+		location_status(unsigned long line_, char const* file_) {
+			/* 0 is not a good line number */
+			_ASSERTE(line_ > 0UL);
+			this->code_ = buffer::format("%lu", line_);;
+			this->location_ = buffer::make(file_);
+		}
+
+	private:
+		/*
+		 on an app level location code is line no. in a source file
+		 On the system level, it can be anything else that
+		 identifies the distributed module/node/service, like URI for example
+		 thus we need to keep it as a text buffer too
+		 */
+		buffer_type code_;
+		buffer_type location_;
+		mutable buffer_type json_;
+	}; // location_status
+
+		/*
+	the key type describing the status and location
+	*/
+	struct location_status;
+	using status_and_location = typename std::pair< status_base_type::pointer, location_status >;
+
+	namespace inner {
+
+	inline status_base_type::pointer status(status_and_location const& sl_) noexcept
+	{
+		return sl_.first;
+	}
+
+	inline location_status const& location(status_and_location const& sl_) noexcept
+	{
+		return sl_.second;
+	}
+
+	/*
+	status sub types are hidden. factory methods are making them
+	*/
+	 struct sqlite3_status final : status_base_type
 	{
 		typename dbj::sql::status_code code_{};
-		virtual char const* what() const {
+		virtual char const* what() const 
+		{
 			this->data_ = err_message_sql((int)code_);
 			return data_.data();
 		}
-		virtual int code() const { return static_cast<int>(code_); }
+		virtual code_type code() const { return static_cast<code_type>(code_); }
 		virtual char const* category() const { return "sqlite3"; }
 
 		virtual operator bool() const noexcept
@@ -187,7 +256,7 @@ namespace dbj::sql
 			this->data_ = err_message_errc(code_);
 			return data_.data();
 		}
-		virtual int code() const { return static_cast<int>(code_); }
+		virtual code_type code() const { return static_cast<code_type>(code_); }
 		virtual char const* category() const { return "posix"; }
 
 		virtual operator bool() const noexcept
@@ -196,64 +265,11 @@ namespace dbj::sql
 		}
 	};
 
-	/*
-	location is simillar to but is not kind-of-a status
-	*/
-	struct location_status final 
-	{
-		// logicaly 'what' should be 'where' for location
-		virtual char const* where() const {
-			return location_.data();
-		}
-
-		char const* code() const { return code_.data(); }
-		char const* category() const { return "location"; }
-
-		char const* json() const noexcept {
-			this->json_ = buffer::format("{ \"category\" : \"%s\" , \"code\" : %d, \"location\" : \"%s\" }",
-				category(), code(), where()
-			);
-			return json_.data();
-		}
-
-		location_status() = default;
-
-
-		location_status(unsigned long line_, char const* file_) {
-			/* 0 is not a good line number */
-			_ASSERTE(line_ > 0UL);
-			/*
-			https://docs.microsoft.com/en-gb/cpp/c-runtime-library/reference/itoa-s-itow-s?view=vs-2019
-
-			errno_t _ultoa_s(unsigned long value, char* buffer, size_t size, int radix);
-			*/
-			buffer_type line_str = buffer::make(_MAX_U64TOSTR_BASE2_COUNT);
-			errno_t rez = _ultoa_s(line_, line_str.data(), line_str.size(), 10);
-
-			if (rez != 0) {
-				dbj::nanolib::dbj_terror("_ultoa_s() failed!", __FILE__, __LINE__);
-			}
-
-			this->code_ = line_str;
-			this->location_ = buffer::make(file_);
-		}
-
-	private :
-		/*
-		 on an app level location code is line no. in a source file
-		 On the system level, it can be anything else that
-		 identifies the distributed module/node/service, like URI for example
-		 thus we need to keep it as a text buffer too
-		 */
-		buffer_type code_;
-		buffer_type location_;
-		mutable buffer_type json_;
-	}; // location_status
 
 	/*
-	-----------------------------------------------------------------------------------
+	bellow are factory methods, making concrete instance of sub-types
+	effectively hiding the sub-types
 	*/
-	namespace inner {
 		inline status_base_type::pointer make_status(typename dbj::sql::status_code code_) {
 
 			sqlite3_status* s3s = new sqlite3_status;
@@ -273,16 +289,7 @@ namespace dbj::sql
 			return { line_, file_ };
 		}
 
-	} // inner ns
-
-	  /*
-	  the key type carrying the status and location 
-	  */
-
-	using status_and_location = typename std::pair< status_base_type::pointer, location_status >;
-
-	namespace inner {
-		/* sqlite3 codes are of a int type */
+        /* make the combinations */
 		inline status_and_location make_sl(int code_, unsigned long line_, char const* file_)
 		{
 			return make_pair(
@@ -298,7 +305,6 @@ namespace dbj::sql
 				dbj::sql::inner::make_status(line_, file_)
 			);
 		}
-	} // inner ns
 
 	/*
 	this macro is making the status_and_location of appropriate type
@@ -314,34 +320,23 @@ namespace dbj::sql
 	*/
 #define DBJ_ERROK ::dbj::sql::inner::make_sl( static_cast<std::errc>(0), __LINE__ , __FILE__ ) 
 
-	namespace inner {
-
-		inline status_base_type::pointer status(status_and_location const& sl_) noexcept
-		{
-			return sl_.first;
-		}
-
-		inline location_status location(status_and_location const& sl_) noexcept
-		{
-			return sl_.second;
-		}
 	} // inner ns
 
-	inline bool is_error(status_and_location const & sl_ ) 
+	inline bool is_error(status_and_location const& sl_)
 	{
 		status_base_type::pointer stat_ptr = inner::status(sl_);
 		/*
 		we are here looking for the error in business logic
 		sqlite3 or posix error
 		if status_and_location is completely empty, default constructed
-		that is not business logic error, it has just not been used 
+		that is not business logic error, it has just not been used
 		*/
-		if ( stat_ptr ) 
+		if (stat_ptr)
 			return stat_ptr->is_error();
 		return false;
 	}
 
-	inline buffer_type to_json(status_and_location const& sl_) 
+	inline buffer_type to_json(status_and_location const& sl_)
 	{
 		status_base_type::pointer stat_ptr = inner::status(sl_);
 		_ASSERTE(stat_ptr);
@@ -350,28 +345,30 @@ namespace dbj::sql
 		return buffer::format("%s %s", stat_ptr->json(), loc_.json());
 	}
 
-	 /*
-	 --------------------------------------------------------------------------------------------------
-	type used to produce return value for users to consume the return in a structured declaration
+#ifdef DBJ_STATUS_FUTURE_EXTENSION
+	/*
+	--------------------------------------------------------------------------------------------------
+   type used to produce return value for users to consume the return in a structured declaration
 
-	auto [value,status] = my_function () ;
+   auto [value,status] = my_function () ;
 
-	 	 if ( ! value ) ... error state ...
-	*/
+		if ( ! value ) ... error state ...
+   */
 	template<typename T_>
 	using return_type = pair<
-			optional< T_ > ,
-			optional< status_and_location >
-		> ;
+		optional< T_ >,
+		optional< status_and_location >
+	>;
 
 	template <typename T_, typename S_L_ >
-	inline 
-		return_type<T_> 
+	inline
+		return_type<T_>
 		make_retval
-	(  optional<T_> value_, optional< status_and_location > status_and_location_pair_ )
+		(optional<T_> value_, optional< status_and_location > status_and_location_pair_)
 	{
-		return make_pair( value_ , status_and_location_pair_);
+		return make_pair(value_, status_and_location_pair_);
 	}
+#endif  // DBJ_STATUS_FUTURE_EXTENSION
 
 } // namespace dbj::sqlite
 

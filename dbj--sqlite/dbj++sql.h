@@ -31,12 +31,7 @@ namespace dbj::sql
 	constexpr inline auto version = "2.0.0";
 }
 
-/*
- dbj::sql::status_and_location
-*/
-#include "dbj_sql_error_concept.h"
-
-
+#include "dbj_status.h"
 
 namespace dbj::sql {
 
@@ -675,11 +670,10 @@ namespace dbj::sql {
 		{
 			auto cell_name = cell.name(j_);
 
-			// remember we are using the magic of dbj::sql::transformer 
-			// in this call
+			// remember we are using the magic of dbj::sql::transformer, in this call
 			buffer_type cell_value = cell(j_);
 
-			DBJ_PRINT( "{ %-10s: %s } ", cell_name, cell_value.data());
+			DBJ_PRINT( "{ '%s' : '%s' } ", cell_name, cell_value.data());
 		};
 
 		DBJ_PRINT( "\n[%6zu] ", row_id);
