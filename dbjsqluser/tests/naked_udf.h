@@ -38,10 +38,21 @@ namespace dbj_sql_user {
 
 	TU_REGISTER([] {
 
+		auto native_callback = [] (void* helper_, int argc, char** argv, char** col_names)
+			->int
+		{
+			sql::cursor_iterator* criter_ = ( helper_ ? (sql::cursor_iterator * )helper_ : nullptr  );
+
+			auto value = criter_->to_text(0);
+
+			for (int i = 0; i < argc; ++i)
+				DBJ_PRINT("\n%s = %s" , col_names[i] , (*value).data() );
+			return SQLITE_OK ;
+		};
 		/*
 		Getting the dbj++sql database
 		*/
-		sql::status_and_location status;
+		sql::status_type status;
 			const sql::database& database = demo_db(status);
 				CHECK_RETURN;
 
@@ -61,12 +72,15 @@ namespace dbj_sql_user {
 
 		} else {
 
-			status = database.query
+			/*
+			Instead of query we shall you the exec() metohod
+			*/
+			status = database.exec
 			(
 				"SELECT firstchar(Name) from entries",
 				// you can provide your own sql result handling callback
 				// we use ours right now
-				sql::universal_callback
+				native_callback
 			);
 
 			DBJ_PRINT("\n\nDone with 'SELECT firstchar(Name) from entries'");

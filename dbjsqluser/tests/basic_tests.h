@@ -9,10 +9,10 @@ namespace dbj_sql_user
 {
 	/*
 	no exceptions are thrown
-	we return the sql::status_and_location, and
+	we return the sql::status_type, and
 	we make sure it is not discarded
 	*/
-	[[nodiscard]] inline sql::status_and_location test_wrong_insert(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::status_type test_wrong_insert(sql::database const& db) noexcept
 	{
 
 		/*
@@ -39,17 +39,17 @@ namespace dbj_sql_user
 	*/
 	int sample_callback(
 		const size_t row_id,
-		const sql::row_descriptor& cell
+		sql::cursor_iterator result_row_
 	)
 	{
 		// get the int value of the first column
-		int   id_ = cell(0);
+		int   id_ = *(result_row_.to_int32(0));
 		// get the string value of the second column
-		buffer_type   name_ = cell(1);
+		buffer_type   name_ = *(result_row_.to_text(1));
 		// print what we got
 
 		DBJ_PRINT( "\n\t %zu \t %s = %d \t %s = %s",
-			row_id, cell.name(0), id_, cell.name(1), name_.data());
+			row_id, result_row_.name(0), id_, result_row_.name(1), name_.data());
 
 		return SQLITE_OK;
 		// we have to use SQLITE_OK macro
@@ -61,7 +61,7 @@ namespace dbj_sql_user
 	/*
 	use the universal callback provided by dbj++sqlite
 	*/
-	[[nodiscard]] inline sql::status_and_location test_table_info( sql::database const& db ) noexcept
+	[[nodiscard]] inline sql::status_type test_table_info( sql::database const& db ) noexcept
 	{
 		DBJ_PRINT( "\nmeta data for columns of the table 'entries'\n");
 		/*
@@ -70,7 +70,7 @@ namespace dbj_sql_user
 		return sql::table_info(db, "entries", sql::universal_callback);
 	}
 
-	[[nodiscard]] inline sql::status_and_location test_select(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::status_type test_select(sql::database const& db) noexcept
 	{
 		DBJ_PRINT( "\nexecute: 'SELECT Id, Name FROM entries'\n");
 		return db.query("SELECT Id,Name FROM entries", sample_callback);
@@ -84,15 +84,15 @@ namespace dbj_sql_user
 	*/
 	int example_callback(
 		const size_t row_id,
-		const dbj::sql::row_descriptor& row_
+		dbj::sql::cursor_iterator row_
 	)
 	{
 		// 'automagic' transform to the buffer type
 		// of the column 0 value for this row
 		// auto can not be used here
 		// compiler would not know what type you want
-		buffer_type  word_ = row_(0);
-		buffer_type  definition_ = row_(1);
+		buffer_type  word_ = *(row_.to_text(0));
+		buffer_type  definition_ = *(row_.to_text(1));
 		DBJ_PRINT( "\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
 
 		//// all these should provoke exception
@@ -108,7 +108,7 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			sql::status_and_location status_{};
+			sql::status_type status_{};
 			// 
 			sql::database db(DICTIONARY_DB_FILE_PATH, status_);
 			// some kind of error has happened
@@ -128,7 +128,7 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			sql::status_and_location status_;
+			sql::status_type status_;
 				sql::database const & db = demo_db(status_);
 				// some kind of error has happened
 				if (is_error(status_)) {
@@ -152,7 +152,7 @@ namespace dbj_sql_user
 		[] {
 
 			DBJ_PRINT("\n\nCreating and querying rezults database.\nRezults of C++ runtime buffer types.\n");
-			sql::status_and_location status_;
+			sql::status_type status_;
 			sql::database const& db = rezults_db(status_);
 			// some kind of error has happened
 			if (is_error(status_)) {

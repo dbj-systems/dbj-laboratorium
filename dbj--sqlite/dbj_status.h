@@ -213,16 +213,16 @@ location is simillar to, but is not kind-of-a status
 	the key type describing the status and location
 	*/
 	struct location_status;
-	using status_and_location = typename std::pair< status_base_type::pointer, location_status >;
+	using status_type = typename std::pair< status_base_type::pointer, location_status >;
 
 	namespace inner {
 
-	inline status_base_type::pointer status(status_and_location const& sl_) noexcept
+	inline status_base_type::pointer status(status_type const& sl_) noexcept
 	{
 		return sl_.first;
 	}
 
-	inline location_status const& location(status_and_location const& sl_) noexcept
+	inline location_status const& location(status_type const& sl_) noexcept
 	{
 		return sl_.second;
 	}
@@ -290,7 +290,7 @@ location is simillar to, but is not kind-of-a status
 		}
 
         /* make the combinations */
-		inline status_and_location make_sl(int code_, unsigned long line_, char const* file_)
+		inline status_type make_sl(int code_, unsigned long line_, char const* file_)
 		{
 			return make_pair(
 				dbj::sql::inner::make_status(static_cast<dbj::sql::status_code>(code_)),
@@ -298,7 +298,7 @@ location is simillar to, but is not kind-of-a status
 			);
 		}
 
-		inline status_and_location make_sl(std::errc code_, unsigned long line_, char const* file_)
+		inline status_type make_sl(std::errc code_, unsigned long line_, char const* file_)
 		{
 			return make_pair(
 				dbj::sql::inner::make_status(static_cast<std::errc>(code_)),
@@ -307,7 +307,7 @@ location is simillar to, but is not kind-of-a status
 		}
 
 	/*
-	this macro is making the status_and_location of appropriate type
+	this macro is making the status_type of appropriate type
 	*/
 #define DBJ_STATUS(X_)  ::dbj::sql::inner::make_sl( X_ , __LINE__, __FILE__ )
 	/*
@@ -322,13 +322,13 @@ location is simillar to, but is not kind-of-a status
 
 	} // inner ns
 
-	inline bool is_error(status_and_location const& sl_)
+	inline bool is_error(status_type const& sl_)
 	{
 		status_base_type::pointer stat_ptr = inner::status(sl_);
 		/*
 		we are here looking for the error in business logic
 		sqlite3 or posix error
-		if status_and_location is completely empty, default constructed
+		if status_type is completely empty, default constructed
 		that is not business logic error, it has just not been used
 		*/
 		if (stat_ptr)
@@ -336,7 +336,7 @@ location is simillar to, but is not kind-of-a status
 		return false;
 	}
 
-	inline buffer_type to_json(status_and_location const& sl_)
+	inline buffer_type to_json(status_type const& sl_)
 	{
 		status_base_type::pointer stat_ptr = inner::status(sl_);
 		_ASSERTE(stat_ptr);
@@ -357,14 +357,14 @@ location is simillar to, but is not kind-of-a status
 	template<typename T_>
 	using return_type = pair<
 		optional< T_ >,
-		optional< status_and_location >
+		optional< status_type >
 	>;
 
 	template <typename T_, typename S_L_ >
 	inline
 		return_type<T_>
 		make_retval
-		(optional<T_> value_, optional< status_and_location > status_and_location_pair_)
+		(optional<T_> value_, optional< status_type > status_and_location_pair_)
 	{
 		return make_pair(value_, status_and_location_pair_);
 	}

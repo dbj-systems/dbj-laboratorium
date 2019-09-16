@@ -15,7 +15,7 @@ namespace dbj_sql_user {
 	namespace sql = ::dbj::sql;
 
 	/*
-	return value is of this type : dbj::sql::status_and_location
+	return value is of this type : dbj::sql::status_type
 
 	We use std::vector<char> as a char buffer
 	std::unique_ptr<char[]> is the only other type we could use
@@ -30,10 +30,10 @@ namespace dbj_sql_user {
 
 	// in memory db for testing
 	// we return an const reference to database singleton, made and hidden in here
-	// notice the status_and_location ref. argument `status`
+	// notice the status_type ref. argument `status`
 	// caller is laways reponisble to test it for the actual error state occurence
 	// staus is for signaling the status  n ot just for the error events
-	inline sql::database const& demo_db(sql::status_and_location & status)
+	inline sql::database const& demo_db(sql::status_type & status)
 		// no throwing from here
 		noexcept
 	{
@@ -71,7 +71,7 @@ namespace dbj_sql_user {
 	/*
 	-------------------------------------------------------------------------------------
 	*/
-	inline sql::database const& rezults_db(sql::status_and_location & status)
+	inline sql::database const& rezults_db(sql::status_type & status)
 		// no throwing from here
 		noexcept
 	{
