@@ -145,8 +145,8 @@ namespace dbj_sql_user {
 /* 
 dp not go overboard with macros
 */
-#define CHECK_RETURN if ( ::dbj::sql::is_error(status) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Statusn%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( status).data() ); return; }
-#define PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( S_ ).data() ); }
+#define DBJ_PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( S_ ).data() ); }
+#define DBJ_RETURN_ON_ERROR(S_) if ( ::dbj::sql::is_error(status) ) { DBJ_PRINT_IF_ERROR(S_); return; }
 
 
 #endif // !DBJ_TEST_DB_INC

@@ -104,18 +104,15 @@ namespace dbj_sql_user {
 			as per sql statement requirements we need to reurn an int
 			1 means yes that is a palindrome
 			*/
-#ifdef NDEBUG
-			result_(is_pal(word_.data()));
-#else
 			char const * name = word_.data();
 			int isit = is_pal( name );
 			result_(isit);
-#endif
+			return;
 		}
-		else {
-			/*	0 means no , word given is not a palindrome	*/
-			result_(0);
-		}
+		/*	0 means no , word given is not a palindrome	
+		    always, must use result_() before return
+		*/
+		result_(0);
 	}
 
 	/* the strlen udf :  int strlen( const char *)
@@ -153,33 +150,20 @@ namespace dbj_sql_user {
 		const sql::cursor_iterator& col
 	)
 	{
-		/* this is deliberately verbose code */
+		/* 
+		this is deliberately verbose code 
+		you might find it usefull to see
+		the types involved
+		*/
 		buffer_type word = *(col.to_text(0));
 		int len_ = *( col.to_int32(1)) ;
 
-		DBJ_FPRINTF(stdout, "\n\t[%3zu]\tword: %32s,\t%s: %12d",
+		DBJ_PRINT( "\n\t[%3zu]\tword: %32s,\t%s: %12d",
 			row_id, word.data(), col.name(1), len_);
 
-		// make sure to return always this  sqlite3 macro
+		// if all ok, make sure to return always this  sqlite3 macro
 		return SQLITE_OK;
 	}
-
-	/* to be called from your test unit
-	   here we register the two easy udf's we made above
-
-	   notice how we do not throw, we use std::sql::status_type's
-	   emanating from dbj++sql
-	*/
-	[[nodiscard]] sql::status_type test_udf(
-		sql::database const& database,
-		char const* query_
-	) noexcept
-	{
-		_ASSERTE(query_);
-		DBJ_FPRINTF(stdout, "\n\nTEST UDF with the  query: '%s'\n\n", query_);
-		return database.query(query_, sql::universal_callback  /*dbj_udfs_result_handler*/);
-		// return the sql::status_type
-	} // test_udf
 
 	/*
 	Test Unit registration
@@ -188,23 +172,22 @@ namespace dbj_sql_user {
 
 		sql::status_type status;
 		sql::database const& database = demo_db(status);
-		CHECK_RETURN;
+		DBJ_RETURN_ON_ERROR( status );
 
 		// register the two udf's required
 		// string names of udf's must match the SQL they are part of
 		// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
 		// always returning the sql::status_type on error
 		// obviuosly macro afficionados are welcome here
-		status = sql::register_dbj_udf<
-			palindrome /* function we register */
-		>(
-			database,  /* to which database */
-			"palindrome" /* how we want it called when used from SQL */
-			);
-		CHECK_RETURN;// return on error status
+		DBJ_RETURN_ON_ERROR(
+			sql::register_dbj_udf
+			 < palindrome /* function we register */	>(
+			 database,  /* to which database */
+			 "palindrome" /* how we want it called when used from SQL */
+			)
+		);
 
-		status = sql::register_dbj_udf<strlen_udf>(database, "strlen");
-		CHECK_RETURN; // return on error status
+		DBJ_RETURN_ON_ERROR(sql::register_dbj_udf<strlen_udf>(database, "strlen"));
 
 	// execute the query using the 
 	// standard result processing calback 
@@ -212,10 +195,10 @@ namespace dbj_sql_user {
 	// that SQL will need 'strlen' and 'palindrome' UDF's
 	// they are not available in SQLITE3 
 
-		status = test_udf(database, "SELECT Name, strlen(Name) FROM entries WHERE ( 1 == palindrome(Name) )");
-		if (  is_error(status) ) DBJ_PRINT("\nError: %s", to_json( status).data());
-		
-		DBJ_PRINT("\n\n");
+		auto SQL = "SELECT Name, strlen(Name) FROM entries WHERE ( 1 == palindrome(Name) )";
+		DBJ_RETURN_ON_ERROR(
+			database.query(SQL, sql::universal_callback  /* generic dbj::sql result_handler */)
+		);
 
 		});
 } // namespace dbj_easy_udfs_sample 
