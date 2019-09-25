@@ -1,0 +1,6 @@
+Windows Registry Editor Version 5.00 
+
+[HKEY_CURRENT_USER\Console]
+"VirtualTerminalLevel"=dword:00000001
+
+;; https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling/1050078#1050078

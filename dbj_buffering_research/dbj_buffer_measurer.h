@@ -84,15 +84,19 @@ namespace measure_buffers_performance {
 
 		inline auto show_results = [&](bool clear = true)
 		{
-			//std::printf("%6zd, %6zd, %%7.2f, %s", iterations_, size_, comment_);
-			DBJ_PRINT("\n%3s,%6s,%6s,%8s,%s", "Ord", "iterations", "size", "rezult", "comment");
-			DBJ_PRINT("\n---------------------------------------------------------------------------");
+			using buf  = dbj::nanolib::v_buffer;
+			using buf_t = typename buf::buffer_type;
+			//
+			buf_t buffy = buf::format("\n%3s,%6s,%6s,%8s,%s", "Ord", "iterations", "size", "rezult", "comment");
 			int position = 1;
 			for (auto [time_, fmt_] : results) {
-				DBJ_PRINT("\n%3d,", position++);
-				DBJ_PRINT(fmt_.data(), time_);
+				buffy = buf::format("%s\n%3d,", buffy.data(),  position++);
+				buf_t buffy_2 = buf::format(fmt_.data(), time_);
+				buffy = buf::format("%s%s", buffy.data(), buffy_2.data());
 			}
 			if (clear) results.clear();
+
+			log_trace("%s", buffy.data());
 		};
 
 		// prepare the prompt
@@ -110,7 +114,7 @@ namespace measure_buffers_performance {
 
 		inline auto driver = [&](size_t  buf_size_)
 		{
-			DBJ_PRINT("\nBuffer size: %zu \tIterations: %d", buf_size_, max_iterations);
+			log_trace("Buffer size: %zu \tIterations: %d", buf_size_, max_iterations);
 			store_result(prompt(max_iterations, buf_size_, "unique_ptr<char[]>"), measure(naked_unique_ptr, buf_size_));
 			store_result(prompt(max_iterations, buf_size_, "std::vector<char>"), measure(dbj_vector_buffer, buf_size_));
 			store_result(prompt(max_iterations, buf_size_, "home made unique_ptr buffer"), measure(uniq_ptr_buffer, buf_size_));
@@ -124,42 +128,35 @@ namespace measure_buffers_performance {
 
 		using namespace inner;
 
-		DBJ_PRINT(DBJ_FG_GREEN_BOLD
+		log_trace(DBJ_FG_GREEN
 			"\n\nTest and measure several core types of runtime buffers\n"
-			DBJ_RESET);
-		DBJ_PRINT(
 			"\nfor (size_t i = 0; i < max_iteration; i++)"
-			"\n{");
-		DBJ_PRINT(DBJ_FG_GREEN
+			"\n{"
 			"\n// create the buffer of required size"
-			"\n// move it on return " DBJ_RESET);
-		DBJ_PRINT(
+			"\n// move it on return " 
 			"\nauto the_buffer = buffer_maker_f(buffer_sz);"
-			"\nfor (unsigned j = 0; j < buffer_sz; j++)");
-		DBJ_PRINT(DBJ_FG_GREEN
+			"\nfor (unsigned j = 0; j < buffer_sz; j++)"
 			"\n	// call the '[]' operator "
 			"\n	// change the char value"
-			"\n	// prevent the compiler to optimize away" DBJ_RESET);
-		DBJ_PRINT(
+			"\n	// prevent the compiler to optimize away" 
 			"\n	the_buffer[j] = char(random(64 + 25, 64));"
 			"\n} }"
+			DBJ_RESET
 		);
 
-		DBJ_PRINT( DBJ_FG_GREEN_BOLD "\n\n\t");
 #ifdef _WIN64
-		DBJ_PRINT("64 BIT");
+	#define CPU_TYPE "64 BIT"
 #else
-		DBJ_PRINT("32 BIT");
+	#define CPU_TYPE "32 BIT"
 #endif // WIN64
-
-#ifdef NDEBUG
-		DBJ_PRINT(", RELEASE");
+#ifdef _DEBUG
+	#define BLD_TYPE ", RELEASE"
 #else
-		DBJ_PRINT(", DEBUG");
-#endif // NDEBUG
-		DBJ_PRINT(" BUILD\n\n" DBJ_RESET);
-
-		DBJ_PRINT("Measuring...\n");
+	#define BLD_TYPE ", DEBUG"
+#endif 
+		log_trace(CPU_TYPE BLD_TYPE	" BUILD" );
+#undef CPU_TYPE
+#undef BLD_TYPE
 
 		driver(buffer_size / 1); 	
 		driver(buffer_size / 2);   	
@@ -168,7 +165,6 @@ namespace measure_buffers_performance {
 		driver(buffer_size / 16); 	
 		driver(buffer_size / 32); 	
 
-		DBJ_PRINT("\n\n");
 		show_results();
 
 		});

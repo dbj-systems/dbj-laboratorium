@@ -13,7 +13,7 @@ constexpr auto build_time_stamp = DBJ_BUILD_TIMESTAMP;
 #include <map>
 
 #include "dbj--nanolib/dbj++tu.h"
-
+#include "..\dbj++simplelog\log.h"
 #include "dbj_buffers.h"
 #include "shared_pointer_buffer.h"
 
@@ -36,10 +36,6 @@ void start_from_separate_thread(
 	const char* envp[]
 )
 {
-	dbj::nanolib::set_console_font( L"Lucida Console", 24);
-
-	DBJ_PRINT(u8"\n(c) 2019 by Dušan B. Jovanović -- dbj@dbj.org\n");
-
 	DBJ_PRINT("\nBuild time stamp -- " DBJ_BUILD_TIMESTAMP );
 	DBJ_PRINT("\n\n%s -- Starting\n", 1 + strrchr(argv[0], '\\'));	
 	dbj::tu::catalog.execute();
@@ -64,6 +60,17 @@ int main(int argc, char const* argv[], char const* envp[])
 		}
 
 	};
+	using  dbj::simplelog::SETUP;
+	// locate log file in the same folder with the exe made
+	dbj::simplelog::setup(
+		SETUP::LOG_FROM_APP_PATH | SETUP::MT 
+		| SETUP::VT100_CON | SETUP::FILE_LINE_OFF ,
+		argv[0]
+	);
+
+	dbj::nanolib::set_console_font(L"Lucida Console", 24);
+
+	DBJ_PRINT(u8"\n(c) 2019 by Dušan B. Jovanović -- dbj@dbj.org\n");
 
 	(void)std::async(std::launch::async, [&] {
 		main_worker();
