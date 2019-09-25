@@ -17,3 +17,6 @@
 [submodule "dbj++ini/dbj--nanolib"]
 	path = dbj++ini/dbj--nanolib
 	url = https://github.com/dbj-systems/dbj--nanolib.git
+[submodule "dbj++simplelog/dbj--nanolib"]
+	path = dbj++simplelog/dbj--nanolib
+	url = https://github.com/dbj-systems/dbj--nanolib.git
