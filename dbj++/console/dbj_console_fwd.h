@@ -2,13 +2,13 @@
 /* inclusion of this file defines the kind of a licence used */
 #include "../dbj_license.h"
 
-#if !defined(_CONSOLE)
-#pragma message ( "#############################################################" )
-#pragma message ( _DBJ_CONCATENATE( "File: ", __FILE__) )
-#pragma message ( _DBJ_CONCATENATE( "Line: ",  _DBJ_STRINGIZE(__LINE__)))
-#pragma message ("This is probably not a console app? OR we re building a library")
-#pragma message ( "#############################################################" )
-#endif
+//#if !defined(_CONSOLE)
+//#pragma message ( "#############################################################" )
+//#pragma message ( _DBJ_CONCATENATE( "File: ", __FILE__) )
+//#pragma message ( _DBJ_CONCATENATE( "Line: ",  _DBJ_STRINGIZE(__LINE__)))
+//#pragma message ("This is probably not a console app? OR we re building a library")
+//#pragma message ( "#############################################################" )
+//#endif
 
 namespace dbj::console {
 
@@ -182,7 +182,7 @@ printer is console single user
 			wchar_t buffer_[buff_siz_]{};
 			auto DBJ_MAYBE(R) = 
 				_snwprintf_s(buffer_, (buff_siz_ - 1), _TRUNCATE, message, (args) ...);
-			_ASSERTE(-1 != R);
+			_ASSERTE( R > 0 );
 			wchar_to_console(buffer_);
 		}
 
@@ -193,7 +193,7 @@ printer is console single user
 			char buffer_[buff_siz_]{};
 			auto DBJ_MAYBE(R) = 
 				_snprintf_s(buffer_, (buff_siz_ - 1), _TRUNCATE, message, (args) ...);
-			_ASSERTE(-1 != R);
+			_ASSERTE( R > 0 );
 			char_to_console(buffer_);
 		}
 

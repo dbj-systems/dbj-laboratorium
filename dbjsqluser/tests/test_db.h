@@ -28,15 +28,23 @@ namespace dbj_sql_user {
 
 #include "..\db_file_path.inc"
 
+	/*
+	we return this and consume as : 
+
+	auto [D,S] = demo_db() ;
+	*/
+	using db_and_status = std::pair< sql::database const & , sql::status_type >;
+
 	// in memory db for testing
 	// we return an const reference to database singleton, made and hidden in here
 	// notice the status_type ref. argument `status`
 	// caller is laways reponisble to test it for the actual error state occurence
 	// staus is for signaling the status  n ot just for the error events
-	inline sql::database const& demo_db(sql::status_type & status)
+	inline  db_and_status demo_db(  )
 		// no throwing from here
 		noexcept
 	{
+		sql::status_type status;
 		constexpr auto DEMO_DB_CREATE_SQL = "DROP TABLE IF EXISTS entries; "
 			"CREATE TABLE entries ( Id int primary key, Name nvarchar(100) not null ); "
 			"INSERT INTO entries values (1, 'LondonodnoL');"
@@ -50,7 +58,7 @@ namespace dbj_sql_user {
 			"INSERT INTO entries values (9, 'Batajnica');";
 		// this lambda is executed only on the first call 
 		auto initor = [&]()
-			-> const sql::database &
+			->  sql::database &
 		{
 			// sql::database constructor does not throw on error
 			// it has the status to report 
@@ -63,18 +71,19 @@ namespace dbj_sql_user {
 			status = db.exec( DEMO_DB_CREATE_SQL );
 			return db;
 		};
-		// here we3 keep the single sql::database type instance
-		static  sql::database const& instance_ = initor();
-		return instance_;
+		// here we keep the single sql::database type instance
+		static  sql::database & instance_ = initor();
+		return db_and_status( instance_ , status ) ;
 	} // demo_db
 
 	/*
 	-------------------------------------------------------------------------------------
 	*/
-	inline sql::database const& rezults_db(sql::status_type & status)
+	inline db_and_status rezults_db()
 		// no throwing from here
 		noexcept
 	{
+		sql::status_type status;
 		constexpr auto REZULTS_DB_CREATE_SQL =
 			"DROP TABLE IF EXISTS rezults;"
 			"CREATE TABLE rezults ("
@@ -122,10 +131,11 @@ namespace dbj_sql_user {
 
 		// this lambda is executed only on the first call 
 		auto initor = [&]()
-			-> const sql::database &
+			->  sql::database &
 		{
 			// sql::database constructor does not throw on error
 			// it has the status to report 
+		    // here we keep the single sql::database type instance
 			static sql::database db(":memory:", status);
 			// if status is in the error state still return the db 
 			// the caller will decide on the course of action
@@ -135,9 +145,10 @@ namespace dbj_sql_user {
 			status = db.exec(REZULTS_DB_CREATE_SQL);
 			return db;
 		};
-		// here we3 keep the single sql::database type instance
-		static  sql::database const& instance_ = initor();
-		return instance_;
+
+		static  sql::database& instance_ = initor();
+		return db_and_status(instance_, status);
+
 	} // demo_db
 
 }; // dbj_sql_user nspace
@@ -146,7 +157,7 @@ namespace dbj_sql_user {
 dp not go overboard with macros
 */
 #define DBJ_PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( S_ ).data() ); }
-#define DBJ_RETURN_ON_ERROR(S_) if ( ::dbj::sql::is_error(status) ) { DBJ_PRINT_IF_ERROR(S_); return; }
+#define DBJ_RETURN_ON_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_PRINT_IF_ERROR(S_); return; }
 
 
 #endif // !DBJ_TEST_DB_INC

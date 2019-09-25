@@ -13,6 +13,25 @@ core always required
 namespace dbj {
 	namespace win32 {
 
+		inline bool syscall( const char * command_ ) 
+		{
+			DBJ_ASSERT( command_ );
+			if (0 != system(NULL)) {
+				if (-1 == system(command_))// utf-8 codepage! 
+				{
+					switch (errno) {
+					case E2BIG: perror("The argument list(which is system - dependent) is too big"); break;
+					case ENOENT: perror("The command interpreter cannot be found."); break;
+					case ENOEXEC: perror("The command - interpreter file cannot be executed because the format is not valid."); break;
+					case ENOMEM: perror("Not enough memory is available to execute command; or available memory has been corrupted; or a non - valid block exists, which indicates that the process that's making the call was not allocated correctly."); break;
+					}
+					return false;
+				}
+				else return true;
+			}
+			else return false;
+		}
+
 		inline bool is_windows_10()
 		{
 			if (!::IsWindows10OrGreater())

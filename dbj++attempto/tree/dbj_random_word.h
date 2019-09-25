@@ -5,9 +5,8 @@
 #include <ctime>
 
 /*
-produce radnom words but just a bit more normal
-of not, or just numbers, or just vowels ...
-whatever you like
+produce radnom words but just a bit more normal looking
+or not, or just numbers, or just vowels ... whatever you like
 */
 namespace dbj_research
 {
@@ -74,7 +73,7 @@ namespace dbj_research
 	};
 
 	/*
-		make random words of the "kind" as enum above allows
+		make random words of the "kind" enum above allows
 		default is leters and vowels
 		to make things simple and fast
 		use std::array as return type
@@ -127,38 +126,18 @@ namespace dbj_research
 		return carr;
 	}
 
-	/*
-	 thereis no point of this as for() can not be 
-	 compile time affair
-
-	template<size_t N, typename CALLABLE_, typename ... Args >
-	void repeat (CALLABLE_ const & fun_ )
-	{
-		constexpr std::array< bool, N>  sequence{};
-
-		for ([[maybe_unused]] auto& el : sequence) {
-			fun_( Args ... );
-		}
-	}
-	*/
-
-
-
 	DBJ_TEST_UNIT(random_words) 
 	{
 		constexpr auto word_length = 8 ;
-		std::array<wchar_t, word_length>  word;
+		std::array<char, word_length>  word;
 
-		/*
-		macro is superior solution
-		block is just a block
-		_dbj_repeat_counter is available with no stunts
-		*/
-		DBJ_REPEAT(4) {
-			::std::wprintf(L"\n %Z \t Random Word\t '%s'", _dbj_repeat_counter, random_word(word).data());
-		}
-		DBJ_REPEAT(2) {
-			::std::wprintf(L"\n random word:\t '%s'", random_word(word).data());
+		//using dbj::console::print;
+		using ::dbj::console::PRN; // .printf;
+
+		DBJ_REPEAT(4) 
+		{
+			auto rword = random_word(word).data();
+			PRN.printf("\n%3d: Random Word: '%s'", _dbj_repeat_counter, rword );
 		}
 	}
 

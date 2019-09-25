@@ -170,10 +170,9 @@ namespace dbj_sql_user {
 	*/
 	TU_REGISTER([] {
 
-		sql::status_type status;
-		sql::database const& database = demo_db(status);
+		auto [ database, status ] = demo_db() ;
 		DBJ_RETURN_ON_ERROR( status );
-
+		
 		// register the two udf's required
 		// string names of udf's must match the SQL they are part of
 		// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"

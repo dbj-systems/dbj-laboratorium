@@ -128,19 +128,11 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			sql::status_type status_;
-				sql::database const & db = demo_db(status_);
-				// some kind of error has happened
-				if (is_error(status_)) {
-					DBJ_PRINT( "\n\n ERROR Status : \n %s\n\n", to_json(status_).data());
-					return;
-				}
-
-				DBJ_PRINT_IF_ERROR(test_wrong_insert( db ));
-
-				DBJ_PRINT_IF_ERROR( test_table_info( db ));
-
-				DBJ_PRINT_IF_ERROR( test_select( db ) );
+			auto [database, status] = demo_db();
+			DBJ_RETURN_ON_ERROR(status);
+			DBJ_PRINT_IF_ERROR( test_wrong_insert( database));
+			DBJ_PRINT_IF_ERROR( test_table_info( database));
+			DBJ_PRINT_IF_ERROR( test_select( database) );
 
 			/*
 			NOTE: above we just perform "print-and-proceed"
@@ -152,14 +144,10 @@ namespace dbj_sql_user
 		[] {
 
 			DBJ_PRINT("\n\nCreating and querying rezults database.\nRezults of C++ runtime buffer types.\n");
-			sql::status_type status_;
-			sql::database const& db = rezults_db(status_);
-			// some kind of error has happened
-			if (is_error(status_)) {
-				DBJ_PRINT_IF_ERROR(status_);
-				return;
-			}
-			
+
+			auto [db, status] = rezults_db();
+			DBJ_RETURN_ON_ERROR(status);
+
 			DBJ_PRINT("\nDatabase: %s, meta data for columns of the table 'rezults'\n", db.db_name() );
 			DBJ_PRINT_IF_ERROR( sql::table_info(db, "rezults", sql::universal_callback) );
 

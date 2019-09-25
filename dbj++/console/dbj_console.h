@@ -49,14 +49,18 @@ namespace dbj::console {
 		{
 			//this->output_handle_ = ::GetStdHandle(STD_OUTPUT_HANDLE);
 			_ASSERTE(INVALID_HANDLE_VALUE != this->output_handle_);
+//
+// 2019 SEP 25	DBJ	commented out
+//
+
 			// previous_code_page_ = ::GetConsoleOutputCP();
-			_ASSERTE(0 != ::SetConsoleOutputCP(code_page_));
+			//_ASSERTE(0 != ::SetConsoleOutputCP(code_page_));
 			/*			TODO: GetLastError()			*/
 			// apparently for a good measure one has to do this too ...
-			::SetConsoleCP(code_page_);
+			//::SetConsoleCP(code_page_);
 			// we do NOT use file handlers but
 			// this is REALLY important to do
-			_setmode(_fileno(stdout), _O_U8TEXT);
+			// _setmode(_fileno(stdout), _O_U8TEXT);
 			// after this guess the right font and you are ok ;)
 		}
 		// no copying
@@ -68,10 +72,14 @@ namespace dbj::console {
 
 		~WideOut()
 		{
-			auto DBJ_MAYBE(rezult) = ::SetConsoleOutputCP(previous_code_page_);
+//
+// 2019 SEP 25	DBJ	commented out
+//
+
+			//auto DBJ_MAYBE(rezult) = ::SetConsoleOutputCP(previous_code_page_);
 			// apparently for a good measure one has to do this too ...
-			::SetConsoleCP(previous_code_page_);
-			_ASSERTE(0 != rezult);
+			//::SetConsoleCP(previous_code_page_);
+			//_ASSERTE(0 != rezult);
 		}
 
 		/* what code page is used */

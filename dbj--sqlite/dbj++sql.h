@@ -329,8 +329,7 @@ namespace dbj::sql {
 	// called once per each row of the result set
 	// this is C++ version of the callback
 	// this is not sqlite3 C version 
-	using cursor_callback = int(*)
-		(
+	using cursor_callback = int(*)	(
 			const size_t /* the row id */,
 			cursor_iterator
 			);
@@ -338,9 +337,13 @@ namespace dbj::sql {
 	/*
 	main interface to the whole dbj++sql
 	*/
+	class database;
+
 	class database final
 	{
 		mutable connection_handle handle{};
+		buffer_type last_opened_db_name{};
+
 		/*
 		this function by design does not return a value
 		just the status_type
@@ -373,14 +376,17 @@ namespace dbj::sql {
 			);
 		}
 
-		buffer_type last_opened_db_name{};
-
 	public:
-		/* default constructor is non existent */
-		database() = delete;
-		/* copying and moving is not possible */
-		database(const database&) = delete;
-		database(database&&) = delete;
+		/* default constructor */
+		database() 
+		{
+			last_opened_db_name = buffer::make("UNOPENED");
+		}
+		/* copying and moving is  not possible */
+		database(const database& ) = delete;
+		database & operator = (const database& ) = delete;
+		database(database&&) = delete ;
+		database& operator = ( database&& ) = delete ;
 
 		// can *not* throw from this constructor
 		explicit database(char const* storage_name, status_type& sl_) noexcept
