@@ -46,8 +46,53 @@ if (error == -2)   return { "not a valid mangled name" };
 #endif // !DBJ_TYPENAME
 
 namespace dbj {
+#pragma region common type traits
+	template< class, class = void_t<> >
+	struct
+		has_type : false_type { };
 
+	template< class T >
+	struct
+		has_type<T, void_t<decltype(declval<T::type>())>> : true_type { };
 
+	template<typename SIG, typename FP >
+	constexpr inline bool have_common_type(FP)
+	{
+		using c_t = common_type< SIG, FP >;
+		return has_type<c_t>{}();
+	}
+
+	template<typename SIG, typename FP >
+	constexpr inline bool signature_fp_match(FP)
+	{
+		static_assert(::std::is_invocable_v<FP()>, "\n\nFP found not to be invokable\n");
+		using c_t = common_type< SIG, FP >;
+		return has_type<c_t>{}();
+	}
+
+	/* usage samples ------------------------------------------------- */
+	template<typename T, typename ... A>
+	using RequiredSignature = bool(T&, A ... a);
+
+	inline bool ok_fun(int&) { return true; }
+
+	static_assert(signature_fp_match< RequiredSignature<int> >(ok_fun));
+
+	static_assert(signature_fp_match< bool(int&) >(ok_fun));
+
+	/*
+	no can do
+	bool bad_fun() { return true; }
+		static_assert( signature_fp_match< bool(int&) >(bad_fun) );
+	*/
+
+	static_assert(have_common_type< string >("has a common type with std::string"));
+
+	/*
+	static_assert( signature_fp_match< string >( true ) );
+	*/
+
+#pragma endregion
 
 	/*
 	currently MSVC compiler 2019-07-02 wrongly allows c++
@@ -84,17 +129,17 @@ namespace dbj {
 
 		/*
 		can not rely on the apparent FP type
-		so let's assume it is the same but let us test
+		so let's assume U == FP, but let us test
 		for that in here
 		*/
-		template<FP  fun_candidate_, typename ...A>
-		static constexpr bool is_callable(A...args)
+		template<typename U, typename ...A>
+		static constexpr bool is_callable(U  fun_candidate_, A...args)
 		{
 			// static_assert does not work here
 			// example
 			// if F is int, int() is c++type cast and is invocable
-			static_assert(sizeof(fun_candidate_(args...)), "\n\nFP found not to be invocable\n");
-			static_assert(::std::is_object_v<FP>, "\n\nFP found not to be an object type\n");
+			static_assert(sizeof(fun_candidate_(args...)), "\n\ncandidate found not to be invocable\n");
+			static_assert(::std::is_object_v<U>, "\n\ncandidate found not to be an object type\n");
 			// but this works
 			// this will not compile if actual_fun_ is not a function
 			// with signature that FP type describes

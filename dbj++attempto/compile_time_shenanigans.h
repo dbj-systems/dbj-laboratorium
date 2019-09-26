@@ -32,13 +32,13 @@ namespace dbj::samples {
 	static_assert(get_strLen("ab") == 2, "");
 	static_assert(get_strLen("4\0\0aaa") == 1, "");
 
-	class str_literal_type final 
+	class str_literal_type final
 	{
 		const char* str;
 
 	public:
 
-		constexpr str_literal_type(const char * cp_ ) : str(cp_) {}
+		constexpr str_literal_type(const char* cp_) : str(cp_) {}
 
 		constexpr auto data() const { return str; }
 
@@ -119,15 +119,103 @@ namespace dbj::samples {
 	DBJ_TEST_UNIT(compile_time_shenanigans)
 	{
 		constexpr auto				sview = "Hola Lola!"sv;
-		constexpr auto				len = get_strLen( sview.data() ) ;
+		constexpr auto				len = get_strLen(sview.data());
 		constexpr str_literal_type	str{ "Wot?!" };
 		constexpr auto				length_ = str.length();
 
 		constexpr auto buffer_1 = buffer::buffer("Hola Lola!");
 		constexpr std::array<char, buffer_1.size() > buffer_2 = buffer_1;
 
-		
+
 		dbj::fmt::print("\n%d\n", len);
 	}
 
 } // namespace dbj::samples 
+
+// This file is a "Hello, world!" in C++ language by GCC for wandbox.
+#include <iostream>
+#include <string>
+#include <array>
+#include <functional>
+
+#ifndef DBJ_TYPENAME
+#define DBJ_TYPENAME(T) typeid(T).name() 
+#endif // !DBJ_TYPENAME
+
+namespace dbj::util {
+	/*
+	// https://stackoverflow.com/a/18682805/10870835
+	template<typename T>
+	class has_type
+	{
+		typedef struct { char c[1]; } yes;
+		typedef struct { char c[2]; } no;
+
+		template<typename U> static constexpr yes test(typename U::type);
+		template<typename U> static constexpr no  test(...);
+
+	public:
+		static constexpr bool result = sizeof(test<T>(nullptr)) == sizeof(yes);
+	};
+	*/
+
+
+} // dbj::util 
+
+// https://wandbox.org/permlink/HDbvC6PP33BMVTbA
+#if 0
+namespace faux_fp {
+	using namespace std;
+	using namespace std::literals;
+	// #define DBJ_TX(x) do { std::cout << std::boolalpha << "\n\nExpression: '" << #x << "'\n\tResult: " << (x) << "\n\tIt's type: " << typeid(x).name()<< "\n\n"; } while (0)
+
+	template<typename T, typename ... A>
+	using RequiredSignature = bool(T&, A ... a);
+
+	template<typename T, typename ... A>
+	using RequiredFP = bool(*)(T&, A ... a);
+
+	bool ok_fun(int& a) { cout << "\n" << "bool ok_fun(int& " << a << ")";  return true; }
+	void wrong_fun() { cout << "\n" << "void wrong_fun( )"; }
+
+
+
+	namespace inner {
+		typedef char yes[1];
+		typedef char no[2];
+
+		template<typename T>
+		yes& is_same_helper(T, T);  //no need to define it now!
+
+		template<typename T, typename U>
+		no& is_same_helper(T, U); //no definition needed!
+
+		template<typename T, typename U>
+		constexpr inline bool fp_matches_fp( T x, U y)
+		{
+			// return (sizeof(is_same_helper(x, y)) == sizeof(yes));
+			return (sizeof(is_same_helper(x, y)) == sizeof(yes));
+		} 
+
+	}
+
+	DBJ_TEST_UNIT(signature_matches_function_pointer)
+	{
+		//int forty_two = 42;
+
+		using required_sig = RequiredSignature<int>;
+
+		if constexpr (dbj::util::signature_fp_match< required_sig >(ok_fun)) {
+			DBJ_FPRINTF(stdout, "\n\n%sdoes  confirm to the required signature:\n%s ",
+				DBJ_TYPENAME(decltype(ok_fun)),
+				DBJ_TYPENAME(required_sig));
+		}
+
+		if constexpr (!dbj::util::signature_fp_match< required_sig >(wrong_fun)) {
+			DBJ_FPRINTF(stdout, "\n\n%sdoes not confirm to the required signature:\n%s ",
+				DBJ_TYPENAME(decltype(wrong_fun)),
+				DBJ_TYPENAME(required_sig));
+		}
+	}
+} // ns
+#endif
