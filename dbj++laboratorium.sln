@@ -29,8 +29,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj_buffering_research", "d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++sqlite", "dbj--sqlite\dbj--sqlite.vcxitems", "{EC401CB2-0A27-4887-9761-E64E5E6C526B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++simplelog", "dbj++simplelog\dbj++simplelog.vcxproj", "{6B026EF6-430E-475B-87AE-A463D0DAEAF0}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dbj++\dbj++.vcxitems*{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}*SharedItemsImports = 9
@@ -132,14 +130,6 @@ Global
 		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x64.Build.0 = Release|x64
 		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x86.ActiveCfg = Release|Win32
 		{566171B0-CB90-4D41-A181-C5679B4E8850}.Release|x86.Build.0 = Release|Win32
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Debug|x64.ActiveCfg = Debug|x64
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Debug|x64.Build.0 = Debug|x64
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Debug|x86.ActiveCfg = Debug|Win32
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Debug|x86.Build.0 = Debug|Win32
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Release|x64.ActiveCfg = Release|x64
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Release|x64.Build.0 = Release|x64
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Release|x86.ActiveCfg = Release|Win32
-		{6B026EF6-430E-475B-87AE-A463D0DAEAF0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

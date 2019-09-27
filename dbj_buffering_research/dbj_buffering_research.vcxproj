@@ -223,6 +223,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dbj--simplelog\log.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@ constexpr auto build_time_stamp = DBJ_BUILD_TIMESTAMP;
 #include <map>
 
 #include "dbj--nanolib/dbj++tu.h"
-#include "..\dbj++simplelog\log.h"
+#include "dbj--simplelog/log.h"
 #include "dbj_buffers.h"
 #include "shared_pointer_buffer.h"
 
