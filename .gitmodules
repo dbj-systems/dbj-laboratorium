@@ -20,3 +20,6 @@
 [submodule "dbj++simplelog/dbj--nanolib"]
 	path = dbj++simplelog/dbj--nanolib
 	url = https://github.com/dbj-systems/dbj--nanolib.git
+[submodule "dbj_buffering_research/dbj--simplelog"]
+	path = dbj_buffering_research/dbj--simplelog
+	url = https://github.com/dbj-systems/dbj--simplelog.git
