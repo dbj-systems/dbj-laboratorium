@@ -1,7 +1,7 @@
 #pragma once
 /*
 (c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
-*/  
+*/
 #include "test_db.h"
 
 
@@ -9,10 +9,10 @@ namespace dbj_sql_user
 {
 	/*
 	no exceptions are thrown
-	we return the sql::status_type, and
+	we return the db_valstat, and
 	we make sure it is not discarded
 	*/
-	[[nodiscard]] inline sql::status_type test_wrong_insert(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::sqlite3_return_type test_wrong_insert(sql::database const& db) noexcept
 	{
 
 		/*
@@ -29,7 +29,7 @@ namespace dbj_sql_user
 			u8"values (4, 'Krčedin'), (5, 'Čačak'), (6, 'Kruševac')";
 
 		DBJ_PRINT("\nAttempting BAD SQL: %s\n", BAD_SQL);
-				return db.exec(BAD_SQL);
+		return db.exec(BAD_SQL);
 	}
 	/*
 	callback to be called per each row of
@@ -48,7 +48,7 @@ namespace dbj_sql_user
 		buffer_type   name_ = *(result_row_.to_text(1));
 		// print what we got
 
-		DBJ_PRINT( "\n\t %zu \t %s = %d \t %s = %s",
+		DBJ_PRINT("\n\t %zu \t %s = %d \t %s = %s",
 			row_id, result_row_.name(0), id_, result_row_.name(1), name_.data());
 
 		return SQLITE_OK;
@@ -61,18 +61,18 @@ namespace dbj_sql_user
 	/*
 	use the universal callback provided by dbj++sqlite
 	*/
-	[[nodiscard]] inline sql::status_type test_table_info( sql::database const& db ) noexcept
+	[[nodiscard]] inline sql::sqlite3_return_type test_table_info(sql::database const& db) noexcept
 	{
-		DBJ_PRINT( "\nmeta data for columns of the table 'entries'\n");
+		DBJ_PRINT("\nmeta data for columns of the table 'entries'\n");
 		/*
 		execute the table_info and pass the status out
 		*/
 		return sql::table_info(db, "entries", sql::universal_callback);
 	}
 
-	[[nodiscard]] inline sql::status_type test_select(sql::database const& db) noexcept
+	[[nodiscard]] inline sql::sqlite3_return_type test_select(sql::database const& db) noexcept
 	{
-		DBJ_PRINT( "\nexecute: 'SELECT Id, Name FROM entries'\n");
+		DBJ_PRINT("\nexecute: 'SELECT Id, Name FROM entries'\n");
 		return db.query("SELECT Id,Name FROM entries", sample_callback);
 	}
 
@@ -93,7 +93,7 @@ namespace dbj_sql_user
 		// compiler would not know what type you want
 		buffer_type  word_ = *(row_.to_text(0));
 		buffer_type  definition_ = *(row_.to_text(1));
-		DBJ_PRINT( "\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
+		DBJ_PRINT("\n\n%3zd: %12s | %s", row_id, word_.data(), definition_.data());
 
 		//// all these should provoke exception
 		//// TODO: but they don't -- currently
@@ -108,13 +108,13 @@ namespace dbj_sql_user
 	*/
 	TU_REGISTER(
 		[] {
-			sql::status_type status_{};
+			sql::sqlite3_return_type status_{};
 			// 
 			sql::database db(DICTIONARY_DB_FILE_PATH, status_);
 			// some kind of error has happened
-			if ( is_error( status_ )) {
-				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile opening the database: %s\n", to_json(status_).data(), DICTIONARY_DB_FILE_PATH);
-				return ;
+			if (sql::is_error(status_)) {
+				DBJ_PRINT("\n\n ERROR Status : \n %s\nWhile opening the database: %s\n", status_.second->data(), DICTIONARY_DB_FILE_PATH);
+				return;
 			}
 
 			constexpr auto SQL = "SELECT word, definition FROM entries WHERE word LIKE 'zyga%'";
@@ -129,10 +129,13 @@ namespace dbj_sql_user
 	TU_REGISTER(
 		[] {
 			auto [database, status] = demo_db();
-			DBJ_RETURN_ON_ERROR(status);
-			DBJ_PRINT_IF_ERROR( test_wrong_insert( database));
-			DBJ_PRINT_IF_ERROR( test_table_info( database));
-			DBJ_PRINT_IF_ERROR( test_select( database) );
+			if (!database) {
+				DBJ_PRINT_STAT(status);
+				return; // error
+			}
+			DBJ_PRINT_IF_ERROR(test_wrong_insert(*database));
+			DBJ_PRINT_IF_ERROR(test_table_info(*database));
+			DBJ_PRINT_IF_ERROR(test_select(*database));
 
 			/*
 			NOTE: above we just perform "print-and-proceed"
@@ -146,15 +149,21 @@ namespace dbj_sql_user
 			DBJ_PRINT("\n\nCreating and querying rezults database.\nRezults of C++ runtime buffer types.\n");
 
 			auto [db, status] = rezults_db();
-			DBJ_RETURN_ON_ERROR(status);
+			if (!db) {
+				DBJ_PRINT_STAT(status);
+				return; // error
+			}
 
-			DBJ_PRINT("\nDatabase: %s, meta data for columns of the table 'rezults'\n", db.db_name() );
-			DBJ_PRINT_IF_ERROR( sql::table_info(db, "rezults", sql::universal_callback) );
+			// db type is optional<reference_wrapper< sql::database >>
+			sql::database const& database = *db;
 
-			const char * const QRY [] { "SELECT rank,size, rezult,comment FROM rezults GROUP BY size ORDER BY rank" };
+			DBJ_PRINT("\nDatabase: %s, meta data for columns of the table 'rezults'\n", database.db_name());
+			DBJ_PRINT_IF_ERROR(sql::table_info(database, "rezults", sql::universal_callback));
 
-			DBJ_PRINT("\n%s\n", QRY[0] );
-			DBJ_PRINT_IF_ERROR( db.query( QRY[0] , sql::universal_callback) );
+			const char* const QRY[]{ "SELECT rank,size, rezult,comment FROM rezults GROUP BY size ORDER BY rank" };
+
+			DBJ_PRINT("\n%s\n", QRY[0]);
+			DBJ_PRINT_IF_ERROR(database.query(QRY[0], sql::universal_callback));
 
 		});
 

@@ -766,7 +766,11 @@ can be mixed, as normaly they can ....
 Also "opaque types" are not going to happen in C++, ditto ...
 */
 
-#define DBJ_STRONG(N,T) struct N final { T v; }
+#define DBJ_STRONG(N,T) \
+	struct N final { \
+		using value_type = N; \
+		T v; \
+	}
 
 /*
 	// measurement units

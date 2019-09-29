@@ -1,6 +1,6 @@
 /*
 (c) 2019 by dbj@dbj.org -- CC BY-SA 4.0 -- https://creativecommons.org/licenses/by-sa/4.0/
-*/  
+*/
 #pragma once
 
 #ifndef DBJ_TEST_DB_INC
@@ -15,7 +15,7 @@ namespace dbj_sql_user {
 	namespace sql = ::dbj::sql;
 
 	/*
-	return value is of this type : dbj::sql::status_type
+	return value is of this type : dbj::db_valstat
 
 	We use std::vector<char> as a char buffer
 	std::unique_ptr<char[]> is the only other type we could use
@@ -29,22 +29,47 @@ namespace dbj_sql_user {
 #include "..\db_file_path.inc"
 
 	/*
-	we return this and consume as : 
-
-	auto [D,S] = demo_db() ;
+	VALSTAT:
+	auto [DB,STAT] = demo_db() ;
 	*/
-	using db_and_status = std::pair< sql::database const & , sql::status_type >;
+	using db_and_status_trait 
+		= typename sql::sqlite3_valstat_trait< std::reference_wrapper<sql::database> >;
+	using db_valstat = typename db_and_status_trait::return_type;
+
+	namespace inner {
+		auto initor = []( auto db_holder,  const char* SQL)
+			->db_valstat
+		{
+			sql::sqlite3_return_type sqlite3_status;
+			// sql::database constructor does not throw on error
+			// it has the status to report 
+			static sql::database const & db = db_holder(sqlite3_status);
+			// the caller will decide on the course of action
+			if (sql::is_error(sqlite3_status))
+				return DBJ_RETVAL_ERR(
+					db_and_status_trait, *sqlite3_status.first
+				);
+			// create the database 
+			if (sql::is_error(sqlite3_status = db.exec(SQL)))
+				return DBJ_RETVAL_ERR(
+					db_and_status_trait, *sqlite3_status.first
+				);
+			// at last success
+			return DBJ_RETVAL_OK(db_and_status_trait, const_cast<sql::database &>(db));
+		};
+	}
 
 	// in memory db for testing
 	// we return an const reference to database singleton, made and hidden in here
 	// notice the status_type ref. argument `status`
 	// caller is laways reponisble to test it for the actual error state occurence
 	// staus is for signaling the status  n ot just for the error events
-	inline  db_and_status demo_db(  )
+	inline  db_valstat demo_db()
 		// no throwing from here
 		noexcept
 	{
-		sql::status_type status;
+		db_valstat demo_db_status;
+
 		constexpr auto DEMO_DB_CREATE_SQL = "DROP TABLE IF EXISTS entries; "
 			"CREATE TABLE entries ( Id int primary key, Name nvarchar(100) not null ); "
 			"INSERT INTO entries values (1, 'LondonodnoL');"
@@ -57,33 +82,24 @@ namespace dbj_sql_user {
 			"INSERT INTO entries values (8, 'ZemunumeZ');"
 			"INSERT INTO entries values (9, 'Batajnica');";
 		// this lambda is executed only on the first call 
-		auto initor = [&]()
-			->  sql::database &
+		auto db_instance_holder = 
+			[](sql::sqlite3_return_type& sqlite3_status) 
+			-> sql::database const&
 		{
-			// sql::database constructor does not throw on error
-			// it has the status to report 
-			static sql::database db(":memory:", status);
-			// if status is in the error state still return the db 
-			// the caller will decide on the course of action
-			if ( is_error(status)) return db;
-			// create the database 
-			// update the status
-			status = db.exec( DEMO_DB_CREATE_SQL );
+			static sql::database db(":memory:", sqlite3_status);
 			return db;
 		};
+		
 		// here we keep the single sql::database type instance
-		static  sql::database & instance_ = initor();
-		return db_and_status( instance_ , status ) ;
+		static db_valstat instance_ = inner::initor(db_instance_holder, DEMO_DB_CREATE_SQL);
+		return instance_ ;
 	} // demo_db
 
 	/*
 	-------------------------------------------------------------------------------------
 	*/
-	inline db_and_status rezults_db()
-		// no throwing from here
-		noexcept
+	inline db_valstat rezults_db() noexcept
 	{
-		sql::status_type status;
 		constexpr auto REZULTS_DB_CREATE_SQL =
 			"DROP TABLE IF EXISTS rezults;"
 			"CREATE TABLE rezults ("
@@ -130,33 +146,27 @@ namespace dbj_sql_user {
 			"INSERT INTO rezults VALUES ( 36,  1000,  65535, 15075.27, 'std::string' );";
 
 		// this lambda is executed only on the first call 
-		auto initor = [&]()
-			->  sql::database &
+		auto db_instance_holder =
+			[](sql::sqlite3_return_type& sqlite3_status)
+			-> sql::database const&
 		{
-			// sql::database constructor does not throw on error
-			// it has the status to report 
-		    // here we keep the single sql::database type instance
-			static sql::database db(":memory:", status);
-			// if status is in the error state still return the db 
-			// the caller will decide on the course of action
-			if ( is_error(status)) return db;
-			// create the database 
-			// update the status
-			status = db.exec(REZULTS_DB_CREATE_SQL);
+			static sql::database db(":memory:", sqlite3_status);
 			return db;
 		};
 
-		static  sql::database& instance_ = initor();
-		return db_and_status(instance_, status);
+		// here we keep the single sql::database type instance
+		static db_valstat instance_ = inner::initor(db_instance_holder, REZULTS_DB_CREATE_SQL);
+		return instance_;
 
 	} // demo_db
 
 }; // dbj_sql_user nspace
 
-/* 
+/*
 dp not go overboard with macros
 */
-#define DBJ_PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  ::dbj::sql::to_json( S_ ).data() ); }
+#define DBJ_PRINT_STAT(S_)  DBJ_FPRINTF(stderr, "\nERROR Status" DBJ_FG_RED_BOLD " \n%s\n\n" DBJ_RESET ,  S_->data() )
+#define DBJ_PRINT_IF_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_FPRINTF(stderr, DBJ_FG_RED_BOLD "\nERROR Status\n%s\n\n" DBJ_RESET ,  S_.second->data() ); }
 #define DBJ_RETURN_ON_ERROR(S_) if ( ::dbj::sql::is_error(S_) ) { DBJ_PRINT_IF_ERROR(S_); return; }
 
 

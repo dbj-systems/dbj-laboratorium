@@ -170,13 +170,19 @@ namespace dbj_sql_user {
 	*/
 	TU_REGISTER([] {
 
-		auto [ database, status ] = demo_db() ;
-		DBJ_RETURN_ON_ERROR( status );
+		auto [ db, status ] = demo_db() ;
+		if (!db ) {
+			DBJ_PRINT_STAT(status);
+			return; // error
+		}
+
+		// db type is optional<reference_wrapper< sql::database >>
+		sql::database const& database = *db;
 		
 		// register the two udf's required
 		// string names of udf's must match the SQL they are part of
 		// 	"SELECT word, strlen(word) FROM words WHERE (1 == palindrome(word))"
-		// always returning the sql::status_type on error
+		// always returning the db_valstat on error
 		// obviuosly macro afficionados are welcome here
 		DBJ_RETURN_ON_ERROR(
 			sql::register_dbj_udf

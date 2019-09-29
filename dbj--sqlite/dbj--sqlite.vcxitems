@@ -17,9 +17,9 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++sql.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)dbj_status.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite++.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)sqlite3\sqlite3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sqlite_valstat.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />

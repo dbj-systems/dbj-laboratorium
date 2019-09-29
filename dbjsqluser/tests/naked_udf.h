@@ -60,19 +60,19 @@ namespace dbj_sql_user {
 		/*
 		Getting the demo database
 		*/
-		// sql::database_reference db_ref = sql::empty_db_reference;
+		auto [db, status] = demo_db();
+		if (!db) {
+			DBJ_PRINT_STAT(status);
+			return; // error
+		}
 
-		auto [ database, status ] = demo_db() ;
-		DBJ_RETURN_ON_ERROR( status );
-			   
-		// the native sqlite3 database handle
-		sqlite3* db = database.the_db();
+		// db type is optional<reference_wrapper< sql::database >>
+		sql::database const& database = *db;
 
-		DBJ_RETURN_ON_ERROR(
-			DBJ_STATUS(
-				sqlite3_create_function(db, "firstchar", 1, SQLITE_UTF8, NULL, &firstchar_udf, NULL, NULL)
-			)
-		);
+		int retval =
+			sqlite3_create_function(database.the_db(), "firstchar", 1, SQLITE_UTF8, NULL, &firstchar_udf, NULL, NULL);
+
+		if (SQLITE_OK != retval) return;
 
 		auto SQL = "SELECT firstchar(Name) FROM entries";
 		/*
