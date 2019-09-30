@@ -44,7 +44,7 @@ int main(int argc, char const * argv[], char const * envp[])
 		}
 		catch (...) {
 			DBJ_FPRINTF(stderr, "\n\nAn Unknown Exception caught!\n\n");
-			::exit(EXIT_FAILURE);
+			std::exit(EXIT_FAILURE);
 		}
 
 	};
@@ -53,7 +53,7 @@ int main(int argc, char const * argv[], char const * envp[])
 		main_worker();
 		});
 
-	::exit(EXIT_SUCCESS);
+	std::exit(EXIT_SUCCESS);
 }
 
 #pragma warning( pop ) // 4100
