@@ -277,7 +277,7 @@ namespace dbj {
 			return *this;
 		}
 
-		unique_ptr_buffer_type(unique_ptr_buffer_type&& other_) {
+		unique_ptr_buffer_type(unique_ptr_buffer_type&& other_) noexcept {
 			const auto sz_ = other_.size();
 			this->pair_.first = std::move(other_.pair_.first);
 			this->pair_.second = std::move(other_.pair_.second);

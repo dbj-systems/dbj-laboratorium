@@ -232,11 +232,6 @@
     <ClInclude Include="dbj_buffer_testing.h" />
     <ClInclude Include="shared_pointer_buffer.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\dbj++simplelog\dbj++simplelog.vcxproj">
-      <Project>{6b026ef6-430e-475b-87ae-a463d0daeaf0}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
