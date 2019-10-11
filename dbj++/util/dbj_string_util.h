@@ -87,9 +87,9 @@ namespace dbj::str {
 
 		return str;
 	}
-
+	// rename required as of 2019-10-11 and update to 16.3.4
 		// locale unaware, use only for for char 0 - char 127
-		inline constexpr bool isalpha(int c)
+		inline constexpr bool dbj_isalpha(int c)
 		{
 			return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 		}
@@ -99,8 +99,9 @@ namespace dbj::str {
 			// dbj note: what is with \b (aka BELL) escape code?
 			return c == '\t' || c == '\r' || c == '\v' || c == '\n' || c == '\f';
 		}
-
-		inline constexpr bool isspace(int c)
+		// required as of 2019-10-11 and update to 16.3.4
+	// rename required as of 2019-10-11 and update to 16.3.4
+		inline constexpr bool dbj_isspace(int c)
 		{
 			return c == 32;
 		}
@@ -109,17 +110,16 @@ namespace dbj::str {
 		// Microsoft (R) C/C++ Optimizing Compiler Version 19.22.27905 for x86
 		// is ok with using inline on global constants in C too
 		inline const char* dbj_punct_chars_ = ".;!?...";
-
-		inline constexpr bool ispunct(int c)
+// rename required as of 2019-10-11 and update to 16.3.4
+		inline constexpr bool dbj_ispunct(int c)
 		{
 			return strchr(dbj_punct_chars_, c) == NULL ? false : true;
 			// can make this shorter
 		}
-
 		// locale unaware, for ASCII char 0 - char 127
 		inline constexpr int dbj_tolower(int c)
 		{
-			if (!::dbj::str::isalpha(c)) return c;
+			if (!::dbj::str::dbj_isalpha(c)) return c;
 			return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
 		}
 		// 
