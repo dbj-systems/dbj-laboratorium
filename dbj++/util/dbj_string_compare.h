@@ -85,7 +85,7 @@ extern "C" {
 		char_trans transformer;
 
 		if (ignore_case)
-			transformer = dbj::str::dbj_tolower;
+			transformer = dbj::str::tolower;
 		else
 			transformer = dbj::str::just_copy_char;
 

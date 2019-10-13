@@ -28,38 +28,6 @@ namespace dbj_sql_user {
 
 #include "..\db_file_path.inc"
 
-#if 0
-	/*
-	VALSTAT:
-	auto [DB,STAT] = demo_db() ;
-	*/
-	using db_and_status_trait 
-		= typename sql::sqlite3_valstat_trait_template< std::reference_wrapper<sql::database> >;
-	using sql::db_valstat = typename db_and_status_trait::return_type;
-
-	namespace inner {
-		auto initor = []( auto db_holder,  const char* SQL)
-			->sql::db_valstat
-		{
-			sql::dbj_sql_valstat sqlite3_status;
-			// sql::database constructor does not throw on error
-			// it has the status to report 
-			std::reference_wrapper<sql::database> dbref = db_holder(sqlite3_status);
-			// the caller will decide on the course of action
-			if (sql::is_error(sqlite3_status))
-				return DBJ_STATVAL_ERR(
-					db_and_status_trait, *sqlite3_status.first
-				);
-			// create the database 
-			if (sql::is_error(sqlite3_status = dbref.get().exec(SQL)))
-				return DBJ_STATVAL_ERR(
-					db_and_status_trait, *sqlite3_status.first
-				);
-			// at last success
-			return DBJ_STATVAL_OK(db_and_status_trait, dbref);
-		};
-	}
-#endif
 	// in memory db for testing
 	// we return an const reference to database singleton, made and hidden in here
 	// notice the status_type ref. argument `status`

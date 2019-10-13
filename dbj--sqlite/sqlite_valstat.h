@@ -4,13 +4,6 @@
 #ifndef _DBJ_SQLITE_STATUS_INC_
 #define _DBJ_SQLITE_STATUS_INC_
 
-#if 0
-#ifndef _DBJ_STATUS_INC_
-#include "dbj--nanolib/dbj++status.h"
-// #include "D:\DEVL\GitHub\dbj--nanolib\dbj++status.h"
-#endif
-#endif
-
 /*
 to use dbj nanolib return type concept for
 another module/library one needs to provide

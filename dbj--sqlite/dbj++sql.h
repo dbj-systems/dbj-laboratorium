@@ -3,7 +3,7 @@
 #define DBJ_SQL_PP_INCLUDED
 
 #include "sqlite++.h"
-#include "dbj--nanolib/dbj++status.h"
+#include "dbj--nanolib/dbj++valstat.h"
 // local testing --> #include "D:\DEVL\GitHub\dbj--nanolib\dbj++status.h"
 //#include <optional>
 

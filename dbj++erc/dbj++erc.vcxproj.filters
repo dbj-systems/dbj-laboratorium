@@ -33,9 +33,6 @@
     <ClInclude Include="deprecated\dbj_simple_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ned14system_error2\system_error2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

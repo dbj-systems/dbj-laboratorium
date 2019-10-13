@@ -22,8 +22,11 @@ namespace dbj::str {
 
 #pragma region low level
 
+	// as of VS 16.3.4 it is not allowed to overload C function 
+	// "form inside" C++ code with or without namespaces
+#ifdef _DBJ_BEFORE_VS_16_3_4
 	extern "C" {
-
+#endif
 
 	/* and the test of the above
 	constexpr std::array<char, string_literal_length("Hola Lola Loyola!") >
@@ -89,7 +92,7 @@ namespace dbj::str {
 	}
 	// rename required as of 2019-10-11 and update to 16.3.4
 		// locale unaware, use only for for char 0 - char 127
-		inline constexpr bool dbj_isalpha(int c)
+		inline constexpr bool isalpha(int c)
 		{
 			return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 		}
@@ -101,7 +104,7 @@ namespace dbj::str {
 		}
 		// required as of 2019-10-11 and update to 16.3.4
 	// rename required as of 2019-10-11 and update to 16.3.4
-		inline constexpr bool dbj_isspace(int c)
+		inline constexpr bool isspace(int c)
 		{
 			return c == 32;
 		}
@@ -110,16 +113,16 @@ namespace dbj::str {
 		// Microsoft (R) C/C++ Optimizing Compiler Version 19.22.27905 for x86
 		// is ok with using inline on global constants in C too
 		inline const char* dbj_punct_chars_ = ".;!?...";
-// rename required as of 2019-10-11 and update to 16.3.4
-		inline constexpr bool dbj_ispunct(int c)
+
+		inline constexpr bool ispunct(int c)
 		{
 			return strchr(dbj_punct_chars_, c) == NULL ? false : true;
 			// can make this shorter
 		}
 		// locale unaware, for ASCII char 0 - char 127
-		inline constexpr int dbj_tolower(int c)
+		inline constexpr int tolower(int c)
 		{
-			if (!::dbj::str::dbj_isalpha(c)) return c;
+			if (!::dbj::str::isalpha(c)) return c;
 			return (c >= 'A' && c <= 'Z') ? c - 'A' : c;
 		}
 		// 
@@ -136,7 +139,9 @@ namespace dbj::str {
 		inline constexpr int     just_copy_char(int c) { return c; }
 
 		inline constexpr wint_t     just_copy_wchar(wint_t c) { return c; }
+#ifdef _DBJ_BEFORE_VS_16_3_4
 	}
+#endif
 #pragma endregion 
 
 
