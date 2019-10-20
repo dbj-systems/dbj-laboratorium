@@ -120,7 +120,7 @@ This API is header-only: it consists entirely of one header file:
 
        dbj_nothing_but.h
 
-*No compilation necessary. No isntallation required.* 
+*No compilation necessary. No installation required.* 
 
 Just drop it in and include. Make it part of your project.
 
@@ -163,10 +163,6 @@ Above are two probably most mature C++ lib's.
 They primarily exist to asure safe arythemtics on "numbers", not to provide type safe handler like NothingBut<T> does.
 None of them is built to stop accidental implicit conversion in C++.
 
-### License
-This is open source software. It id distributed under the
- Apache License,Version 2.0, January 2004, http://www.apache.org/licenses/.
-Please respect the copiryght.
 ### Contact
 Please report issues or [questions here](https://github.com/dbj-systems/dbj-laboratorium/issues).
  
