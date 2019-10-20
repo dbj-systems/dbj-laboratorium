@@ -114,11 +114,9 @@ namespace dbj {
 
 			// as elsewhere in std 
 			// the convention is to provide 'data()' method
+			T const & data() const { return val_; }
 			// for users to reach to non const data handled
-			T & data() const { return (T&)val_; }
-
-		private:
-			T val_{};
+			T & data() { return (T&)val_; }
 
 			// compatibility with std::
 
@@ -137,6 +135,9 @@ namespace dbj {
 			{
 				return ((left_.val_) == (right_.val_));
 			}
+
+		private:
+			T val_{};
 
 #ifdef DBJ_NOTHING_BUT_STREAMS
 			// bellow means type T has to be "printable" too 

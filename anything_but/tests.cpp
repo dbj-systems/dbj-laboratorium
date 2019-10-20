@@ -54,8 +54,8 @@ utils
 */
 
 // Show eXpression
-#define SX(x) std::cout << std::boolalpha <<  "\nExpression: " << (#x) \
-<< "\n\tValue: " << (x) << "\n"
+#define SX(x) std::cout << std::boolalpha <<  "\n Expression: " << (#x) \
+<< "\n\t Value: " << (x) << "\n"
 
 
 namespace dbj {
@@ -84,6 +84,27 @@ static uc_buffer_type uc_buffer(safe_size  sz_) noexcept
 	return uc_buffer_type( safe_size::value_type(sz_), unsigned_char_type::value_type(0) );
 };
 
+void test_comparators() 
+{
+	// Safe SiZE
+	using safe_size = dbj::util::nothing_but < size_t >;
+
+	safe_size s1{ size_t(1) };
+	safe_size s2{ size_t(2) };
+
+	SX(s1 < s2);
+
+	// long   & lng = s1;
+	safe_size::value_type & sze = s1;
+
+	sze = 23.4 ;
+
+	float  f{ float(1.2)  };
+	double d{ double(3.4)  };
+
+	SX(f < d);
+}
+
 void test_vector_walk() {
 
 	// Safe SiZE
@@ -104,6 +125,9 @@ void test_vector_walk() {
 	SX( buffy_.data() );
 }
 
+/*
+basic tests on type T
+*/
 template<typename T >
 auto test_basic(void) -> dbj::util::nothing_but<T>
 {
@@ -124,6 +148,10 @@ auto test_basic(void) -> dbj::util::nothing_but<T>
 	nbt_a = mover(nbt_b);
 
 	assert(!(nbt_a < nbt_b));
+
+	// compare wrapped up to native T
+	SX(nbt_a < nbt_b);
+	SX(nbt_a == nbt_b);
 
 	// notice the use of TT
 	TT& peeping_tom = nbt_b.data();
@@ -319,9 +347,6 @@ void test_compatibility()
 	using just_unsigned = dbj::util::nothing_but<unsigned char>;
 
 	// nothing happens implicitly in the world of nothing_but<T>
-
-
-
 	just_signed	sarr[3];
 	just_unsigned	uarr[3];
 
