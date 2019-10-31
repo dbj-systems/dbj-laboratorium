@@ -128,19 +128,24 @@ namespace measure_buffers_performance {
 
 		using namespace inner;
 
-		log_trace(DBJ_FG_GREEN
+		log_trace(
 			"\n\nTest and measure several core types of runtime buffers\n"
-			"\nfor (size_t i = 0; i < max_iteration; i++)"
-			"\n{"
+			DBJ_FG_GREEN_BOLD
+			"\n for (size_t i = 0; i < max_iteration; i++)"
+			"\n {"
+			DBJ_RESET DBJ_FG_GREEN
 			"\n// create the buffer of required size"
 			"\n// move it on return " 
-			"\nauto the_buffer = buffer_maker_f(buffer_sz);"
-			"\nfor (unsigned j = 0; j < buffer_sz; j++)"
+			DBJ_RESET DBJ_FG_GREEN_BOLD
+			"\n   auto the_buffer = buffer_maker_f(buffer_sz);"
+			"\n   for (unsigned j = 0; j < buffer_sz; j++)"
+			DBJ_RESET DBJ_FG_GREEN
 			"\n	// call the '[]' operator "
 			"\n	// change the char value"
 			"\n	// prevent the compiler to optimize away" 
-			"\n	the_buffer[j] = char(random(64 + 25, 64));"
-			"\n} }"
+			DBJ_RESET DBJ_FG_GREEN_BOLD
+			"\n	  the_buffer[j] = char(random(64 + 25, 64));"
+			"\n  } }\n\n"
 			DBJ_RESET
 		);
 
