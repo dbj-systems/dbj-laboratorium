@@ -95,7 +95,7 @@ void test_comparators()
 	SX(s1 < s2);
 
 	// long   & lng = s1;
-	safe_size::value_type & sze = s1;
+	safe_size::value_type sze = s1;
 
 	sze = 23.4 ;
 

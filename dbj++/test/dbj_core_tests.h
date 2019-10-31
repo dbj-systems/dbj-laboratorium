@@ -16,27 +16,19 @@ DBJ_TEST_UNIT(core_format_utils)
 	std::error_code ec_;
 
 	/*
-	BIG NOTE: if you mistake the formating code probably everything
+	BIG NOTE: if you mistake a single formating code probably everything
 	on the console and in the app will go *very* wrong, and UCRT
 	crash will be spectacular
 	*/
+	auto rez = dbj::fmt::to_buff("%s", "ABCDEFGH");
+	DBJ_VERIFY(!std::strcmp(rez.data(), "ABCDEFGH"));
 
-	print(
-		"\nTIME_STAMP_SIMPLE_MASK\n\t%s",	
-		u::make_time_stamp(ec_, u::TIME_STAMP_SIMPLE_MASK)
-	);
-	print( 
-		"\nTIME_STAMP_FULL_MASK\n\t%s",	
-		u::make_time_stamp(ec_, u::TIME_STAMP_FULL_MASK)
-	);
+	auto wrez = dbj::fmt::to_wbuff(L"%s", L"ABCDEFGH");
+	DBJ_VERIFY(!std::wcscmp(wrez.data(), L"ABCDEFGH"));
 
-	print("\nENV VAR 'USERNAME'\n\t%s", 
-		u::dbj_get_envvar("USERNAME", ec_));
-
-	// programdata path
-	print("\nprogramdata path\n\t%s", 
-		u::program_data_path(ec_));
-
+	// uses u::TIME_STAMP_SIMPLE_MASK by default
+	DBJ_T_BUF("%s", u::make_time_stamp(ec_, u::TIME_STAMP_SIMPLE_MASK));
+	DBJ_T_BUF("%s", u::make_time_stamp(ec_, u::TIME_STAMP_FULL_MASK));
 }
 
 DBJ_TEST_UNIT(core_utils)
@@ -54,12 +46,7 @@ DBJ_TEST_UNIT(core_utils)
 	}
 
 	std::error_code ec_;
-
-	// uses u::TIME_STAMP_SIMPLE_MASK by default
-	DBJ_T_BUF("%s", u::make_time_stamp(ec_, u::TIME_STAMP_SIMPLE_MASK));
-	DBJ_T_BUF("%s", u::make_time_stamp(ec_, u::TIME_STAMP_FULL_MASK));
-
-	// env vars
+    // env vars
 	DBJ_T_BUF("%s", u::dbj_get_envvar("USERNAME", ec_ ));
 
 	// programdata path
@@ -68,4 +55,6 @@ DBJ_TEST_UNIT(core_utils)
 }
 
 DBJ_TEST_SPACE_CLOSE
+
+#undef DBJ_T_BUF
 

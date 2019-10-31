@@ -36,7 +36,7 @@ namespace dbj {
 		{
 			if (!::IsWindows10OrGreater())
 			{
-				::dbj::core::trace(L"\n\nYou need at least Windows 10 %s\n\n", L"Version Not Supported");
+				::dbj::core::trace("\n\nYou need at least Windows 10 %s\n\n", "Version Not Supported");
 				return false;
 			}
 			return true;

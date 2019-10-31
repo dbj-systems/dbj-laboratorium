@@ -4,12 +4,12 @@ namespace dbj {
 	namespace fmt {
 
 		template<typename ... Args>
-		inline auto to_buff
-		(wchar_t const* format_, Args ... args)	noexcept -> dbj::vector_buffer<wchar_t>::wide;
+		inline auto to_wbuff
+		(wchar_t const* format_, Args ... args)	noexcept -> std::vector<wchar_t> ;
 
 		template<typename ... Args>
 		inline auto	to_buff
-		(char const* format_, Args ...args) noexcept -> dbj::vector_buffer<char>::narrow;
+		(char const* format_, Args ...args) noexcept -> std::vector<char> ;
 
 
 		//////////////////////////////////////////////////////////////////////
@@ -31,17 +31,22 @@ namespace dbj {
 
 		inline char* frm_arg( std::vector<char> const & value) noexcept
 		{
+			_ASSERTE( value.back() == char(0) ); // properly terminated?
 			return const_cast<char *>( value.data() );
 		}
 
 		inline wchar_t* frm_arg( std::vector<wchar_t> const & value) noexcept
 		{
+			_ASSERTE(value.back() == wchar_t(0)); // properly terminated?
 			return const_cast<wchar_t *>( value.data() ) ;
 		}
 
 #pragma region dbj buffer and friends
 
-		// template <typename T>
+		/*
+		this is fast and dangerous, we can not check if these are 
+		properly zero terinated
+		*/
 		inline char* frm_arg(rfr<std::unique_ptr<char[]>> value) noexcept
 		{
 			return value.get().get();
@@ -65,7 +70,7 @@ namespace dbj {
 
 #pragma endregion 
 
-		inline char const* frm_arg(std::error_code value) noexcept
+		inline char const* frm_arg(std::error_code const & value) noexcept
 		{
 			if (value.value() == 0)
 				// MSVC STL does have an empty string here ...
@@ -77,13 +82,13 @@ namespace dbj {
 		}
 
 		template <typename T>
-		inline T const* frm_arg(std::basic_string<T> value) noexcept
+		inline T const* frm_arg(std::basic_string<T> const & value) noexcept
 		{
 			return value.c_str();
 		}
 
 		template <typename T>
-		inline T const* frm_arg(std::basic_string_view<T> value) noexcept
+		inline T const* frm_arg(std::basic_string_view<T> const & value) noexcept
 		{
 			return value.data();
 		}
@@ -99,7 +104,10 @@ namespace dbj {
 		{
 			DBJ_VERIFY( format_.size() > 0  );
 			static_assert( sizeof...(args) > 0  );
-			std::vector<char> buffy = fmt::to_buff(format_.data(), args...);
+			// vectore move happens here
+			std::vector<char> buffy{ fmt::to_buff(format_.data(), args...) } ;
+			// here we basically are doing the transformation from narrow
+			// to wide amd that is a performance hit
 			std::wprintf(L"%S",  buffy.data() );
 		}
 
@@ -128,9 +136,9 @@ namespace dbj {
 #endif
 		// DBJ::TRACE exist in release builds too
 		template <typename ... Args>
-		inline void trace(wchar_t const* const message, Args ... args) noexcept
+		inline void wtrace(wchar_t const* const message, Args ... args) noexcept
 		{
-			auto buf_ = dbj::fmt::to_buff(message, args...);
+			auto buf_ = dbj::fmt::to_wbuff(message, args...);
 			::OutputDebugStringW(buf_.data());
 		}
 		template <typename ... Args>
@@ -141,7 +149,7 @@ namespace dbj {
 		}
 
 #ifdef _DEBUG
-#define DBJ_TRACE( msg_ , ...) ::dbj::core::trace( msg_, __VA_ARGS__ )
+#define DBJ_TRACE( msg_ , ...) ::dbj::core::wtrace( msg_, __VA_ARGS__ )
 #else
 #define DBJ_TRACE(...)
 #endif
@@ -167,7 +175,8 @@ namespace dbj {
 #endif // _DEBUG
 
 		if (ccb_) ccb_();
-		exit(errno_);
+		// NOTE: std::exit is *different*
+		std::exit(errno_);
 	}
 
 #define	DBJ_ERRP(...) do { \
@@ -195,7 +204,7 @@ namespace dbj::core {
 
 	extern "C" {
 
-		/*	transform path to filename,	delimiter is '\\' */
+		/*	transform path to filename,	default delimiter is '\\' */
 		inline	typename ::dbj::vector_buffer<char>::narrow
 			filename(std::string_view file_path, const char delimiter_ = '\\')
 			noexcept
@@ -232,60 +241,97 @@ namespace dbj::core {
 }
 namespace dbj::fmt {
 	
-	//inline char const* frm_arg(::dbj::vector_buffer const & value ) noexcept
-	//{
-	//	return value.data();
-	//}
-
-	//inline wchar_t const* frm_arg(::dbj::vector_buffer_wide cosnt & value) noexcept
-	//{
-	//	return value.data();
-	//}
-
-
-	/*  vaguely inspired by
+	/*  only vaguely inspired by
 		https ://stackoverflow.com/a/39972671/10870835
 	*/
 	template<typename ... Args>
 	inline auto	to_buff
 	   ( char const * format_, Args ...args)
-		 noexcept -> dbj::vector_buffer<char>::narrow
+		 noexcept -> std::vector<char>
 	{
-		DBJ_VERIFY( format_ != nullptr );
+		DBJ_VERIFY(format_ != nullptr );
 		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_ ;
-		// 1: what is the size required
-		size_t size = 1 + std::snprintf(nullptr, 0, fmt, frm_arg(args) ...);
-		assert(size > 0);
-		// 2: use it at runtime
-		auto buf = std::make_unique<char[]>(size + 1);
-		// each arg becomes arg to the frm_arg() overload found
-		size = std::snprintf(buf.get(), size, fmt, frm_arg(args) ...);
+		/*  ppf_arg's are called only once ,rezults are stored in a tuple */
+		auto args_tup = make_tuple( frm_arg(args) ... );
+		auto snprintf_tup_1 = make_tuple(nullptr, 0, format_);
+
+		// obtain the buffer size required
+		size_t size = apply(std::snprintf, tuple_cat(snprintf_tup_1, args_tup));
 		DBJ_VERIFY(size > 0);
 
-		return ::dbj::vector_buffer<char>::make( buf );
+		std::vector<char> buf(size + 1);
+		auto snprintf_tup_2 = make_tuple(buf.data(), buf.size(), format_);
+		// populate the buffer, do not call the  ppf_arg's again
+		size = apply(std::snprintf, tuple_cat(snprintf_tup_2, args_tup));
+		DBJ_VERIFY(size > 0);
+		// snprintf iz properly terminating the rezult
+		// https://stackoverflow.com/a/13067917/10870835
+		return buf;
 	}
+
 	// wide version
+	//template<typename ... Args>
+	//inline auto to_buff
+	//      (wchar_t const * format_, Args ... args)
+	//	noexcept -> std::vector<wchar_t>
+	//{
+	//	DBJ_VERIFY(format_ != nullptr);
+	//	static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
+	//	/*  ppf_arg's are called only once ,rezults are stored in a tuple */
+	//	auto args_tup = std::make_tuple(frm_arg(args) ...);
+	//	auto snprintf_tup_1 = make_tuple(nullptr, 0, format_);
+
+	//	// obtain the buffer size required
+	//	size_t size = std::apply(std::swprintf, tuple_cat(snprintf_tup_1, args_tup));
+	//	DBJ_VERIFY(size > 0);
+
+	//	std::vector<wchar_t> buf(size + 1);
+	//	auto snprintf_tup_2 = make_tuple(buf.data(), buf.size(), format_);
+	//	// populate the buffer, do not call the  ppf_arg's again
+	//	size = std::apply(std::swprintf, tuple_cat(snprintf_tup_2, args_tup));
+	//	DBJ_VERIFY(size > 0);
+	//	// snprintf iz properly terminating the rezult
+	//	// https://stackoverflow.com/a/13067917/10870835
+	//	return buf;
+	//}
+
 	template<typename ... Args>
-	inline auto to_buff
-	      (wchar_t const * format_, Args ... args)
-		noexcept -> dbj::vector_buffer<wchar_t>::wide
+	inline auto to_wbuff
+	(wchar_t const* format_, Args ... wargs_)
+		noexcept -> std::vector<wchar_t>
 	{
 		DBJ_VERIFY(format_ != nullptr);
+		static_assert(sizeof...(wargs_) < 255, "\n\nmax 255 arguments allowed\n");
+#undef USE_TUPLE
+#ifdef USE_TUPLE
+		// for some reason as of today 2019-10-31, CL can not compile this
+			/*  ppf_arg's are called only once ,rezults are stored in a tuple */
+	auto args_tup = std::make_tuple(frm_arg(wargs_) ...);
+	auto snprintf_tup_1 = make_tuple(nullptr, 0, format_);
 
-		static_assert(sizeof...(args) < 255, "\n\nmax 255 arguments allowed\n");
-		const auto fmt = format_ ;
+	// obtain the buffer size required
+	size_t size = std::apply(std::swprintf, std::tuple_cat(snprintf_tup_1, args_tup));
+	DBJ_VERIFY(size > 0);
+
+	std::vector<wchar_t> buf(size + 1);
+	auto snprintf_tup_2 = make_tuple(buf.data(), buf.size(), format_);
+	// populate the buffer, do not call the  ppf_arg's again
+	size = std::apply(std::swprintf, std::tuple_cat(snprintf_tup_2, args_tup));
+	DBJ_VERIFY(size > 0);
+#else
 		// 1: what is the size required
-		size_t size = 1 + std::swprintf(nullptr, 0, fmt, frm_arg(args) ...);
-		assert(size > 0);
+		size_t size = 1 + std::swprintf(nullptr, 0, format_, frm_arg(wargs_) ...);
+		DBJ_VERIFY(size > 0);
 		// 2: use it at runtime
-		auto buf = std::make_unique<wchar_t[]>(size + 1);
+		vector<wchar_t> buf(size + 1);
 		// each arg becomes arg to the frm_arg() overload found
-		size = std::swprintf(buf.get(), size, fmt, frm_arg(args) ...);
-		assert(size > 0);
-
-		return ::dbj::vector_buffer<wchar_t>::make(buf);
+		size = std::swprintf(buf.data(), buf.size(), format_, frm_arg(wargs_) ...);
+		DBJ_VERIFY(size > 0);
+#endif
+		return buf;
 	}
 }
+
+#undef USE_TUPLE
 
 #include "../dbj_license.h"

@@ -118,8 +118,11 @@ namespace dbj {
 			// for users to reach to non const data handled
 			T & data() { return (T&)val_; }
 
-			// compatibility with std::
 
+		private:
+			T val_{};
+
+			// compatibility with std::
 			// to act as element type in some of std:: containers
 			// class has to provide less than operator
 			// type T has to be comparable in the same way 
@@ -130,14 +133,12 @@ namespace dbj {
 			}
 
 			// type T has to be comparable in the same way 
-			// that is 'operator ==' for type T has ot be available
+			// that is 'operator ==' for type T has to be available
 			friend bool operator == (type const & left_, type const & right_)
 			{
 				return ((left_.val_) == (right_.val_));
 			}
 
-		private:
-			T val_{};
 
 #ifdef DBJ_NOTHING_BUT_STREAMS
 			// bellow means type T has to be "printable" too 

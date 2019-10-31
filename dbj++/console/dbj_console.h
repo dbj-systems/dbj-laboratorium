@@ -219,7 +219,7 @@ namespace dbj::console {
 						"dbj console configuration has failed"sv
 					)
 				);
-				::dbj::core::trace(L"\nERROR %s", message_.data());
+				::dbj::core::trace("\nERROR %s", message_.data());
 				// throw dbj::exception(message_);
 #pragma warning(push)
 #pragma warning(disable: 4127 )
