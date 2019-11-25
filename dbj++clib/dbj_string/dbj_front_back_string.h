@@ -56,7 +56,7 @@ static dbj_string * dbj_string_null()
 /*
 return true if front and back are not NULL
 and are not equal
-and size is in the allowe boundaries
+and size is in the allowed boundaries
 */
 static bool dbj_valid_string(const dbj_string * str)
 {

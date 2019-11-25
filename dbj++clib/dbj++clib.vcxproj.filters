@@ -8,11 +8,11 @@
     <ClCompile Include="dbj_error\dbj_error_internal.c" />
     <ClCompile Include="dbj_string\dbj_string_trim.c" />
     <ClCompile Include="dbj_string\dbj_string_trim_test.c" />
-    <ClCompile Include="dbj_string_list\dbj_list.c" />
-    <ClCompile Include="dbj_string_list\dbj_list_test.c" />
     <ClCompile Include="dbj_sll\dbj_sll.c">
       <Filter>dbj_sll</Filter>
     </ClCompile>
+    <ClCompile Include="dbj_string_list\dbj_string_list.c" />
+    <ClCompile Include="dbj_string_list\dbj_string_list_test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbjclib.h" />
@@ -22,8 +22,8 @@
     </ClInclude>
     <ClInclude Include="dbj_error\dbj_error.h" />
     <ClInclude Include="dbj_error\dbj_error_codes.h" />
-    <ClInclude Include="dbj_string\dbj_string.h" />
-    <ClInclude Include="dbj_string\dbj_trim.h" />
+    <ClInclude Include="dbj_string\dbj_string_trim.h" />
+    <ClInclude Include="dbj_string\dbj_front_back_string.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.MD" />

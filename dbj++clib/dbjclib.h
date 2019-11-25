@@ -149,7 +149,7 @@ extern "C" {
 #include "./dbj_error/dbj_error.h"
 #endif /*DBJ_CLIB_ERR_CONCEPT*/
 
-#include "./dbj_string/dbj_trim.h"
+#include "dbj_string/dbj_string_trim.h"
 #include "./dbj_string/dbj_string.h"
 	// #include "./dbj_sll/dbj_sll.h" 
 #include "./dbj_string_list/dbj_string_list.h"

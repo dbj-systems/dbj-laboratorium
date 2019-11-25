@@ -5,8 +5,7 @@
 manage the 'char **' structure
 it is said to be "self contained" because of the sentinel
 at the end, it does not need a structure above it,
-to keep it's size for example
-instead we compute the size
+to keep it's size for example.
 
   empty:
 
