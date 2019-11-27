@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++pertempto", "dbj++pert
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++attempto", "dbj++attempto\dbj++attempto.vcxproj", "{36D7F5F7-AB28-4FDF-80A5-EA53553A5B5D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++clib", "dbj++clib\dbj++clib.vcxproj", "{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utf8dbj", "utf8dbj\utf8dbj.vcxproj", "{1E6806CB-7C63-453E-85BA-0072E6D867C3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++erc", "dbj++erc\dbj++erc.vcxproj", "{8C1FA03B-DE31-4508-B212-E5EB419B9A64}"
@@ -58,14 +56,6 @@ Global
 		{36D7F5F7-AB28-4FDF-80A5-EA53553A5B5D}.Release|x64.Build.0 = Release|x64
 		{36D7F5F7-AB28-4FDF-80A5-EA53553A5B5D}.Release|x86.ActiveCfg = Debug|x64
 		{36D7F5F7-AB28-4FDF-80A5-EA53553A5B5D}.Release|x86.Build.0 = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Debug|x64.ActiveCfg = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Debug|x64.Build.0 = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Debug|x86.ActiveCfg = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Debug|x86.Build.0 = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Release|x64.ActiveCfg = Release|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Release|x64.Build.0 = Release|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Release|x86.ActiveCfg = Debug|x64
-		{FB3F59BF-E33A-473B-A1F2-7E90510B13A6}.Release|x86.Build.0 = Debug|x64
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Debug|x64.ActiveCfg = Debug|x64
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Debug|x64.Build.0 = Debug|x64
 		{1E6806CB-7C63-453E-85BA-0072E6D867C3}.Debug|x86.ActiveCfg = Debug|Win32
