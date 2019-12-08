@@ -64,6 +64,7 @@ namespace dbj {
 		return has_type<c_t>{}();
 	}
 
+#if  ! defined( __clang__ )
 	/* usage samples ------------------------------------------------- */
 	template<typename T, typename ... A>
 	using RequiredSignature = bool(T&, A ... a);
@@ -71,7 +72,6 @@ namespace dbj {
 	inline bool ok_fun(int&) { return true; }
 
 	static_assert(signature_fp_match< RequiredSignature<int> >(ok_fun));
-
 	static_assert(signature_fp_match< bool(int&) >(ok_fun));
 
 	/*
@@ -85,6 +85,8 @@ namespace dbj {
 	/*
 	static_assert( signature_fp_match< string >( true ) );
 	*/
+
+#endif // __clang__
 
 #pragma endregion
 
@@ -682,7 +684,7 @@ namespace dbj {
 
 	template <typename T>
 	constexpr inline bool is_bool_v
-		= ::std::is_same_v< no_const_decayed<T> >, bool > ;
+		= ::std::is_same_v< no_const_decayed<T>, bool > ;
 
 } // eof dbj
 #pragma endregion

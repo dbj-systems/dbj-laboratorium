@@ -45,7 +45,7 @@ namespace inner {
 			case Colour::BrightBlue:   return setTextAttribute( FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 			case Colour::BrightWhite:   return setTextAttribute(FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
 			default: 
-				perror( __FILE__ "(" _CRT_STRINGIZE(__LINE__) ")" " -- Exception in "  __FUNCSIG__ " : not a valid colour code?");
+				perror( __FILE__ "(" _CRT_STRINGIZE(__LINE__) ")" " -- Exception in : not a valid colour code?");
 		}
 		_ASSERTE(false); // debug break
 		std::exit(EXIT_FAILURE); // runtime exit

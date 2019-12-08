@@ -99,7 +99,7 @@ namespace dbj::str {
 		static_assert(dbj::is_std_char_v< std::remove_cv_t<T>>,
 			"[dbj strnlen] requires only standard chars");
 
-		return dbj::MIN(N, maxlen) - 1;
+		return std::min(N, maxlen) - 1;
 	}
 
 	// stop array of pointers shennanigans

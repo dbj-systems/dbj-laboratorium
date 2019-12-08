@@ -61,7 +61,7 @@ namespace dbj {
 						return dbj::call(command_map_.at(command));
 					}
 					catch (std::out_of_range &) {
-						throw  ::dbj::exception( __FUNCSIG__  " Unknown command?");
+						throw  ::dbj::exception(" Unknown command?");
 					}
 				}
 

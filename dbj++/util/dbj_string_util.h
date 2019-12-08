@@ -99,19 +99,19 @@ namespace dbj_legacy {
 		}
 
 		// by default remove all white spaces and a space
-		static string_type& ltrim(string_type& str, const string_type& chars = whitespaces_and_space)
+		static string_type& ltrim(string_type& str, const string_type chars = whitespaces_and_space().data() )
 		{
 			str.erase(0, str.find_first_not_of(chars));
 			return str;
 		}
 
-		static string_type& rtrim(string_type& str, const string_type& chars = whitespaces_and_space)
+		static string_type& rtrim(string_type& str, const string_type chars = whitespaces_and_space().data() )
 		{
 			str.erase(str.find_last_not_of(chars) + 1);
 			return str;
 		}
 
-		static string_type& trim(string_type& str, const string_type& chars = whitespaces_and_space)
+		static string_type& trim(string_type& str, const string_type chars = whitespaces_and_space().data() )
 		{
 			return ltrim(rtrim(str, chars), chars);
 		}
@@ -124,7 +124,7 @@ namespace dbj_legacy {
 
 		// replace all found with one given
 		template< typename T = char_type, size_t N >
-		static string_type& replace_many_one(string_type& str, std::array<T,N> & many_, char_type one_)
+		static string_type& replace_many_one(string_type& str, std::array<T,N> many_, char_type one_)
 		{
 			for (const char_type& ch : many_) {
 				str = simple_replace(str, ch, one_);
@@ -881,10 +881,10 @@ namespace dbj {
 		{
 			// feed the static string view ctor with data from a
 			// static std::array
-			static std::string_view the_line_(
+			std::string_view the_line_(
 				[&]
 			{
-				static std::array< char, size + 1 > array_{};
+				std::array< char, size + 1 > array_{};
 				array_.fill(filler);
 				array_[size] = '\0';
 				return array_.data();

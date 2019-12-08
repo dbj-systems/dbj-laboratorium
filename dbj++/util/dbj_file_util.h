@@ -106,7 +106,7 @@ namespace dbj::util
 				FILE *log_file_{};
 				if (fopen_s(&log_file_, file_path_.data(), "w") != 0)
 				{
-					puts("\n\nCan't truncate the file -- " __FUNCSIG__ "\n\n");
+					puts("\n\nCan't truncate the file -- \n\n");
 					puts(file_path_.data());
 					exit(1);
 				}

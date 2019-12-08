@@ -26,7 +26,10 @@ namespace dbj_stack_matrix_testing {
 			return true; // proceed
 		}
 		);
-		MX::printarr(dbj::console::print);
+
+		MX::printarr(
+			[](auto ... args) { ::dbj::console::print(args ...); }
+		);
 	}
 
 	template< typename MX>
@@ -162,7 +165,7 @@ namespace dbj_stack_matrix_testing {
 		auto mtx(unsigned short height_, unsigned short width_)
 		{
 #ifdef _MSC_VER
-			static_assert(std::is_arithmetic_v <T>, "\n\nstatic assert in:\n\n" __FUNCSIG__ "\n\n\tOnly numbers please!\n\n");
+			static_assert(std::is_arithmetic_v <T>, "\n\nstatic assert in:\n\nOnly numbers please!\n\n");
 #else
 			static_assert(std::is_arithmetic_v <T>, "\n\nstatic assert in: dbj::mtx::mtx()\t\nOnly numbers please!\n\n");
 #endif

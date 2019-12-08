@@ -26,7 +26,6 @@ thus the macto _TEST bellow does not get in that mess ...
 namespace dbj {
 
 	namespace typetraits {
-		using namespace std;
 
 		template <typename T> struct remove_all_ptr { typedef T type; };
 
@@ -113,13 +112,13 @@ namespace dbj {
 
 		// is T, a standard string
 		template< class T >
-		struct is_std_string : integral_constant < bool,
-			is_same_v<T, string    > ||
-			is_same_v<T, wstring   > ||
-			is_same_v<T, u16string > ||
-			is_same_v<T, u32string >
+		struct is_std_string : std::integral_constant < bool,
+			std::is_same_v<T, std::string    > ||
+			std::is_same_v<T, std::wstring   > ||
+			std::is_same_v<T, std::u16string > ||
+			std::is_same_v<T, std::u32string >
 #if __cplusplus > 201703L
-			|| is_same_v<T, u8string >
+			|| std::is_same_v<T, std::u8string >
 #endif
 			>
 		{};
@@ -166,12 +165,12 @@ namespace dbj {
 		{
 			static_assert(typetraits::is_std_string_v<return_type>, "return type must be standard string type");
 
-			template<typename T>
-			return_type operator () (T arg)
+			template<typename TPE_	,
+			std::enable_if_t< ! std::is_pointer_v<TPE_> , int > = 0
+			>
+			return_type operator () (TPE_ arg)
 			{
-				// using namespace typetraits;
-
-				using actual_type = typetraits::remove_cvref_t< T >;
+				using actual_type = typetraits::remove_cvref_t< TPE_ >;
 
 				if constexpr (std::is_same_v<actual_type, return_type >) {
 					return arg; // copy to output
@@ -179,12 +178,12 @@ namespace dbj {
 				else {
 
 					static_assert(typetraits::is_range_with_value_type_v<actual_type>,
-						"can transform only ranges also having a T::value_type accessible");
+						"\n\n\ncan transform only ranges also having a T::value_type accessible");
 
 					static_assert (
 						// arg must have nested value_type 
-						typetraits::is_std_char_v< typename actual_type::value_type >,
-						"can not transform ranges **not** made out of standard char types"
+						typetraits::is_std_char_v< actual_type::value_type >,
+						"\n\n\ncan not transform ranges **not** made out of standard char types"
 						);
 #ifndef _MSC_VER
 					return { arg.begin(), arg.end() };
@@ -199,28 +198,29 @@ namespace dbj {
 				}
 			}
 
-			// dealing with native string literals
-			template<typename T, size_t N>
-			return_type operator () (const T(&arg)[N])
+			// native poiinters are allowed
+			// that relys on zero terminated strings
+			// and that is a safety risk
+			template<typename CHR >
+			return_type operator () ( CHR * sv_ ) 
 			{
 				using actual_type
-					= std::remove_cv_t< std::remove_pointer_t<T> >;
+					= std::remove_cv_t< std::remove_pointer_t<CHR> >;
 
 				static_assert (
 					typetraits::is_std_char_v< actual_type >,
-					"can transform only literals made out of standard char types"
+					"can transform only sequences made out of standard char types"
 					);
 
 				// make string and send it to 
 				// range transformation method
 				return this->operator()(
-					std::basic_string<actual_type>{ arg }
+					std::basic_string<actual_type>{sv_}
 				);
 			}
 
-			// native poiinters are not allowed
-			// that would rely on zero terminated strings
-			// and that is a safety risk
+			// NOTE: MSVC can not compile voerload for native array reference
+			// and for a native pointer in the same time
 
 		}; // meta_converter
 
@@ -249,20 +249,21 @@ namespace dbj {
 
 // TESTING
 
-#ifdef _DBJ_META_CONVERTER_TESTING
+#if 1 // ifdef _DBJ_META_CONVERTER_TESTING
 
+#include <iostream>
 #include <deque>
 #include <forward_list>
 #include <array>
 #include <vector>
 
 // just show the type of the result ...
-#define TEST_(x) do { \
+#define MC_TES_(x) do { \
 auto const & rez = (x); \
 std::cout << std::endl << _CRT_STRINGIZE(x) << "\n result type: " << typeid(rez).name() << std::endl; \
 } while(false)
 
-namespace meta_conversion_testing {
+namespace dbj_mc_testing {
 
 	using namespace std;
 
@@ -275,88 +276,88 @@ namespace meta_conversion_testing {
 		using namespace std;
 		using namespace std::string_literals;
 		// standard string literals
-		TEST_(the_converter("the\0\0standard string literal"s));
-		TEST_(the_converter(L"the\0\0standard string literal"s));
-		TEST_(the_converter(u"the\0\0standard string literal"s));
-		TEST_(the_converter(U"the\0\0standard string literal"s));
+		MC_TES_(the_converter("the\0\0standard string literal"s));
+		MC_TES_(the_converter(L"the\0\0standard string literal"s));
+		MC_TES_(the_converter(u"the\0\0standard string literal"s));
+		MC_TES_(the_converter(U"the\0\0standard string literal"s));
 #if __cplusplus > 201703L
-		TEST_(the_converter(u8"the\0\0standard string literal"s));
+		MC_TES_(the_converter(u8"the\0\0standard string literal"s));
 #endif	
 
 		// native string literals
-		TEST_(the_converter("Abra Ca Dabra Alhambra"));
-		TEST_(the_converter(L"Abra Ca Dabra Alhambra"));
-		TEST_(the_converter(u"Abra Ca Dabra Alhambra"));
-		TEST_(the_converter(U"Abra Ca Dabra Alhambra"));
+		MC_TES_(the_converter("Abra Ca Dabra Alhambra"));
+		MC_TES_(the_converter(L"Abra Ca Dabra Alhambra"));
+		MC_TES_(the_converter(u"Abra Ca Dabra Alhambra"));
+		MC_TES_(the_converter(U"Abra Ca Dabra Alhambra"));
 #if __cplusplus > 201703L
-		TEST_(the_converter(u8"Abra Ca Dabra Alhambra"));
+		MC_TES_(the_converter(u8"Abra Ca Dabra Alhambra"));
 #endif	
 
 		// the five C++20 standard string types
-		TEST_(the_converter(std::string{ "Abra Ca Dabra Alhambra" }));
-		TEST_(the_converter(std::wstring{ L"Abra Ca Dabra Alhambra" }));
-		TEST_(the_converter(std::u16string{ u"Abra Ca Dabra Alhambra" }));
-		TEST_(the_converter(std::u32string{ U"Abra Ca Dabra Alhambra" }));
+		MC_TES_(the_converter(std::string{ "Abra Ca Dabra Alhambra" }));
+		MC_TES_(the_converter(std::wstring{ L"Abra Ca Dabra Alhambra" }));
+		MC_TES_(the_converter(std::u16string{ u"Abra Ca Dabra Alhambra" }));
+		MC_TES_(the_converter(std::u32string{ U"Abra Ca Dabra Alhambra" }));
 #if __cplusplus > 201703L
-		TEST_(the_converter(std::u8string{ u8"Abra Ca Dabra Alhambra" }));
+		MC_TES_(the_converter(std::u8string{ u8"Abra Ca Dabra Alhambra" }));
 #endif	
 
 		// now let's try the renge-like containers
 		// in case you have missed it we can transform any range of chars
 		// into any required std string type
 
-		TEST_(the_converter(std::array{ 'H', 'e', 'l', 'l', 'o', '!' }));
-		TEST_(the_converter(std::array{ L'H', L'e', L'l', L'l', L'o', L'!' }));
-		TEST_(the_converter(std::array{ u'H', u'e', u'l', u'l', u'o', u'!' }));
-		TEST_(the_converter(std::array{ U'H', U'e', U'l', U'l', U'o', U'!' }));
+		MC_TES_(the_converter(std::array{ 'H', 'e', 'l', 'l', 'o', '!' }));
+		MC_TES_(the_converter(std::array{ L'H', L'e', L'l', L'l', L'o', L'!' }));
+		MC_TES_(the_converter(std::array{ u'H', u'e', u'l', u'l', u'o', u'!' }));
+		MC_TES_(the_converter(std::array{ U'H', U'e', U'l', U'l', U'o', U'!' }));
 #if __cplusplus > 201703L
-		TEST_(the_converter(std::array{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
+		MC_TES_(the_converter(std::array{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
 #endif	
 
-		TEST_(the_converter(std::vector{ 'H', 'e', 'l', 'l', 'o', '!' }));
-		TEST_(the_converter(std::vector{ L'H', L'e', L'l', L'l', L'o', L'!' }));
-		TEST_(the_converter(std::vector{ u'H', u'e', u'l', u'l', u'o', u'!' }));
-		TEST_(the_converter(std::vector{ U'H', U'e', U'l', U'l', U'o', U'!' }));
+		MC_TES_(the_converter(std::vector{ 'H', 'e', 'l', 'l', 'o', '!' }));
+		MC_TES_(the_converter(std::vector{ L'H', L'e', L'l', L'l', L'o', L'!' }));
+		MC_TES_(the_converter(std::vector{ u'H', u'e', u'l', u'l', u'o', u'!' }));
+		MC_TES_(the_converter(std::vector{ U'H', U'e', U'l', U'l', U'o', U'!' }));
 #if __cplusplus > 201703L
-		TEST_(the_converter(std::vector{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
+		MC_TES_(the_converter(std::vector{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
 #endif	
 
-		TEST_(the_converter(std::deque{ 'H', 'e', 'l', 'l', 'o', '!' }));
-		TEST_(the_converter(std::deque{ L'H', L'e', L'l', L'l', L'o', L'!' }));
-		TEST_(the_converter(std::deque{ u'H', u'e', u'l', u'l', u'o', u'!' }));
-		TEST_(the_converter(std::deque{ U'H', U'e', U'l', U'l', U'o', U'!' }));
+		MC_TES_(the_converter(std::deque{ 'H', 'e', 'l', 'l', 'o', '!' }));
+		MC_TES_(the_converter(std::deque{ L'H', L'e', L'l', L'l', L'o', L'!' }));
+		MC_TES_(the_converter(std::deque{ u'H', u'e', u'l', u'l', u'o', u'!' }));
+		MC_TES_(the_converter(std::deque{ U'H', U'e', U'l', U'l', U'o', U'!' }));
 #if __cplusplus > 201703L
-		TEST_(the_converter(std::deque{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
+		MC_TES_(the_converter(std::deque{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
 #endif	
 
-		TEST_(the_converter(std::forward_list{ 'H', 'e', 'l', 'l', 'o', '!' }));
-		TEST_(the_converter(std::forward_list{ L'H', L'e', L'l', L'l', L'o', L'!' }));
-		TEST_(the_converter(std::forward_list{ u'H', u'e', u'l', u'l', u'o', u'!' }));
-		TEST_(the_converter(std::forward_list{ U'H', U'e', U'l', U'l', U'o', U'!' }));
+		MC_TES_(the_converter(std::forward_list{ 'H', 'e', 'l', 'l', 'o', '!' }));
+		MC_TES_(the_converter(std::forward_list{ L'H', L'e', L'l', L'l', L'o', L'!' }));
+		MC_TES_(the_converter(std::forward_list{ u'H', u'e', u'l', u'l', u'o', u'!' }));
+		MC_TES_(the_converter(std::forward_list{ U'H', U'e', U'l', U'l', U'o', U'!' }));
 #if __cplusplus > 201703L
-		TEST_(the_converter(std::forward_list{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
+		MC_TES_(the_converter(std::forward_list{ u8'H', u8'e', u8'l', u8'l', u8'o', u8'!' }));
 #endif	
 
 		// no can do -- only ranges and arrays aka string literals
 		// char const * native_and_nasty = "Buahaha!";
-		// TEST_(the_converter(native_and_nasty));
+		//MC_TES_(the_converter(native_and_nasty));
 
 
 		// also we do not serve stunt men any more
-		//TEST_(the_converter(static_cast< char(&)[]>("Abra Ca Dabra")));
-		//TEST_(the_converter(static_cast< wchar_t(&)[]>(L"Abra Ca Dabra")));
-		//TEST_(the_converter(static_cast< char16_t(&)[]>(u"Abra Ca Dabra")));
-		//TEST_(the_converter(static_cast< char32_t(&)[]>(U"Abra Ca Dabra")));
+		//MC_TES_(the_converter(static_cast< char(&)[]>("Abra Ca Dabra")));
+		//MC_TES_(the_converter(static_cast< wchar_t(&)[]>(L"Abra Ca Dabra")));
+		//MC_TES_(the_converter(static_cast< char16_t(&)[]>(u"Abra Ca Dabra")));
+		//MC_TES_(the_converter(static_cast< char32_t(&)[]>(U"Abra Ca Dabra")));
 
 		// then string views, and so on ...
 		// now lets test non char containers
 		// rightly so, none of this compiles
-		// TEST_(the_converter(std::array<int, 6>{  1,2,3,4,5,6 }));
-		// TEST_(the_converter(std::vector<int>{  1, 2, 3, 4, 5, 6 }));
-		// TEST_(the_converter(std::basic_string<int>{  1, 2, 3, 4, 5, 6 }));
+		//MC_TES_(the_converter(std::array<int, 6>{  1,2,3,4,5,6 }));
+		//MC_TES_(the_converter(std::vector<int>{  1, 2, 3, 4, 5, 6 }));
+		//MC_TES_(the_converter(std::basic_string<int>{  1, 2, 3, 4, 5, 6 }));
 	}
 
-	inline void metaconvertertest() {
+	inline void dbj_mc_test() {
 
 		test_conversion(dbj::range_to_string);
 		test_conversion(dbj::range_to_wstring);
@@ -366,9 +367,9 @@ namespace meta_conversion_testing {
 		test_conversion(dbj::range_to_u8string);
 #endif	
 	}
-} // namespace meta_conversion_testing
+} // namespace dbj_mc_testing
 
-#undef TEST_
+#undef MC_TES_ 
 #endif // _DBJ_META_CONVERTER_TESTING
 
 #endif // !_DBJ_META_CONVERTER_INC_

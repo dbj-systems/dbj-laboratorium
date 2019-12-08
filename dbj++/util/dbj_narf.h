@@ -95,7 +95,7 @@ namespace dbj::narf {
 		// effectively remove the ref + constness
 		using nativarref =  std::remove_cv_t<T>(&)[N];
 
-		static T cludge[N]{};
+		T cludge[N]{};
 
 		std::copy(native_arr, native_arr + N, cludge);
 		

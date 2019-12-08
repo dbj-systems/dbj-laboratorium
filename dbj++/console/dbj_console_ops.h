@@ -2,6 +2,8 @@
 #ifndef _DBJ_CONSOLE_OPS
 #define _DBJ_CONSOLE_OPS
 
+#include <filesystem>
+
 // #define DBJ_TYPE_INSTRUMENTS
 
 /// <summary>
@@ -244,8 +246,7 @@ namespace dbj::console {
 #endif
 
 #define DBJ_UNHANDLED_(P)\
-	 dbj::console::PRN.printf(\
-		 __FUNCSIG__ "\nunhandled " P " argument type: %s\nbase type: %s\n",\
+	 dbj::console::PRN.printf("\nunhandled " P " argument type: %s\nbase type: %s\n",\
 		 DBJ_TYPENAME(T), DBJ_TYPENAME(actual::base) )
 
 	/*
@@ -293,7 +294,7 @@ namespace dbj::console {
 #endif
 		// dbj_type_report<argument_type>( &console_ );
 
-		if constexpr (std::is_fundamental_v< dbj::tt::actual_type<T>::unqualified >) {
+		if constexpr (std::is_fundamental_v< typename dbj::tt::actual_type<T>::unqualified >) {
 
 			if constexpr (std::is_arithmetic_v< actual::unqualified_type >) {
 				if constexpr (std::is_floating_point_v< actual::unqualified >) {

@@ -2,6 +2,7 @@
 #ifndef _DBJ_CORE_TESTS
 #define _DBJ_CORE_TESTS
 
+#define _DBJ_META_CONVERTER_TESTING
 #include "../core/dbj_meta_converter.h"
 
 DBJ_TEST_SPACE_OPEN(core_tests)
@@ -62,7 +63,8 @@ DBJ_TEST_UNIT(metaconvertortest) {
 #ifndef _DBJ_META_CONVERTER_TESTING
 #error _DBJ_META_CONVERTER_TESTING needs to be # defined here?
 #else
-	meta_conversion_testing::metaconvertertest();
+	using namespace dbj_mc_testing ;
+		dbj_mc_test();
 #endif // _DBJ_META_CONVERTER_TESTING
 
 }

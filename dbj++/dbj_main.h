@@ -82,7 +82,7 @@ int main(int argc, char* argv[], char *envp[])
 			dbj_program_start(argc, argv, envp);
 		}
 		catch (std::error_code ec) {
-			print("\n\nAn error_code caught in " __FUNCSIG__ "\n\t",
+			print("\n\nAn error_code caught in \n\t",
 				painter_command::bright_red,
 				ec,
 				painter_command::text_color_reset

@@ -146,7 +146,7 @@ namespace dbj::num {
 		std::int32_t const &
 		fact32(std::int32_t const & i) {
 		if (i < 0U || i> 12U) {
-			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
+			perror("\n\n -- argument out of range\n\n");
 			return std::int32_t(std::errc::result_out_of_range);
 		}
 		return factorials32[i];
@@ -175,7 +175,7 @@ namespace dbj::num {
 		fact64(std::int64_t const & i) {
 
 		if (i < 0U || i> 20U) {
-			perror("\n\n" __FUNCSIG__ " -- argument out of range\n\n");
+			perror("\n\n -- argument out of range\n\n");
 			// POSIX
 			return std::int64_t(std::errc::result_out_of_range);
 		}

@@ -1,4 +1,8 @@
 #pragma once
+#ifndef _DBJ_LAMBDA_MADE_MATRIX
+#define _DBJ_LAMBDA_MADE_MATRIX
+
+#include "../console/dbj++con.h"
 /*
 Also at: https://wandbox.org/permlink/hSE7d24YmNIOSVII
 
@@ -111,5 +115,4 @@ namespace dbj::lambda_matrix
 	};
 
 } // namespace dbj::lambda_matrix
-
-
+#endif // _DBJ_LAMBDA_MADE_MATRIX

@@ -32,19 +32,19 @@ namespace dbj {
 
 		};
 
-		inline auto white_line = [&](auto && ... args) {
+		inline auto white_line = [](auto && ... args) {
 			text_line(CMD::white, args...);
 		};
 
-		inline auto blue_line = [&](auto && ... args) {
+		inline auto blue_line = [](auto && ... args) {
 			text_line(CMD::bright_blue, args...);
 		};
 
-		inline auto green_line = [&](auto && ... args) {
+		inline auto green_line = [](auto && ... args) {
 			text_line(CMD::green, args...);
 		};
 
-		inline auto red_line = [&](auto && ... args) {
+		inline auto red_line = [](auto && ... args) {
 			text_line(CMD::bright_red, args ...);
 		};
 

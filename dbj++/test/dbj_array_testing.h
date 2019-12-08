@@ -30,7 +30,7 @@ DBJ_TEST_UNIT( templated_memcpy ) {
 /*------------------------------------------------------*/
 
 inline auto default_element_output_ =
-[&](size_t j, const auto & element,
+[](size_t j, const auto & element,
 	const char * fmt_str = " %zd:%d ")
 {
 	printf(fmt_str, j++, element);
