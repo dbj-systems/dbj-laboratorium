@@ -198,8 +198,9 @@ namespace dbj {
 				}
 			}
 
-			// native poiinters are allowed
-			// that relys on zero terminated strings
+			// native pointers are allowed
+			// comfortable API
+			// WARNING: this relys on zero terminated strings
 			// and that is a safety risk
 			template<typename CHR >
 			return_type operator () ( CHR * sv_ ) 
@@ -219,7 +220,7 @@ namespace dbj {
 				);
 			}
 
-			// NOTE: MSVC can not compile voerload for native array reference
+			// NOTE: MSVC can not compile overload for native array reference
 			// and for a native pointer in the same time
 
 		}; // meta_converter

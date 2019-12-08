@@ -150,7 +150,7 @@ printer is console single user
 		~Printer() { this->console_ = nullptr; }
 
 		void char_to_console(const char * char_ptr) const noexcept {
-			_ASSERTE(char_ptr);
+			_ASSERTE( & char_ptr[0] );
 			if (char_ptr[0] == (char)0) { // probably an error
 				return;
 			}
@@ -160,7 +160,7 @@ printer is console single user
 
 
 		void wchar_to_console(const wchar_t  * char_ptr) const noexcept {
-			_ASSERTE(char_ptr);
+			_ASSERTE( & char_ptr[0] );
 			if (char_ptr[0] == (wchar_t)0) { // probably an error
 				return;
 			}
