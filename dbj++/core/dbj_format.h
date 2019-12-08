@@ -1,4 +1,7 @@
-#pragma once
+#ifndef _DBJ_FORMAT_INC
+#define _DBJ_FORMAT_INC
+
+#include "dbj_buffers.h"
 
 namespace dbj {
 	namespace fmt {
@@ -117,7 +120,7 @@ namespace dbj {
 
 namespace dbj {
 	namespace core {
-#if 0
+#if 1
 		template <typename ... Args>
 		inline std::wstring printf_to_buffer
 		(wchar_t const* const message, Args ... args) noexcept
@@ -334,4 +337,4 @@ namespace dbj::fmt {
 
 #undef USE_TUPLE
 
-#include "../dbj_license.h"
+#endif // !_DBJ_FORMAT_INC

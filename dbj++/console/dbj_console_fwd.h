@@ -1,14 +1,7 @@
 #pragma once
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#ifndef _DBJ_CONSOLE_FWD
+#define _DBJ_CONSOLE_FWD
 
-//#if !defined(_CONSOLE)
-//#pragma message ( "#############################################################" )
-//#pragma message ( _DBJ_CONCATENATE( "File: ", __FILE__) )
-//#pragma message ( _DBJ_CONCATENATE( "Line: ",  _DBJ_STRINGIZE(__LINE__)))
-//#pragma message ("This is probably not a console app? OR we re building a library")
-//#pragma message ( "#############################################################" )
-//#endif
 
 namespace dbj::console {
 
@@ -211,3 +204,5 @@ printer is console single user
 	struct WideOut;
 
 } // namespace dbj::console 
+
+#endif // !_DBJ_CONSOLE_FWD

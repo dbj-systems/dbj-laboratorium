@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_meta_converter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_utils_core.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_runtime.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_format.h" />
@@ -63,7 +64,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_traits_testing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_util_test.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_win32_tests.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)test\dbj_errc_tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)test\zAllocator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj++util.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)util\dbj_arh.h" />

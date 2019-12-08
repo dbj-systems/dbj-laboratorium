@@ -112,7 +112,7 @@ DBJ_TEST_UNIT(dbj_string_util_ui_is_prefix) {
 DBJ_TEST_UNIT(clasical_string_utils)
 {
 	using namespace std;
-	using util = ::dbj::str_util_char;
+	using util = ::dbj_legacy::str_util_char;
 
 	std::string required_state = "ABR A\f \n KA DAB\r RA\t \v";
 	std::string  test_input[]{

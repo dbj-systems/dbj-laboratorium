@@ -1,7 +1,7 @@
 #pragma once
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#ifndef _DBJ_CONSOLE_PAINTER
+#define _DBJ_CONSOLE_PAINTER
 
 namespace dbj::console {
 #pragma region "colors and painter"
@@ -127,3 +127,5 @@ namespace inner {
 
 #pragma endregion
 } // dbj::console
+
+#endif // !_DBJ_CONSOLE_PAINTER

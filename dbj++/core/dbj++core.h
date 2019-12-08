@@ -22,4 +22,7 @@ usage concept: use dbj++core always and only by including this header only
 #include "dbj_format.h"
 #include "dbj_win32_core.h"
 
+// _DBJ_META_CONVERTER_TESTING
+#include "dbj_meta_converter.h"
+
 #endif DBJ_CORE_INCLUDED

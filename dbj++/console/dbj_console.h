@@ -1,4 +1,6 @@
 ﻿#pragma once
+#ifndef _DBJ_CONSOLE
+#define _DBJ_CONSOLE
 
 
 #if DBJ_CONSOLE_INIT_REQUIRED
@@ -247,5 +249,4 @@ namespace dbj {
 
 #endif
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#endif // _DBJ_CONSOLE

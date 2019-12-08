@@ -1,4 +1,6 @@
 ﻿#pragma once
+#ifndef _DBJ_RUNTIME_
+#define _DBJ_RUNTIME_
 
 // REMINDER: be sure you do not have a space after a macro name and before the '(' !!
 
@@ -405,6 +407,8 @@ constexpr auto compile_time_ascii_index = ascii_ordinal_compile_time<64>() ;
 		= ::std::disjunction_v<::std::is_same<_Ty, _Types>...>;
 #pragma endregion
 
+#pragma region DBJ REPEAT
+
 	//  https://en.wikipedia.org/wiki/Proof_that_22/7_exceeds_π
 	// https://www.wired.com/story/a-major-proof-shows-how-to-approximate-numbers-like-pi/
 	constexpr inline auto DBJ_PI = 104348 / 33215;
@@ -473,11 +477,113 @@ modern solution usage, ugly as hell:
 
 repeat(42, [&](auto arg_) { printf("\n%s", arg_ );} , "42 lines of text") ;
 */
+#pragma  endregion
 
 } // dbj
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#pragma region vector char_type buffer
 
-/* standard suffix for every dbj header */
-#pragma comment( user, DBJ_BUILD_STAMP ) 
+#include <vector>
+#include <string_view>
+#include <memory>
+
+namespace dbj {
+
+	/*
+	for runtime buffering the most comfortable and in the same time fast
+	solution is vector<char_type>
+
+	only unique_ptr<char[]> is faster than vector of  chars, by a margin
+	*/
+	template<typename CHAR>
+	struct vector_buffer final {
+
+		constexpr static std::size_t MAX_VEC_BUFF_LENGTH = 0xFFFF; // aka UINT16_MAX and 65535
+
+		static_assert(is_any_same_as_first_v<CHAR, char, wchar_t>,
+			"\n\n" __FILE__  "\n\n\tvector_buffer requires char or wchar_t only\n\n");
+
+		using buffer_type = std::vector<CHAR>;
+		using narrow = std::vector<char>;
+		using wide = std::vector<wchar_t>;
+
+		static
+			buffer_type make(size_t count_)
+		{
+			DBJ_VERIFY(count_ > 0);
+			DBJ_VERIFY(MAX_VEC_BUFF_LENGTH >= count_);
+			std::vector<CHAR> retval_(count_ + 1);
+			// terminate!
+			retval_[count_] = CHAR(0);
+			return retval_;
+		}
+
+		static
+			buffer_type make(std::basic_string_view<CHAR> sview_)
+		{
+			DBJ_VERIFY(sview_.size() > 0);
+			DBJ_VERIFY(MAX_VEC_BUFF_LENGTH >= sview_.size());
+			buffer_type retval_(sview_.begin(), sview_.end());
+			// terminate!
+			retval_.push_back(CHAR(0));
+			return retval_;
+		}
+
+		static
+			buffer_type make(std::unique_ptr<CHAR[]> const& upc_)
+		{
+			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
+		}
+
+		static
+			buffer_type make(std::shared_ptr<CHAR[]> const& upc_)
+		{
+			return vector_buffer::make(std::basic_string_view<CHAR>(upc_.get()));
+		}
+
+		/*
+		format is make too
+		*/
+		template <typename... Args, size_t max_arguments = 255>
+		static buffer_type
+			format(char const* format_, Args... args) noexcept
+		{
+			static_assert(sizeof...(args) < max_arguments, "\n\nmax 255 arguments allowed\n");
+			_ASSERTE(format_);
+			// 1: what is the size required
+			size_t size = 1 + std::snprintf(nullptr, 0, format_, args...);
+			_ASSERTE(size > 0);
+			// 2: use it at runtime
+			buffer_type buf = vector_buffer::make(size);
+			//
+			size = std::snprintf(buf.get(), size, format_, args...);
+			_ASSERTE(size > 0);
+
+			return buf;
+		}
+	}; // vector_buffer
+
+
+} // dbj
+
+#pragma endregion
+
+namespace dbj::util {
+	// std::equal has many overloads
+	// it is sometimes less error prone to have it here
+	// in a singular form, and use this one as we exactly need
+	template<class InputIt1, class InputIt2>
+	constexpr bool equal_(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+	{
+		for (; first1 != last1; ++first1, ++first2) {
+			if (!(*first1 == *first2)) {
+				return false;
+			}
+		}
+		return true;
+	}
+} // ns dbj::util
+
+#endif // !_DBJ_RUNTIME_
+
+

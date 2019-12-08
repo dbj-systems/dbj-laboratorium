@@ -1,4 +1,8 @@
-#pragma once
+#ifndef _DBJ_UTILS_CORE_INC
+#define _DBJ_UTILS_CORE_INC
+
+// DBJ! This is circular include ... Bollocks ..
+#include "dbj_runtime.h"
 
 namespace dbj {
 	// the first time dbj::core namespace was introduced was here
@@ -123,3 +127,6 @@ namespace dbj {
 		} // unvarnished
 	}// core
 } // dbj
+
+
+#endif // !_DBJ_UTILS_CORE_INC

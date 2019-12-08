@@ -62,7 +62,9 @@ namespace dbj_stack_matrix_testing {
 		B::for_each(filler);
 
 		stack_matrix_multiply<A, B, R>();
-		R::printarr(::dbj::console::print);
+		R::printarr(
+			[](auto ... args) { ::dbj::console::print( args ...); }
+		);
 	}
 
 	DBJ_TEST_UNIT(using_dbj_static_matrix_as_storage)
@@ -136,8 +138,13 @@ namespace dbj_stack_matrix_testing {
 		mx9a mxa = test_mx_arg_retval(mx9a());
 		mx9b mxb = test_mx_arg_retval(mx9b());
 
-		mxa.printarr(::dbj::console::print);
-		mxb.printarr(::dbj::console::print);
+		mxa.printarr(
+			[](auto ... args) { ::dbj::console::print(args ...); }
+		);
+
+		mxb.printarr(
+			[](auto ... args) { ::dbj::console::print(args ...); }
+		);
 	}
 	/*
 		This is certainly better memory layout but equaly certainly more

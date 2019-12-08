@@ -1,12 +1,12 @@
-#pragma once
+#ifndef _DBJ_STRING_UTIL
+#define _DBJ_STRING_UTIL
+
 /*
 
 UNLESS OTHERWISE STATED THIS CODE IS GOOD ONLY FOR FIRST 127 CHARS
 IN ASCI locale unaware situations
 
 */
-
-#include "../core/dbj_runtime.h"
 #include "../core/dbj_traits.h"
 
 // #include <type_traits>
@@ -14,9 +14,195 @@ IN ASCI locale unaware situations
 #ifdef DBJ_USE_STD_STREAMS
 #include <sstream> // wstringstream
 #endif
-//#include <memory>  // allocator
-//#include <string>
-//#include <optional>
+
+#pragma region str util legacy
+
+namespace dbj_legacy {
+
+	/*
+	NOTE: bellow is some repetition of functionality from above
+	A bit more classical approach, in a struct that dictates behaviour
+	How? It has no data but types which must be used and functions operating
+	on them types only
+	*/
+	template<typename C >
+	struct str_util final {
+
+		static_assert(
+			dbj::is_wide_narrow_char_v<C> , "\n\n\ndbj_legacy::str_util -- C must be char or wchar_t, only!"
+		);
+
+		using type = str_util;
+		typedef C char_type;
+		typedef std::basic_string<char_type> string_type;
+
+		// array reference type
+		using arrf = char_type(&)[];
+
+		// { L"\t\n\v\f\r " };
+		static auto whitespaces_and_space() {
+			if constexpr ( dbj::is_wchar_v<C> ) {
+				static std::array whitespaces_and_space_{ L'\t',L'\n',L'\v',L'\f',L'\r', L' ' };
+				return whitespaces_and_space_;
+			}
+			else {
+				static std::array whitespaces_and_space_{ '\t','\n','\v','\f','\r', ' ' };
+				return whitespaces_and_space_;
+			}
+		}
+
+		static string_type to_string(int n)
+		{
+			return convert_string(std::to_string(n));
+		}
+
+		static std::string convert_string(const std::wstring& ws_) {
+			return { ws_.begin(), ws_.end() };
+		}
+
+		static std::wstring convert_string(const std::string& ss_) {
+			return { ss_.begin(), ss_.end() };
+		}
+
+		static bool equal_and_found(wchar_t c1, wchar_t c2, const wchar_t* specimen) {
+			return c1 == c2 && (nullptr != (wcschr(specimen, c2)));
+		}
+
+		static bool equal_and_found(char c1, char c2, const char* specimen) {
+			return c1 == c2 && (nullptr != (strchr(specimen, c2)));
+		}
+
+		// remove whitespace + space pairs by default
+		// or whatever else has to_be_removed
+		static string_type  compressor
+		(string_type s1, const char_type* to_be_single = whitespaces_and_space)
+		{
+			string_type s2;
+			std::unique_copy(
+				s1.begin(),
+				s1.end(),
+				back_inserter(s2),
+				[&](char_type c1, char_type c2)
+				{
+					// return c1 == c2 && (nullptr != (_tcschr(to_be_single, c2)));
+					return equal_and_found(c1, c2, to_be_single);
+				}
+			);
+			return s2;
+		}
+
+		static string_type  normalizer
+		(string_type str, const char_type* to_be_single = whitespaces_and_space().data() )
+		{
+			str = compressor(str, to_be_single);
+			return trim(str);
+		}
+
+		// by default remove all white spaces and a space
+		static string_type& ltrim(string_type& str, const string_type& chars = whitespaces_and_space)
+		{
+			str.erase(0, str.find_first_not_of(chars));
+			return str;
+		}
+
+		static string_type& rtrim(string_type& str, const string_type& chars = whitespaces_and_space)
+		{
+			str.erase(str.find_last_not_of(chars) + 1);
+			return str;
+		}
+
+		static string_type& trim(string_type& str, const string_type& chars = whitespaces_and_space)
+		{
+			return ltrim(rtrim(str, chars), chars);
+		}
+
+		static string_type& simple_replace(string_type& str, char_type to_find, char_type replacement)
+		{
+			std::replace(str.begin(), str.end(), to_find, replacement);
+			return str;
+		}
+
+		// replace all found with one given
+		template< typename T = char_type, size_t N >
+		static string_type& replace_many_one(string_type& str, std::array<T,N> & many_, char_type one_)
+		{
+			for (const char_type& ch : many_) {
+				str = simple_replace(str, ch, one_);
+			}
+			return str;
+		}
+
+		// replace white spaces and space with underscore to make the input presentable
+		// that is: printable to the console 
+		static string_type& presentable(string_type& str, char_type one_ = '_')
+		{
+			return replace_many_one(str, type::whitespaces_and_space(), one_);
+		}
+
+		// returns the number of chars replaced
+		static int replace(string_type& str, char_type to_find, char_type replacement)
+		{
+			int accumulator_ = 0;
+			std::for_each(str.begin(), str.end(),
+				[&](char_type& char_) {
+					if (char_ == to_find) {
+						accumulator_ += 1;
+						char_ = replacement;
+					}
+				}
+			);
+			return accumulator_;
+		}
+
+		// returns the number of substrings replaced
+		static int replace_substring(
+			string_type& str,
+			const string_type& search,
+			const string_type& replace
+		)
+		{
+			size_t pos = 0;
+			size_t replacements_ = 0;
+			while ((pos = str.find(search, pos)) != string_type::npos) {
+				str.replace(pos, search.length(), replace);
+				pos += replace.length();
+				replacements_ += 1;
+			};
+			return replacements_;
+		}
+
+		static bool char_found(wchar_t c, wchar_t const* text_) { return NULL != wcschr(text_, c); }
+
+		static bool char_found(char    c, char    const* text_) { return NULL != strchr(text_, c); }
+
+		// preserve the input
+		// returns the number of chars removed
+		static string_type remove_chars(
+			string_type& str,
+			char_type const* chars_to_remove = whitespaces_and_space().data() )
+		{
+			int how_many_were_removed = 0;
+			string_type output_;
+			output_.reserve(str.size());
+			// above ctor avoids buffer reallocations in da loop
+
+			for (auto&& ch : str)
+				if (!char_found(ch, chars_to_remove)) {
+					output_.append(1, ch);
+					how_many_were_removed++;
+				};
+			// todo: we can return a pair to have back how_many_were_removed
+			return output_;
+		}
+
+	}; // str_util_
+
+	typedef str_util<wchar_t> str_util_wide;
+	typedef str_util<char   > str_util_char;
+
+} //dbj
+
+#pragma endregion // str util legacy
 
 namespace dbj::str {
 
@@ -507,45 +693,59 @@ namespace dbj::str {
 		template < typename return_type >
 		struct meta_converter final
 		{
-			/*
-			Optimization: if two types are the same 
-			just return a copy, sorry: move a copy out
-			*/
-			return_type operator () (return_type arg)
-			{
-				return arg;
-			}
+			static_assert(dbj::is_std_string_v<return_type>, "return type must be standard string type");
 
 			template<typename T>
 			return_type operator () (T arg)
 			{
-				if constexpr (dbj::is_range_v<T>) {
+				using actual_type
+					= std::remove_cv_t< std::remove_pointer_t<T> >;
+
+				if constexpr (std::is_same_v<actual_type, return_type >) {
+					return arg; // copy to output
+			}
+				else {
+
+					static_assert(dbj::is_range_v<actual_type>, "can transform only ranges");
+
 					static_assert (
-						// arg must have this typedef
-						dbj::is_std_char_v< T::value_type >,
+						// arg must have nested value_type 
+						dbj::is_std_char_v< typename actual_type::value_type >,
 						"can not transform ranges **not** made out of standard char types"
 						);
 #ifndef _MSC_VER
 					return { arg.begin(), arg.end() };
 #else
-					// char32_t being used 
-					// currently generates a lot of warnings C4244 
-					// for MSVC, as of 2019-07-22
-	#pragma warning( push )
-	#pragma warning ( disable: 4244 )
-					return return_type( arg.begin(), arg.end() );
-	#pragma warning( pop )
+					// currently a lot of warnings C4244 
+					// for MSVC, as of 2019-11-27
+#pragma warning( push )
+#pragma warning ( disable: 4244 )
+					return return_type(arg.begin(), arg.end());
+#pragma warning( pop )
 #endif
 				}
-				else {
-					using actual_type
-						= std::remove_cv_t< std::remove_pointer_t<T> >;
-					return this->operator()(
-						std::basic_string<actual_type>{ arg }
+		}
+
+			// dealing with native string literals
+			template<typename T>
+			return_type operator () (const T* arg)
+			{
+				using actual_type
+					= std::remove_cv_t< std::remove_pointer_t<T> >;
+
+				static_assert (
+					dbj::is_std_char_v< actual_type >,
+					"can transform only literals made out of standard char types"
 					);
-				}
+
+				// make string and send it to 
+				// range transformation method
+				return this->operator()(
+					std::basic_string<actual_type>{ arg }
+				);
 			}
-		}; // meta_converter
+
+	}; // meta_converter
 
 		   // explicit instantiations
 		template struct meta_converter<std::string   >;
@@ -562,14 +762,6 @@ namespace dbj::str {
 	} // inner
 
 } // dbj::str
-
-namespace dbj {
-	// all the meta converter INTANCES required / implicit instantiations
-	inline dbj::str::inner::meta_converter<std::string   > range_to_string{};
-	inline dbj::str::inner::meta_converter<std::wstring  > range_to_wstring{};
-	inline dbj::str::inner::meta_converter<std::u16string> range_to_u16string{};
-	inline dbj::str::inner::meta_converter<std::u32string> range_to_u32string{};
-}
 
 namespace dbj::str {
 	template <class T>
@@ -665,205 +857,6 @@ namespace dbj::str {
 } // dbj::str
 
 namespace dbj {
-/*
-NOTE: bellow is some repetition of functionality from above
-A bit more classical approach, in a struct that dictates behaviour
-How? It has no data but types which must be used and functions operating
-on them types only
-*/
-	template<typename C = char>
-	struct str_util {
-
-		typedef C char_type;
-		typedef std::basic_string<char_type> string_type;
-
-		static const char_type whitespaces_and_space[]; // { L"\t\n\v\f\r " };
-
-		static string_type to_string(int n)
-		{
-			return convert_string(std::to_string(n));
-		}
-
-		static std::string convert_string(const std::wstring & ws_) {
-			return { ws_.begin(), ws_.end() };
-		}
-
-		static std::wstring convert_string(const std::string & ss_) {
-			return { ss_.begin(), ss_.end() };
-		}
-
-		static bool equal_and_found(wchar_t c1, wchar_t c2, const wchar_t * specimen) {
-			return c1 == c2 && (nullptr != (wcschr(specimen, c2)));
-		}
-
-		static bool equal_and_found(char c1, char c2, const char * specimen) {
-			return c1 == c2 && (nullptr != (strchr(specimen, c2)));
-		}
-
-		// remove whitespace + space pairs by default
-		// or whatever else has to_be_removed
-		static string_type  compressor
-		(string_type s1, const char_type * to_be_single = whitespaces_and_space)
-		{
-			string_type s2;
-			std::unique_copy(
-				s1.begin(),
-				s1.end(),
-				back_inserter(s2),
-				[&](char_type c1, char_type c2)
-			{
-				// return c1 == c2 && (nullptr != (_tcschr(to_be_single, c2)));
-				return equal_and_found(c1, c2, to_be_single);
-			}
-			);
-			return s2;
-		}
-
-		static string_type  normalizer
-		(string_type str, const char_type * to_be_single = whitespaces_and_space)
-		{
-			str = compressor(str, to_be_single);
-			return trim(str);
-		}
-
-		// by default remove all white spaces and a space
-		static string_type& ltrim(string_type& str, const string_type& chars = whitespaces_and_space)
-		{
-			str.erase(0, str.find_first_not_of(chars));
-			return str;
-		}
-
-		static string_type& rtrim(string_type& str, const string_type& chars = whitespaces_and_space)
-		{
-			str.erase(str.find_last_not_of(chars) + 1);
-			return str;
-		}
-
-		static string_type& trim(string_type& str, const string_type& chars = whitespaces_and_space)
-		{
-			return ltrim(rtrim(str, chars), chars);
-		}
-
-		static string_type & simple_replace(string_type & str, char_type to_find, char_type replacement)
-		{
-			std::replace(str.begin(), str.end(), to_find, replacement);
-			return str;
-		}
-
-		// replace all found with one given
-		template< typename T = char_type, size_t N >
-		static string_type & replace_many_one(string_type& str, const T(&many_)[N], char_type one_)
-		{
-			for (const char_type & ch : many_) {
-				str = simple_replace(str, ch, one_);
-			}
-			return str;
-		}
-
-		// replace white spaces and space with underscore to make the input presentable
-		// that is: printable to the console 
-		static string_type & presentable(string_type& str, char_type one_ = '_')
-		{
-			return replace_many_one(str, str_util_char::whitespaces_and_space, one_);
-		}
-
-		// returns the number of chars replaced
-		static int replace(string_type& str, char_type to_find, char_type replacement)
-		{
-			int accumulator_ = 0;
-			std::for_each(str.begin(), str.end(),
-				[&](char_type & char_) {
-				if (char_ == to_find) {
-					accumulator_ += 1;
-					char_ = replacement;
-				}
-			}
-			);
-			return accumulator_;
-		}
-
-		// returns the number of substrings replaced
-		static int replace_substring(
-			string_type& str,
-			const string_type& search,
-			const string_type& replace
-		)
-		{
-			size_t pos = 0;
-			size_t replacements_ = 0;
-			while ((pos = str.find(search, pos)) != string_type::npos) {
-				str.replace(pos, search.length(), replace);
-				pos += replace.length();
-				replacements_ += 1;
-			};
-			return replacements_;
-		}
-
-		static bool char_found(wchar_t c, wchar_t const * text_) { return NULL != wcschr(text_, c); }
-
-		static bool char_found(char    c, char    const * text_) { return NULL != strchr(text_, c); }
-
-		// preserve the input
-		// returns the number of chars removed
-		static string_type remove_chars(
-			string_type& str,
-			char_type const * chars_to_remove = whitespaces_and_space)
-		{
-			int how_many_were_removed = 0;
-			string_type output_;
-			output_.reserve(str.size());
-			// above ctor avoids buffer reallocations in da loop
-
-			for (auto && ch : str)
-				if (!char_found(ch, chars_to_remove)) {
-					output_.append(1, ch);
-					how_many_were_removed++;
-				};
-			// todo: we can return a pair to have back how_many_were_removed
-			return output_;
-		}
-
-#if 0 
-		// 2019 FEB 26 REMOVED
-		// use dbj::fmt suite from the core
-		template <size_t BUFSIZ_ = 1024U, typename ... Args>
-		static std::wstring
-			format(wchar_t const * const message, Args ... args) noexcept
-		{
-			wchar_t buffer[BUFSIZ_]{};
-			auto R = _snwprintf_s(
-				buffer,
-				BUFSIZ_,
-				_TRUNCATE /*_countof(buffer)*/
-				, message, (args) ...);
-			_ASSERTE(-1 != R);
-			return { buffer };
-		}
-
-		template <size_t BUFSIZ_ = 1024U, typename ... Args>
-		static std::string
-			format(char const * const message, Args ... args) noexcept
-		{
-			char buffer[BUFSIZ_]{};
-			auto R = _snprintf_s(
-				buffer,
-				_countof(buffer),
-				_TRUNCATE /*_countof(buffer)*/
-				, message, (args) ...);
-			_ASSERTE(-1 != R);
-			return { buffer };
-		}
-#endif
-	}; // str_util_
-
-	typedef str_util<wchar_t> str_util_wide;
-	typedef str_util<char   > str_util_char;
-
-	const str_util_wide::char_type
-		str_util_wide::whitespaces_and_space[] = { L"\t\n\v\f\r " };
-	const str_util_char::char_type
-		str_util_char::whitespaces_and_space[] = { "\t\n\v\f\r " };
-
 
 	namespace str {
 
@@ -973,5 +966,4 @@ on them types only
 	} // str
 } // dbj
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#endif // _DBJ_STRING_UTIL

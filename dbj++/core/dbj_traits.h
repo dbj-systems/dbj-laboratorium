@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _DBJ_TRAITS_INC_
+#define _DBJ_TRAITS_INC_
+
 //#include <functional>
 //#include <optional>
 // license is at eof
@@ -23,14 +25,6 @@ if (error == -2)   return { "not a valid mangled name" };
 */
 
 #include "dbj_runtime.h"
-
-//#include <type_traits>
-//#include <utility>
-//#include <typeinfo>
-//#include <array>
-//#include <vector>
-//#include <string>
-//#include <optional>
 
 /*
  typeid() returns the outcome of
@@ -376,7 +370,10 @@ namespace dbj {
 
 				const ::std::string to_string() const noexcept
 				{
-					return DBJ::printf_to_buffer(
+					using buffy_type = dbj::vector_buffer<char>;
+					using buffy_type = typename buffy_type::buffer_type;
+
+					auto buf =  buffy_type::format (
 						"\n%-20s"
 						"\n%-20s : %s / %s"
 						"\n%-20s : %s -- %zu"
@@ -386,6 +383,8 @@ namespace dbj {
 						space, "dimensions, if array", number_of_dimension,
 						space, "dimension[0] size, if array", first_extent
 					);
+
+					return { buf.data() };
 				}
 			};
 
@@ -794,5 +793,4 @@ Also "opaque types" are not going to happen in C++, ditto ...
 	https://cppx.godbolt.org/z/rWW5zI
 */
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#endif _DBJ_TRAITS_INC_

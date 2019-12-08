@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _DBJ_PP_INCLUDED_
+#define _DBJ_PP_INCLUDED_
 
 // #define DBJ_INCLUDE_STD_
 
@@ -48,7 +50,9 @@
 
 #include "./core/dbj++core.h"
 #include "./util/dbj++util.h"
-#include "./errc/dbj++erc.h"
+
+// 2019 DEC 08 DBJ EXCLUDED
+// #include "./errc/dbj++erc.h"
 //
 // DEPRECATED -> #include "./err/dbj_err.h"
 //#include "./err/dbj_errc.h"
@@ -96,3 +100,5 @@ DBJ::TRACE("\nVisiting dbj_once 'call once' lambda *****************************
 
  } // dbj_once
 #endif
+
+#endif // _DBJ_PP_INCLUDED_

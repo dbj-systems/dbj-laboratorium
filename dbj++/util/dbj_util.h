@@ -119,19 +119,7 @@ namespace dbj {
 
 #endif // __cplusplus <= 201703L
 
-		// std::equal has many overloads
-		// it is sometimes less error prone to have it here
-		// in a singular form, and use this one as we exactly need
-		template<class InputIt1, class InputIt2>
-		constexpr bool equal_(InputIt1 first1, InputIt1 last1, InputIt2 first2)
-		{
-			for (; first1 != last1; ++first1, ++first2) {
-				if (!(*first1 == *first2)) {
-					return false;
-				}
-			}
-			return true;
-		}
+
 
 		//-----------------------------------------------------------------------------
 		/*
@@ -266,7 +254,7 @@ namespace dbj {
 			_ASSERT(left_ != right_ );
 
 			auto make_return_value = [](auto a_, auto b_, size_t size_) {
-				auto retval = dbj::make_smart_pair<Type>(size_) ;
+				auto retval = dbj::make_smart_array_pair<Type>(size_) ;
 				std::copy(a_, b_, retval.second.get());
 				return retval ;
 			};

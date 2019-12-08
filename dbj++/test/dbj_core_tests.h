@@ -1,6 +1,8 @@
 #pragma once
+#ifndef _DBJ_CORE_TESTS
+#define _DBJ_CORE_TESTS
 
-// #include "../core/dbj++core.h"
+#include "../core/dbj_meta_converter.h"
 
 DBJ_TEST_SPACE_OPEN(core_tests)
 
@@ -54,7 +56,20 @@ DBJ_TEST_UNIT(core_utils)
 	DBJ_T_BUF("%s", ec_);
 }
 
+
+DBJ_TEST_UNIT(metaconvertortest) {
+
+#ifndef _DBJ_META_CONVERTER_TESTING
+#error _DBJ_META_CONVERTER_TESTING needs to be # defined here?
+#else
+	meta_conversion_testing::metaconvertertest();
+#endif // _DBJ_META_CONVERTER_TESTING
+
+}
+
+
 DBJ_TEST_SPACE_CLOSE
 
 #undef DBJ_T_BUF
 
+#endif // _DBJ_CORE_TESTS

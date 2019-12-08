@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _DBJ_CONSOLE_OPS
+#define _DBJ_CONSOLE_OPS
 
 // #define DBJ_TYPE_INSTRUMENTS
 
@@ -11,6 +13,9 @@
 namespace dbj::console {
 
 #pragma region forward declarations
+
+	template<typename T1, typename ... T2  >
+	void print(T1 const& first_param, T2 ... params);
 
 	/*
 	the cacth all, function declaration
@@ -571,8 +576,8 @@ namespace dbj::console {
 	template< typename T>
 	inline void out(std::optional<T> opt_)
 	{
-		if (opt_.has_value())
-			::dbj::console::print("{ value: ", opt_.value(), " }");
+		if (opt_)
+			::dbj::console::print("{ value: ", *opt_, " }");
 		else
 			::dbj::console::print("{ value: empty }");
 	}
@@ -700,8 +705,10 @@ namespace dbj::console {
 	}
 	*/
 
-	inline auto print = [](auto const& first_param, auto const& ... params)
-		constexpr
+	template<typename T1, typename ... T2  >
+	inline void print (T1 const& first_param,  T2 ... params)
+//	inline auto print = [](auto const& first_param, auto const& ... params)
+//		constexpr
 	{
 #if DBJ_CONSOLE_INIT_REQUIRED
 		_ASSERTE(::dbj::console_is_initialized());
@@ -713,7 +720,7 @@ namespace dbj::console {
 			// recurse
 			print(params...);
 		}
-		return print;
+		// return print;
 	};
 
 	/*
@@ -754,3 +761,4 @@ thus the UDT has to be visible at this point
    ::dbj::console::print(X{}) ; // works
 
 */
+#endif // !_DBJ_CONSOLE_OPS

@@ -1,4 +1,7 @@
 #pragma once
+#ifndef _DBJ_COMMANDER
+#define _DBJ_COMMANDER
+
 /* Command pattern mechanism */
 #pragma region commands
 namespace dbj {
@@ -122,5 +125,4 @@ namespace dbj {
 } // dbj
 #pragma endregion "commands"
 
-/* inclusion of this file defines the kind of a licence used */
-#include "../dbj_license.h"
+#endif // !_DBJ_COMMANDER
