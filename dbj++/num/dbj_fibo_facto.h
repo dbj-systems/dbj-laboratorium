@@ -2,25 +2,6 @@
 
 #include <valstat>
 
-namespace dbj {
-    // repeated here to cut on 
-    // dependancies
-    namespace posix {
-        inline std::string e_to_m(std::errc posix_err_code)
-        {
-            ::std::error_code ec = std::make_error_code(posix_err_code);
-            return ec.message();
-        };
-        // consume immediately
-        inline char const* e_to_s(std::errc posix_err_code)
-        {
-            static std::string anchor_{};
-            anchor_ = e_to_m(posix_err_code);
-            return anchor_.c_str();
-        };
-    } // posix
-}
-
 namespace dbj::num {
 
     using fibo_type = int64_t;
@@ -106,4 +87,56 @@ namespace dbj::num {
 
 #endif // DBJ_FIBONACCI_TESTING
 
+/*
+the "clever" factorial is just a lookup,
+since for 32bit int overflow happens for 13!
+
+fact values source: http://www.tsm-resources.com/alists/fact.html
+
+reminder:
+#define INT32_MAX        2147483647i32
+#define INT64_MAX        9223372036854775807i64
+*/
+
+    constexpr std::int32_t factorials32[]{ 1, 1, 2, 6, 24, 120, 720,
+            5040, 40320, 362880, 3628800, 39916800, 479001600 };
+
+    constexpr  
+        inline std::valstat< int32_t, std::errc >
+        fact32( std::int32_t i ) noexcept
+    {
+        if (i < 0U || i> 12U) {
+            return { {}, std::errc::result_out_of_range  };
+        }
+        return { factorials32[i] , {} };
+    }
+
+    constexpr  std::int64_t factorials64[]
+    { 1,
+            1,
+            2,
+            6,
+            24,
+            120,
+            720,
+            5040, 40320, 362880, 3628800, 39916800, 479001600,
+            6227020800, /*13!*/
+            87178291200,
+            1307674368000,
+            20922789888000,
+            355687428096000,
+            6402373705728000,
+            121645100408832000,
+            2432902008176640000 /*20!*/
+    };
+    
+    constexpr
+        inline std::valstat< int64_t, std::errc >
+        fact64(std::int64_t i) {
+
+        if (i < 0U || i> 20U) {
+            return { {}, std::errc::result_out_of_range };
+        }
+        return { factorials64[i], {} };
+    }
 } // nspace

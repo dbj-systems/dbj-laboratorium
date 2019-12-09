@@ -36,7 +36,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++required.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_fibo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_fibo_facto.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_lambda_made_matrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_stack_matrix.h" />

@@ -5,7 +5,7 @@
 
 #include "num/dbj_lambda_made_matrix.h"
 #include "num/dbj_stack_matrix.h"
-#include "num/dbj_fibo.h"
+#include "num/dbj_fibo_facto.h"
 
 namespace dbj::num {
 
@@ -129,60 +129,6 @@ namespace dbj::num {
 			rev = rev * 10 + pop;
 		}
 		return rev;
-	}
-
-	/*
-	the "clever" factorial is just a lookup,
-	since for 32bit int overflow happens for 13!
-
-	fact values source: http://www.tsm-resources.com/alists/fact.html
-
-	reminder:
-	#define INT32_MAX        2147483647i32
-	#define INT64_MAX        9223372036854775807i64
-	*/
-
-	constexpr std::int32_t factorials32[]{ 1, 1, 2, 6, 24, 120, 720,
-			5040, 40320, 362880, 3628800, 39916800, 479001600 };
-
-	extern "C" constexpr
-		std::int32_t const &
-		fact32(std::int32_t const & i) {
-		if (i < 0U || i> 12U) {
-			perror("\n\n -- argument out of range\n\n");
-			return std::int32_t(std::errc::result_out_of_range);
-		}
-		return factorials32[i];
-	}
-
-	constexpr  std::int64_t factorials64[]
-	{ 1,
-			1,
-			2,
-			6,
-			24,
-			120,
-			720,
-			5040, 40320, 362880, 3628800, 39916800, 479001600,
-			6227020800, /*13!*/
-			87178291200,
-			1307674368000,
-			20922789888000,
-			355687428096000,
-			6402373705728000,
-			121645100408832000,
-			2432902008176640000 /*20!*/
-	};
-	extern "C" constexpr
-		std::int64_t const &
-		fact64(std::int64_t const & i) {
-
-		if (i < 0U || i> 20U) {
-			perror("\n\n -- argument out of range\n\n");
-			// POSIX
-			return std::int64_t(std::errc::result_out_of_range);
-		}
-		return factorials64[i];
 	}
 
 } // dbj::num
