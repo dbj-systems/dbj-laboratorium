@@ -88,14 +88,15 @@ namespace dbj::narf {
 		std::size_t N, 
 		typename wrap_type = wrapper<T,N> 
 	>
-	constexpr wrap_type
+	 wrap_type
 		make( const T ( & native_arr)[N])
 		// -> wrapper<T, N>
 	{
 		// effectively remove the ref + constness
 		using nativarref =  std::remove_cv_t<T>(&)[N];
-
-		T cludge[N]{};
+		// must be static
+		// since a ref to it is returned
+		static T cludge[N]{};
 
 		std::copy(native_arr, native_arr + N, cludge);
 		

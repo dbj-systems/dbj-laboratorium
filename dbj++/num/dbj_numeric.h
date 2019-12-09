@@ -5,6 +5,7 @@
 
 #include "num/dbj_lambda_made_matrix.h"
 #include "num/dbj_stack_matrix.h"
+#include "num/dbj_fibo.h"
 
 namespace dbj::num {
 
@@ -183,25 +184,6 @@ namespace dbj::num {
 		}
 		return factorials64[i];
 	}
-
-	using fibo_type = int64_t;
-
-		/*
-		this is the best runtime fibonacci
-		non recursive
-		compiler is free to optimize this in the best possible way
-		on i5 CPU / 8GB ram x64 WIN10 this was the fastest for N=40
-		*/
-		extern "C" constexpr fibo_type fibo (fibo_type n)
-		{
-			fibo_type c = 0, a = 1, b = 1;
-			for (fibo_type i = 3; i <= n; i++) {
-				c = a + b;
-				a = b;
-				b = c;
-			}
-			return b;
-		}
 
 } // dbj::num
 

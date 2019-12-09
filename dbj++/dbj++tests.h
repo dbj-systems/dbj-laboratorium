@@ -28,6 +28,7 @@ or even run time...but ... this works
 #define dbj_numeric_tests
 
 #ifdef dbj_numeric_tests
+#define DBJ_FIBONACCI_TESTING
 #include "test/dbj_static_matrix_test.h"
 #endif // dbj_numeric_tests
 

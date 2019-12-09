@@ -44,6 +44,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_exception.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_p1095.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_status_code.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_fibo.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_lambda_made_matrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_stack_matrix.h" />
