@@ -1,8 +1,10 @@
 #pragma once
 
-//#include "../core/dbj_traits.h"
-//#include <stdint.h>
-//#include <random>
+#ifndef _DBJ_NUMERIC
+#define _DBJ_NUMERIC
+
+#include "num/dbj_lambda_made_matrix.h"
+#include "num/dbj_stack_matrix.h"
 
 namespace dbj::num {
 
@@ -202,3 +204,5 @@ namespace dbj::num {
 		}
 
 } // dbj::num
+
+#endif _DBJ_NUMERIC

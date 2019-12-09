@@ -1,9 +1,6 @@
 #pragma once
-
-#include "../dbj_license.h"
-//#include "../util/dbj_stack_matrix.h"
-//#include "../testfwork/dbj_testing.h"
-//#include "../console/dbj_console_ops.h"
+#ifndef DBJ_STACK_MATRIX_TESTING
+#define DBJ_STACK_MATRIX_TESTING
 
 namespace dbj_stack_matrix_testing {
 
@@ -266,3 +263,5 @@ namespace dbj_stack_matrix_testing {
 	}
 
 } // namespace dbj_stack_matrix_testing 
+
+#endif // DBJ_STACK_MATRIX_TESTING

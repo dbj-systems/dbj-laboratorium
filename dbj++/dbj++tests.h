@@ -23,9 +23,14 @@ or even run time...but ... this works
 #define dbj_kalends_test   
 #define dbj_string_util_test   
 #define dbj_string_tests   
-#define dbj_static_matrix_test 
 #define dbj_any_optional_tests
 #define dbj_error_concept_tests
+#define dbj_numeric_tests
+
+#ifdef dbj_numeric_tests
+#include "test/dbj_static_matrix_test.h"
+#endif // dbj_numeric_tests
+
 
 #ifdef dbj_core_tests   
 #define _DBJ_META_CONVERTER_TESTING
@@ -69,9 +74,7 @@ or even run time...but ... this works
 #ifdef dbj_string_tests   
 #include "test\dbj_string_tests.h"  
 #endif
-#ifdef dbj_static_matrix_test   
-#include "test\dbj_static_matrix_test.h"  
-#endif
+
 
 #ifdef dbj_any_optional_tests   
 #include "test\dbj_any_optional_tests.h"

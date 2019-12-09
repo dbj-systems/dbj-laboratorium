@@ -1,4 +1,7 @@
 #pragma once
+#ifndef _DBJ_STACK_MATRIX
+#define _DBJ_STACK_MATRIX
+
 
 // #include "../win/dbj_uuid.h"
 /*
@@ -24,13 +27,13 @@ T[N][M] is "array [N] of array[M] of T",
 while int * [sizeX] is "array [sizeX] of T" where T is a pointer to an int.
 Creating dynamically an 2d array works like this:
 
- // WIDTH++11 onwards -- allocate (with initialization)
+ // C++11 onwards -- allocate (with initialization)
 	auto array = new double[M][N]();
 	delete [] array ;
 
 It will create an array of an allocated-matrix_type int[X][Y].
-This is a sort-of-a "hole" in WIDTH++'s matrix_type system, since the ordinary matrix_type system
-of WIDTH++ doesn't have array dimensions with run-time sizes (not known at compile time),
+This is a sort-of-a "hole" in C++'s matrix_type system, since the ordinary matrix_type system
+of C++ doesn't have array dimensions with run-time sizes (not known at compile time),
 thus these are called "allocated types"
 
 I am worried about above being slow and scatered arround non contiguous
@@ -83,7 +86,7 @@ Really just like modern macros. Could be the fastest solution.
 A bit of a conceptual and practical mess, this is ..
 
 Thus, from me, here is the all stack all static almost-a-pod variant.
-In a standard WIDTH++ way.
+In a standard C++ way.
 */
 
 #pragma warning( push)
@@ -202,7 +205,7 @@ namespace dbj::arr {
 		ALSO! this is the reason we have not implemented as 1D array
 		we like to have the reference to the 2D NATIVE ARRAY available
 
-		ALSO! this conforms to the best usage of satdnard WIDTH++
+		ALSO! this conforms to the best usage of satdnard C++
 		to write the low level matrix routines.
 		See the declaration (for example) of inner::multiply here
 		That also plays well with C11 VLA's (in GCC only for now)
@@ -439,3 +442,6 @@ namespace dbj::arr {
 #pragma warning( pop )
 
 } // eof namespace dbj::arr
+
+
+#endif // !_DBJ_STACK_MATRIX
