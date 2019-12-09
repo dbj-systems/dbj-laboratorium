@@ -21,6 +21,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_ops.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)console\dbj_console_painter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++core.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj++valstat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_buffers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_constexpr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)core\dbj_meta_converter.h" />
@@ -35,15 +36,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++required.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj++tests.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dbj_license.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj++erc.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_err_type.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_retval.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\dbj_error_concept_idmessage.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_err.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_error_code.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_exception.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_p1095.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)errc\deprecated\dbj_status_code.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_fibo.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_lambda_made_matrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)num\dbj_numeric.h" />
@@ -94,8 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)cpp.hint" />
-    <None Include="$(MSBuildThisFileDirectory)errc\dbj_error_type.md" />
-    <None Include="$(MSBuildThisFileDirectory)errc\readme.md" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
   </ItemGroup>
