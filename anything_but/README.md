@@ -166,7 +166,7 @@ None of them is built to stop accidental implicit conversion in C++.
 ### Contact
 Please report issues or [questions here](https://github.com/dbj-systems/dbj-laboratorium/issues).
  
-You can contact me via twitter at @dbjdbj
+Best way to contact me is the "Issues" tab.
 ### Contributing
 Any feedback from users and stakeholders will be used to improve the library.
 ### License
