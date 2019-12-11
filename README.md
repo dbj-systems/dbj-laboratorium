@@ -7,7 +7,7 @@ Testing , Reasearch and Development. In and around  ISO C++
 
 Copyright 2018,2019 by dbj@dbj.org
 <pre>
-Licensed under the GNU GPLv3 (the "License");
+Licensed under the "Creative Commons Zero v1.0 Universal"
 Please see the LICENSE.md file in the project root.
 </pre>
 ---------------------------------------------------------------------  
