@@ -706,6 +706,23 @@ namespace dbj::console {
 	}
 	*/
 
+#if _HAS_CXX20 // must imply _HAS_CXX17
+	/// <summary>
+	/// udf separator
+	/// no recursion
+	/// </summary>
+	template<
+		auto sep = ' ', 
+		typename T1, typename ... T2  >
+	inline void print( const T1 & first_param, const T2 & ... params)
+	{
+		out(first_param);
+		// auto with_sep = [](const auto& arg) { out(sep); };
+
+		(..., params ); 
+		// (..., with_sep(params)); // with_sep for each additional arg ///
+	}
+#else
 	template<typename T1, typename ... T2  >
 	inline void print (T1 const& first_param,  T2 ... params)
 //	inline auto print = [](auto const& first_param, auto const& ... params)
@@ -723,7 +740,7 @@ namespace dbj::console {
 		}
 		// return print;
 	};
-
+#endif // _HAS_CXX17
 	/*
 	CAUTION!
 	on using wrong format specifier bellow
