@@ -16,9 +16,15 @@ namespace dbj::console {
 
 #pragma region forward declarations
 
+#ifdef _HAS_CXX20 // must imply _HAS_CXX17
+	template<
+		auto sep /*= ' '*/,
+		typename T1, typename ... T2  >
+		inline void print(const T1& first_param, const T2& ... params);
+#else
 	template<typename T1, typename ... T2  >
 	void print(T1 const& first_param, T2 ... params);
-
+#endif
 	/*
 	the cacth all, function declaration
 	whatever is not implemented here goes into this function
@@ -489,19 +495,19 @@ namespace dbj::console {
 	// std classes
 	///////////////////////////////////////////////////////////////////////////
 
-	template<> inline void out< std::exception >(std::exception x_) {
+	template<> inline void out< const std::exception & >(const std::exception & x_) {
 		DBJ_TYPE_REPORT_FUNCSIG;
 		out(painter_command::bright_red);
 		PRN.char_to_console(x_.what());
 		paint(painter_command::text_color_reset);
 	}
 
-	template<> inline void out< std::runtime_error >(std::runtime_error x_) {
-		DBJ_TYPE_REPORT_FUNCSIG;
-		out(painter_command::bright_red);
-		PRN.char_to_console(x_.what());
-		paint(painter_command::text_color_reset);
-	}
+	//template<> inline void out< std::runtime_error >(std::runtime_error x_) {
+	//	DBJ_TYPE_REPORT_FUNCSIG;
+	//	out(painter_command::bright_red);
+	//	PRN.char_to_console(x_.what());
+	//	paint(painter_command::text_color_reset);
+	//}
 
 	template<typename T, typename A	>
 	inline void out(const std::vector<T, A>& v_) {
@@ -706,7 +712,7 @@ namespace dbj::console {
 	}
 	*/
 
-#if _HAS_CXX20 // must imply _HAS_CXX17
+#ifdef _HAS_CXX20 // must imply _HAS_CXX17
 	/// <summary>
 	/// udf separator
 	/// no recursion
@@ -719,10 +725,10 @@ namespace dbj::console {
 		out(first_param);
 		// auto with_sep = [](const auto& arg) { out(sep); };
 
-		(..., params ); 
+		(..., out(params) ); // the rest
 		// (..., with_sep(params)); // with_sep for each additional arg ///
 	}
-#else
+#else // bellow 17
 	template<typename T1, typename ... T2  >
 	inline void print (T1 const& first_param,  T2 ... params)
 //	inline auto print = [](auto const& first_param, auto const& ... params)
