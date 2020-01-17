@@ -2,9 +2,6 @@
 	path = dbj_buffering_research/dbj--nanolib
 	url = https://github.com/dbj-systems/dbj--nanolib.git
 	branch = master
-[submodule "dbjsqluser/dbj--sqlite3"]
-	path = dbjsqluser/dbj--sqlite3
-	url = https://github.com/dbj-systems/dbj--sqlite3.git
 [submodule "dbjsqluser/dbj--nanolib"]
 	path = dbjsqluser/dbj--nanolib
 	url = https://github.com/dbj-systems/dbj--nanolib.git
