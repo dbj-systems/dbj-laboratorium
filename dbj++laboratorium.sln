@@ -11,10 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utf8dbj", "utf8dbj\utf8dbj.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++erc", "dbj++erc\dbj++erc.vcxproj", "{8C1FA03B-DE31-4508-B212-E5EB419B9A64}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3_lib", "sqlite3_lib\sqlite3_lib.vcxproj", "{C7425AD8-771A-4921-833C-93626EB0EFCE}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbjsqluser", "dbjsqluser\dbjsqluser.vcxproj", "{C0B416AE-9F00-4887-A647-A6B65C95A635}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++log", "dbj++log\dbj++log.vcxproj", "{1B5860B3-1DE7-4232-9080-81AF60E1BD7F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++ini", "dbj++ini\dbj++ini.vcxproj", "{26CC61DC-CDED-4A26-9B9A-0B8D802A4A9E}"
@@ -23,13 +19,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++", "dbj++\dbj++.vcxite
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj_buffering_research", "dbj_buffering_research\dbj_buffering_research.vcxproj", "{566171B0-CB90-4D41-A181-C5679B4E8850}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dbj++sqlite", "dbj--sqlite\dbj--sqlite.vcxitems", "{EC401CB2-0A27-4887-9761-E64E5E6C526B}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		dbj++\dbj++.vcxitems*{09ba3370-4f1f-40d7-9a0d-f9b7aaffd817}*SharedItemsImports = 9
 		dbj++\dbj++.vcxitems*{9c92850f-c359-4e82-b3b1-e274da337058}*SharedItemsImports = 4
-		dbj--sqlite\dbj--sqlite.vcxitems*{ec401cb2-0a27-4887-9761-e64e5e6c526b}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -70,22 +63,6 @@ Global
 		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x64.Build.0 = Release|x64
 		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x86.ActiveCfg = Release|Win32
 		{8C1FA03B-DE31-4508-B212-E5EB419B9A64}.Release|x86.Build.0 = Release|Win32
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Debug|x64.ActiveCfg = Debug|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Debug|x64.Build.0 = Debug|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Debug|x86.ActiveCfg = Debug|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Debug|x86.Build.0 = Debug|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Release|x64.ActiveCfg = Release|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Release|x64.Build.0 = Release|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Release|x86.ActiveCfg = Debug|x64
-		{C7425AD8-771A-4921-833C-93626EB0EFCE}.Release|x86.Build.0 = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Debug|x64.ActiveCfg = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Debug|x64.Build.0 = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Debug|x86.ActiveCfg = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Debug|x86.Build.0 = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Release|x64.ActiveCfg = Release|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Release|x64.Build.0 = Release|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Release|x86.ActiveCfg = Debug|x64
-		{C0B416AE-9F00-4887-A647-A6B65C95A635}.Release|x86.Build.0 = Debug|x64
 		{1B5860B3-1DE7-4232-9080-81AF60E1BD7F}.Debug|x64.ActiveCfg = Debug|x64
 		{1B5860B3-1DE7-4232-9080-81AF60E1BD7F}.Debug|x64.Build.0 = Debug|x64
 		{1B5860B3-1DE7-4232-9080-81AF60E1BD7F}.Debug|x86.ActiveCfg = Debug|x64
