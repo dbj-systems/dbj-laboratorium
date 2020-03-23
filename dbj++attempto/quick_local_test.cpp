@@ -2,7 +2,7 @@
 //#include <assert.h>
 //#include <memory>
 #include <string_view>
-#include <dbj++clib/dbjclib.h>
+#include "../dbj++/dbj++.h"
 //#include <functional>
 //#include <optional>
 #include "dbj_ref_node.h"

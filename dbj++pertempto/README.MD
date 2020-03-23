@@ -1,5 +1,7 @@
 
-# dbj++erc
+# THIS PROJECT IS ABANDONED
+
+## dbj++erc
 
 #### dbj error concept
 
