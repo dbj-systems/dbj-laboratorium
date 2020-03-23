@@ -212,9 +212,6 @@
     <ProjectReference Include="..\dbj++ini\dbj++ini.vcxproj">
       <Project>{26cc61dc-cded-4a26-9b9a-0b8d802a4a9e}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\dbj++log\dbj++log.vcxproj">
-      <Project>{1b5860b3-1de7-4232-9080-81af60e1bd7f}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

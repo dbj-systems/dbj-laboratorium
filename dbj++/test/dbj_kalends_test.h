@@ -123,7 +123,8 @@ namespace fast {
 	struct fibonacci 
 		: integral_constant < 
 		fibo_type,
-		fibonacci<N - 1>{} + fibonacci<N - 2>{} > 
+		(fibonacci<N - 1>{} + fibonacci<N - 2>{}) 
+		> 
 	{};
 
 	template<> struct fibonacci<1> : integral_constant<fibo_type, 1> {};
